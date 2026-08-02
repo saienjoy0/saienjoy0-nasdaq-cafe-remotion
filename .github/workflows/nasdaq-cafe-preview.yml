@@ -4,9 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       spec_path:
-        description: "実行する render_spec.json のパス"
+        description: "当日の render-specs/YYYY-MM-DD/render_spec.json を入力"
         required: true
-        default: "render-specs/2026-07-14/render_spec.json"
+        type: string
+      confirmation:
+        description: "当日の台本・画像・render_specが確定済みなら PREVIEW と入力"
+        required: true
         type: string
 
 permissions:
@@ -25,6 +28,7 @@ jobs:
     env:
       CI: "true"
       SPEC_PATH: ${{ inputs.spec_path }}
+      RUN_CONFIRMATION: ${{ inputs.confirmation }}
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
@@ -55,19 +59,21 @@ jobs:
           fi
           ffmpeg -version | head -n 1
 
-      - name: Check input and secrets
+      - name: Check confirmation, input, and secrets
         id: spec
         shell: bash
         run: |
           set -euo pipefail
 
-          case "$SPEC_PATH" in
-            render-specs/*/render_spec.json) ;;
-            *)
-              echo "::error::spec_path must match render-specs/*/render_spec.json"
-              exit 1
-              ;;
-          esac
+          if [[ "$RUN_CONFIRMATION" != "PREVIEW" ]]; then
+            echo "::error::confirmation must be exactly PREVIEW"
+            exit 1
+          fi
+
+          if [[ ! "$SPEC_PATH" =~ ^render-specs/[0-9]{4}-[0-9]{2}-[0-9]{2}/render_spec\.json$ ]]; then
+            echo "::error::spec_path must match render-specs/YYYY-MM-DD/render_spec.json"
+            exit 1
+          fi
 
           if [[ ! -s "$SPEC_PATH" ]]; then
             echo "::error::render_spec.json not found or empty: $SPEC_PATH"
