@@ -15,7 +15,7 @@ on:
     branches:
       - main
     paths:
-      - render-specs/2026-07-31/.shortened-parts/**
+      - render-specs/2026-07-31/trigger-preview.txt
 
 permissions:
   contents: read
