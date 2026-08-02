@@ -16,6 +16,11 @@ on:
       - main
     paths:
       - render-specs/2026-07-31/trigger-preview.txt
+  pull_request:
+    branches:
+      - main
+    paths:
+      - render-specs/2026-07-31/trigger-preview.txt
 
 permissions:
   contents: read
@@ -65,7 +70,7 @@ jobs:
           ffmpeg -version | head -n 1
 
       - name: Assemble one-time render spec
-        if: github.event_name == 'push'
+        if: github.event_name != 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
