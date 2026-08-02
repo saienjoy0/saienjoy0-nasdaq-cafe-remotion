@@ -16,6 +16,11 @@ on:
       - episode/2026-07-31-preview
     paths:
       - render-specs/2026-07-31/render_spec.json.gz.b64
+  pull_request:
+    branches:
+      - preview-base/2026-07-31
+    paths:
+      - render-specs/2026-07-31/render_spec.json.gz.b64
 
 permissions:
   contents: read
@@ -65,7 +70,7 @@ jobs:
           ffmpeg -version | head -n 1
 
       - name: Assemble one-time render spec
-        if: github.event_name == 'push'
+        if: github.event_name != 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
