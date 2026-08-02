@@ -71,7 +71,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$(dirname "$SPEC_PATH")"
           base64 --decode render-specs/2026-07-31/render_spec.json.gz.b64 | gzip --decompress > "$SPEC_PATH"
-          test "$(sha256sum "$SPEC_PATH" | awk '{print $1}')" = "e34e476601154edfd4d6007668868ec5b16fb6f9662b13a7a4eddcb130c6ba1d"
+          test "$(sha256sum "$SPEC_PATH" | awk '{print $1}')" = "8dabd9bc72ea5c942665f1914df788c143243081c0f78c0c67195b64a5d2b983"
 
       - name: Check confirmation, input, and secrets
         id: spec
