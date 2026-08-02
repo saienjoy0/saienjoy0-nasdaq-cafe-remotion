@@ -11,12 +11,17 @@ on:
         description: "当日の台本・画像・render_specが確定済みなら PREVIEW と入力"
         required: true
         type: string
+  push:
+    branches:
+      - episode/2026-07-31-preview
+    paths:
+      - render-specs/2026-07-31/render_spec.json
 
 permissions:
   contents: read
 
 concurrency:
-  group: nasdaq-cafe-preview-${{ inputs.spec_path }}
+  group: nasdaq-cafe-preview-${{ github.event_name == 'workflow_dispatch' && inputs.spec_path || 'render-specs/2026-07-31/render_spec.json' }}
   cancel-in-progress: false
 
 jobs:
@@ -27,8 +32,8 @@ jobs:
 
     env:
       CI: "true"
-      SPEC_PATH: ${{ inputs.spec_path }}
-      RUN_CONFIRMATION: ${{ inputs.confirmation }}
+      SPEC_PATH: ${{ github.event_name == 'workflow_dispatch' && inputs.spec_path || 'render-specs/2026-07-31/render_spec.json' }}
+      RUN_CONFIRMATION: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation || 'PREVIEW' }}
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
