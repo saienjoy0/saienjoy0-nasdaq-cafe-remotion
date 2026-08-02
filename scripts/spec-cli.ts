@@ -6,7 +6,7 @@ import voiceProfilesJson from "../config/voice-profiles.json";
 import {productionAssetPaths} from "../src/config/production-assets";
 import {compileRenderSpec, type SynthesizedChunk} from "../src/spec/compile-render-spec";
 import {getTransitionDurationInFrames} from "../src/spec/render-state";
-import {assertProductionTextSafe, resolveVoiceProfile} from "../src/spec/validate-render-spec";
+import {resolveVoiceProfile} from "../src/spec/validate-render-spec";
 import {loadProductionData, loadRenderSpec, loadRenderSpecForProduction} from "./load-render-spec";
 import {PROJECT_DIR} from "./render-helpers";
 import {createSpecBlockSynthesizer, SPEC_AUDIO_STANDARD} from "./spec-audio";
@@ -131,7 +131,6 @@ if (command === "validate") {
   const {spec} = await loadRenderSpec(input);
   const productionPath = buildPath(spec.episode.id);
   const data = await loadProductionData(productionPath);
-  assertProductionTextSafe(data);
   const expectedMs = Math.round((data.timeline.totalDurationInFrames * 1000) / data.episode.fps);
   const preview = mediaPath("preview", spec.episode.id);
   const final = mediaPath("final", spec.episode.id);

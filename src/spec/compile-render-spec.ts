@@ -1,6 +1,7 @@
 import {createHash} from "node:crypto";
 import type {RenderProductionData, RenderSpec} from "./render-spec";
-import {assertProductionTextSafe, assertRenderSpecApprovedForCompile} from "./validate-render-spec";
+import {assertProductionTextSafe} from "./production-text-safety";
+import {assertRenderSpecApprovedForCompile} from "./validate-render-spec";
 
 export type SynthesizedChunk = {
   audioSrc: string;
@@ -28,6 +29,7 @@ export const compileRenderSpec = async (
   options: {inputSpecSha256?: string; onSynthesizedChunk?: (value: {sceneId: string; chunkId: string; audio: SynthesizedChunk}) => void} = {},
 ): Promise<RenderProductionData> => {
   assertRenderSpecApprovedForCompile(spec);
+  assertProductionTextSafe(spec);
   let episodeFrame = 0;
   let previousTransitionFrames = 0;
   const scenes = [] as RenderProductionData["scenes"];

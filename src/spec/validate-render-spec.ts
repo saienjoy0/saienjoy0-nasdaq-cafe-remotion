@@ -310,19 +310,3 @@ export const validateRenderSpecReferences = (
 export const assertRenderSpecApprovedForCompile = (spec: RenderSpec) => {
   if (!spec.review.approvedForCodex) fail("$.review.approvedForCodex", "compile requires approvedForCodex: true");
 };
-
-export const PRODUCTION_FORBIDDEN_TEXT = [
-  "fallback", "実測", "表示中", "画面構成：", "AUDIO-MEASURED",
-  "conversion warning", "debug metadata", "タイトルの約束を回収", "図を再表示",
-] as const;
-
-export const assertProductionTextSafe = (value: unknown, path = "$"): void => {
-  if (typeof value === "string") {
-    const lower = value.toLowerCase();
-    const found = PRODUCTION_FORBIDDEN_TEXT.find((item) => lower.includes(item.toLowerCase()));
-    if (found) fail(path, `production forbidden text: ${found}`);
-    return;
-  }
-  if (Array.isArray(value)) return value.forEach((item, index) => assertProductionTextSafe(item, `${path}[${index}]`));
-  if (value && typeof value === "object") Object.entries(value).forEach(([key, item]) => assertProductionTextSafe(item, `${path}.${key}`));
-};

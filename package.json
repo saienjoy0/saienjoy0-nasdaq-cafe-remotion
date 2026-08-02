@@ -82,7 +82,7 @@
     "remaining-assets:all": "npm run remaining-assets:data && npm run remaining-assets:render",
     "remaining-assets:preview": "node --import tsx scripts/render-remaining-assets-integration-preview.ts",
     "test:remaining-assets": "node --import tsx scripts/test-remaining-assets.ts",
-    "test:spec": "tsx scripts/test-render-spec.ts && tsx scripts/test-spec-inspect.ts"
+    "test:spec": "tsx scripts/test-render-spec.ts && tsx scripts/test-production-text-safety.ts && tsx scripts/test-spec-inspect.ts"
   },
   "sideEffects": [
     "*.css"
