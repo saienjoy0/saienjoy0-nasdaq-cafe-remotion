@@ -1,0 +1,121 @@
+name: Nasdaq Cafe Preview Exact Temp
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - render-specs/2026-07-31/trigger-exact-preview.txt
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nasdaq-cafe-preview-exact-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  render-preview:
+    name: Validate, TTS, and render preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      CI: "true"
+      SPEC_PATH: render-specs/2026-07-31/render_spec.json
+      RUN_CONFIRMATION: PREVIEW
+      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+
+      - name: Assemble exact render spec
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$SPEC_PATH")"
+          cat render-specs/2026-07-31/.exact-parts/part-0[0-5].b64 | base64 --decode | gzip --decompress > "$SPEC_PATH"
+          test "$(sha256sum "$SPEC_PATH" | awk '{print $1}')" = "8dabd9bc72ea5c942665f1914df788c143243081c0f78c0c67195b64a5d2b983"
+
+      - name: Check input and secrets
+        id: spec
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUN_CONFIRMATION" = "PREVIEW"
+          test -s "$SPEC_PATH"
+          if [[ -z "${GEMINI_API_KEY_1:-}" && -z "${GEMINI_API_KEY_2:-}" && -z "${GEMINI_API_KEY_3:-}" ]]; then
+            echo "::error::At least one Gemini API key secret is required"
+            exit 1
+          fi
+          EPISODE_ID="$(node -e 'const fs=require("node:fs");const v=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(!v?.episode?.id)process.exit(2);process.stdout.write(String(v.episode.id));' "$SPEC_PATH")"
+          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          echo "episode_id=$EPISODE_ID" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+          echo "EPISODE_ID=$EPISODE_ID" >> "$GITHUB_ENV"
+
+      - name: Restore Gemini TTS cache
+        uses: actions/cache@v5
+        with:
+          path: .cache/spec-tts
+          key: >-
+            ${{ runner.os }}-spec-tts-v1-
+            ${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts') }}-
+            ${{ steps.spec.outputs.spec_sha }}
+          restore-keys: |
+            ${{ runner.os }}-spec-tts-v1-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts') }}-
+
+      - name: Validate render spec
+        run: npm run episode:spec:validate -- "$SPEC_PATH"
+
+      - name: Generate preview
+        run: npm run episode:spec:preview -- "$SPEC_PATH"
+
+      - name: Mechanical output checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          MP4="renders/preview/${EPISODE_ID}_nasdaq-cafe-spec-preview.mp4"
+          REPORT="build/${EPISODE_ID}/technical_report.json"
+          DATA="build/${EPISODE_ID}/render_data.production.json"
+          test -s "$MP4"
+          test -s "$REPORT"
+          test -s "$DATA"
+          node -e 'const fs=require("node:fs");const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(r.status!=="preview-generated"||!r.previewPath)process.exit(1);' "$REPORT"
+
+      - name: Upload preview and reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-preview-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            renders/preview/*.mp4
+            build/*/technical_report.json
+            build/*/render_data.production.json
+          if-no-files-found: warn
+          retention-days: 7
