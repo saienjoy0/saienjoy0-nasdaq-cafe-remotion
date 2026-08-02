@@ -11,7 +11,7 @@ on:
         description: "当日の台本・画像・render_specが確定済みなら PREVIEW と入力"
         required: true
         type: string
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -65,7 +65,7 @@ jobs:
           ffmpeg -version | head -n 1
 
       - name: Assemble one-time render spec
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
