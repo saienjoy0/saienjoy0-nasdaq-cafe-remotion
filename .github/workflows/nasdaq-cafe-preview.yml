@@ -1,0 +1,159 @@
+name: Nasdaq Cafe Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec_path:
+        description: "実行する render_spec.json のパス"
+        required: true
+        default: "render-specs/2026-07-14/render_spec.json"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nasdaq-cafe-preview-${{ inputs.spec_path }}
+  cancel-in-progress: false
+
+jobs:
+  render-preview:
+    name: Validate, TTS, and render preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      CI: "true"
+      SPEC_PATH: ${{ inputs.spec_path }}
+      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+
+      - name: Check input and secrets
+        id: spec
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "$SPEC_PATH" in
+            render-specs/*/render_spec.json) ;;
+            *)
+              echo "::error::spec_path must match render-specs/*/render_spec.json"
+              exit 1
+              ;;
+          esac
+
+          if [[ ! -s "$SPEC_PATH" ]]; then
+            echo "::error::render_spec.json not found or empty: $SPEC_PATH"
+            exit 1
+          fi
+
+          if [[ -z "${GEMINI_API_KEY_1:-}" && -z "${GEMINI_API_KEY_2:-}" && -z "${GEMINI_API_KEY_3:-}" ]]; then
+            echo "::error::At least one Gemini API key secret is required"
+            exit 1
+          fi
+
+          EPISODE_ID="$(
+            node -e '
+              const fs = require("node:fs");
+              const file = process.argv[1];
+              const value = JSON.parse(fs.readFileSync(file, "utf8"));
+              if (!value?.episode?.id) process.exit(2);
+              process.stdout.write(String(value.episode.id));
+            ' "$SPEC_PATH"
+          )"
+
+          if [[ ! "$EPISODE_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "::error::Unsafe or missing episode.id"
+            exit 1
+          fi
+
+          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+
+          echo "episode_id=$EPISODE_ID" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+          echo "EPISODE_ID=$EPISODE_ID" >> "$GITHUB_ENV"
+
+      - name: Restore Gemini TTS cache
+        uses: actions/cache@v5
+        with:
+          path: .cache/spec-tts
+          key: >-
+            ${{ runner.os }}-spec-tts-v1-
+            ${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts') }}-
+            ${{ steps.spec.outputs.spec_sha }}
+          restore-keys: |
+            ${{ runner.os }}-spec-tts-v1-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts') }}-
+
+      - name: Validate render spec
+        run: npm run episode:spec:validate -- "$SPEC_PATH"
+
+      - name: Generate preview
+        run: npm run episode:spec:preview -- "$SPEC_PATH"
+
+      - name: Mechanical output checks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MP4="renders/preview/${EPISODE_ID}_nasdaq-cafe-spec-preview.mp4"
+          REPORT="build/${EPISODE_ID}/technical_report.json"
+          DATA="build/${EPISODE_ID}/render_data.production.json"
+
+          test -s "$MP4"
+          test -s "$REPORT"
+          test -s "$DATA"
+
+          node -e '
+            const fs = require("node:fs");
+            const reportPath = process.argv[1];
+            const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+            if (report.status !== "preview-generated") {
+              throw new Error(`unexpected technical report status: ${report.status}`);
+            }
+            if (!report.previewPath) {
+              throw new Error("technical report has no previewPath");
+            }
+          ' "$REPORT"
+
+          echo "Preview MP4: $MP4"
+          echo "Technical report: $REPORT"
+          echo "Production data: $DATA"
+
+      - name: Upload preview and reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-preview-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            renders/preview/*.mp4
+            build/*/technical_report.json
+            build/*/render_data.production.json
+          if-no-files-found: warn
+          retention-days: 7
