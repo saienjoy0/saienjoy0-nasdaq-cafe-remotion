@@ -15,7 +15,7 @@ on:
     branches:
       - main
     paths:
-      - render-specs/2026-07-31/render_spec.json.gz.b64
+      - render-specs/2026-07-31/.shortened-parts/**
 
 permissions:
   contents: read
@@ -70,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "$SPEC_PATH")"
-          base64 --decode render-specs/2026-07-31/render_spec.json.gz.b64 | gzip --decompress > "$SPEC_PATH"
+          cat render-specs/2026-07-31/.shortened-parts/part-*.b64 | base64 --decode | gzip --decompress > "$SPEC_PATH"
           test "$(sha256sum "$SPEC_PATH" | awk '{print $1}')" = "8dabd9bc72ea5c942665f1914df788c143243081c0f78c0c67195b64a5d2b983"
 
       - name: Check confirmation, input, and secrets
