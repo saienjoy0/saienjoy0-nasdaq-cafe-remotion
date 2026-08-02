@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nasdaq-cafe-preview-${{ github.event_name == 'workflow_dispatch' && inputs.spec_path || 'render-specs/2026-07-31/render_spec.json' }}
+  group: nasdaq-cafe-preview-${{ github.event_name }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
