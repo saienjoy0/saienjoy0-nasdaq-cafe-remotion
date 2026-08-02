@@ -58,7 +58,13 @@
       "半導体の相対安",
       "原油と米10年債利回り",
       "HBM4量産と大口需要の具体情報"
-    ]
+    ],
+    "leadEntityPlan": {
+      "mode": "required",
+      "subjectType": "company",
+      "displayName": "SK hynix",
+      "firstMentionCue": "ハイニックス"
+    }
   },
   "publishing": {
     "recommendedTitle": "AI需要は強い。それでも半導体が崩れた理由",
@@ -145,7 +151,8 @@
       "Charon実測尺を確認し正式レンダーを検証する"
     ],
     "changesApplied": [
-      "ウォラー人物カードと確認／断定しないの二段表示を実装Specへ固定"
+      "ウォラー人物カードと確認／断定しないの二段表示を実装Specへ固定",
+      "SK hynix主役カードを最初のナレーション言及位置へ追加"
     ],
     "titleThumbnailConsistency": "consistent",
     "approvedForCodex": true
@@ -394,7 +401,7 @@
       "uncertainty": "ソウル株と米国ADRは取引時間と市場構造が異なる",
       "timelineBasis": "上場初日と翌営業日の価格",
       "expectedBasisType": "price-inference",
-      "visualMode": "chart",
+      "visualMode": "text-focus",
       "initialExpression": "軽い驚き",
       "headline": "上場初日 +13% → 翌営業日 -9.3%",
       "supportingTexts": [
@@ -423,35 +430,39 @@
           "beatId": "scene-02-beat-001",
           "startChunkId": "scene-02-chunk-001",
           "endChunkId": "scene-02-chunk-001",
-          "narrationStartCue": "矛盾はここです。SKハイ",
-          "narrationEndCue": "六十八ドルで終えました。",
-          "primaryFunction": "Evidence",
-          "screenState": "Chart",
-          "visualMode": "chart",
-          "contentType": "数値・関係図",
-          "screenQuestion": "初日はどうだった？",
-          "primaryElement": "149→170→168",
+          "narrationStartCue": "ハイニックス",
+          "narrationEndCue": "ハイニックス",
+          "primaryFunction": "Anchor",
+          "screenState": "EntityFocus",
+          "visualMode": "text-focus",
+          "contentType": "SK hynix企業カード",
+          "screenQuestion": "主役はどの企業？",
+          "primaryElement": "SK hynix",
           "viewerTexts": [
-            "需要は強い。それでも急落",
-            "HBM｜AI向け高速メモリ"
+            "AI向け高性能メモリの主要供給企業"
           ],
-          "changeCue": "需要は強い。それでも急落",
-          "objectIds": [
-            "s2-number-01",
-            "s2-number-02",
-            "s2-number-03",
-            "s2-number-04",
-            "s2-number-05"
+          "changeCue": "ハイニックス",
+          "objectIds": [],
+          "assetPlacementIds": [
+            "scene-02-placement-company_skhynix"
           ],
-          "assetPlacementIds": [],
-          "assetState": "not-required",
-          "returnScreenState": null,
+          "assetState": "ready",
+          "returnScreenState": "Data",
           "evidenceSourceIds": [
             "source-001"
           ],
-          "expressionChange": "分析",
+          "expressionChange": null,
           "fallback": null,
-          "entity": null,
+          "entity": {
+            "subjectType": "company",
+            "displayName": "SK hynix",
+            "role": "AI向け高性能メモリの主要供給企業",
+            "firstMentionCue": "ハイニックス",
+            "variant": "company",
+            "assetId": "company_skhynix",
+            "rightsStatus": "not-required",
+            "targetDurationMs": 6000
+          },
           "pictureBook": null
         },
         {
@@ -610,6 +621,16 @@
           "opacity": 1,
           "startChunkId": null,
           "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-company_skhynix",
+          "assetId": "company_skhynix",
+          "role": "entity-card",
+          "region": "main-stage",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": "scene-02-chunk-001",
+          "endChunkId": "scene-02-chunk-001"
         }
       ],
       "transition": {

@@ -235,6 +235,10 @@ const makeSpec = (kind: FixtureKind): RenderSpec => {
   editorial: {
     leadNews: null,
     leadTheme: "TEST LEAD THEME",
+    leadEntityPlan: {
+    mode: "not-required",
+    reason: "汎用Specフィクスチャではカード必須契約を専用テストで検証するため",
+  },
     targetIndices: ["TEST INDEX"],
     storySpine: "TEST STORY SPINE",
     centralHypothesis: "TEST CENTRAL HYPOTHESIS",

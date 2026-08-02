@@ -26,6 +26,79 @@ const assetPaths = Object.fromEntries(Object.entries(assetManifestJson.assets).m
 const technicalSynth = async ({chunkId}: {chunkId: string}) => ({audioSrc: `audio/${chunkId}.wav`, durationMs: 1000});
 
 test("complete 9Scene fixture validates", () => {validateRenderSpecReferences(fixture, assetManifestJson, voiceProfilesJson);});
+test("required lead entity card fixture validates", () => {
+  const value = clone();
+  value.editorial.leadEntityPlan = {
+    mode: "required",
+    subjectType: "company",
+    displayName: "NVIDIA",
+    firstMentionCue: "TEST INDEX DIRECTION",
+  };
+  validateRenderSpecReferences(value, assetManifestJson, voiceProfilesJson);
+});
+test("lead entity card is required at the first narration mention", () => {
+  const value = clone();
+  value.editorial.leadEntityPlan = {
+    mode: "required",
+    subjectType: "company",
+    displayName: "NVIDIA",
+    firstMentionCue: "TEST INDEX DIRECTION",
+  };
+  const beat = value.scenes[0].visualBeats[1];
+  beat.screenState = "Data";
+  beat.entity = null;
+  beat.assetPlacementIds = [];
+  beat.assetState = "not-required";
+  beat.returnScreenState = null;
+  rejects(
+    () => validateRenderSpecReferences(value, assetManifestJson, voiceProfilesJson),
+    /lead entity card must use EntityFocus at the first narration mention/ ,
+  );
+});
+test("lead entity card cannot be deferred after the first narration mention", () => {
+  const value = clone();
+  value.editorial.leadEntityPlan = {
+    mode: "required",
+    subjectType: "company",
+    displayName: "NVIDIA",
+    firstMentionCue: "TEST INDEX DIRECTION",
+  };
+  const plan = value.editorial.leadEntityPlan;
+  assert.equal(plan.mode, "required");
+  if (plan.mode !== "required") throw new Error("fixture must require a lead entity card");
+  plan.firstMentionCue = "NVIDIA";
+  value.scenes[0].narrationChunks[0].speechText = "NVIDIA TEST OPENING HOOK。";
+  value.scenes[0].narrationChunks[0].captionText = "NVIDIA TEST OPENING HOOK";
+  rejects(
+    () => validateRenderSpecReferences(value, assetManifestJson, voiceProfilesJson),
+    /lead entity card must use EntityFocus at the first narration mention/ ,
+  );
+});
+test("lead entity card metadata must match the editorial plan", () => {
+  const value = clone();
+  value.editorial.leadEntityPlan = {
+    mode: "required",
+    subjectType: "company",
+    displayName: "NVIDIA",
+    firstMentionCue: "TEST INDEX DIRECTION",
+  };
+  const plan = value.editorial.leadEntityPlan;
+  assert.equal(plan.mode, "required");
+  if (plan.mode !== "required") throw new Error("fixture must require a lead entity card");
+  plan.displayName = "AMD";
+  rejects(
+    () => validateRenderSpecReferences(value, assetManifestJson, voiceProfilesJson),
+    /lead entity card metadata must match editorial.leadEntityPlan/ ,
+  );
+});
+test("an explicit lead entity not-required reason is accepted", () => {
+  const value = clone();
+  value.editorial.leadEntityPlan = {
+    mode: "not-required",
+    reason: "主役が抽象的な市場テーマであるため",
+  };
+  validateRenderSpecReferences(value, assetManifestJson, voiceProfilesJson);
+});
 test("schemaVersion mismatch is rejected", () => {const value = clone() as unknown as {schemaVersion: string}; value.schemaVersion = "1.0.0"; rejects(() => renderSpecSchema.parse(value));});
 test("root unknown field is rejected", () => rejects(() => renderSpecSchema.parse({...fixture, unknownField: true})));
 test("nested unknown field is rejected", () => {const value = clone(); Object.assign(value.scenes[0], {unknownField: true}); rejects(() => renderSpecSchema.parse(value));});

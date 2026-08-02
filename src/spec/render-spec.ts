@@ -68,9 +68,23 @@ const episodeSchema = z.object({
   height: z.number().int().min(720).max(2160),
 }).strict();
 
+const leadEntityPlanSchema = z.discriminatedUnion("mode", [
+  z.object({
+    mode: z.literal("required"),
+    subjectType: z.enum(["person", "company", "product"]),
+    displayName: nonEmptyText,
+    firstMentionCue: nonEmptyText,
+  }).strict(),
+  z.object({
+    mode: z.literal("not-required"),
+    reason: nonEmptyText,
+  }).strict(),
+]);
+
 const editorialSchema = z.object({
   leadNews: nullableText,
   leadTheme: nullableText,
+  leadEntityPlan: leadEntityPlanSchema,
   targetIndices: z.array(nonEmptyText).min(1),
   storySpine: nonEmptyText,
   centralHypothesis: nonEmptyText,
