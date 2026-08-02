@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "provisional": false,
+  "expressions": {
+    "通常": {"requestedExpression": "通常", "assetId": "foxNormal", "fallback": false, "reason": "ファイル名で通常として明示"},
+    "分析": {"requestedExpression": "分析", "assetId": "foxAnalysis", "fallback": false, "reason": "ファイル名で分析として明示"},
+    "ニヤリ": {"requestedExpression": "ニヤリ", "assetId": "foxSmirk", "fallback": false, "reason": "ファイル名でニヤリとして明示"},
+    "軽い驚き": {"requestedExpression": "軽い驚き", "assetId": "foxSlightSurprise", "fallback": false, "reason": "ファイル名で軽い驚きとして明示"},
+    "困惑": {"requestedExpression": "困惑", "assetId": "foxConfused", "fallback": false, "reason": "ファイル名で困惑として明示"},
+    "警戒": {"requestedExpression": "警戒", "assetId": "foxAlert", "fallback": false, "reason": "ファイル名で警戒として明示"},
+    "眠そう": {"requestedExpression": "眠そう", "assetId": "foxSleepy", "fallback": false, "reason": "ファイル名で眠そうとして明示"}
+  }
+}

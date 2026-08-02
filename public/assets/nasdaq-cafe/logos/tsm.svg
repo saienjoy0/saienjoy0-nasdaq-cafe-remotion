@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="420" viewBox="0 0 800 420" data-brand-color="#76B900">
+  <rect width="800" height="420" rx="60" fill="#151715"/>
+  <text x="400" y="205" dominant-baseline="middle" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif" font-size="160" font-weight="800"
+        fill="#76B900">T</text>
+  <text x="400" y="330" dominant-baseline="middle" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="700"
+        fill="#FFFFFF">TSM</text>
+</svg>

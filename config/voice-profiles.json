@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "profiles": {
+    "voicevox-mochiko-anko": {
+      "provider": "voicevox",
+      "speakingRate": 1.05,
+      "pitchScale": 0,
+      "intonationScale": 1,
+      "volumeScale": 1,
+      "characterName": "もち子さん",
+      "styleName": "セクシー／あん子",
+      "styleId": 66,
+      "speakerUuid": "9f3ee141-26ad-437e-97bd-d22298d02ad2",
+      "provisional": false
+    },
+    "voicevox-kurono-normal": {
+      "provider": "voicevox",
+      "speakingRate": 1.05,
+      "pitchScale": 0,
+      "intonationScale": 1,
+      "volumeScale": 1,
+      "characterName": "玄野武宏",
+      "styleName": "ノーマル",
+      "styleId": 11,
+      "speakerUuid": "voicevox-kurono-fixed",
+      "provisional": false
+    },
+    "fox-main": {
+      "provider": "gemini",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Charon",
+      "speakerUuid": "gemini-3.1-flash-tts-preview:Charon",
+      "styleId": 936454926,
+      "speakingRate": 1.05,
+      "pitchScale": 0,
+      "intonationScale": 1,
+      "volumeScale": 1,
+      "characterName": "朝のNASDAQカフェの狐",
+      "styleName": "Charon / Informative",
+      "provisional": false
+    },
+    "gemini-charon": {
+      "provider": "gemini",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Charon",
+      "speakerUuid": "gemini-3.1-flash-tts-preview:Charon",
+      "styleId": 936454926,
+      "speakingRate": 1.05,
+      "pitchScale": 0,
+      "intonationScale": 1,
+      "volumeScale": 1,
+      "characterName": "朝のNASDAQカフェの狐",
+      "styleName": "Charon / Informative",
+      "provisional": false
+    }
+  }
+}

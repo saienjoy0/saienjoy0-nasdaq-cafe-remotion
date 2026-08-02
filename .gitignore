@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+.DS_Store
+.env
+.env.local
+.cache/
+public/generated/
+
+# Ignore the output video from Git but not videos you import into src/.
+out
+renders/**/*.mp4
+renders/**/*.png

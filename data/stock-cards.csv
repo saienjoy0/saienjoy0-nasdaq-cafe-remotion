@@ -1,0 +1,65 @@
+﻿assetId,priority,companyName,ticker,description,category,iconSlug,logoFile
+company_nvda,A,NVIDIA,NVDA,AIの計算能力を支える中心企業,AI・GPU,nvidia,assets/nasdaq-cafe/logos/nvda.svg
+company_msft,A,Microsoft,MSFT,企業の仕事とAIをクラウドでつなぐ会社,大型テック・クラウド・AI,microsoft,assets/nasdaq-cafe/logos/msft.svg
+company_amzn,A,Amazon,AMZN,AWSと消費の二つの柱を持つ会社,大型テック・クラウド・消費,amazon,assets/nasdaq-cafe/logos/amzn.svg
+company_meta,A,Meta Platforms,META,SNS広告とAI投資が収益を支える会社,大型テック・広告・AI,meta,assets/nasdaq-cafe/logos/meta.svg
+company_googl,A,Alphabet,GOOGL,検索・広告・AIをつなぐ会社,大型テック・検索・広告・AI,google,assets/nasdaq-cafe/logos/googl.svg
+company_aapl,A,Apple,AAPL,端末とサービスの生態系で稼ぐ会社,大型テック・端末・サービス,apple,assets/nasdaq-cafe/logos/aapl.svg
+company_tsla,A,Tesla,TSLA,EV、電池、AIで事業を広げる会社,EV・エネルギー・AI,tesla,assets/nasdaq-cafe/logos/tsla.svg
+company_amd,A,AMD,AMD,CPUとGPUを設計する半導体会社,半導体・CPU・GPU,amd,assets/nasdaq-cafe/logos/amd.svg
+company_avgo,A,Broadcom,AVGO,AI通信と企業ソフトを支える会社,半導体・ネットワーク・ソフト,broadcom,assets/nasdaq-cafe/logos/avgo.svg
+company_tsm,A,TSMC,TSM,他社が設計した最先端半導体を製造する会社,半導体製造,tsmc,assets/nasdaq-cafe/logos/tsm.svg
+company_asml,A,ASML,ASML,最先端チップ製造に欠かせない露光装置会社,半導体装置・露光,asml,assets/nasdaq-cafe/logos/asml.svg
+company_arm,A,Arm Holdings,ARM,チップの設計ルールを提供する会社,半導体設計・IP,arm,assets/nasdaq-cafe/logos/arm.svg
+company_mu,A,Micron Technology,MU,AI計算に必要な高速メモリを供給する会社,メモリ・HBM,micron,assets/nasdaq-cafe/logos/mu.svg
+company_intc,A,Intel,INTC,CPUと製造の再建を進める老舗半導体会社,CPU・半導体製造,intel,assets/nasdaq-cafe/logos/intc.svg
+company_orcl,A,Oracle,ORCL,企業データとクラウドを支える会社,クラウド・データベース・AI,oracle,assets/nasdaq-cafe/logos/orcl.svg
+company_pltr,A,Palantir,PLTR,複雑なデータを意思決定へ変えるAIソフト会社,AIソフト・データ分析,palantir,assets/nasdaq-cafe/logos/pltr.svg
+company_ibm,A,IBM,IBM,企業の既存ITをAIとクラウドへつなぐ会社,企業IT・AI・ハイブリッドクラウド,ibm,assets/nasdaq-cafe/logos/ibm.svg
+company_smci,A,Super Micro Computer,SMCI,AI計算用サーバーを素早く組み上げる会社,AIサーバー,supermicro,assets/nasdaq-cafe/logos/smci.svg
+company_anet,A,Arista Networks,ANET,AIデータセンター内の通信を支える会社,データセンターネットワーク,arista,assets/nasdaq-cafe/logos/anet.svg
+company_vrt,A,Vertiv,VRT,AIデータセンターの電力と冷却を支える会社,データセンター電力・冷却,,assets/nasdaq-cafe/logos/vrt.svg
+company_ceg,A,Constellation Energy,CEG,AI需要を支える電力供給会社,電力・原子力・データセンター,,assets/nasdaq-cafe/logos/ceg.svg
+company_crwd,A,CrowdStrike,CRWD,企業の端末とクラウドを守るセキュリティ会社,サイバーセキュリティ,crowdstrike,assets/nasdaq-cafe/logos/crwd.svg
+company_panw,A,Palo Alto Networks,PANW,広い企業ネットワークを統合的に守る会社,サイバーセキュリティ,paloaltonetworks,assets/nasdaq-cafe/logos/panw.svg
+company_coin,A,Coinbase,COIN,暗号資産の売買・保管基盤を提供する会社,暗号資産取引基盤,coinbase,assets/nasdaq-cafe/logos/coin.svg
+company_qcom,B,Qualcomm,QCOM,通信と端末向け半導体を支える会社,半導体・通信・端末AI,qualcomm,assets/nasdaq-cafe/logos/qcom.svg
+company_amat,B,Applied Materials,AMAT,半導体を作るための装置を供給する会社,半導体装置,appliedmaterials,assets/nasdaq-cafe/logos/amat.svg
+company_lrcx,B,Lam Research,LRCX,微細回路形成に欠かせない装置会社,半導体装置,lamresearch,assets/nasdaq-cafe/logos/lrcx.svg
+company_klac,B,KLA,KLAC,半導体製造の品質を検査する会社,半導体検査装置,kla,assets/nasdaq-cafe/logos/klac.svg
+company_mrvl,B,Marvell Technology,MRVL,データセンターの高速通信を支える半導体会社,半導体・データ通信,marvell,assets/nasdaq-cafe/logos/mrvl.svg
+company_snps,B,Synopsys,SNPS,半導体設計を助けるソフト会社,EDA・半導体設計ソフト,synopsys,assets/nasdaq-cafe/logos/snps.svg
+company_cdns,B,Cadence Design Systems,CDNS,半導体や電子製品の設計を支える会社,EDA・設計ソフト,cadence,assets/nasdaq-cafe/logos/cdns.svg
+company_ftnt,B,Fortinet,FTNT,ネットワーク境界を守るセキュリティ会社,サイバーセキュリティ,fortinet,assets/nasdaq-cafe/logos/ftnt.svg
+company_zs,B,Zscaler,ZS,会社の外からでも安全に接続させる会社,クラウドセキュリティ,zscaler,assets/nasdaq-cafe/logos/zs.svg
+company_net,B,Cloudflare,NET,ウェブを速く安全に届ける会社,クラウドネットワーク・セキュリティ,cloudflare,assets/nasdaq-cafe/logos/net.svg
+company_wday,B,Workday,WDAY,企業の人事・財務管理をクラウド化する会社,企業SaaS・人事・財務,workday,assets/nasdaq-cafe/logos/wday.svg
+company_intu,B,Intuit,INTU,会計・税務を分かりやすくするソフト会社,金融ソフト・会計,intuit,assets/nasdaq-cafe/logos/intu.svg
+company_app,B,AppLovin,APP,アプリ広告の収益化を支える会社,アプリ広告・AI,applovin,assets/nasdaq-cafe/logos/app.svg
+company_nflx,B,Netflix,NFLX,定額動画配信とコンテンツ制作の会社,動画配信・メディア,netflix,assets/nasdaq-cafe/logos/nflx.svg
+company_cost,B,Costco,COST,会員制と大量販売で稼ぐ小売会社,小売・消費,costco,assets/nasdaq-cafe/logos/cost.svg
+company_mstr,B,Strategy,MSTR,ビットコイン保有の影響が大きい企業,ビットコイン関連・企業ソフト,,assets/nasdaq-cafe/logos/mstr.svg
+company_jpm,B,JPMorgan Chase,JPM,米金融システムの中心的な大手銀行,銀行・金融,jpmorgan,assets/nasdaq-cafe/logos/jpm.svg
+company_gs,B,Goldman Sachs,GS,企業金融と市場取引を支える投資銀行,投資銀行・市場,goldmansachs,assets/nasdaq-cafe/logos/gs.svg
+company_skhynix,B,SK hynix,000660.KS,AI向け高性能メモリの主要供給企業,メモリ・HBM,skhynix,assets/nasdaq-cafe/logos/000660-ks.svg
+company_samsung,B,Samsung Electronics,005930.KS,メモリ・製造・端末を幅広く持つ企業,メモリ・半導体・端末,samsung,assets/nasdaq-cafe/logos/005930-ks.svg
+company_tokyoelectron,B,Tokyo Electron,8035.T,世界の半導体工場へ装置を供給する企業,半導体装置,,assets/nasdaq-cafe/logos/8035-t.svg
+company_advantest,B,Advantest,6857.T,半導体が正しく動くか確認する企業,半導体検査,,assets/nasdaq-cafe/logos/6857-t.svg
+company_ms,C,Morgan Stanley,MS,投資銀行と資産運用を持つ金融会社,投資銀行・資産運用,morganstanley,assets/nasdaq-cafe/logos/ms.svg
+company_bac,C,Bank of America,BAC,大規模な個人・企業銀行,銀行・金融,bankofamerica,assets/nasdaq-cafe/logos/bac.svg
+company_c,C,Citigroup,C,国際的な金融サービスを提供する銀行,銀行・国際金融,citigroup,assets/nasdaq-cafe/logos/c.svg
+company_wfc,C,Wells Fargo,WFC,個人・地域金融に強い銀行,銀行・個人金融,wellsfargo,assets/nasdaq-cafe/logos/wfc.svg
+company_xom,C,Exxon Mobil,XOM,原油価格を通じ市場へ影響するエネルギー企業,エネルギー・石油,exxonmobil,assets/nasdaq-cafe/logos/xom.svg
+company_cvx,C,Chevron,CVX,世界の原油供給に関わる大手エネルギー企業,エネルギー・石油,chevron,assets/nasdaq-cafe/logos/cvx.svg
+company_dis,C,Disney,DIS,コンテンツ・配信・施設を持つメディア企業,メディア・テーマパーク,disney,assets/nasdaq-cafe/logos/dis.svg
+company_adbe,C,Adobe,ADBE,制作と文書業務を支えるソフト会社,クリエイティブソフト・AI,adobe,assets/nasdaq-cafe/logos/adbe.svg
+company_crm,C,Salesforce,CRM,企業の営業・顧客管理をクラウド化する会社,企業SaaS・顧客管理,salesforce,assets/nasdaq-cafe/logos/crm.svg
+company_now,C,ServiceNow,NOW,企業の仕事の流れを自動化する会社,企業ワークフロー,servicenow,assets/nasdaq-cafe/logos/now.svg
+company_shop,C,Shopify,SHOP,事業者がネットショップを作る基盤,EC・商取引基盤,shopify,assets/nasdaq-cafe/logos/shop.svg
+company_pypl,C,PayPal,PYPL,オンライン決済を仲介する会社,デジタル決済,paypal,assets/nasdaq-cafe/logos/pypl.svg
+company_uber,C,Uber,UBER,需要と移動サービスをアプリでつなぐ会社,配車・配送プラットフォーム,uber,assets/nasdaq-cafe/logos/uber.svg
+company_abnb,C,Airbnb,ABNB,個人の宿泊場所と旅行者をつなぐ会社,旅行・宿泊プラットフォーム,airbnb,assets/nasdaq-cafe/logos/abnb.svg
+company_rddt,C,Reddit,RDDT,オンラインコミュニティと広告の会社,SNS・広告・コミュニティ,reddit,assets/nasdaq-cafe/logos/rddt.svg
+company_snow,C,Snowflake,SNOW,企業データを保存・共有・分析する基盤,クラウドデータ,snowflake,assets/nasdaq-cafe/logos/snow.svg
+company_ddog,C,Datadog,DDOG,クラウドシステムの動作を監視する会社,クラウド監視,datadog,assets/nasdaq-cafe/logos/ddog.svg
+company_dell,C,Dell Technologies,DELL,PCとAIサーバーを供給する会社,PC・サーバー・AIインフラ,dell,assets/nasdaq-cafe/logos/dell.svg

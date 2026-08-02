@@ -1,0 +1,282 @@
+[
+  {
+    "asset_id": "person_jensen_huang",
+    "role": "創業者・CEO",
+    "organization": "NVIDIA",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://nvidianews.nvidia.com/bios/jensen-huang",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_lisa_su",
+    "role": "会長・CEO",
+    "organization": "AMD",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.amd.com/en/corporate/leadership/lisa-su.html",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_satya_nadella",
+    "role": "会長・CEO",
+    "organization": "Microsoft",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.microsoft.com/en-us/about/leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_mark_zuckerberg",
+    "role": "創業者・会長・CEO",
+    "organization": "Meta",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.meta.com/media-gallery/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_sundar_pichai",
+    "role": "CEO",
+    "organization": "Alphabet / Google",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://abc.xyz/investor/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_tim_cook",
+    "role": "CEO",
+    "organization": "Apple",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.apple.com/leadership/tim-cook/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_andy_jassy",
+    "role": "社長・CEO",
+    "organization": "Amazon",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.aboutamazon.com/about-us/leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_elon_musk",
+    "role": "CEO",
+    "organization": "Tesla",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://ir.tesla.com/corporate",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_larry_ellison",
+    "role": "会長・CTO",
+    "organization": "Oracle",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.oracle.com/corporate/executives/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_alex_karp",
+    "role": "共同創業者・CEO",
+    "organization": "Palantir",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://investors.palantir.com/governance/management",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_sam_altman",
+    "role": "CEO",
+    "organization": "OpenAI",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://openai.com/about/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_cc_wei",
+    "role": "会長・CEO",
+    "organization": "TSMC",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.tsmc.com/english/aboutTSMC/executives",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_hock_tan",
+    "role": "社長・CEO",
+    "organization": "Broadcom",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.broadcom.com/company/about-us/leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_rene_haas",
+    "role": "CEO・取締役",
+    "organization": "Arm",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.arm.com/company/leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_sanjay_mehrotra",
+    "role": "社長・CEO",
+    "organization": "Micron",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.micron.com/about/our-leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_brian_armstrong",
+    "role": "共同創業者・CEO",
+    "organization": "Coinbase",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.coinbase.com/about",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_michael_saylor",
+    "role": "会長",
+    "organization": "Strategy",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.strategy.com/company",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_jamie_dimon",
+    "role": "会長・CEO",
+    "organization": "JPMorgan Chase",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.jpmorganchase.com/about/our-leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_david_solomon",
+    "role": "会長・CEO",
+    "organization": "Goldman Sachs",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.goldmansachs.com/our-firm/leadership",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_marc_benioff",
+    "role": "会長・CEO",
+    "organization": "Salesforce",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.salesforce.com/company/leadership/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_shantanu_narayen",
+    "role": "会長・CEO",
+    "organization": "Adobe",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.adobe.com/about-adobe/leaders/shantanu-narayen.html",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_arvind_krishna",
+    "role": "会長・社長・CEO",
+    "organization": "IBM",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.ibm.com/about/leadership/arvind-krishna",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_jerome_powell",
+    "role": "FRB理事",
+    "organization": "Federal Reserve Board",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.federalreserve.gov/aboutthefed/bios/board/powell.htm",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_christopher_waller",
+    "role": "FRB理事",
+    "organization": "Federal Reserve Board",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.federalreserve.gov/aboutthefed/bios/board/waller.htm",
+    "portrait_source_url": "https://www.federalreserve.gov/aboutthefed/bios/board/waller.htm",
+    "source_status": "official-photo",
+    "replacement_reason": null
+  },
+  {
+    "asset_id": "person_donald_trump",
+    "role": "米国大統領",
+    "organization": "The White House",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.whitehouse.gov/administration/",
+    "portrait_source_url": null,
+    "source_status": "official-photo-pending",
+    "replacement_reason": "公式写真を取得できる接続経路がないため、別人を代用せず汎用カードへフォールバック"
+  },
+  {
+    "asset_id": "person_role_us_treasury",
+    "role": "財政・国債政策",
+    "organization": "U.S. Treasury",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://home.treasury.gov/",
+    "portrait_source_url": null,
+    "source_status": "institution-card",
+    "replacement_reason": "特定の現職者に依存しない機関カードへ置換"
+  },
+  {
+    "asset_id": "person_role_boj_governor",
+    "role": "日本の金融政策",
+    "organization": "Bank of Japan",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.boj.or.jp/",
+    "portrait_source_url": null,
+    "source_status": "institution-card",
+    "replacement_reason": "特定の現職者に依存しない機関カードへ置換"
+  },
+  {
+    "asset_id": "person_role_ecb_president",
+    "role": "ユーロ圏の金融政策",
+    "organization": "European Central Bank",
+    "role_verified_at": "2026-07-29",
+    "role_source_url": "https://www.ecb.europa.eu/",
+    "portrait_source_url": null,
+    "source_status": "institution-card",
+    "replacement_reason": "特定の現職者に依存しない機関カードへ置換"
+  }
+]

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06101d"/>
+      <stop offset="1" stop-color="#0b1d34"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="82%" cy="18%" r="70%">
+      <stop offset="0" stop-color="#35D9FF" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#35D9FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" rx="26" fill="url(#bg)"/>
+  <rect width="640" height="360" rx="26" fill="url(#glow)"/>
+  <g opacity=".34" stroke="#35D9FF" stroke-width="2" fill="none">
+    <path d="M370 72 L470 42 L570 105 L505 178 L604 232"/>
+    <path d="M358 278 L450 216 L548 286 L622 252"/>
+    <circle cx="470" cy="42" r="7" fill="#35D9FF"/>
+    <circle cx="570" cy="105" r="7" fill="#35D9FF"/>
+    <circle cx="505" cy="178" r="7" fill="#35D9FF"/>
+    <circle cx="450" cy="216" r="7" fill="#35D9FF"/>
+    <circle cx="548" cy="286" r="7" fill="#35D9FF"/>
+  </g>
+  <rect x="34" y="34" width="126" height="48" rx="24" fill="#35D9FF" fill-opacity=".16" stroke="#35D9FF"/>
+  <text x="97" y="66" text-anchor="middle" fill="#35D9FF" font-family="Arial, sans-serif" font-size="24" font-weight="800">MU</text>
+  <text x="36" y="170" fill="#F4FAFF" font-family="Arial, 'Noto Sans JP', sans-serif" font-size="58" font-weight="900">Micron</text>
+  <text x="38" y="224" fill="#9BB1C8" font-family="Arial, 'Noto Sans JP', sans-serif" font-size="30" font-weight="700">メモリー半導体</text>
+  <rect x="36" y="286" width="318" height="4" rx="2" fill="#35D9FF"/>
+  <text x="36" y="326" fill="#8AEAFF" font-family="Arial, 'Noto Sans JP', sans-serif" font-size="18" font-weight="700">NASDAQ CAFE / REUSABLE COMPANY VISUAL</text>
+</svg>

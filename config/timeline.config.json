@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "provisional": true,
+  "fps": 30,
+  "transitionFrames": 9,
+  "durationSource": "production-package-estimate"
+}

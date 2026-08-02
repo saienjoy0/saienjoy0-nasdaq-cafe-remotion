@@ -1,0 +1,2826 @@
+{
+  "bundle_name": "nasdaq_cafe_runtime_assets_current.zip",
+  "bundle_revision": "2026-08-01-stability-v2.4.1",
+  "files": [
+    {
+      "path": ".cache/spec-tts/1d7c237c0b19dcf772d4a34ed1ddc24c0c91184ebcd22b57ca53ebf1b35e9bc1/audio.wav",
+      "required": false,
+      "sha256": "eb3ade889856a113b68c422ccd20115522fea75629d77899f79ac947d78a4f8a",
+      "size_bytes": 867918
+    },
+    {
+      "path": ".cache/spec-tts/1d7c237c0b19dcf772d4a34ed1ddc24c0c91184ebcd22b57ca53ebf1b35e9bc1/metadata.json",
+      "required": false,
+      "sha256": "aff730118ca4d45aa251d67783b2d1091cf5af4fb36552869624839c252fd682",
+      "size_bytes": 818
+    },
+    {
+      "path": ".cache/spec-tts/1d7c237c0b19dcf772d4a34ed1ddc24c0c91184ebcd22b57ca53ebf1b35e9bc1/provider-output.wav",
+      "required": false,
+      "sha256": "f16c231957b1a27bae7e9b81b0ee5b9dd46e3eaf59d59f963c9d715e62fa75b4",
+      "size_bytes": 433964
+    },
+    {
+      "path": ".cache/spec-tts/3dde8ece41ed4c9bac370f7229cd4ee4aa4b3b836cb770a0d6ec958c0fc924ea/audio.wav",
+      "required": false,
+      "sha256": "e7a25eaf2fe43f159909a84a2ff8088a84d5f90920dbca021528d59f3e2d2242",
+      "size_bytes": 975438
+    },
+    {
+      "path": ".cache/spec-tts/3dde8ece41ed4c9bac370f7229cd4ee4aa4b3b836cb770a0d6ec958c0fc924ea/metadata.json",
+      "required": false,
+      "sha256": "b05996a7a6de1abeb22c14d770925c1f9c02f3d8863f5f22adcc54ae6cf86806",
+      "size_bytes": 819
+    },
+    {
+      "path": ".cache/spec-tts/3dde8ece41ed4c9bac370f7229cd4ee4aa4b3b836cb770a0d6ec958c0fc924ea/provider-output.wav",
+      "required": false,
+      "sha256": "14ec1679f08e749471a1b31020edbd70bbba5f2d4ea69a5749db29ab26374053",
+      "size_bytes": 487724
+    },
+    {
+      "path": ".cache/spec-tts/7a18687f6e91026d5ab50f9725a8ecdec64a9cdfb0a2b66025cb1dd8da2da967/audio.wav",
+      "required": false,
+      "sha256": "46d31bd87f1d1c26a4d186451f6c0ad842ad76f6655ba45c0cba3e03e5517c9f",
+      "size_bytes": 441678
+    },
+    {
+      "path": ".cache/spec-tts/7a18687f6e91026d5ab50f9725a8ecdec64a9cdfb0a2b66025cb1dd8da2da967/metadata.json",
+      "required": false,
+      "sha256": "a69650e1d86eb15af92c5da63ff2ab898855427f16cc8dec71f4a26c6afc0ac0",
+      "size_bytes": 818
+    },
+    {
+      "path": ".cache/spec-tts/7a18687f6e91026d5ab50f9725a8ecdec64a9cdfb0a2b66025cb1dd8da2da967/provider-output.wav",
+      "required": false,
+      "sha256": "1dd2777040f80a4bd0afae0f57ab3be4b04d0b681ea376ba10337ebab32f68b2",
+      "size_bytes": 220844
+    },
+    {
+      "path": ".cache/spec-tts/88631ae92ec040969448b9ac3dd45c799b96bc1d9d547899c1160f1ebd4cf189/audio.wav",
+      "required": false,
+      "sha256": "599aeb98838e34e96013b1f32651013dd1ab567ab888f4be38020bcf6e53fc7d",
+      "size_bytes": 994638
+    },
+    {
+      "path": ".cache/spec-tts/88631ae92ec040969448b9ac3dd45c799b96bc1d9d547899c1160f1ebd4cf189/metadata.json",
+      "required": false,
+      "sha256": "ce7560cc65c92a1a9678e510719d6d5b7a8f63ad329593e8ecf04bf32af95507",
+      "size_bytes": 819
+    },
+    {
+      "path": ".cache/spec-tts/88631ae92ec040969448b9ac3dd45c799b96bc1d9d547899c1160f1ebd4cf189/provider-output.wav",
+      "required": false,
+      "sha256": "6d95950d50ad37eeb00f5291e84d4c822971a5026e311f75330924e7747b5c24",
+      "size_bytes": 497324
+    },
+    {
+      "path": ".cache/spec-tts/a58c153d6cd4b4a5f2cfdcfcf98510a16c5ad02a3f23c93351e47e05a039594e/audio.wav",
+      "required": false,
+      "sha256": "2bc1913ef585e0b1232b6c5d18567b3bab8ac3db8f40f4f5bf8711b9f77fb84f",
+      "size_bytes": 629838
+    },
+    {
+      "path": ".cache/spec-tts/a58c153d6cd4b4a5f2cfdcfcf98510a16c5ad02a3f23c93351e47e05a039594e/metadata.json",
+      "required": false,
+      "sha256": "9ca3d134401bb674a6064cdd9e151aaacfb3d3abec98a36ec192b2a7f9b51382",
+      "size_bytes": 818
+    },
+    {
+      "path": ".cache/spec-tts/a58c153d6cd4b4a5f2cfdcfcf98510a16c5ad02a3f23c93351e47e05a039594e/provider-output.wav",
+      "required": false,
+      "sha256": "4d3371b7208ed63e1fcb0de0b6bb7904e723010b0fbdd1f1dde22ad1e9cec393",
+      "size_bytes": 314924
+    },
+    {
+      "path": ".cache/spec-tts/b07754c17cf20ee9d7b2208aa3197fd3325dc83b4516eee39f2db613142200bc/audio.wav",
+      "required": false,
+      "sha256": "1a725fa6371e94cfafcaba3c7be5d5e348364feb21c70059560a9230fff98d4d",
+      "size_bytes": 1205838
+    },
+    {
+      "path": ".cache/spec-tts/b07754c17cf20ee9d7b2208aa3197fd3325dc83b4516eee39f2db613142200bc/metadata.json",
+      "required": false,
+      "sha256": "120fa7817d277954a9fee6ea93f5903acd3c5784b49616014e6f4f6537257b96",
+      "size_bytes": 820
+    },
+    {
+      "path": ".cache/spec-tts/b07754c17cf20ee9d7b2208aa3197fd3325dc83b4516eee39f2db613142200bc/provider-output.wav",
+      "required": false,
+      "sha256": "6c366a2148a9f5c33ae5bcc21565296461368bbf6f3aec7e439513c5987230c2",
+      "size_bytes": 602924
+    },
+    {
+      "path": ".env.example",
+      "required": false,
+      "sha256": "8f6404ebdffb99c87fd1aa43f2046f5305b4541155ee7e6cf99bb5af400d7c3d",
+      "size_bytes": 321
+    },
+    {
+      "path": ".gitignore",
+      "required": false,
+      "sha256": "dbcd737ec9691f333d690f48849e5988082a983615b3140adadf8cdc893c089d",
+      "size_bytes": 187
+    },
+    {
+      "path": ".prettierrc",
+      "required": false,
+      "sha256": "10e86224d2f90945fbe57db21ac109bdb0ce9b5d7470e7b78fa5f8b6d49a1afd",
+      "size_bytes": 66
+    },
+    {
+      "path": "AGENTS.md",
+      "required": false,
+      "sha256": "b168e1c141a9dbeb3e27fdb289331c8489360fbb7b07bfb5fd7e7ecbc0d6d247",
+      "size_bytes": 39
+    },
+    {
+      "path": "GEMINI_TTS_OVERLAY_README.md",
+      "required": false,
+      "sha256": "16770b035a33a3e410ec2341e2743e9c5fbdf8f8dee37bfe263d9621fcf92495",
+      "size_bytes": 724
+    },
+    {
+      "path": "QA_REMAINING_ASSETS.md",
+      "required": false,
+      "sha256": "93227074b10ae8f3561e4242ee773726300ab5999ea0e0cdec5f10455317dfd4",
+      "size_bytes": 3981
+    },
+    {
+      "path": "README.md",
+      "required": false,
+      "sha256": "d1be65ff05bb007c54c10954effe5e2dabb96c89e11acb044c80ebaa76eab684",
+      "size_bytes": 12155
+    },
+    {
+      "path": "RTK.md",
+      "required": false,
+      "sha256": "56005802a4e3650bcf5639ddec1dae6b9838a4e8e77a4996af1dc40b67d15ce3",
+      "size_bytes": 514
+    },
+    {
+      "path": "config/asset-manifest.json",
+      "required": true,
+      "sha256": "91d05b72e1288a76055520db7b2c1635b0ac774ca63dc07760fc7eb07f991fa1",
+      "size_bytes": 3831
+    },
+    {
+      "path": "config/fox-expression-map.json",
+      "required": true,
+      "sha256": "71c79ecf1f834ca9aedaec58b76d1834fa67dbe9ed9562562c5985c8f0fbc09e",
+      "size_bytes": 1133
+    },
+    {
+      "path": "config/person-source-register.json",
+      "required": false,
+      "sha256": "38fdc83ed26492b5d3e1cee783a8b6157c848111d25c8cae38df5befcbefeca0",
+      "size_bytes": 12274
+    },
+    {
+      "path": "config/pronunciation-dictionary.json",
+      "required": false,
+      "sha256": "6f9f878e57b64d4e663ccf6c87bb6655ecdf19d5d5a29da5d56f30b8d682fcfa",
+      "size_bytes": 1003
+    },
+    {
+      "path": "config/reusable-entity-assets.json",
+      "required": true,
+      "sha256": "d555e7d6df2258576640bced79f7c462f775c6a83857be91827533841e5845a7",
+      "size_bytes": 7323
+    },
+    {
+      "path": "config/timeline.config.json",
+      "required": false,
+      "sha256": "08e0e342df1990c8124c0b12574bc9c8c9bbaed8b62477e58b7b81b5aac9d941",
+      "size_bytes": 137
+    },
+    {
+      "path": "config/voice-profiles.json",
+      "required": true,
+      "sha256": "759b56909e5690dfb7edb187794cdaa6dde50c0580770f2ef0e21841e16a15f1",
+      "size_bytes": 1639
+    },
+    {
+      "path": "data/remaining-assets.csv",
+      "required": false,
+      "sha256": "35e9524010db8e63597b922e429cd7dc7967735a820cfb072cc76c9f4c475119",
+      "size_bytes": 44663
+    },
+    {
+      "path": "data/remaining-assets.json",
+      "required": false,
+      "sha256": "dbf6104bd83d23ff705ae0c176e0feaf93e7a3e6e0646f760640623b24d7b798",
+      "size_bytes": 73455
+    },
+    {
+      "path": "data/stock-cards.csv",
+      "required": false,
+      "sha256": "3f97fb7d83fa9310fa886957dc25d0e9f48854c3c11428fe4bf14deca686048f",
+      "size_bytes": 9815
+    },
+    {
+      "path": "data/stock-cards.json",
+      "required": false,
+      "sha256": "7a5f4ad81746b5674a5fe4acb8fc550028a637ab3bbe309654f32f3283293c57",
+      "size_bytes": 20110
+    },
+    {
+      "path": "docs/05_remotion_implementation_spec.md",
+      "required": false,
+      "sha256": "4938b74f5a2e9f53bb1f6ba58ea48b819a3cf59dc5051ac23f02160fa20879c0",
+      "size_bytes": 39773
+    },
+    {
+      "path": "docs/07_codex_minimal_execution_contract.md",
+      "required": false,
+      "sha256": "2ea56c211d04e381e821975bbd36036791b7c623ae78b339fd48434399c0fe40",
+      "size_bytes": 6970
+    },
+    {
+      "path": "docs/08_gemini_tts_runbook.md",
+      "required": true,
+      "sha256": "e61a713596bb59650e0dcfecc1c64b5ef4925aba9e4470189b5c3bf428f55b54",
+      "size_bytes": 2162
+    },
+    {
+      "path": "docs/09_stock_cards_qa.md",
+      "required": false,
+      "sha256": "eee2b7529dbfada458e26393e2ea5b989fa4a6d37b72229f1244a5b4af54f3c8",
+      "size_bytes": 1714
+    },
+    {
+      "path": "docs/11_visual_beat_implementation.md",
+      "required": false,
+      "sha256": "d6f11948be6d29a5775e729377693e5b656e958edd5f1514c862b9647977f321",
+      "size_bytes": 3347
+    },
+    {
+      "path": "episodes/2026-07-10/episode_package_2026-07-10.md",
+      "required": false,
+      "sha256": "46c067ac05aada788bf9f09970fb75991ab344bbee1beb4f89136ee617c10f59",
+      "size_bytes": 35719
+    },
+    {
+      "path": "eslint.config.mjs",
+      "required": false,
+      "sha256": "42778a50ff710c74253bdd1ed7040136e717c52578935e80f5ba5690b281a473",
+      "size_bytes": 245
+    },
+    {
+      "path": "package-lock.json",
+      "required": true,
+      "sha256": "88735d0d4136d37b696108f0986a6b8a54cdc8e95df152dd0d021bf073e519d7",
+      "size_bytes": 215758
+    },
+    {
+      "path": "package.json",
+      "required": true,
+      "sha256": "0d1bdca35304e1011e169761ed398874aeb9dd8bb2adf3c534d86f72cbd037e1",
+      "size_bytes": 4522
+    },
+    {
+      "path": "public/.gitkeep",
+      "required": false,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "public/assets/backgrounds/.gitkeep",
+      "required": false,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "public/assets/backgrounds/main-background.png",
+      "required": true,
+      "sha256": "d2bca0f6873e068041f1320487df85eaca6bfb814656b97af3c5019c35ae9f4b",
+      "size_bytes": 1820341
+    },
+    {
+      "path": "public/assets/bgm/.gitkeep",
+      "required": false,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "public/assets/characters/fox/.gitkeep",
+      "required": false,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "public/assets/characters/fox/уГЛуГдуГк.png",
+      "required": false,
+      "sha256": "62fab513da94aa4153c1f12b477241748f33e4f4380b9ba5a04446d032b399b9",
+      "size_bytes": 1490282
+    },
+    {
+      "path": "public/assets/characters/fox/хИЖцЮР.png",
+      "required": false,
+      "sha256": "13c12372697a0e457257ac2385511683e26ebe139c7f65156379a45a59c53bd1",
+      "size_bytes": 1539640
+    },
+    {
+      "path": "public/assets/characters/fox/хЫ░цГС.png",
+      "required": false,
+      "sha256": "aa1d0eaa7a1a25c8f4bb11b4c99bfc56f77fce142aec9f795788cbd05b242d99",
+      "size_bytes": 1540070
+    },
+    {
+      "path": "public/assets/characters/fox/чЬауБЭуБЖ.png",
+      "required": false,
+      "sha256": "97f134b212824940cef74015c86b4161fb24f220795317f9d40d65d0f6c17a7f",
+      "size_bytes": 1507782
+    },
+    {
+      "path": "public/assets/characters/fox/шнжцИТ.png",
+      "required": false,
+      "sha256": "e1a6e5ea5de37d0da08b947ffd1268a3bf107b44b8b3ff562d80820c4c8f0b9e",
+      "size_bytes": 1541456
+    },
+    {
+      "path": "public/assets/characters/fox/ш╗╜уБДщйЪуБН.png",
+      "required": false,
+      "sha256": "8b2cf81bef01242f5a5c09ce0da488ee12087f99c40ddc6ca34b53ac42bd37b4",
+      "size_bytes": 1489273
+    },
+    {
+      "path": "public/assets/characters/fox/щАЪх╕╕.png",
+      "required": false,
+      "sha256": "721535559c6807d0f77946bba70f377bd56f64c2ba41b5ff79fdb1cc382a2d3d",
+      "size_bytes": 1543602
+    },
+    {
+      "path": "public/assets/characters/fox/ニヤリ-transparent.png",
+      "required": true,
+      "sha256": "a7ee05ef282a8a4d47930a37608e100b0f5017a04d919116aa14cba83b449796",
+      "size_bytes": 1464536
+    },
+    {
+      "path": "public/assets/characters/fox/分析-transparent.png",
+      "required": true,
+      "sha256": "41667f65b921c3de693a6ca98a6c930190c03d2433d409d99b77492baaa9a00c",
+      "size_bytes": 1536618
+    },
+    {
+      "path": "public/assets/characters/fox/困惑-transparent.png",
+      "required": true,
+      "sha256": "f50311ed4d77de19eb1347c255cf4128c5312bfb6bb2a660ecd6b968189886ae",
+      "size_bytes": 1535375
+    },
+    {
+      "path": "public/assets/characters/fox/眠そう-transparent.png",
+      "required": true,
+      "sha256": "a4fc8a2a6c855bd13c9c6d690f5b5efdbd2d9715a9cf3afbeb201147d282db38",
+      "size_bytes": 1486329
+    },
+    {
+      "path": "public/assets/characters/fox/警戒-transparent.png",
+      "required": true,
+      "sha256": "6ac939c05f51ab12665652ba07f0186f827c60949334f2b4c28f49bbef632b22",
+      "size_bytes": 1519326
+    },
+    {
+      "path": "public/assets/characters/fox/軽い驚き-transparent.png",
+      "required": true,
+      "sha256": "55d9dd509d605868a4f3491950f1392245407fe849362b24c2c350cef79a6de7",
+      "size_bytes": 1448386
+    },
+    {
+      "path": "public/assets/characters/fox/通常-transparent.png",
+      "required": true,
+      "sha256": "4bb4ef86d2978a9cdae1ab35c3138ce5a3369eff2b8183877e8f18eda0bf32bc",
+      "size_bytes": 1545549
+    },
+    {
+      "path": "public/assets/entities/people/waller_christopher_official_960.jpg",
+      "required": false,
+      "sha256": "e8429d1290d0dcda02f1bc76f946c1fc7bf0b4b6210d4862f9afc127da85fb9b",
+      "size_bytes": 307214
+    },
+    {
+      "path": "public/assets/entities/people/warsh_kevin_official_130.png",
+      "required": false,
+      "sha256": "c1e999d3bc10b8159b9bcf9c003b6743524afed113bfdad4aa50237ea271e7a3",
+      "size_bytes": 34826
+    },
+    {
+      "path": "public/assets/entities/reusable-asset-manifest.json",
+      "required": true,
+      "sha256": "c24835b4d00fb777bef63dbe2b21bf163bb62022feb44f1bf2f770185f851f37",
+      "size_bytes": 10733
+    },
+    {
+      "path": "public/assets/entities/tickers/aapl.svg",
+      "required": false,
+      "sha256": "720278c24aaf97ced3da22dc202351773ef3a6e0f3f52d98e26eca8ec2e4079d",
+      "size_bytes": 1828
+    },
+    {
+      "path": "public/assets/entities/tickers/amd.svg",
+      "required": false,
+      "sha256": "5f1c3949ea77df4116c4733697b1d58e41d8da0b5e9c4aa5366653711a8bd0fd",
+      "size_bytes": 1815
+    },
+    {
+      "path": "public/assets/entities/tickers/amzn.svg",
+      "required": false,
+      "sha256": "9246d071acdbdccd199e6e180080b67d9f13d3c4862db1615ecbc155e4b4c2f3",
+      "size_bytes": 1813
+    },
+    {
+      "path": "public/assets/entities/tickers/avgo.svg",
+      "required": false,
+      "sha256": "389163be51d308f2f043e76427262a224e5a60f2b4507d0007df4497806142e4",
+      "size_bytes": 1828
+    },
+    {
+      "path": "public/assets/entities/tickers/googl.svg",
+      "required": false,
+      "sha256": "5b8f8eb2edb2dcc91ea20dcdf2af485309a693ddbd1b441286883581be12768a",
+      "size_bytes": 1829
+    },
+    {
+      "path": "public/assets/entities/tickers/intc.svg",
+      "required": false,
+      "sha256": "3b1a86b8d6ebd42cd1e9d263fbe9c0b752f26d15450a6b1d60db12d0185395b6",
+      "size_bytes": 1816
+    },
+    {
+      "path": "public/assets/entities/tickers/meta.svg",
+      "required": false,
+      "sha256": "f13bd97c6fd81dc9efe5fe121ee9113e2aaa4c97bff22fbb2cf2e84a46d73454",
+      "size_bytes": 1811
+    },
+    {
+      "path": "public/assets/entities/tickers/msft.svg",
+      "required": false,
+      "sha256": "fe1f75b6b9e9e0d6773b0699df756bb36d933009ef6898c50320c79e3b4ac13b",
+      "size_bytes": 1832
+    },
+    {
+      "path": "public/assets/entities/tickers/mu.svg",
+      "required": false,
+      "sha256": "e21dc351286bd662988ae68bcf2527629f280b75434e3b6131561ff7b6020a40",
+      "size_bytes": 1815
+    },
+    {
+      "path": "public/assets/entities/tickers/nvda.svg",
+      "required": false,
+      "sha256": "a2f4594d7bc59033335cb41631adef357ac54e5563955df48bd3e7bb96c0757b",
+      "size_bytes": 1819
+    },
+    {
+      "path": "public/assets/entities/tickers/tsla.svg",
+      "required": false,
+      "sha256": "5450406f7fbdf7256cf55b545d8ec00707855afcb41c7d57ba05a31f0ba48a54",
+      "size_bytes": 1820
+    },
+    {
+      "path": "public/assets/entities/tickers/tsm.svg",
+      "required": false,
+      "sha256": "94012c00a2ea2ea13debcbe4cd4141beac2faf25778629fd5930408499aaffd3",
+      "size_bytes": 1817
+    },
+    {
+      "path": "public/assets/logos/.gitkeep",
+      "required": false,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/000660-ks.svg",
+      "required": false,
+      "sha256": "dd12811d2601bac3e2c4358444e4732ad852b0c318c2b2e7e92196c5256487ce",
+      "size_bytes": 604
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/005930-ks.svg",
+      "required": false,
+      "sha256": "cfee02d1c26d7992e715d4de95c13a6237ff8f4d4625468f7f53606c583e901c",
+      "size_bytes": 2329
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/6857-t.svg",
+      "required": false,
+      "sha256": "947dc1fc1019d7c035154b8a63c69f2447e9018177641f10f2ed194bbb623204",
+      "size_bytes": 600
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/8035-t.svg",
+      "required": false,
+      "sha256": "7681c8bcd989d694b6f165be9f8fd1825f413f858bca6a18629ef10ff005bebc",
+      "size_bytes": 601
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/aapl.svg",
+      "required": false,
+      "sha256": "5e5343261c2f40d1d8e4f0e5f50d7e87267bff0ee3aece4bb598b988f877eb4d",
+      "size_bytes": 692
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/abnb.svg",
+      "required": false,
+      "sha256": "db2be83b2e17a4968896771573f18dd3a28abf34797893c6e1b1077b73b4fd1f",
+      "size_bytes": 1405
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/adbe.svg",
+      "required": false,
+      "sha256": "2e8bde6bddd6c2567688db9cab5d269c60a9067c5f0b71412f820f8dc09428fe",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/amat.svg",
+      "required": false,
+      "sha256": "eca0290e62146c9ab94172d47f767b01403d4d0bab26160f50eea4722d12a858",
+      "size_bytes": 599
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/amd.svg",
+      "required": false,
+      "sha256": "cdeff315d70e7ddc5f3945fbdfed31c78b178de873e6f3e745544444a256a890",
+      "size_bytes": 609
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/amzn.svg",
+      "required": false,
+      "sha256": "1f0c4df4a1efeb1818afd229ef0d8acd137da0156256451a46fe6680f1cfc2d8",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/anet.svg",
+      "required": false,
+      "sha256": "9d8dde455f28aba70c4c21937cdc228d6d212d615ea6424aaaad2e34eb127281",
+      "size_bytes": 599
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/app.svg",
+      "required": false,
+      "sha256": "911612d8c08ad8de4b0e0260a7ed78fed2466b278cb946c5b85d02bbcc591db7",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/arm.svg",
+      "required": false,
+      "sha256": "9401ca9ce3c1dea1285965e46bc4aee07ea8e99503eb515c005cea89602687a9",
+      "size_bytes": 1070
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/asml.svg",
+      "required": false,
+      "sha256": "02c4ac6f11d5b166ca634d9be91ee24461b10d7c6b8e7d9571d208a4a0e53159",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/avgo.svg",
+      "required": false,
+      "sha256": "30e724d2c9ff19d9ff5de69afb218daa48131c884da82205fb97edefbe99f770",
+      "size_bytes": 1198
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/bac.svg",
+      "required": false,
+      "sha256": "6b91e80b1e8dd7cc30e7fbe140b808c6e1e0bc8e238efda76e6ef841fde9bdf7",
+      "size_bytes": 1368
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/c.svg",
+      "required": false,
+      "sha256": "865171f8d12cf718c7012ed576c06fab55658594d0aaf3d2619d1b906dcfb894",
+      "size_bytes": 595
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/cdns.svg",
+      "required": false,
+      "sha256": "a6f83631ebe6bc9f12a169b41e7ed6aee529a4d2b9b16b8e7c06aa8f06d63a22",
+      "size_bytes": 600
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/ceg.svg",
+      "required": false,
+      "sha256": "356244e71623455bd58c5b6bbee1e055995f0d953ac6b88dac5727395bd6b4bc",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/coin.svg",
+      "required": false,
+      "sha256": "2bb5dd5ac347d97fad874d7efc457a74dada57a1e5b06100e01ea894d4dbbf6b",
+      "size_bytes": 2166
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/cost.svg",
+      "required": false,
+      "sha256": "6e9c3d4a11b246eae1dbca23287207c2a3c9e5b23aa9d9056968ef37954c2520",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/crm.svg",
+      "required": false,
+      "sha256": "3b0cebb20510e063ae2631ba6c45d0d3ac3145f34743dc7074594fedc67874af",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/crwd.svg",
+      "required": false,
+      "sha256": "63862eebcbc4b0e21646adf0676cd5acb01ac5a52041a56fdf8abd235ae807d7",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/cvx.svg",
+      "required": false,
+      "sha256": "c446b4a20c37abe6ad928b49fa75ccb797ba67aea69af7590087e9f2be742707",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/ddog.svg",
+      "required": false,
+      "sha256": "dfcb10fc1f44e7dc214b94e82407c6164641ee95936f4cb2549c885a036ec00d",
+      "size_bytes": 3040
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/dell.svg",
+      "required": false,
+      "sha256": "d5ae9f39b1d243f9a7955ca0123d2f1102ab1689d8b7167458ba5cd075d1a5ee",
+      "size_bytes": 1492
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/dis.svg",
+      "required": false,
+      "sha256": "fa36619d16411e4271bf2135acea78835b25561f2971daa0015e261520ce8d0b",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/ftnt.svg",
+      "required": false,
+      "sha256": "971b10045ba7a7a4db03fd8c96e68607de3a45ce37da1cb03eebbc876060ffe5",
+      "size_bytes": 516
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/googl.svg",
+      "required": false,
+      "sha256": "1f8cb426b8c770b5064e8c20c17554283a220e175b8d19dc262f2adfb188ddc8",
+      "size_bytes": 499
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/gs.svg",
+      "required": false,
+      "sha256": "0275c330810490528d7dd85cff4e484fef0d0c3a66f38ca792984b9be9af97ba",
+      "size_bytes": 3800
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/ibm.svg",
+      "required": false,
+      "sha256": "553cdcf2c2cfba459db76e3a11e6131c9a36430ce69ffc8e289f881efc698b99",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/intc.svg",
+      "required": false,
+      "sha256": "ddd0730990ca92b2a867e75ff9b35275cab568645ea642d3251209fd48d3b5cb",
+      "size_bytes": 1859
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/intu.svg",
+      "required": false,
+      "sha256": "eba8bf949e97b6b0d21e4bf946f5c58566f51e2d5440a591768b07a8ff11f307",
+      "size_bytes": 668
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/jpm.svg",
+      "required": false,
+      "sha256": "26dde453ca189b6cf4cbf400f4300f100d4e62588fd307c10c23f5c93f1206ad",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/klac.svg",
+      "required": false,
+      "sha256": "8cd36da0fc475357c5863c07253ff37127297816af80b20e0f03a19e94e3738d",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/lrcx.svg",
+      "required": false,
+      "sha256": "a1881372e95bc68541389c8c7bb2bb84ff4935a1ef0776d41f62ca1c194d9da7",
+      "size_bytes": 599
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/meta.svg",
+      "required": false,
+      "sha256": "0c5a9598c8d2319591bfed5af941ff937e29cca72330b37a9641b8f8a5e7518c",
+      "size_bytes": 1366
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/mrvl.svg",
+      "required": false,
+      "sha256": "4ba25b8f167062603cd9147066d506592d7087d5f8730e9a0b3be4ade0c630cb",
+      "size_bytes": 599
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/ms.svg",
+      "required": false,
+      "sha256": "248083f53a81697eadc2d9c32adba14bb9ddb5af2a2067dc71d113ea1e2ea52e",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/msft.svg",
+      "required": false,
+      "sha256": "d6914b57b09e8b833a50d8631374afce0a3d81ea58f2a4515c2fa453b027abc3",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/mstr.svg",
+      "required": false,
+      "sha256": "18bc578af5ec0d53be687ec553c1354f66256c6d3cfae8fda85acb3d6c49e271",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/mu.svg",
+      "required": false,
+      "sha256": "92b96302e1aef2fffe679cf6843cb10b56b7d179194eeb6657dabdfe561350cc",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/net.svg",
+      "required": false,
+      "sha256": "347b3fc62f0f8b2c78fe2d5c779296a952ea31df560fc1ecd69687377b982462",
+      "size_bytes": 1220
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/nflx.svg",
+      "required": false,
+      "sha256": "34fe98b4ab4a44b5f077465b21e12a7cec6cb7cc18e2e4393a4d3f51164a3137",
+      "size_bytes": 318
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/now.svg",
+      "required": false,
+      "sha256": "e3a27336c7aaf03e696e23fcd19938d7eef3fb781d68567467cff32d43dd45ef",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/nvda.svg",
+      "required": false,
+      "sha256": "5ec067d64b8100c9179b3dbf1e05df92a12f92406b0d88d053a8a85e99baeba3",
+      "size_bytes": 923
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/orcl.svg",
+      "required": false,
+      "sha256": "93b59447a28e18f35948b3cca77c3bb855f15b667b8cc5474e069913fc57c2eb",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/panw.svg",
+      "required": false,
+      "sha256": "0c16c414c8668b5fdb50b56c18dc4e511c7f920f1cca74f7bdd53319d016f6bf",
+      "size_bytes": 388
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/pltr.svg",
+      "required": false,
+      "sha256": "03b51aa03fb999dfc5fa31a723c33d3fc8f08cdf7022bd4bc4b120d41818a9b4",
+      "size_bytes": 329
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/pypl.svg",
+      "required": false,
+      "sha256": "2635717dbc7c5e4fec8ebc50120494cd8107b09fd6b3b28402cad7308f79d9d4",
+      "size_bytes": 494
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/qcom.svg",
+      "required": false,
+      "sha256": "324b8b36c81371aa2c23c2cb18d53a17061c10984e275b989c1380610f233e5a",
+      "size_bytes": 802
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/rddt.svg",
+      "required": false,
+      "sha256": "8c5838f6b5ed5dcac42f5bef23706435ef6a66e14cf7d0021a259ff49e30ebc5",
+      "size_bytes": 1275
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/shop.svg",
+      "required": false,
+      "sha256": "9892ba735af4c5d98f61990edc930500be60d668d6eecc63b1f5fce27b7ec793",
+      "size_bytes": 1276
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/smci.svg",
+      "required": false,
+      "sha256": "6afcf9825ba147618ed65f416ea94b171ea977ed96267560088155deb86669ff",
+      "size_bytes": 6630
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/snow.svg",
+      "required": false,
+      "sha256": "334d083243851de15465a6b2821ecd7c66b9d73890f9d0c763ea1e2334ac0e3a",
+      "size_bytes": 2501
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/snps.svg",
+      "required": false,
+      "sha256": "2b42aba25c4010afec66059b589088eab249140df268cfaa3efc574cdb2ce58a",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/tsla.svg",
+      "required": false,
+      "sha256": "0e547c7002aed22895a11581b7d91b88177ae952b4bb4bb7f5c5f47ab114136e",
+      "size_bytes": 583
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/tsm.svg",
+      "required": false,
+      "sha256": "e9f62a165b6d8f579a87d764bc14ed186f36cb6ac8c3bfc944c0a44f83f73528",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/uber.svg",
+      "required": false,
+      "sha256": "5079b9f216d148008d3480ff5ae3873c40232a6ba810406e2efbef4f16708255",
+      "size_bytes": 975
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/vrt.svg",
+      "required": false,
+      "sha256": "cd1a1f249564eaa99fe5fecac94d082da5ebc68b22e452a10349e1e0812f7fd6",
+      "size_bytes": 597
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/wday.svg",
+      "required": false,
+      "sha256": "539bc6d6897de1d02f400fed2bb435bb6480464915d6a705f3ed639f65815fc6",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/wfc.svg",
+      "required": false,
+      "sha256": "005b7796fb3ef6a6174a1e5fda89eb9f92772c1cf2b4535ead76194b8fbe4a08",
+      "size_bytes": 2473
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/xom.svg",
+      "required": false,
+      "sha256": "97058d312464b749aabb13d591f8c40fec09d9336f6a82781f7cd4bf58153e76",
+      "size_bytes": 598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/logos/zs.svg",
+      "required": false,
+      "sha256": "3697c1ac54abee3c7df1a02998c1fae0728910ee58a793a01983cba369896fe0",
+      "size_bytes": 596
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_causal_chain.png",
+      "required": false,
+      "sha256": "cf115151a40459c18cee406332eb6f577803c3ba7b979037f72a27d25eaf89d6",
+      "size_bytes": 1198334
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_comparison.png",
+      "required": false,
+      "sha256": "6244fb5f6f1000cd7e6461281c86c9c52507f9449868b8952c6316a54204882f",
+      "size_bytes": 1186226
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_conclusion.png",
+      "required": false,
+      "sha256": "58ecac900beb806f9a5029e566989d137894aee6942217f5c759ee20ac44edab",
+      "size_bytes": 1194837
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_contradiction.png",
+      "required": false,
+      "sha256": "de4ec5d84a1e36ec30e5ffda1bd83f7a2ca878a9e58313c0ca4bd236ce97faa6",
+      "size_bytes": 1165641
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_crypto.png",
+      "required": false,
+      "sha256": "aca72d8cec6e973834ea360f597f1bdef2ee04921296900f970778d2dee9efb2",
+      "size_bytes": 1201363
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_cyber.png",
+      "required": false,
+      "sha256": "e6a89811835b31108c53b74c51ff00e03f1fec650c06b9f9e492c8adf92772dc",
+      "size_bytes": 1194235
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_ending.png",
+      "required": false,
+      "sha256": "cb2fae4b06cf4175974398fd90a16a3f383a4889e3d881988b15a75e6a0c03ae",
+      "size_bytes": 1194078
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_energy.png",
+      "required": false,
+      "sha256": "66299851f71d678eb1065eddbd2c9cc1fed679542532b3143808fbdd2711a9dc",
+      "size_bytes": 1201329
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_expected_gap.png",
+      "required": false,
+      "sha256": "81bee509d289ff0ffff52f193d4de482a08a30377f6d64ea9bfcbc076ae63de7",
+      "size_bytes": 1158059
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_fed.png",
+      "required": false,
+      "sha256": "1e209a3beb973f4c6cc89f905919cb9216eca22115eb6be81976facc9beae860",
+      "size_bytes": 1202195
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_news.png",
+      "required": false,
+      "sha256": "ddb21397b7459833622a0c14557a6b9e3dd8b4777f6d8ce0a421f9074364c37f",
+      "size_bytes": 1194892
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_semiconductor.png",
+      "required": false,
+      "sha256": "362a3b6b1aa3164fe21d690d6fc6e9e5280349abb340e2248ed8f07598d5a085",
+      "size_bytes": 1202036
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_timeline.png",
+      "required": false,
+      "sha256": "26795e982880232263747cfc1c3776bd6a0773c1a655d040cd5deafeab4721b4",
+      "size_bytes": 1169376
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/backgrounds/background_scene_verification.png",
+      "required": false,
+      "sha256": "297328d7c1cd942ce10da1d47623d497ee92f40d259597c9acd3b7dac152fb24",
+      "size_bytes": 1193928
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_ai_investment_payback.png",
+      "required": false,
+      "sha256": "f2d718aec8794b33338f95c59ec4a297583c21bafe9844fa6c1bbb9ded80a3f5",
+      "size_bytes": 683294
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_ai_training_inference.png",
+      "required": false,
+      "sha256": "020aad3a554be105a6a97eccdeaead581625a9936e8c177e33bad22d845f2af0",
+      "size_bytes": 673365
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_chip_equipment_cycle.png",
+      "required": false,
+      "sha256": "b7402100d9c8fab047e7d7bef55209bbd2c89ca520ec3567c69947bb3b945ff6",
+      "size_bytes": 676507
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_cloud_capex.png",
+      "required": false,
+      "sha256": "3202130008e63eff2448c027c14cde2f71abbbe0e50e589344c1172d259eb5de",
+      "size_bytes": 674245
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_company_vs_index.png",
+      "required": false,
+      "sha256": "4378d2adf507bd518d97b7474dc53a16d8e5d37ced21f33f8eaa92f579ec8e4b",
+      "size_bytes": 682199
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_consensus_price_implied.png",
+      "required": false,
+      "sha256": "405cd2c43f8c89493d3497f40b97ed273687f514779157fa7cf7731b0374ff57",
+      "size_bytes": 686723
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_consumer_ads_retail.png",
+      "required": false,
+      "sha256": "1888fa3b3766ef42f0ca938ee4d21f138df3dd28716c5f8c625277da5ba5b583",
+      "size_bytes": 677832
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_crypto_coin_mstr.png",
+      "required": false,
+      "sha256": "38823a488d98da5199d14ca32569c29cccd4a274be4f782848acc80cd58bf69a",
+      "size_bytes": 681698
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_cyber_business_impact.png",
+      "required": false,
+      "sha256": "fcf29669a07fcd4c40f6c0b977ebd71992e672d3d77a598f637e9c688c2e3c90",
+      "size_bytes": 677110
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_data_center_power.png",
+      "required": false,
+      "sha256": "db4866836a53ad2457dd62066d082ac35b0370463bf1c47dfd3bc9841041c7aa",
+      "size_bytes": 674461
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_dollar_up_tech.png",
+      "required": false,
+      "sha256": "f394515e1c8149184f43bc6b5f4aeb2ef3ecfeb37d0685cc89f448b4ea86cf78",
+      "size_bytes": 678641
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_expected_actual_gap.png",
+      "required": false,
+      "sha256": "a3afbfe8b7912ec32efeef7df69a50e3307ae5c9e7d24235ed3c89f78d63c8fc",
+      "size_bytes": 695739
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_export_controls.png",
+      "required": false,
+      "sha256": "a75826f3ae0eee86f121eeca18a8703c2bd0c4cb5110710def2d77bad9c4176e",
+      "size_bytes": 673137
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_fact_interpretation_inference_unknown.png",
+      "required": false,
+      "sha256": "2b7d4f13fd8b5e0af8eafeb778aa5011e5b2c10fa47bf84448a9183e5bc626cf",
+      "size_bytes": 676956
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_foundry_bottleneck.png",
+      "required": false,
+      "sha256": "35b37751485de8ab18859567f5ab134dde0135ec4bfd70e1138d426b2caf07d3",
+      "size_bytes": 682331
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_good_results_stock_down.png",
+      "required": false,
+      "sha256": "6940013fc5aa3f5fda4dc25b4bf71a33c602dcf0168f1a08026473a6fa077fb8",
+      "size_bytes": 695111
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_gpu_hbm_foundry_cloud.png",
+      "required": false,
+      "sha256": "44e5fe97bbb34aff15e59fc4740500310c8cbd255a0c9c63ef8a26184fb0b2db",
+      "size_bytes": 682820
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_guidance_matters.png",
+      "required": false,
+      "sha256": "3d2eea1a79fb38b5ab55b10e1d994287afd7dc6ccd02fa96da8a5805176d7497",
+      "size_bytes": 682506
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_hbm_shortage.png",
+      "required": false,
+      "sha256": "ef5058dcb879aae7a12005738d50550273c19e890731417466dcf4c9513d5186",
+      "size_bytes": 665169
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_headline_real_issue.png",
+      "required": false,
+      "sha256": "416baa8fccb392696d11a9838db37d2549369a02b02107e8f64ea790de157aa0",
+      "size_bytes": 675391
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_high_expectations.png",
+      "required": false,
+      "sha256": "ad717b3b68f5ac5bea2349fe2091b982a6b17ac2d3e075d37f0ff886166ba039",
+      "size_bytes": 676735
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_main_amplifier_offset_counter.png",
+      "required": false,
+      "sha256": "9108b9a308f741c189a2b280f2fc23f2bb9d6a7d9adc45b98dfee8094286bff4",
+      "size_bytes": 673124
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_oil_inflation_rates_tech.png",
+      "required": false,
+      "sha256": "131350bc94f05c77f33afc15ce931a68176907f231123436a89fae20fda709f1",
+      "size_bytes": 680205
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_rate_down_tech_support.png",
+      "required": false,
+      "sha256": "398cd4563e09575a1fdf131836d3b59902851cfd0ab2f81bfc1c08e884b227d1",
+      "size_bytes": 678383
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_rate_up_tech_pressure.png",
+      "required": false,
+      "sha256": "d555b6489ac8af93749883a0956c992d53377b721d0284cc03440b1b0994c5c1",
+      "size_bytes": 679763
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_reason_unknown.png",
+      "required": false,
+      "sha256": "ca03f20563744ab71749d15d4f89ec0652d7de547d2fafcc59d6ec67503fcc98",
+      "size_bytes": 668633
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_risk_on_off.png",
+      "required": false,
+      "sha256": "a4efab3cd329659c5b3b5c1b2b0fc98d26c95dd0c261a042d0cad6d45aa2c3f2",
+      "size_bytes": 687477
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_sector_vs_company.png",
+      "required": false,
+      "sha256": "6f1ad66b55296f028f6cda498b851a7cf51ba73040ff5cdf2be5edc89eea6de8",
+      "size_bytes": 677783
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_semiconductor_supply_chain.png",
+      "required": false,
+      "sha256": "41f5d5a1b11bdc9b33d9acc14875a4da651cd6ddce52a2bb63a69bc6bbc6fec8",
+      "size_bytes": 672822
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_stock_divergence.png",
+      "required": false,
+      "sha256": "f8b0e84f02fe1c31de03b4ef87df52b86a3f23e6e72e29e119c299df2215a875",
+      "size_bytes": 675426
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_supply_demand_margin.png",
+      "required": false,
+      "sha256": "0489bf12b4599c0f9168c1df32762d8adb2012f33488a0d161992d937a43928d",
+      "size_bytes": 677562
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_tariffs_supply_chain.png",
+      "required": false,
+      "sha256": "54bf3eacd73d3cb7cdf1ce375fc5d12a4e14d066ed44c844e671b3a46fa33b31",
+      "size_bytes": 673253
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_valuation_discount_rate.png",
+      "required": false,
+      "sha256": "c8829019c8e25f0d27ea464be503da68674ae29e8286649b00f24a2835f38393",
+      "size_bytes": 684823
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_verification_points.png",
+      "required": false,
+      "sha256": "fc9bfb5ba3ce5474ac704c8610b541aaf2985bea44c530f55e8b4ec9c1a0fd93",
+      "size_bytes": 677437
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_vix_volatility.png",
+      "required": false,
+      "sha256": "cb44e40169c9bb6b88d538dca37597c795a5bac2d85771e89ef5184812841b35",
+      "size_bytes": 673808
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_weak_results_stock_up.png",
+      "required": false,
+      "sha256": "8d83a9986ad22272be778a6c34d9ea063bfb79b7265d0c78af2c55014776887c",
+      "size_bytes": 691047
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/concepts/concept_world_to_nasdaq.png",
+      "required": false,
+      "sha256": "1197996e08ee29d1934dd2370bb9f373baecd2c30a43f6aaa998d7509b9593ed",
+      "size_bytes": 692920
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_alex_karp.png",
+      "required": false,
+      "sha256": "f46612aa8380ec580df632863abb70cf01afdcca53474da6988963992f8b787c",
+      "size_bytes": 782724
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_andy_jassy.png",
+      "required": false,
+      "sha256": "42e4a7f69f8c963f352c762d06c99b1314b67288d176dd4096a18c64e6a28801",
+      "size_bytes": 781226
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_arvind_krishna.png",
+      "required": false,
+      "sha256": "95101f6c8678e05054f1a0f75f01a564e4f65f2b3433d2d13c733f48745f2c91",
+      "size_bytes": 781635
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_brian_armstrong.png",
+      "required": false,
+      "sha256": "f1b933870b7bfde948a2699b949f4c9734ffaf69418c1fdab219a159f762f36f",
+      "size_bytes": 788395
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_cc_wei.png",
+      "required": false,
+      "sha256": "0f28f388323f018ad5051f618159634a100a94fab3187acb541491753e83b706",
+      "size_bytes": 775644
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_christopher_waller.png",
+      "required": false,
+      "sha256": "07adfb77836d9d7b5cc9ead252641339d41711071a564fc5b876f26cceb03fad",
+      "size_bytes": 1203031
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_david_solomon.png",
+      "required": false,
+      "sha256": "2839f1a212f571ea10ee9c2a4230110675186ee6db4352285731feda2a76aa61",
+      "size_bytes": 784957
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_donald_trump.png",
+      "required": false,
+      "sha256": "df8c1eebad556135d6144a3ff91dc5d84f62bc40952bfff95f7eaae0871151f4",
+      "size_bytes": 782300
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_elon_musk.png",
+      "required": false,
+      "sha256": "3b30d8652c35122002be6c5c125540735ca81e0262149e7da1573b8b5d2254b6",
+      "size_bytes": 774059
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_hock_tan.png",
+      "required": false,
+      "sha256": "a8ac2a85aad0c415dc73586f2f3262d9fa161863aabc395cf10721559003aec0",
+      "size_bytes": 780632
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_jamie_dimon.png",
+      "required": false,
+      "sha256": "bab1298116950d329271768584f6a1f9cc284652e876495dab34b266eb940ec5",
+      "size_bytes": 786119
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_jensen_huang.png",
+      "required": false,
+      "sha256": "3371acc1f5509527a504aabd60d52b83cee3c61c71ffb472d5cbf15fd8df82fd",
+      "size_bytes": 782498
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_jerome_powell.png",
+      "required": false,
+      "sha256": "de9951b883bb1a6fd1875f45ea2358bb0ae9a578ab3dd936db023a8cfab1942f",
+      "size_bytes": 781598
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_larry_ellison.png",
+      "required": false,
+      "sha256": "7ac33f241ff019433c8af6f5caddd7a1f0b492910d526ae1ecd9bd0ca41e6515",
+      "size_bytes": 778125
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_lisa_su.png",
+      "required": false,
+      "sha256": "ab130924a6a4186e680879daf08237b6278022f91b0bcc50dc8f0d59d88ca937",
+      "size_bytes": 774100
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_marc_benioff.png",
+      "required": false,
+      "sha256": "b5ba6a3bc961532ce281cae82c9160e1718aa90c0e14ace461ca68a1eb4b7bfc",
+      "size_bytes": 781813
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_mark_zuckerberg.png",
+      "required": false,
+      "sha256": "fcd1f390aee7757682939fd8497c68543f5014550ac8c981f04f4ae3276b66bc",
+      "size_bytes": 783173
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_michael_saylor.png",
+      "required": false,
+      "sha256": "018e2435ab7219f297b3490985bfc1420a8b36383a04bf47064562835cecc310",
+      "size_bytes": 779883
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_rene_haas.png",
+      "required": false,
+      "sha256": "0b261d685730345696adc34537706b920fbe5ef4dd1917837b23aff1be88103b",
+      "size_bytes": 777677
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_sam_altman.png",
+      "required": false,
+      "sha256": "ec26999aa6f4ca99edd2230b41df7ce971ced7f4a93128f90e6015f8c91ef264",
+      "size_bytes": 778157
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_sanjay_mehrotra.png",
+      "required": false,
+      "sha256": "b2cfc1c37f305aae560551af5f23d4feb99dbaab1b8593d3a6573ec9451e1639",
+      "size_bytes": 778593
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_satya_nadella.png",
+      "required": false,
+      "sha256": "6dd9d1dcc59f75cb370f0abda76f1562bdd7908c7b02f9e0f6b0dbc1abccd851",
+      "size_bytes": 778058
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_shantanu_narayen.png",
+      "required": false,
+      "sha256": "1cd73f2f7daa2e7bb4e5f8163b3a16a4a5220b7d611e0e60ae5f73f66b9bc769",
+      "size_bytes": 784612
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_sundar_pichai.png",
+      "required": false,
+      "sha256": "116315705368cd807c684750e631542284c2b4921c0b46785a478c8ca9b73b15",
+      "size_bytes": 784083
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/people/person_tim_cook.png",
+      "required": false,
+      "sha256": "1165950c94135c63cf995761b4faeab3267f391ad9205e00d71ef64eb76610b6",
+      "size_bytes": 777078
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/render-manifest.json",
+      "required": true,
+      "sha256": "9d7a3626635d7ba167fedb3d06117c27a0b6cf5fa50d0b374496a0125b12d0a4",
+      "size_bytes": 79845
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/roles/person_role_boj_governor.png",
+      "required": false,
+      "sha256": "fd96fb8091a5a522650638cbf4e767eba382976c0026860a2b7b17a50c7c936c",
+      "size_bytes": 785249
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/roles/person_role_ecb_president.png",
+      "required": false,
+      "sha256": "80878aa70ccc002d1b430055a664136edc289c6419136b50487ce3e3e7b11433",
+      "size_bytes": 788196
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/remaining/roles/person_role_us_treasury.png",
+      "required": false,
+      "sha256": "c57491aece974dfd0ec72355d0f34082166d9e58a5d71841e396e746b7729c9e",
+      "size_bytes": 783179
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/001_nvda.png",
+      "required": false,
+      "sha256": "9d699bc295cfc600d5f78e8fdccc57953a4cc510288d393984bc4bbb65c19d71",
+      "size_bytes": 97788
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/002_msft.png",
+      "required": false,
+      "sha256": "1fd6ddcff811c05c99855c2f901c8a079a1df4206b946e4ac7c48f8103684537",
+      "size_bytes": 90552
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/003_amzn.png",
+      "required": false,
+      "sha256": "63cff381ea375d06ee0757b11ef45237f4cd3a6530d38b411420f71d6a83731d",
+      "size_bytes": 88906
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/004_meta.png",
+      "required": false,
+      "sha256": "9c0a754ad03a256e7bbaa558728e2e6b74315ea5094c6d40293e5088ea93c18e",
+      "size_bytes": 104242
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/005_googl.png",
+      "required": false,
+      "sha256": "211ce3d7fac2822fba08bacc0f92890af29f3eb938b705307e204cdd2638a1d6",
+      "size_bytes": 96808
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/006_aapl.png",
+      "required": false,
+      "sha256": "3b2ec5ae9e923a0de9501e740f64a51ae1b2e275cd47ce43bc4b692c75002579",
+      "size_bytes": 92363
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/007_tsla.png",
+      "required": false,
+      "sha256": "a5b0cca01f1eb55ae058a0167a4ddfd1c10180fa1b6f9cffdda6878290747681",
+      "size_bytes": 92792
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/008_amd.png",
+      "required": false,
+      "sha256": "76988aee86f69766a79297f4d7d4708d670df6576d0b4a543efd9de31b5e9836",
+      "size_bytes": 87076
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/009_avgo.png",
+      "required": false,
+      "sha256": "aea7c4e6677114c296183aec7afec2ff14c853dc300c2f56a23fc563c688f5bb",
+      "size_bytes": 103562
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/010_tsm.png",
+      "required": false,
+      "sha256": "05b0c99baee74cdfe07b9f1ad377eef5207a3c8dc51b4e96c1104052c3a50b87",
+      "size_bytes": 88690
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/011_asml.png",
+      "required": false,
+      "sha256": "07caebfe31907cf59ccf52bccc5722a17060cfd28434375a5c59a1673c326bae",
+      "size_bytes": 91791
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/012_arm.png",
+      "required": false,
+      "sha256": "9d792b4145b8a6ed5e15fb813458447d90d5cb71125ef1f9de5b3b637607e605",
+      "size_bytes": 93397
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/013_mu.png",
+      "required": false,
+      "sha256": "c31cda407b4a3fdf9915be3b5d6ca373104bb94c8bd1f5ee313c4ff68cb38a20",
+      "size_bytes": 92126
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/014_intc.png",
+      "required": false,
+      "sha256": "a569fd4845da68c01ffa1b1be2b0df08cd4022a94dfcd5d43e03b362f129c839",
+      "size_bytes": 89190
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/015_orcl.png",
+      "required": false,
+      "sha256": "6670197549d8d474a11aab7ce36859c7c1cf6d49e5c5cf9264cd1d49367afd7f",
+      "size_bytes": 91726
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/016_pltr.png",
+      "required": false,
+      "sha256": "48ec75999bc28f458519863c286bf4465bd9cafd571f8c2aec76d9d7df08d864",
+      "size_bytes": 98114
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/017_ibm.png",
+      "required": false,
+      "sha256": "5dd0ee1cb0fc035ebfb441dede9c839e1fada48c40de338988d9da3db503fd7e",
+      "size_bytes": 80723
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/018_smci.png",
+      "required": false,
+      "sha256": "808aa5618077ef36478f63dbd2a63aa3f9a09f12f98d30c4c775b1d2e7df1bf5",
+      "size_bytes": 107574
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/019_anet.png",
+      "required": false,
+      "sha256": "8c6261f6e5121431df7a3f3a8a9e2fccbdae1115bf35ff0f6f521a66d8a4fc1e",
+      "size_bytes": 93466
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/020_vrt.png",
+      "required": false,
+      "sha256": "f33dac5539ed488b3e144f9e7e2030b2458d7bd0deb6c8bea11a2d6425bdb0a2",
+      "size_bytes": 85628
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/021_ceg.png",
+      "required": false,
+      "sha256": "139f81a365ba12683a4bfc95d64cad3378ad1b9dc65cf2fdf2a00a66af97e605",
+      "size_bytes": 95106
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/022_crwd.png",
+      "required": false,
+      "sha256": "e5fca8bf3292aa1a60ca289275bc0f3187b1694678bbd680de80656d3f71569f",
+      "size_bytes": 96999
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/023_panw.png",
+      "required": false,
+      "sha256": "81540fb1f287dfe8bea7a1da6ef85ffbe3582321b4487f54fc5b357e93f460d7",
+      "size_bytes": 98968
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/024_coin.png",
+      "required": false,
+      "sha256": "e9d218171b52a8faf1eeb3951ed5d09529076215227982d1eaff534027c6e82b",
+      "size_bytes": 98759
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/025_qcom.png",
+      "required": false,
+      "sha256": "e3a593848dd4685f0a42a05076f27a37887cf82b66bd8849a7cd41908e5ede84",
+      "size_bytes": 104863
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/026_amat.png",
+      "required": false,
+      "sha256": "15fbc3a4b04d8e11dcbda1a6d6ea5ce14a2d3c814a036a7918daff926ed813e2",
+      "size_bytes": 95719
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/027_lrcx.png",
+      "required": false,
+      "sha256": "385bef48ef2467108e6db368f10af12479c5bd7387bd8248d0866f8025510592",
+      "size_bytes": 96361
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/028_klac.png",
+      "required": false,
+      "sha256": "67f7867d84d364285d256b33de1b67e2135cfc6953325f51a592fe52157479ee",
+      "size_bytes": 86431
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/029_mrvl.png",
+      "required": false,
+      "sha256": "3ad9be4c920f231c540ffcccb033b67992295c2fd5a1714da28218990d5357aa",
+      "size_bytes": 93661
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/030_snps.png",
+      "required": false,
+      "sha256": "725dc879c1b04d0fbd912c517d8c5be6219104bf185a4f0d0bff506e616072b3",
+      "size_bytes": 93946
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/031_cdns.png",
+      "required": false,
+      "sha256": "66e4fd53e2f41bed4c19dfca3340cbf59e7c24fcf7161a5c6e54695a98669997",
+      "size_bytes": 106808
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/032_ftnt.png",
+      "required": false,
+      "sha256": "ed5aebabae75acd8b1ce76cea7c5579a231ba9a7eb74ad7246f270f9d4fe1c78",
+      "size_bytes": 82889
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/033_zs.png",
+      "required": false,
+      "sha256": "bfda5f0f5f4339ff2ecb2be022cbe6259aad950d95c18800acfd56f4e3d520bb",
+      "size_bytes": 92968
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/034_net.png",
+      "required": false,
+      "sha256": "fccb8152d1bd8c1703054db70b5b1039f58e75a1c55db477b4b6c4eae2ef4f5f",
+      "size_bytes": 91171
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/035_wday.png",
+      "required": false,
+      "sha256": "23cc34675809f88059411bbdb870f36ed0bf418c7b99424ea43fe6cf7a6eb9ad",
+      "size_bytes": 96466
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/036_intu.png",
+      "required": false,
+      "sha256": "8fa973042f3ec45f4052117573f56755c106b5a8bfbb974269e2c7d364fa4b81",
+      "size_bytes": 82010
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/037_app.png",
+      "required": false,
+      "sha256": "9865cd5a90f3c8a9e571e89de9b5a35b4cc6dd8549fa8900185c0001abccb8fa",
+      "size_bytes": 88413
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/038_nflx.png",
+      "required": false,
+      "sha256": "443749011dcc8eac4fe6e77a61374ffa5291869fa4ebc1f1c011b6675bf34ec4",
+      "size_bytes": 90305
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/039_cost.png",
+      "required": false,
+      "sha256": "d3500d256cc6a69d6ce4a19a7775fdff00ec012579fdf30f3a5cdf05cdb19d27",
+      "size_bytes": 91274
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/040_mstr.png",
+      "required": false,
+      "sha256": "4b1a815123102162856bd34bac033804becca5c824901f6bc92475696bd31b58",
+      "size_bytes": 96960
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/041_jpm.png",
+      "required": false,
+      "sha256": "d0ebf79db0f741e69734970e75e46d883e2caaf7e9bf521f97f421ecd6a01edb",
+      "size_bytes": 97951
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/042_gs.png",
+      "required": false,
+      "sha256": "fb1e38192de3a166ad41e1ab58ea9f7112fa060ec8d16c7b6880b42dfad79206",
+      "size_bytes": 108196
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/043_000660-ks.png",
+      "required": false,
+      "sha256": "dce99f41cf5f874bb274ba678e89c9f6f5d2bb74988848f75b2e26203d0c481f",
+      "size_bytes": 99557
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/044_005930-ks.png",
+      "required": false,
+      "sha256": "53e58f254701e8a4da4e13f7db5f3da9891205f34bad6bda032798fab1d8b416",
+      "size_bytes": 106427
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/045_8035-t.png",
+      "required": false,
+      "sha256": "0c2b448408a99634496b8f1d37e2e16bb33301a227d62c5ef04f33a4b5f81b10",
+      "size_bytes": 98109
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/046_6857-t.png",
+      "required": false,
+      "sha256": "21f3dc219aab18482abb758b8cead09bf0cc5819a058c30f40752e2c703be867",
+      "size_bytes": 97850
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/047_ms.png",
+      "required": false,
+      "sha256": "455475b23a5059d86a3dca3388b09f54f9b7ae39b54b2b89def1a95c3d661f23",
+      "size_bytes": 99119
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/048_bac.png",
+      "required": false,
+      "sha256": "7f54d032db4df252a5f521ef83ad24b7e915c5df695f55099f68f852b2c0e719",
+      "size_bytes": 99414
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/049_c.png",
+      "required": false,
+      "sha256": "dea90303e4953ec38d601a22d11558d6212bfbeb1094d9397813f546592c473d",
+      "size_bytes": 92012
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/050_wfc.png",
+      "required": false,
+      "sha256": "a5a69e5dba4674b997d83fb43e84cf8848aec398525b07d8be20e1d2db8956e5",
+      "size_bytes": 97550
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/051_xom.png",
+      "required": false,
+      "sha256": "b3d04b16470d1f77e69e2c5b738e82ab9f333428fab039bbac6dee38958abeb1",
+      "size_bytes": 94431
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/052_cvx.png",
+      "required": false,
+      "sha256": "4e32536476892edf2906d49a5a7f8b579f0014ac18f15875b6cca492f8df8731",
+      "size_bytes": 92715
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/053_dis.png",
+      "required": false,
+      "sha256": "25bfba90b250dd6edaaee64e70f72582c7cd12539863add08dd45ef3916bddbb",
+      "size_bytes": 86485
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/054_adbe.png",
+      "required": false,
+      "sha256": "b68b72412c56a2e1522c003a3e9a29d2a442514228f559eacc6e0395d5213726",
+      "size_bytes": 90879
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/055_crm.png",
+      "required": false,
+      "sha256": "c0b6e70713f274f49ebf14ff632974bfb3907f4ba39b60047075f4f979b6de86",
+      "size_bytes": 96115
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/056_now.png",
+      "required": false,
+      "sha256": "7e1f8d81e79bc386074bf224d1450e8d41b000c18ab7c248b104abc538a9699c",
+      "size_bytes": 98961
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/057_shop.png",
+      "required": false,
+      "sha256": "912e5f04747331fdafcd18d82b0bfb8d740a4d2cdc09918b148ebad9acdc2b9f",
+      "size_bytes": 103047
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/058_pypl.png",
+      "required": false,
+      "sha256": "936bbc3ba988e707b32f1c07ae8183271ec681f37c558187248a836d16d27288",
+      "size_bytes": 91034
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/059_uber.png",
+      "required": false,
+      "sha256": "57cc64ca9ad9f761a4e6f2868c31c6d65bddc0db60bf8b86fba07f5626b003fd",
+      "size_bytes": 89733
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/060_abnb.png",
+      "required": false,
+      "sha256": "d6693ac7e8fcec2353142ec9962f88abe6c0eae80a4feb8261c75854c057907c",
+      "size_bytes": 102318
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/061_rddt.png",
+      "required": false,
+      "sha256": "b1a05c930a226fa962bcfb3edf8d10364224e9ba70e85e2fc9b846de5bbaeeb3",
+      "size_bytes": 94519
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/062_snow.png",
+      "required": false,
+      "sha256": "b05e3d6d9def74a81b8dfc816aff7950051281fb60076ed7843e1e2e41b61cf5",
+      "size_bytes": 109377
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/063_ddog.png",
+      "required": false,
+      "sha256": "349e25e801babf2454dcb096ad38132336e03b9c1f9a248512e65840f1176689",
+      "size_bytes": 113918
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/064_dell.png",
+      "required": false,
+      "sha256": "7067596e41e23fcd92593645d14c95a227f0b377b2b96c290ca37fe01a2edb9d",
+      "size_bytes": 102585
+    },
+    {
+      "path": "public/assets/nasdaq-cafe/stock-cards/render-manifest.json",
+      "required": true,
+      "sha256": "699472de395066e46186f3eca19f437c7dfca299d362bf9ea9b2b0b924b24849",
+      "size_bytes": 25665
+    },
+    {
+      "path": "public/assets/se/.gitkeep",
+      "required": false,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-01.metadata.json",
+      "required": false,
+      "sha256": "6a88b2c0a35f9d25a3eefaed0bb794177a4e59cda63e07d85209c9eb4e43f10e",
+      "size_bytes": 5201
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-01.wav",
+      "required": false,
+      "sha256": "4cdfb7f5c7de53227bec78a2b52f9b584097cf2066e36e9e0b0558ed17cf3f06",
+      "size_bytes": 3245390
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-02.metadata.json",
+      "required": false,
+      "sha256": "315478519f04bc83baba1fd4f708d3bb9758a6f40d079e2dba66d1e438d27597",
+      "size_bytes": 4943
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-02.wav",
+      "required": false,
+      "sha256": "57f112cdd37ee0f45a436570c5951fa2bd20f6e069621174621071fdcebc137f",
+      "size_bytes": 3125582
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-03.metadata.json",
+      "required": false,
+      "sha256": "636534c32b27bae4ee8d5089222c48076296b4ee3f0c32e0c01fd81d671e677f",
+      "size_bytes": 6917
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-03.wav",
+      "required": false,
+      "sha256": "56d7de02fe9477ddf2bbafe9462763139058d7f6d56f30584618042563298a71",
+      "size_bytes": 4970062
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-04.metadata.json",
+      "required": false,
+      "sha256": "96b0d077545f39243a3d366d134890a70984411ac49b0ea3c8000817e048c84d",
+      "size_bytes": 7783
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-04.wav",
+      "required": false,
+      "sha256": "8d2f3764ddbbb8a72d8f7a414cc1b0235ec36912280e1e441cf7d43849d9a410",
+      "size_bytes": 5267790
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-05.metadata.json",
+      "required": false,
+      "sha256": "1624798c4477bcbc8ae69feebdd6b55de5f0a4443c368f6a4b76c6c0df2d80c2",
+      "size_bytes": 6365
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-05.wav",
+      "required": false,
+      "sha256": "91487eedbcf3668b2b7286c6e5d3b9d2225f59bf297938c5acd4e847c42e40b3",
+      "size_bytes": 4795726
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-06.metadata.json",
+      "required": false,
+      "sha256": "9e20a630779f59a6b0b59424a0aa5b532d58855b77b593df96e6b7ed3b68de70",
+      "size_bytes": 9093
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-06.wav",
+      "required": false,
+      "sha256": "796ea91f48786d3481bb1e46d886fe4a1a41c3243efe3e7fb34edf815eb50927",
+      "size_bytes": 6875726
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-07.metadata.json",
+      "required": false,
+      "sha256": "ddb4abefd0b70054a92cd7200a330d90a70cf7efc868b75b1daee10a6ec5e475",
+      "size_bytes": 7236
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-07.wav",
+      "required": false,
+      "sha256": "397933af4ca65bca5f1b7dc5e0153bf8f790805a8cdbd0d6711d44248c7b8e6b",
+      "size_bytes": 5302094
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-08.metadata.json",
+      "required": false,
+      "sha256": "a07da16c5638950ab726fc102556cc464530482a2466ea402cc2c9a46e01ba36",
+      "size_bytes": 6789
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-08.wav",
+      "required": false,
+      "sha256": "4d466bef6a23026c9bb968420423a8dd0323668dfee8484a29b78c3963d1b535",
+      "size_bytes": 4761166
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-09.metadata.json",
+      "required": false,
+      "sha256": "d0e24dc36747695e1ce4263e03996542717164c83970b3a86e2341f3f4cfcb37",
+      "size_bytes": 2773
+    },
+    {
+      "path": "public/generated/2026-07-10/audio/scene-09.wav",
+      "required": false,
+      "sha256": "ef63b46fe6a518c1e8de0ee727ac52e4f50d5184686008ca33e058b7321f1037",
+      "size_bytes": 1620558
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-01.json",
+      "required": false,
+      "sha256": "52db20c6eed4ba75068557d98ef5b34793e789707924cb18f9e2b4715fc76706",
+      "size_bytes": 2607
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-02.json",
+      "required": false,
+      "sha256": "d07253627810bd928559efbe32fcd67be52e447cb4e671f58d0be7e2e1fdb7b8",
+      "size_bytes": 2479
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-03.json",
+      "required": false,
+      "sha256": "2cfc47410f4a839384b777fe7d1853c7eb61e34dbb4b90e80e48568effe6e41d",
+      "size_bytes": 3629
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-04.json",
+      "required": false,
+      "sha256": "3fd9523381bfa7c591247a3e496c3d680bb9d130a36422ccce17e1c4d629f7cd",
+      "size_bytes": 4568
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-05.json",
+      "required": false,
+      "sha256": "cfb67534a367226f75e12585bf82381c2205ac94ac6a7112078a1748345406d0",
+      "size_bytes": 4563
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-06.json",
+      "required": false,
+      "sha256": "360de3757d5b27a02706fa0bd05c6048ca591fe677c3b34614eab340f53c6e19",
+      "size_bytes": 4745
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-07.json",
+      "required": false,
+      "sha256": "b7fe1574e95219879d81c28abf4f5c61aa653a94d343c089538bd1a4c0067b03",
+      "size_bytes": 4155
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-08.json",
+      "required": false,
+      "sha256": "18f4a5a21adb11d70593d922466abb6ce1b95a4907ef9b31cc637bcc99204922",
+      "size_bytes": 4233
+    },
+    {
+      "path": "public/generated/2026-07-10/captions/scene-09.json",
+      "required": false,
+      "sha256": "fa243d3e14ad41b2e6e70c67a3d685ad4f33ef11ec6aa40da5451e10fa0fc7ef",
+      "size_bytes": 1645
+    },
+    {
+      "path": "public/spec-audio/2026-07-14/2026-07-14__scene-01__scene-01-chunk-001__gemini-charon__49be49b6a1d4d6a4afb0.wav",
+      "required": false,
+      "sha256": "1a725fa6371e94cfafcaba3c7be5d5e348364feb21c70059560a9230fff98d4d",
+      "size_bytes": 1205838
+    },
+    {
+      "path": "public/spec-audio/2026-07-14/2026-07-14__scene-01__scene-01-chunk-002__gemini-charon__eeb11980d7d44914a223.wav",
+      "required": false,
+      "sha256": "e7a25eaf2fe43f159909a84a2ff8088a84d5f90920dbca021528d59f3e2d2242",
+      "size_bytes": 975438
+    },
+    {
+      "path": "public/spec-audio/2026-07-14/2026-07-14__scene-01__scene-01-chunk-003__gemini-charon__a8dd0144d3a974086c7d.wav",
+      "required": false,
+      "sha256": "2bc1913ef585e0b1232b6c5d18567b3bab8ac3db8f40f4f5bf8711b9f77fb84f",
+      "size_bytes": 629838
+    },
+    {
+      "path": "public/spec-audio/2026-07-14/2026-07-14__scene-01__scene-01-chunk-004__gemini-charon__1d8b619b5810601a60bd.wav",
+      "required": false,
+      "sha256": "46d31bd87f1d1c26a4d186451f6c0ad842ad76f6655ba45c0cba3e03e5517c9f",
+      "size_bytes": 441678
+    },
+    {
+      "path": "public/spec-audio/2026-07-14/2026-07-14__scene-02__scene-02-chunk-001__gemini-charon__c939a717caf25daeff21.wav",
+      "required": false,
+      "sha256": "599aeb98838e34e96013b1f32651013dd1ab567ab888f4be38020bcf6e53fc7d",
+      "size_bytes": 994638
+    },
+    {
+      "path": "public/spec-audio/2026-07-14/2026-07-14__scene-02__scene-02-chunk-002__gemini-charon__512cb112b444c75d0ba6.wav",
+      "required": false,
+      "sha256": "eb3ade889856a113b68c422ccd20115522fea75629d77899f79ac947d78a4f8a",
+      "size_bytes": 867918
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-01__scene-01-chunk-001__voicevox-mochiko-anko__6c6181ca9c4684a558f1.wav",
+      "required": false,
+      "sha256": "24c7a07568149b7e0f9b0a694fd51bb191145e04aad27bb3ed52be19a9e4b3b1",
+      "size_bytes": 308302
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-01__scene-01-chunk-002__voicevox-mochiko-anko__87e1785f5baefc5a4160.wav",
+      "required": false,
+      "sha256": "9509f1c9f9960d0c7a83b97785409fc80185091df3cd246e9afe76c5a2ee769e",
+      "size_bytes": 313422
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-01__scene-01-chunk-003__voicevox-mochiko-anko__af8b4de061ec07d78137.wav",
+      "required": false,
+      "sha256": "3dd602f8e3d7c39d2c20b3047aa095899c40c2eb7bad1991aa2d9a4b08e740be",
+      "size_bytes": 366670
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-01__scene-01-chunk-004__voicevox-mochiko-anko__4080f35fbd683cf92ab0.wav",
+      "required": false,
+      "sha256": "a1eb127fff43927f40b3a4142452f850bfb1f780febad0dd6e73a53f7a1e65ad",
+      "size_bytes": 419918
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-02__scene-02-chunk-001__voicevox-mochiko-anko__0bc1a4a8365cf350e505.wav",
+      "required": false,
+      "sha256": "4bd182b98f8f1b114306a1a010ba9b784d47b266774a4d65327b622a9fb18943",
+      "size_bytes": 547918
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-02__scene-02-chunk-002__voicevox-mochiko-anko__c386685b5f30725907c0.wav",
+      "required": false,
+      "sha256": "78fb9e7aece0fe05340f57538ee3445966ec857c2160f01192081c380bee7ba0",
+      "size_bytes": 506958
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-03__scene-03-chunk-001__voicevox-mochiko-anko__39a6f6198db074a353c7.wav",
+      "required": false,
+      "sha256": "d92803ac7403478cb4ad044479ee49b0055ae60b0376055b3efce5b119ca912b",
+      "size_bytes": 580686
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-03__scene-03-chunk-002__voicevox-mochiko-anko__880bac14b8830debbf8a.wav",
+      "required": false,
+      "sha256": "59c9dbb665bc15fb57ea9efd4df48340a5f06679b6339b3bd38f2f8c1f145a1f",
+      "size_bytes": 539726
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-04__scene-04-chunk-001__voicevox-mochiko-anko__fa429d25c0a57eeeb036.wav",
+      "required": false,
+      "sha256": "a2ed29c9080cec9a0515354c748c93263203b70ce29c2eac795860e58ab94505",
+      "size_bytes": 580686
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-04__scene-04-chunk-002__voicevox-mochiko-anko__1acef2dbe76dfc52a74a.wav",
+      "required": false,
+      "sha256": "49e83ebcdedd050beb61dc6d955d5c460d5534e534def2944fc2f302810eb660",
+      "size_bytes": 539726
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-05__scene-05-chunk-001__voicevox-mochiko-anko__695dc6ec1139cfbf95e0.wav",
+      "required": false,
+      "sha256": "e6626907382ed597e88812d6d1e1066ac19810c3d186dd1c691518b21a16f8ac",
+      "size_bytes": 556110
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-05__scene-05-chunk-002__voicevox-mochiko-anko__cf4031ed35f15b1332bb.wav",
+      "required": false,
+      "sha256": "e16e3ddde841608d3e4abb182b0036b30669e1eaab8906a9b21ab733da80588b",
+      "size_bytes": 515150
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-06__scene-06-chunk-001__voicevox-mochiko-anko__4fbf3a1cebbd31e0adce.wav",
+      "required": false,
+      "sha256": "c67696167ffb4c18dacb09cac46978f4dbe80625967dae0bdbca6ca2eb672758",
+      "size_bytes": 593998
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-06__scene-06-chunk-002__voicevox-mochiko-anko__7a9c23544157ebe80eac.wav",
+      "required": false,
+      "sha256": "bca11249fbd1f7741c768801f34abebd058ccb73d8b2f09fa4442e03640ded51",
+      "size_bytes": 553038
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-07__scene-07-chunk-001__voicevox-mochiko-anko__3623ed96853bccb26f9a.wav",
+      "required": false,
+      "sha256": "d5175be25a448173d9b6eb990ffb2bfe38332b8e92cc8e928a0643f11dcd61c2",
+      "size_bytes": 564302
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-07__scene-07-chunk-002__voicevox-mochiko-anko__00f525acf230c9c60ebd.wav",
+      "required": false,
+      "sha256": "892a4d5ec25aca882093ddc58df3d639fab2ceabde2d5836fbd419ff1d452df0",
+      "size_bytes": 523342
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-08__scene-08-chunk-001__voicevox-mochiko-anko__8b505daca2736a8077e4.wav",
+      "required": false,
+      "sha256": "aa1afe972cb147f6cd15c920dad86a9c659d213e7f22df984a980ec85136a400",
+      "size_bytes": 585806
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-08__scene-08-chunk-002__voicevox-mochiko-anko__8e77ada908f2094bbd55.wav",
+      "required": false,
+      "sha256": "aa864418ca7c9cfc4e4d64636cafaab07b6e1f4baea0d55092350e54bc690c28",
+      "size_bytes": 544846
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-09__scene-09-chunk-001__voicevox-mochiko-anko__a3391cbb11c3ca49ec4a.wav",
+      "required": false,
+      "sha256": "37b3df355552df012b43be75def17639a8bf5c212db34553d21b3ffa1dd17bd1",
+      "size_bytes": 304206
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-09__scene-09-chunk-002__voicevox-mochiko-anko__3e004949669f24dfc6f6.wav",
+      "required": false,
+      "sha256": "1d494d99e048e0be3dae34dcb87574203ed6999f7641f97294e6aa6b26437241",
+      "size_bytes": 123982
+    },
+    {
+      "path": "public/spec-audio/2099-02-02/2099-02-02__scene-09__scene-09-chunk-003__voicevox-mochiko-anko__7cca43d61ced4cdfb55e.wav",
+      "required": false,
+      "sha256": "ab60f9eaa1b8d15c285d64b99af20abc1f949025daa3d21576d27b6c545107d7",
+      "size_bytes": 196686
+    },
+    {
+      "path": "qa/stock-cards-after.sha256",
+      "required": false,
+      "sha256": "7a5f7c7dca83572e0fe5afbb141f884c0180cc3b740e0793b17a0c47b18576f4",
+      "size_bytes": 8564
+    },
+    {
+      "path": "qa/stock-cards-before.sha256",
+      "required": false,
+      "sha256": "7a5f7c7dca83572e0fe5afbb141f884c0180cc3b740e0793b17a0c47b18576f4",
+      "size_bytes": 8564
+    },
+    {
+      "path": "remotion.config.ts",
+      "required": true,
+      "sha256": "10be72a2c181e42a8890f311ed1d55b94be59e7b37d700df6e7a1cd8a873d50f",
+      "size_bytes": 308
+    },
+    {
+      "path": "render-specs/2026-07-14/render_spec.json",
+      "required": false,
+      "sha256": "2f048c8d4e4eb7741500a6e7663854931422705f00ab0d3de97951be34f29691",
+      "size_bytes": 77488
+    },
+    {
+      "path": "render-specs/fixtures/complete-9scene/render_spec.json",
+      "required": false,
+      "sha256": "07ec7e4d67a6deb39cd9532575cdbc8ce780640fc9d1ac6d51f05395c3b74edd",
+      "size_bytes": 62448
+    },
+    {
+      "path": "render-specs/fixtures/minimal/render_spec.json",
+      "required": false,
+      "sha256": "06d4a244de8b6071ab569bcc09130630279c2d358adf5933c0fac8ccd3af1620",
+      "size_bytes": 43121
+    },
+    {
+      "path": "render-specs/fixtures/renderable-9scene/render_spec.json",
+      "required": false,
+      "sha256": "68cafece59edcafea8be39c02062ce979a22f73f3efe9edb2619a52b795c6cd6",
+      "size_bytes": 62427
+    },
+    {
+      "path": "render-specs/fixtures/schema-all-expressions/render_spec.json",
+      "required": false,
+      "sha256": "07ec7e4d67a6deb39cd9532575cdbc8ce780640fc9d1ac6d51f05395c3b74edd",
+      "size_bytes": 62448
+    },
+    {
+      "path": "samples/episode_data.optional-missing.json",
+      "required": false,
+      "sha256": "3f9bb33c2d21b5ac487b9928a04413c2ea07505cbf2ac3fd6292e63010978169",
+      "size_bytes": 227
+    },
+    {
+      "path": "samples/episode_data.sample.json",
+      "required": false,
+      "sha256": "a49ff844dbd43aa2c657df666c6cfa175f889708b32a35d0b36a17e0a2be1a83",
+      "size_bytes": 2169
+    },
+    {
+      "path": "schemas/render_spec.schema.json",
+      "required": false,
+      "sha256": "8ec904d2e7df2af83d0732861cb8ee76059d71d7c4897827d851c45f1e96a487",
+      "size_bytes": 39458
+    },
+    {
+      "path": "scripts/cache-stock-logos.mjs",
+      "required": false,
+      "sha256": "9caa54b17f50984b30748cd4ff97c59d136965d16988bbb788bc7f155741eed4",
+      "size_bytes": 2487
+    },
+    {
+      "path": "scripts/episode-build.ts",
+      "required": false,
+      "sha256": "02172aba13deefd58bae27e46ff8aca54dec475097948d5ebfe129f68a0ba8f6",
+      "size_bytes": 5006
+    },
+    {
+      "path": "scripts/generate-person-source-register.ts",
+      "required": false,
+      "sha256": "cc5029c2c6a3bced6bff2b2ef9e3f840ff52217816625526fa1344873fe1f42c",
+      "size_bytes": 1123
+    },
+    {
+      "path": "scripts/generate-remaining-assets-data.mjs",
+      "required": false,
+      "sha256": "4e058cbb2cf655ce8cc93b276af345e28945caccb2fcfcdef862d9a6bebb6fdf",
+      "size_bytes": 889
+    },
+    {
+      "path": "scripts/generate-render-spec-fixtures.ts",
+      "required": false,
+      "sha256": "d0646cf6129fc8fa20835783dd5f90f8ed740eec7ac6fa08b931f5a0ef8e939f",
+      "size_bytes": 13744
+    },
+    {
+      "path": "scripts/generate-render-spec-schema.ts",
+      "required": false,
+      "sha256": "4c0fbc8fad8c6a87143283d27575a3326e32a9bdde7a8a4f60fb1eff0b97a7b8",
+      "size_bytes": 687
+    },
+    {
+      "path": "scripts/generate-reusable-entity-assets.mjs",
+      "required": false,
+      "sha256": "2c0a01e0f72ec25383df4c96cad9078ba45c70948ae42fd0bd00afba93001a2e",
+      "size_bytes": 4365
+    },
+    {
+      "path": "scripts/generate-voiceover.ts",
+      "required": false,
+      "sha256": "1dda02bbf364a4fbdc4288b14c4ede05e4658e701447235567f16a99fb47b364",
+      "size_bytes": 15277
+    },
+    {
+      "path": "scripts/inspect-final.ts",
+      "required": false,
+      "sha256": "28e00fd5229e599d22bfb433cd3bb3bc57cac48fad9990869a75bb1a2f917f60",
+      "size_bytes": 7611
+    },
+    {
+      "path": "scripts/load-episode-final.ts",
+      "required": false,
+      "sha256": "b3cac75e467caa21b248af00a584aed2cf1ef47913d059f38be6dac7db75641a",
+      "size_bytes": 1693
+    },
+    {
+      "path": "scripts/load-episode-v1.ts",
+      "required": false,
+      "sha256": "c3713959f916bb784bca9a7414c6bf88d89a987e5b9148abddeeea23ec774281",
+      "size_bytes": 1847
+    },
+    {
+      "path": "scripts/load-episode.ts",
+      "required": false,
+      "sha256": "c751a9d51aeb9489a15098be5dc96bba0d735dfc5ca1a4cb74f8582dce454876",
+      "size_bytes": 1391
+    },
+    {
+      "path": "scripts/load-render-spec.ts",
+      "required": false,
+      "sha256": "f50c4fc8f667fff000709aeb62f477a7b4cda69fa92ae3a6607a829c51657556",
+      "size_bytes": 1924
+    },
+    {
+      "path": "scripts/prepare-episode.ts",
+      "required": false,
+      "sha256": "9780f2f2dfde0b671f5781b83c78ab6ee0bdf52a48896f5ecae6fe389a7d00dd",
+      "size_bytes": 2832
+    },
+    {
+      "path": "scripts/remove-fox-white-background.py",
+      "required": false,
+      "sha256": "64fe415b1a08c7e0da452ffdd86e85e79d5ca43c52809ac4bab8a268e8cf0573",
+      "size_bytes": 1436
+    },
+    {
+      "path": "scripts/render-all-stock-cards.mjs",
+      "required": false,
+      "sha256": "36adb372702f89bce964f1b47e5ca73de9f73cdbe97fc31545dfb50a5788d1b5",
+      "size_bytes": 3907
+    },
+    {
+      "path": "scripts/render-episode.ts",
+      "required": false,
+      "sha256": "3b61cb3d96add60b98fea042a05332de945614907019564fc3c477fbbb5e75a9",
+      "size_bytes": 2634
+    },
+    {
+      "path": "scripts/render-helpers.ts",
+      "required": false,
+      "sha256": "130c8ece7561f21ef9f083c1c90bf0818cf92bf605b9cf3665f348ba3282cb7b",
+      "size_bytes": 3473
+    },
+    {
+      "path": "scripts/render-preview.ts",
+      "required": false,
+      "sha256": "3d9fcca6238a5f017588cd506497fb9a516c51f33eecafe07b6a4f2c03800d3c",
+      "size_bytes": 1465
+    },
+    {
+      "path": "scripts/render-remaining-assets-integration-preview.ts",
+      "required": false,
+      "sha256": "94ba9fc54c5955a4b21f5cbecd056845e27d5d64cf496ef666410aff1a2b499a",
+      "size_bytes": 3013
+    },
+    {
+      "path": "scripts/render-remaining-assets.mjs",
+      "required": false,
+      "sha256": "2fc15f53a59c66c628a2201e2502329bc99f0df68df280ebf076960b18674903",
+      "size_bytes": 3280
+    },
+    {
+      "path": "scripts/render-spec-golden-stills.ts",
+      "required": false,
+      "sha256": "607e2b6a5673ead3c8586bd647ddf1f82d58169c59ab3335a02d18c0f65ddd26",
+      "size_bytes": 4671
+    },
+    {
+      "path": "scripts/render-stills.ts",
+      "required": false,
+      "sha256": "a8f1faa970a44ce410e1136ac6009dba9f0a44759e57a732b546ce01814dc09e",
+      "size_bytes": 5125
+    },
+    {
+      "path": "scripts/render-stock-card-integration-preview.ts",
+      "required": false,
+      "sha256": "46799b58e81817ce4306dfa70a9fd846e32cea7f7260ce5f6efff72ebd96deab",
+      "size_bytes": 1630
+    },
+    {
+      "path": "scripts/render-visual-beat-stills.ts",
+      "required": false,
+      "sha256": "f717bb77f7f6ee1440547e212bd4c48382c4f549a71bb02813dd25583b6c13ca",
+      "size_bytes": 1837
+    },
+    {
+      "path": "scripts/spec-audio.ts",
+      "required": false,
+      "sha256": "47124d65022337d0569dd034337bb3c15670a7cfece4da5e4424ca856a5b8ce9",
+      "size_bytes": 21385
+    },
+    {
+      "path": "scripts/spec-cli.ts",
+      "required": false,
+      "sha256": "a41503c6cf47930953dc20d6f294b9a998fd10a3e60abc776640cba239ce2b46",
+      "size_bytes": 10401
+    },
+    {
+      "path": "scripts/spec-inspect.ts",
+      "required": false,
+      "sha256": "c616b7787d7a613fa748d92397531fa619ee757a19408170c13e95761cb47d4f",
+      "size_bytes": 3305
+    },
+    {
+      "path": "scripts/test-expression-preview.ts",
+      "required": false,
+      "sha256": "a42e6b069c2d80b3f8d73e0da1f89709a44b84e3aff5ce8db8f77193fe009b90",
+      "size_bytes": 4002
+    },
+    {
+      "path": "scripts/test-gemini-api-key-pool.ts",
+      "required": false,
+      "sha256": "5f3b8c391503dd3916204a425093fa294ab49cc6dc5261066f832e363816fdae",
+      "size_bytes": 1968
+    },
+    {
+      "path": "scripts/test-gemini-tts.ts",
+      "required": false,
+      "sha256": "f49891873e0d34d85ebb10dffc06a19017a8ba7c48947361cf878c0565249af0",
+      "size_bytes": 793
+    },
+    {
+      "path": "scripts/test-inputs.ts",
+      "required": false,
+      "sha256": "065ec11f66941c7d246bd45039452073436d7422812e2baa3cec6971a0b8098b",
+      "size_bytes": 10195
+    },
+    {
+      "path": "scripts/test-public-screen.ts",
+      "required": false,
+      "sha256": "c83e08169ec185e25edf5cf217fff325411a69b881ba4c2c910c67d3d7c5637d",
+      "size_bytes": 1460
+    },
+    {
+      "path": "scripts/test-remaining-assets.ts",
+      "required": false,
+      "sha256": "e25fbe05810529e1f8af65f6df5383b25e5f79e5a3ccc82c7454e0fa2e2c5d09",
+      "size_bytes": 4142
+    },
+    {
+      "path": "scripts/test-render-spec.ts",
+      "required": false,
+      "sha256": "2d17eb56fb8fb26f76b63e9412fb2c401b97d13cd2e5b0e434bdf90fc8b8edca",
+      "size_bytes": 33895
+    },
+    {
+      "path": "scripts/test-reusable-entity-cues.ts",
+      "required": false,
+      "sha256": "73867361674195541783c98d47f6daccec2ca1a645cb033e2985667fd9d2f1ec",
+      "size_bytes": 1388
+    },
+    {
+      "path": "scripts/test-spec-golden.ts",
+      "required": false,
+      "sha256": "a755cb4a414e5c7ba224ad050f973ba840057564016b0f2ab6f09e657bbdae27",
+      "size_bytes": 1866
+    },
+    {
+      "path": "scripts/test-spec-inspect.ts",
+      "required": false,
+      "sha256": "1d0190c41bfe4fca5fb6b7b9dcb6c93843ed3c7e491ed56def6a79fdab1b5d7c",
+      "size_bytes": 2748
+    },
+    {
+      "path": "scripts/test-spec-voicevox.ts",
+      "required": false,
+      "sha256": "07e425c1838dc0cc8bec986cdfc3272c88b4a70d75c63f7382c56d84a81c531e",
+      "size_bytes": 3243
+    },
+    {
+      "path": "scripts/test-stock-cards.ts",
+      "required": false,
+      "sha256": "f2e7fe1213eb69de56a3a3c2270c7018bc2c39e78663e976c39847a905348c58",
+      "size_bytes": 1235
+    },
+    {
+      "path": "scripts/validate-episode.ts",
+      "required": false,
+      "sha256": "51e287a8b43d4bb828fd777c4a05360e3c07680be9e9fdb1716f3dee4d30b83e",
+      "size_bytes": 1817
+    },
+    {
+      "path": "src/Root.tsx",
+      "required": true,
+      "sha256": "c4a35c2da41da45738b63a4a24da961df5e3c1a6c42291a158b5f642e2c59d1a",
+      "size_bytes": 5385
+    },
+    {
+      "path": "src/components/AmbientBackground.tsx",
+      "required": false,
+      "sha256": "a2804ac8401c7c1fe01135a8d813204367f33b5c56aaa716c46e50b822fc777e",
+      "size_bytes": 3195
+    },
+    {
+      "path": "src/components/BackgroundLayer.tsx",
+      "required": false,
+      "sha256": "a140bc8a17c1323193effd8f1df9870f02ec20dfcb2168c2c4b11e647a9716d6",
+      "size_bytes": 856
+    },
+    {
+      "path": "src/components/DataCards.tsx",
+      "required": false,
+      "sha256": "f8c260c301998b5292ce879eb5b750930c901723e3fbe07c75aeafa1ec5c92c4",
+      "size_bytes": 6211
+    },
+    {
+      "path": "src/components/FoxBadge.tsx",
+      "required": false,
+      "sha256": "f39b4095eba2b841092df51c8da662c23dfaa8a14841cddc2991aabb40afbb6a",
+      "size_bytes": 2201
+    },
+    {
+      "path": "src/components/FoxLayer.tsx",
+      "required": false,
+      "sha256": "e1c9b1a14ef28a0ae2c1b1e0d84d7cecddaf7979497534d29544afc0c2729c6b",
+      "size_bytes": 1346
+    },
+    {
+      "path": "src/components/Motion.tsx",
+      "required": false,
+      "sha256": "7f9a5a9966123169162b6ed5d6e09ae573596ec6830ae3f4069efd6676316d89",
+      "size_bytes": 1845
+    },
+    {
+      "path": "src/components/SceneShell.tsx",
+      "required": false,
+      "sha256": "d87733b9a6792f95ef09bee085db2644d2010f0f1e441df285981da335430b10",
+      "size_bytes": 2379
+    },
+    {
+      "path": "src/components/spec/SpecAssetLayer.tsx",
+      "required": false,
+      "sha256": "748a7448bcb0bd6fe4e2b45c410bff45d711d06e390b46e6341588aada1f6ee9",
+      "size_bytes": 961
+    },
+    {
+      "path": "src/components/spec/SpecVisualModes.tsx",
+      "required": false,
+      "sha256": "b7d293852fb9d9100160f15be31c288ab4730f6c4f08402b0b27ff5ac21198fe",
+      "size_bytes": 9940
+    },
+    {
+      "path": "src/components/v2/CaptionLayer.tsx",
+      "required": false,
+      "sha256": "c1141b11ec16e847f47aa26ddcf805a39a60d8512c8a74bc526f03884e175853",
+      "size_bytes": 1487
+    },
+    {
+      "path": "src/components/v2/EpisodeSceneV2.tsx",
+      "required": false,
+      "sha256": "1d48249b5b563293b2159330d1b74f2868ca8d071631574873a5ad6d6911b7af",
+      "size_bytes": 4031
+    },
+    {
+      "path": "src/components/v2/ReusableEntityCue.tsx",
+      "required": false,
+      "sha256": "49f3d9613afa78ce2eb08209b88af63bb7e47e5a50c0efe40ccffcab26a4f736",
+      "size_bytes": 509
+    },
+    {
+      "path": "src/components/v2/SceneAudio.tsx",
+      "required": false,
+      "sha256": "55e5bc3c32dcda15da0692784071cd64a8c8c37c896560fe5e70341335de7e75",
+      "size_bytes": 178
+    },
+    {
+      "path": "src/components/v2/VisualModeRenderer.tsx",
+      "required": false,
+      "sha256": "8a8960a3ff2ada4bb62601634fae108f0da61a9bbd33f930fa45467910f0e52f",
+      "size_bytes": 15327
+    },
+    {
+      "path": "src/compositions/FixedAssetCalibration.tsx",
+      "required": false,
+      "sha256": "43f5ac18be19e0dc2d9d735f866b69386f0dff43376313e072e0e5405f563167",
+      "size_bytes": 2354
+    },
+    {
+      "path": "src/compositions/NasdaqCafeEpisode.tsx",
+      "required": false,
+      "sha256": "97cc9d82608891ba66d8270bb636e3a6e7a2c6bfc77bf2819f1cb4579bd8f3c0",
+      "size_bytes": 1919
+    },
+    {
+      "path": "src/compositions/NasdaqCafeEpisodeV2.tsx",
+      "required": false,
+      "sha256": "61ca0bcaf23526ed42c1746b5257d1c8e2b11707b5458b98561411c7888b64b6",
+      "size_bytes": 2093
+    },
+    {
+      "path": "src/compositions/NasdaqCafeSpecEpisode.tsx",
+      "required": false,
+      "sha256": "914d57f2c4d4dfc88ba749e218d68703fc955ee33da862e0a698d9e51ec1610b",
+      "size_bytes": 5896
+    },
+    {
+      "path": "src/config.ts",
+      "required": false,
+      "sha256": "f2c43bb3841d1be7403dea3e6a65cd5f538846031cb905187418d128e813c9db",
+      "size_bytes": 225
+    },
+    {
+      "path": "src/config/fixed-assets.ts",
+      "required": false,
+      "sha256": "361f2c01bcb4dc70922895a525bd36ca5af448a7ffee8c368620a2b97623b3cb",
+      "size_bytes": 1672
+    },
+    {
+      "path": "src/config/fox-expressions.ts",
+      "required": false,
+      "sha256": "7dd5f48aff06d92ce1bce5396c04caa4ca9db2de6799441c1f92b188442bc1b9",
+      "size_bytes": 940
+    },
+    {
+      "path": "src/config/production-assets.ts",
+      "required": false,
+      "sha256": "999bdcf82535eb2037ac1b329d68f4468b730f24c570dd9900c92a7570671d0f",
+      "size_bytes": 2025
+    },
+    {
+      "path": "src/config/remaining-asset-entities.ts",
+      "required": false,
+      "sha256": "20e9a1ca571aac0700dadb4e05b3efe44294a6f3ea52495af1f30d7ee5572260",
+      "size_bytes": 1622
+    },
+    {
+      "path": "src/config/remaining-backgrounds.ts",
+      "required": false,
+      "sha256": "36a95ab01a7c99182df2a00dfa986b9ff0a37de146e1b9a2053012f0e76785c5",
+      "size_bytes": 1551
+    },
+    {
+      "path": "src/config/reusable-entity-cues.ts",
+      "required": false,
+      "sha256": "310e406194547f6b229464d5b3dfb943cc5a7e0787481666a71822452e98cf6a",
+      "size_bytes": 3062
+    },
+    {
+      "path": "src/config/spec-expressions.ts",
+      "required": false,
+      "sha256": "bf4ce38bc7a4dfd4e56c8899c9efaf3980a5107aa8f55ef68fc632e36da1d0bd",
+      "size_bytes": 1532
+    },
+    {
+      "path": "src/config/stock-card-entities.ts",
+      "required": false,
+      "sha256": "8e9899ef19305a64f6c358d7ca87f1cf74f1cc01241261ee70045471fcdc0ddb",
+      "size_bytes": 4329
+    },
+    {
+      "path": "src/data/default-episode-v1.ts",
+      "required": false,
+      "sha256": "30738d19ea8fe3a84473409b50a389226ee23b02fb315758fad2c802675915bb",
+      "size_bytes": 3237
+    },
+    {
+      "path": "src/fonts.ts",
+      "required": false,
+      "sha256": "b911ec79d59098d64aacc1fb9333066116718c559c735b3e90a852dcfa7dad9b",
+      "size_bytes": 65
+    },
+    {
+      "path": "src/index.css",
+      "required": false,
+      "sha256": "26d8ec5c4dbf53cc1a3dfb2a7b8627c19b93abf79b1bb89e0378b958557db81c",
+      "size_bytes": 130
+    },
+    {
+      "path": "src/index.ts",
+      "required": false,
+      "sha256": "957e481dd33a29b4a55ae0e95dbf763b7e48c37c427ca4bd1275faf34bc07a74",
+      "size_bytes": 109
+    },
+    {
+      "path": "src/parser/episode-package.ts",
+      "required": false,
+      "sha256": "2fb3cf940d012f52d59de4c0bbbda685df81a11e1edde2cacdacf886ac8fe1db",
+      "size_bytes": 16562
+    },
+    {
+      "path": "src/remaining-assets/ConceptCard.tsx",
+      "required": false,
+      "sha256": "377dbcf8826c218d1f59d5d99e29463edac33c4ac2805eb491b075eeeb347c56",
+      "size_bytes": 2809
+    },
+    {
+      "path": "src/remaining-assets/PersonCard.tsx",
+      "required": false,
+      "sha256": "042d9c84702998d436bc6d9843160d81602f2113e3a5bb138adfedb07c11a992",
+      "size_bytes": 3483
+    },
+    {
+      "path": "src/remaining-assets/RemainingAssetStill.tsx",
+      "required": false,
+      "sha256": "b15ffc7460899c7e3bbd4ee662531d605276c163b4101a07add3d8bf2d59a139",
+      "size_bytes": 823
+    },
+    {
+      "path": "src/remaining-assets/RemainingAssetsRoot.tsx",
+      "required": false,
+      "sha256": "c74ce57e81ebebf6aa485c476bde0e9d92adb2357f3eb675f0abba4b715179a3",
+      "size_bytes": 387
+    },
+    {
+      "path": "src/remaining-assets/SceneBackground.tsx",
+      "required": false,
+      "sha256": "d26f0fc285d12365ffb5f4211db642ed7cc3da1bba8ba13a7315c6e8385afb74",
+      "size_bytes": 2372
+    },
+    {
+      "path": "src/remaining-assets/index.ts",
+      "required": false,
+      "sha256": "1eaba3dcc059106727978cb8611d8a9fb139c54079fd30002e3da55ce2ec8b49",
+      "size_bytes": 178
+    },
+    {
+      "path": "src/remaining-assets/person-presentations.ts",
+      "required": false,
+      "sha256": "577c82cf359aec5e1333e9bcbfb358a648e6ad22db347d462eec54ac81e646e9",
+      "size_bytes": 8428
+    },
+    {
+      "path": "src/remaining-assets/types.ts",
+      "required": false,
+      "sha256": "f4a2f2b5993a5a1694669dca51aecadfc01038ba5dc9923d23b20ea2c876a47b",
+      "size_bytes": 771
+    },
+    {
+      "path": "src/scenes/ConclusionScene.tsx",
+      "required": false,
+      "sha256": "e203138c2146f1207ab19b0eeb7bbc9d795955e9f0b286a3ea646e2a0e4be550",
+      "size_bytes": 3415
+    },
+    {
+      "path": "src/scenes/MainNewsScene.tsx",
+      "required": false,
+      "sha256": "4d6847f2b41691845b651fbaeb66487877bb990e48658772ce4da8c88a99565c",
+      "size_bytes": 4311
+    },
+    {
+      "path": "src/scenes/MarketReactionScene.tsx",
+      "required": false,
+      "sha256": "9189512ff21e2bdd811a9220785da27985763190ac030eb8f3f7e530cea26b80",
+      "size_bytes": 4254
+    },
+    {
+      "path": "src/scenes/TickerScene.tsx",
+      "required": false,
+      "sha256": "f4a8f2d1deb2d1c39e5343d3a8941028b90a00bb96fa68388c9ba629ace02a5e",
+      "size_bytes": 1919
+    },
+    {
+      "path": "src/scenes/WatchPointsScene.tsx",
+      "required": false,
+      "sha256": "3e1dd610a6c3e09c1698a6fb725a856bc6353bf2deeff56bb453a1bc2b15a345",
+      "size_bytes": 3442
+    },
+    {
+      "path": "src/schemas/episode-final.ts",
+      "required": false,
+      "sha256": "a475b50e28f5b83810c40a22b4e9b6423289e09daaa7fbf7af3cc8d10070a3ff",
+      "size_bytes": 7228
+    },
+    {
+      "path": "src/schemas/episode-v1.ts",
+      "required": false,
+      "sha256": "15b4f871e5f315a426657e8c78f2aabaeb13e4ae2df2a1723df3dcade78c0103",
+      "size_bytes": 6471
+    },
+    {
+      "path": "src/schemas/episode.ts",
+      "required": false,
+      "sha256": "863af4633c954b0a26fe033f3e01c32bdfba0591c84451e4b4b178fdcbf2e080",
+      "size_bytes": 4906
+    },
+    {
+      "path": "src/spec/compile-render-spec.ts",
+      "required": false,
+      "sha256": "67ad887333931bc18a1a0654c503df646831fe39059d5b8b757296c5fd8a3e8e",
+      "size_bytes": 5535
+    },
+    {
+      "path": "src/spec/preflight-render-spec.ts",
+      "required": false,
+      "sha256": "fd5e29596c615a7852cb216214195841dbaca77c956874ad0fb3dd52235efc34",
+      "size_bytes": 2349
+    },
+    {
+      "path": "src/spec/public-view-model.ts",
+      "required": false,
+      "sha256": "9552e3f09ab829962d8d195aa23a5d20693f6fc99cf5782a9b6c932825a4851b",
+      "size_bytes": 7136
+    },
+    {
+      "path": "src/spec/render-spec.ts",
+      "required": false,
+      "sha256": "19546b45c87d014a828ce07a9eb4b152777852870d9384e927013881b8d09e66",
+      "size_bytes": 19545
+    },
+    {
+      "path": "src/spec/render-state.ts",
+      "required": false,
+      "sha256": "44e56dd4e6bc74872663389be0637aaf3bf16c4acd9b0eb17dfd4ded4542d4e8",
+      "size_bytes": 4959
+    },
+    {
+      "path": "src/spec/validate-render-layout.ts",
+      "required": false,
+      "sha256": "1963557e7e752512ba7039d42e440bc9a493c60c24d6e825eaf642c9a4c598f4",
+      "size_bytes": 3018
+    },
+    {
+      "path": "src/spec/validate-render-spec.ts",
+      "required": false,
+      "sha256": "7435146437c130ecab2d291b1d8bb5fe05c365ec68d98e673c2b84027a42ccf9",
+      "size_bytes": 20119
+    },
+    {
+      "path": "src/stock-cards/StockCardsRoot.tsx",
+      "required": false,
+      "sha256": "5f5fc470f569b80432b5c44231736bd78935d2193f751a4cd40fb730750a74f0",
+      "size_bytes": 587
+    },
+    {
+      "path": "src/stock-cards/StockPopupCard.tsx",
+      "required": false,
+      "sha256": "7c766b4146c396f170b24f1e4b5353add8bf759949d81f9650d74793265642d2",
+      "size_bytes": 3365
+    },
+    {
+      "path": "src/stock-cards/index.ts",
+      "required": false,
+      "sha256": "89e41478cf8e0a6d7e69df5d3ac045de2f287e9df9c1a77c5f7e1575429bfe5b",
+      "size_bytes": 163
+    },
+    {
+      "path": "src/styles/layout.ts",
+      "required": false,
+      "sha256": "59e9681c3379a73e440f7f81d9b7f96624a677fd33f517aa81cb0f5c30002fb5",
+      "size_bytes": 742
+    },
+    {
+      "path": "src/styles/theme.ts",
+      "required": false,
+      "sha256": "3b1e7cb785905824dc6f741aa8659a6327f26029a2ac02e05b4481d48ea4fc0c",
+      "size_bytes": 1197
+    },
+    {
+      "path": "src/timeline/episode-timeline.ts",
+      "required": false,
+      "sha256": "f1fd4b3c7d2c481b8e55f40d6d4f157eb444487d7b874d579c4f6b0a2d4167be",
+      "size_bytes": 1450
+    },
+    {
+      "path": "src/tts/cache.ts",
+      "required": false,
+      "sha256": "aaf098da8a13459a8c75ea4cca3999c3f9093711ac76182e092d33f2438cc1b3",
+      "size_bytes": 163
+    },
+    {
+      "path": "src/tts/pronunciation.ts",
+      "required": false,
+      "sha256": "9103e065a7f46be9b1cab478ff1b1aff5e3a67b96379ea8d60e80659af19f893",
+      "size_bytes": 647
+    },
+    {
+      "path": "src/tts/provider-registry.ts",
+      "required": false,
+      "sha256": "ac111fded725681d1caf8f91381695760229f6d2aedec0e8ea48abe902214fa8",
+      "size_bytes": 497
+    },
+    {
+      "path": "src/tts/providers/gemini-api-key-pool.ts",
+      "required": false,
+      "sha256": "9e6115666a65a26aac91fe9dcf332f72b0204299d26a579419d75c36bb218169",
+      "size_bytes": 8376
+    },
+    {
+      "path": "src/tts/providers/gemini-tts-provider.ts",
+      "required": false,
+      "sha256": "25b3b0c3f4a03315996b473a917437551e906f78a7a441b85c6183d7ad8d4fc4",
+      "size_bytes": 5270
+    },
+    {
+      "path": "src/tts/providers/voicevox-provider.ts",
+      "required": false,
+      "sha256": "f5706f86228d494cc0de8735effafc77683917c4e8de215674f60ae4d5245a72",
+      "size_bytes": 6484
+    },
+    {
+      "path": "src/tts/segmenter.ts",
+      "required": false,
+      "sha256": "ffbb3f8c84a406f5cea72a3e5b093e5c9320620835b7f66366cc7ae5f99f0e84",
+      "size_bytes": 1388
+    },
+    {
+      "path": "src/tts/tts-service.ts",
+      "required": false,
+      "sha256": "3e39d2cee6a1965f4119ae61f56c70c4eabd605668c87ea8355ae0af8345fa83",
+      "size_bytes": 14470
+    },
+    {
+      "path": "src/tts/types.ts",
+      "required": false,
+      "sha256": "fc538195b8272044fd00395954d1dd9a5b09a1dc91ebbf9ca83fa14546fe8dfe",
+      "size_bytes": 1352
+    },
+    {
+      "path": "tsconfig.json",
+      "required": false,
+      "sha256": "0e943f3d931714c7c153bc89552330d95f0840649a8e98a61c6d65e440ebc331",
+      "size_bytes": 422
+    }
+  ],
+  "schema_version": "1.2.0",
+  "source": {
+    "canonical_fox_asset_id": "foxNormal",
+    "canonical_fox_sha256": "4bb4ef86d2978a9cdae1ab35c3138ce5a3369eff2b8183877e8f18eda0bf32bc",
+    "project_source_sha256": "579de23ec9111a861d11e3bb397196713375142be6273847d272fbc33f703feb"
+  }
+}

@@ -1,0 +1,11 @@
+@import "@fontsource-variable/noto-sans-jp";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #030711;
+}

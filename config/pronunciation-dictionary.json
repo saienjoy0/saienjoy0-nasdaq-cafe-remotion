@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "entries": [
+    {"display": "Nasdaq Composite", "speech": "ナスダック・コンポジット"},
+    {"display": "NASDAQ", "speech": "ナスダック"},
+    {"display": "SOX", "speech": "エスオーエックス"},
+    {"display": "Meta", "speech": "メタ"},
+    {"display": "Iris", "speech": "アイリス"},
+    {"display": "Muse Spark", "speech": "ミューズ・スパーク"},
+    {"display": "Broadcom", "speech": "ブロードコム"},
+    {"display": "TSMC", "speech": "ティーエスエムシー"},
+    {"display": "Nvidia", "speech": "エヌビディア"},
+    {"display": "NVIDIA", "speech": "エヌビディア"},
+    {"display": "AMD", "speech": "エーエムディー"},
+    {"display": "Micron", "speech": "マイクロン"},
+    {"display": "Reuters", "speech": "ロイター"},
+    {"display": "WTI", "speech": "ダブリューティーアイ"},
+    {"display": "GW", "speech": "ギガワット"},
+    {"display": "ET", "speech": "米東部時間"}
+  ]
+}

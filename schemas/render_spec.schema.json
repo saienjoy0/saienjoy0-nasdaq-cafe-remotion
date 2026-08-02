@@ -1,0 +1,1462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "2.1.0"
+    },
+    "episode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "targetDate": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "marketSession": {
+          "type": "string"
+        },
+        "informationCutoff": {
+          "type": "string"
+        },
+        "episodeType": {
+          "type": "string",
+          "enum": [
+            "single-news",
+            "composite-story",
+            "reason-unknown"
+          ]
+        },
+        "durationMode": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "shortened"
+          ]
+        },
+        "shortenedReason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 24,
+          "maximum": 60
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1280,
+          "maximum": 3840
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 720,
+          "maximum": 2160
+        }
+      },
+      "required": [
+        "id",
+        "targetDate",
+        "marketSession",
+        "informationCutoff",
+        "episodeType",
+        "durationMode",
+        "shortenedReason",
+        "fps",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "editorial": {
+      "type": "object",
+      "properties": {
+        "leadNews": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "leadTheme": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "targetIndices": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "storySpine": {
+          "type": "string"
+        },
+        "centralHypothesis": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "unknown"
+          ]
+        },
+        "directMaterial": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nasdaqDrivers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "amplifiers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "offsettingFactors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gap": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedBasisType": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "official-consensus",
+                "company-prior-guidance",
+                "major-reporting",
+                "analyst-view",
+                "price-inference",
+                "unconfirmed"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedBasisDetails": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedSourceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^source-[0-9]{3}$"
+          }
+        },
+        "timelineBasis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "counterEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verificationPoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "leadNews",
+        "leadTheme",
+        "targetIndices",
+        "storySpine",
+        "centralHypothesis",
+        "confidence",
+        "directMaterial",
+        "nasdaqDrivers",
+        "amplifiers",
+        "offsettingFactors",
+        "expected",
+        "actual",
+        "gap",
+        "expectedBasisType",
+        "expectedBasisDetails",
+        "expectedSourceIds",
+        "timelineBasis",
+        "counterEvidence",
+        "verificationPoints"
+      ],
+      "additionalProperties": false
+    },
+    "publishing": {
+      "type": "object",
+      "properties": {
+        "recommendedTitle": {
+          "type": "string"
+        },
+        "titleCandidates": {
+          "minItems": 3,
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommendedThumbnailText": {
+          "type": "string"
+        },
+        "thumbnailTextCandidates": {
+          "minItems": 3,
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "recommendedTitle",
+        "titleCandidates",
+        "recommendedThumbnailText",
+        "thumbnailTextCandidates",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "sources": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "pattern": "^source-[0-9]{3}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "official",
+              "company",
+              "major-media",
+              "analyst",
+              "market-data",
+              "other"
+            ]
+          },
+          "reference": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accessedAt": {
+            "type": "string"
+          },
+          "usedFor": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "narrationAttribution": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId",
+          "title",
+          "publisher",
+          "sourceType",
+          "reference",
+          "publishedAt",
+          "accessedAt",
+          "usedFor",
+          "narrationAttribution"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "approved-with-changes",
+            "rejected"
+          ]
+        },
+        "scores": {
+          "type": "object",
+          "properties": {
+            "openingHook": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "storyProgression": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "discovery": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "clarity": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "foxCharacter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "reasonToFinish": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            }
+          },
+          "required": [
+            "openingHook",
+            "storyProgression",
+            "discovery",
+            "clarity",
+            "foxCharacter",
+            "reasonToFinish"
+          ],
+          "additionalProperties": false
+        },
+        "totalScore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 30
+        },
+        "largestDropoffRisk": {
+          "type": "string"
+        },
+        "requiredChanges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "changesApplied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "titleThumbnailConsistency": {
+          "type": "string",
+          "enum": [
+            "consistent",
+            "needs-revision"
+          ]
+        },
+        "approvedForCodex": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "verdict",
+        "scores",
+        "totalScore",
+        "largestDropoffRisk",
+        "requiredChanges",
+        "changesApplied",
+        "titleThumbnailConsistency",
+        "approvedForCodex"
+      ],
+      "additionalProperties": false
+    },
+    "pronunciations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "surface": {
+            "type": "string"
+          },
+          "reading": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface",
+          "reading"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "correctionId": {
+            "type": "string",
+            "pattern": "^correction-[0-9]{3}$"
+          },
+          "original": {
+            "type": "string"
+          },
+          "corrected": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "correctionId",
+          "original",
+          "corrected",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "voiceProfileId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "scenes": {
+      "minItems": 9,
+      "maxItems": 9,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sceneId": {
+            "type": "string",
+            "enum": [
+              "scene-01",
+              "scene-02",
+              "scene-03",
+              "scene-04",
+              "scene-05",
+              "scene-06",
+              "scene-07",
+              "scene-08",
+              "scene-09"
+            ]
+          },
+          "sceneNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9
+          },
+          "sceneRole": {
+            "type": "string",
+            "enum": [
+              "opening-hook-market-direction-greeting-conclusion",
+              "editorial-body",
+              "closing-recap-sendoff-goodnight"
+            ]
+          },
+          "formalName": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "causalScope": {
+            "type": "string",
+            "enum": [
+              "lead-stock",
+              "sector",
+              "nasdaq",
+              "multiple"
+            ]
+          },
+          "performanceIntent": {
+            "type": "string"
+          },
+          "evidenceSourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^source-[0-9]{3}$"
+            }
+          },
+          "uncertainty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timelineBasis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expectedBasisType": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "official-consensus",
+                  "company-prior-guidance",
+                  "major-reporting",
+                  "analyst-view",
+                  "price-inference",
+                  "unconfirmed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "visualMode": {
+            "type": "string",
+            "enum": [
+              "conclusion-card",
+              "number-comparison",
+              "expected-actual-gap",
+              "timeline",
+              "chart",
+              "causal-diagram",
+              "stock-comparison",
+              "news-media",
+              "verification-points",
+              "text-focus"
+            ]
+          },
+          "initialExpression": {
+            "type": "string",
+            "enum": [
+              "通常",
+              "分析",
+              "ニヤリ",
+              "軽い驚き",
+              "困惑",
+              "警戒",
+              "眠そう"
+            ]
+          },
+          "headline": {
+            "type": "string"
+          },
+          "supportingTexts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "narrationChunks": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "chunkId": {
+                  "type": "string",
+                  "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                },
+                "speechText": {
+                  "type": "string"
+                },
+                "captionText": {
+                  "type": "string"
+                },
+                "expression": {
+                  "type": "string",
+                  "enum": [
+                    "通常",
+                    "分析",
+                    "ニヤリ",
+                    "軽い驚き",
+                    "困惑",
+                    "警戒",
+                    "眠そう"
+                  ]
+                },
+                "pauseAfterMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000
+                }
+              },
+              "required": [
+                "chunkId",
+                "speechText",
+                "captionText",
+                "expression",
+                "pauseAfterMs"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "visualBeats": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "beatId": {
+                  "type": "string",
+                  "pattern": "^scene-0[1-9]-beat-[0-9]{3}$"
+                },
+                "startChunkId": {
+                  "type": "string",
+                  "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                },
+                "endChunkId": {
+                  "type": "string",
+                  "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                },
+                "narrationStartCue": {
+                  "type": "string"
+                },
+                "narrationEndCue": {
+                  "type": "string"
+                },
+                "primaryFunction": {
+                  "type": "string",
+                  "enum": [
+                    "Anchor",
+                    "Evidence",
+                    "Compare",
+                    "Explain",
+                    "Verify"
+                  ]
+                },
+                "screenState": {
+                  "type": "string",
+                  "enum": [
+                    "Data",
+                    "Chart",
+                    "EntityFocus",
+                    "MainWithEntity",
+                    "PictureBook",
+                    "News"
+                  ]
+                },
+                "visualMode": {
+                  "type": "string",
+                  "enum": [
+                    "conclusion-card",
+                    "number-comparison",
+                    "expected-actual-gap",
+                    "timeline",
+                    "chart",
+                    "causal-diagram",
+                    "stock-comparison",
+                    "news-media",
+                    "verification-points",
+                    "text-focus"
+                  ]
+                },
+                "contentType": {
+                  "type": "string"
+                },
+                "screenQuestion": {
+                  "type": "string"
+                },
+                "primaryElement": {
+                  "type": "string"
+                },
+                "viewerTexts": {
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "changeCue": {
+                  "type": "string"
+                },
+                "objectIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                  }
+                },
+                "assetPlacementIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                  }
+                },
+                "assetState": {
+                  "type": "string",
+                  "enum": [
+                    "ready",
+                    "missing",
+                    "invalid",
+                    "user-review-required",
+                    "not-required"
+                  ]
+                },
+                "returnScreenState": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Data",
+                        "Chart",
+                        "EntityFocus",
+                        "MainWithEntity",
+                        "PictureBook",
+                        "News"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "evidenceSourceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^source-[0-9]{3}$"
+                  }
+                },
+                "expressionChange": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "通常",
+                        "分析",
+                        "ニヤリ",
+                        "軽い驚き",
+                        "困惑",
+                        "警戒",
+                        "眠そう"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fallback": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "entity": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "subjectType": {
+                          "type": "string",
+                          "enum": [
+                            "person",
+                            "company",
+                            "product"
+                          ]
+                        },
+                        "displayName": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "firstMentionCue": {
+                          "type": "string"
+                        },
+                        "variant": {
+                          "type": "string",
+                          "enum": [
+                            "photo",
+                            "noPhoto",
+                            "company",
+                            "product"
+                          ]
+                        },
+                        "assetId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "rightsStatus": {
+                          "type": "string",
+                          "enum": [
+                            "cleared",
+                            "user-review-required",
+                            "not-required"
+                          ]
+                        },
+                        "targetDurationMs": {
+                          "type": "integer",
+                          "minimum": 5000,
+                          "maximum": 8000
+                        }
+                      },
+                      "required": [
+                        "subjectType",
+                        "displayName",
+                        "role",
+                        "firstMentionCue",
+                        "variant",
+                        "assetId",
+                        "rightsStatus",
+                        "targetDurationMs"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pictureBook": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "difficultPoint": {
+                          "type": "string"
+                        },
+                        "analogyPurpose": {
+                          "type": "string"
+                        },
+                        "shortAnalogy": {
+                          "type": "string"
+                        },
+                        "analogyType": {
+                          "type": "string",
+                          "enum": [
+                            "university-life",
+                            "overseas-life",
+                            "hong-kong",
+                            "it",
+                            "household-shopping",
+                            "cooking",
+                            "fox-daily-life"
+                          ]
+                        },
+                        "referenceAssetId": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                        },
+                        "aspectRatio": {
+                          "type": "string",
+                          "const": "16:9"
+                        },
+                        "generationPrompt": {
+                          "type": "string"
+                        },
+                        "completedAssetId": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                        },
+                        "marketReturnCue": {
+                          "type": "string"
+                        },
+                        "sameFoxCheck": {
+                          "type": "string",
+                          "const": "pass"
+                        },
+                        "pictureBookStyleCheck": {
+                          "type": "string",
+                          "const": "pass"
+                        },
+                        "noBakedTextCheck": {
+                          "type": "string",
+                          "const": "pass"
+                        }
+                      },
+                      "required": [
+                        "difficultPoint",
+                        "analogyPurpose",
+                        "shortAnalogy",
+                        "analogyType",
+                        "referenceAssetId",
+                        "aspectRatio",
+                        "generationPrompt",
+                        "completedAssetId",
+                        "marketReturnCue",
+                        "sameFoxCheck",
+                        "pictureBookStyleCheck",
+                        "noBakedTextCheck"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "beatId",
+                "startChunkId",
+                "endChunkId",
+                "narrationStartCue",
+                "narrationEndCue",
+                "primaryFunction",
+                "screenState",
+                "visualMode",
+                "contentType",
+                "screenQuestion",
+                "primaryElement",
+                "viewerTexts",
+                "changeCue",
+                "objectIds",
+                "assetPlacementIds",
+                "assetState",
+                "returnScreenState",
+                "evidenceSourceIds",
+                "expressionChange",
+                "fallback",
+                "entity",
+                "pictureBook"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "cards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cardId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "role": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "expected",
+                        "actual",
+                        "gap"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                },
+                "lines": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      },
+                      "tone": {
+                        "type": "string",
+                        "enum": [
+                          "positive",
+                          "negative",
+                          "warning",
+                          "neutral",
+                          "emphasis"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "value",
+                      "tone"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "cardId",
+                "role",
+                "title",
+                "lines"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "numbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "numberId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "comparison": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "tone": {
+                  "type": "string",
+                  "enum": [
+                    "positive",
+                    "negative",
+                    "warning",
+                    "neutral",
+                    "emphasis"
+                  ]
+                }
+              },
+              "required": [
+                "numberId",
+                "label",
+                "value",
+                "unit",
+                "comparison",
+                "tone"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "nodeId",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "arrows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "arrowId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "fromNodeId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "toNodeId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "arrowId",
+                "fromNodeId",
+                "toNodeId",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "visualEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "eventId": {
+                  "type": "string",
+                  "pattern": "^event-[0-9]{3}$"
+                },
+                "atChunkId": {
+                  "type": "string",
+                  "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                },
+                "timing": {
+                  "type": "string",
+                  "enum": [
+                    "chunk-start",
+                    "chunk-end"
+                  ]
+                },
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "show",
+                    "hide",
+                    "highlight",
+                    "unhighlight",
+                    "set-expression"
+                  ]
+                },
+                "targetId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "offsetMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "expression": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "通常",
+                        "分析",
+                        "ニヤリ",
+                        "軽い驚き",
+                        "困惑",
+                        "警戒",
+                        "眠そう"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "eventId",
+                "atChunkId",
+                "timing",
+                "action",
+                "targetId",
+                "offsetMs",
+                "expression"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "assetPlacements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "placementId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "assetId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "background",
+                    "fox-expression",
+                    "main-media",
+                    "chart",
+                    "illustration",
+                    "entity-card",
+                    "picture-book",
+                    "overlay"
+                  ]
+                },
+                "region": {
+                  "type": "string",
+                  "enum": [
+                    "full-canvas",
+                    "fox-left",
+                    "main-stage",
+                    "main-primary",
+                    "main-entity",
+                    "lower-third"
+                  ]
+                },
+                "fit": {
+                  "type": "string",
+                  "enum": [
+                    "cover",
+                    "contain",
+                    "fill"
+                  ]
+                },
+                "focalPoint": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "y": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "startChunkId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "endChunkId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "placementId",
+                "assetId",
+                "role",
+                "region",
+                "fit",
+                "opacity",
+                "startChunkId",
+                "endChunkId"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "transition": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "cut",
+                  "fade",
+                  "none"
+                ]
+              },
+              "durationMs": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2000
+              }
+            },
+            "required": [
+              "type",
+              "durationMs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "sceneId",
+          "sceneNumber",
+          "sceneRole",
+          "formalName",
+          "purpose",
+          "causalScope",
+          "performanceIntent",
+          "evidenceSourceIds",
+          "uncertainty",
+          "timelineBasis",
+          "expectedBasisType",
+          "visualMode",
+          "initialExpression",
+          "headline",
+          "supportingTexts",
+          "sourceLabel",
+          "narrationChunks",
+          "visualBeats",
+          "cards",
+          "numbers",
+          "nodes",
+          "arrows",
+          "visualEvents",
+          "assetPlacements",
+          "transition"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "episode",
+    "editorial",
+    "publishing",
+    "sources",
+    "review",
+    "pronunciations",
+    "corrections",
+    "voiceProfileId",
+    "scenes"
+  ],
+  "additionalProperties": false,
+  "$id": "schemas/render_spec.schema.json",
+  "title": "NASDAQ Cafe render_spec 2.1.0",
+  "description": "Generated from src/spec/render-spec.ts. Do not edit by hand."
+}

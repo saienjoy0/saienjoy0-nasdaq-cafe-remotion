@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "provisional": false,
+  "layout": {
+    "enabled": true,
+    "previewFoxAssetId": "foxNormal"
+  },
+  "expectedSlots": {
+    "foxNormal": "assets/characters/fox/通常-transparent.png",
+    "foxAnalysis": "assets/characters/fox/分析-transparent.png",
+    "foxSmirk": "assets/characters/fox/ニヤリ-transparent.png",
+    "foxSlightSurprise": "assets/characters/fox/軽い驚き-transparent.png",
+    "foxConfused": "assets/characters/fox/困惑-transparent.png",
+    "foxAlert": "assets/characters/fox/警戒-transparent.png",
+    "foxSleepy": "assets/characters/fox/眠そう-transparent.png",
+    "mainBackground": "assets/backgrounds/main-background.png"
+  },
+  "assets": {
+    "foxNormal": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/通常-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1545549, "sha256": "4bb4ef86d2978a9cdae1ab35c3138ce5a3369eff2b8183877e8f18eda0bf32bc"
+    },
+    "foxAnalysis": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/分析-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1536618, "sha256": "41667f65b921c3de693a6ca98a6c930190c03d2433d409d99b77492baaa9a00c"
+    },
+    "foxSmirk": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/ニヤリ-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1464536, "sha256": "a7ee05ef282a8a4d47930a37608e100b0f5017a04d919116aa14cba83b449796"
+    },
+    "foxSlightSurprise": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/軽い驚き-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1448386, "sha256": "55d9dd509d605868a4f3491950f1392245407fe849362b24c2c350cef79a6de7"
+    },
+    "foxConfused": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/困惑-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1535375, "sha256": "f50311ed4d77de19eb1347c255cf4128c5312bfb6bb2a660ecd6b968189886ae"
+    },
+    "foxAlert": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/警戒-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1519326, "sha256": "6ac939c05f51ab12665652ba07f0186f827c60949334f2b4c28f49bbef632b22"
+    },
+    "foxSleepy": {
+      "type": "image", "role": "fox-expression", "path": "assets/characters/fox/眠そう-transparent.png", "format": "PNG",
+      "width": 1024, "height": 1536, "aspectRatio": 0.666667, "colorMode": "RGBA", "hasAlpha": true,
+      "hasTransparentMargin": true, "fileSizeBytes": 1486329, "sha256": "a4fc8a2a6c855bd13c9c6d690f5b5efdbd2d9715a9cf3afbeb201147d282db38"
+    },
+    "mainBackground": {
+      "type": "image", "role": "background", "path": "assets/backgrounds/main-background.png", "format": "PNG",
+      "width": 1672, "height": 941, "aspectRatio": 1.776833, "colorMode": "RGB", "hasAlpha": false,
+      "hasTransparentMargin": false, "fileSizeBytes": 1820341, "sha256": "d2bca0f6873e068041f1320487df85eaca6bfb814656b97af3c5019c35ae9f4b"
+    }
+  }
+}

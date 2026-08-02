@@ -1,0 +1,2234 @@
+{
+  "schemaVersion": "2.1.0",
+  "episode": {
+    "id": "2026-07-14",
+    "targetDate": "2026-07-14",
+    "marketSession": "2026-07-13 US market",
+    "informationCutoff": "2026-07-14T06:46:00Z",
+    "episodeType": "single-news",
+    "durationMode": "standard",
+    "shortenedReason": null,
+    "fps": 30,
+    "width": 1920,
+    "height": 1080
+  },
+  "editorial": {
+    "leadNews": "SK hynixのナスダック上場直後の急落",
+    "leadTheme": null,
+    "targetIndices": [
+      "NASDAQ総合",
+      "NASDAQ 100",
+      "フィラデルフィア半導体株指数"
+    ],
+    "storySpine": "AI需要の崩壊ではなく、上場初日のプレミアムとHBM4量産確認の時間差に、原油高と金利上昇が重なった期待修正",
+    "centralHypothesis": "半導体安の主因は期待先行部分の再評価で、原油・金利が売りを増幅した",
+    "confidence": "medium",
+    "directMaterial": [
+      "上場後の利益確定",
+      "韓国株比25.6%のADRプレミアム",
+      "HBM4量産確認待ち"
+    ],
+    "nasdaqDrivers": [
+      "半導体株全体の下落",
+      "原油急騰",
+      "米10年債利回り上昇"
+    ],
+    "amplifiers": [
+      "WTI 9.4%高",
+      "米10年債利回り4.62%",
+      "ウォラーFRB理事のインフレ警戒"
+    ],
+    "offsettingFactors": [
+      "MSFT、AAPL、AMZNは上昇し、AI・ハイテク全面安ではない"
+    ],
+    "expected": "AI向けメモリ不足とHBM4の立ち上がりが続き、高い株価に成長が追いつく",
+    "actual": "HBM4出荷増がまだ大規模に確認されず、上場直後のプレミアムから利益確定",
+    "gap": "需要の強さではなく、需要を先取りした価格と実績確認の時間差",
+    "expectedBasisType": "price-inference",
+    "expectedBasisDetails": "韓国株年初来3倍超、ADR初日価格、HBM4出荷が第2四半期から増えるとのアナリスト見解",
+    "expectedSourceIds": [
+      "source-001"
+    ],
+    "timelineBasis": "主要報道の時系列説明と2026-07-13終値",
+    "counterEvidence": [
+      "AI向けメモリ不足が続くとの会社見解",
+      "2027〜28年まで強い需要が続くとのアナリスト見解"
+    ],
+    "verificationPoints": [
+      "半導体の相対安",
+      "原油と米10年債利回り",
+      "HBM4量産と大口需要の具体情報"
+    ]
+  },
+  "publishing": {
+    "recommendedTitle": "AI需要は強い。それでも半導体が崩れた理由",
+    "titleCandidates": [
+      "AI需要は強い。それでも半導体が崩れた理由",
+      "SK hynix急落、消えたのは需要か期待か",
+      "NASDAQ -1.55%　半導体だけが弱かった朝"
+    ],
+    "recommendedThumbnailText": "需要は強いのに急落",
+    "thumbnailTextCandidates": [
+      "需要は強いのに急落",
+      "半導体だけが崩れた",
+      "AIバブル崩壊ではない？"
+    ],
+    "description": "2026年7月13日の米国市場ではNASDAQ総合が1.55%下落し、半導体株の弱さが目立ちました。SK hynixのナスダック上場直後の急落を主役に、上場プレミアム、HBM4の実績確認、原油高、米長期金利を分けて検証します。本動画は一般向けのニュース解説であり、個別銘柄の売買を勧めるものではありません。"
+  },
+  "sources": [
+    {
+      "sourceId": "source-001",
+      "title": "SK Hynix plunges after Nasdaq debut as memory chip euphoria cools",
+      "publisher": "Reuters",
+      "sourceType": "major-media",
+      "reference": "https://finance.yahoo.com/markets/stocks/articles/sk-hynix-shares-fall-much-003035107.html",
+      "publishedAt": "2026-07-13T00:30:35Z",
+      "accessedAt": "2026-07-14T06:46:00Z",
+      "usedFor": [
+        "SK hynixの価格、直接材料、Expected・Actual・Gap、反対材料"
+      ],
+      "narrationAttribution": "ロイター"
+    },
+    {
+      "sourceId": "source-002",
+      "title": "Stocks Settle Lower as Chipmakers are Routed and US-Iran Tensions Escalate",
+      "publisher": "Nasdaq / Barchart",
+      "sourceType": "market-data",
+      "reference": "https://www.nasdaq.com/articles/stocks-settle-lower-chipmakers-routed-and-us-iran-tensions-escalate",
+      "publishedAt": "2026-07-14T06:21:28Z",
+      "accessedAt": "2026-07-14T06:46:00Z",
+      "usedFor": [
+        "指数、半導体と大型ハイテクの終値、市場全体"
+      ],
+      "narrationAttribution": "終値データ"
+    },
+    {
+      "sourceId": "source-003",
+      "title": "Dollar Rises on Crude Prices and Bond Yields",
+      "publisher": "Nasdaq / Barchart",
+      "sourceType": "market-data",
+      "reference": "https://www.nasdaq.com/articles/dollar-rises-crude-prices-and-bond-yields",
+      "publishedAt": "2026-07-14T01:12:34Z",
+      "accessedAt": "2026-07-14T06:46:00Z",
+      "usedFor": [
+        "WTI原油と米10年債利回り"
+      ],
+      "narrationAttribution": "市場データ"
+    },
+    {
+      "sourceId": "source-004",
+      "title": "Monetary Policy at a Crossroads",
+      "publisher": "Board of Governors of the Federal Reserve System",
+      "sourceType": "official",
+      "reference": "https://www.federalreserve.gov/newsevents/speech/waller20260713a.htm",
+      "publishedAt": "2026-07-13T00:00:00Z",
+      "accessedAt": "2026-07-14T06:46:00Z",
+      "usedFor": [
+        "ウォラー理事の役割、インフレと政策の発言"
+      ],
+      "narrationAttribution": "FRB"
+    }
+  ],
+  "review": {
+    "verdict": "approved-with-changes",
+    "scores": {
+      "openingHook": 5,
+      "storyProgression": 5,
+      "discovery": 5,
+      "clarity": 5,
+      "foxCharacter": 4,
+      "reasonToFinish": 5
+    },
+    "totalScore": 29,
+    "largestDropoffRisk": "Scene 6の政策と時系列の留保が抽象的になりやすい",
+    "requiredChanges": [
+      "Charon実測尺を確認し正式レンダーを検証する"
+    ],
+    "changesApplied": [
+      "ウォラー人物カードと確認／断定しないの二段表示を実装Specへ固定"
+    ],
+    "titleThumbnailConsistency": "consistent",
+    "approvedForCodex": true
+  },
+  "pronunciations": [
+    {
+      "surface": "SK hynix",
+      "reading": "エスケー・ハイニックス"
+    },
+    {
+      "surface": "HBM",
+      "reading": "エイチビーエム"
+    },
+    {
+      "surface": "Waller",
+      "reading": "ウォラー"
+    }
+  ],
+  "corrections": [],
+  "voiceProfileId": "gemini-charon",
+  "scenes": [
+    {
+      "sceneId": "scene-01",
+      "sceneNumber": 1,
+      "sceneRole": "opening-hook-market-direction-greeting-conclusion",
+      "formalName": "寝ている間に何が起きた？",
+      "purpose": "市場の下げと半導体の突出をコールドフックで提示する",
+      "causalScope": "multiple",
+      "performanceIntent": "驚きから問いを絞る",
+      "evidenceSourceIds": [
+        "source-001",
+        "source-002"
+      ],
+      "uncertainty": "この時点では主因を断定しない",
+      "timelineBasis": "2026-07-13米国市場の終値",
+      "expectedBasisType": null,
+      "visualMode": "number-comparison",
+      "initialExpression": "軽い驚き",
+      "headline": "NASDAQ -1.55%",
+      "supportingTexts": [
+        "半導体の下げが突出",
+        "需要は強いのになぜ売られた？"
+      ],
+      "sourceLabel": "Reuters／NASDAQ終値データ",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-01-chunk-001",
+          "speechText": "ナスダック総合は一・五五パーセント安。ところが、いちばん大きく崩れたのは、AI需要そのものではなく、その期待を最も濃く映していた半導体でした。今朝の問いは一つです。AI向けメモリが足りないという話は続いているのに、なぜ半導体株は一斉に売られたのか。",
+          "captionText": "半導体の下げが突出",
+          "expression": "分析",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-01-chunk-002",
+          "speechText": "僕の第一印象は、中東情勢と原油高で市場全体が逃げた、でした。でも数字を追うと、それだけでは説明しきれません。",
+          "captionText": "需要は強いのになぜ売られた？",
+          "expression": "分析",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-01-beat-001",
+          "startChunkId": "scene-01-chunk-001",
+          "endChunkId": "scene-01-chunk-001",
+          "narrationStartCue": "ナスダック総合は一・五五",
+          "narrationEndCue": "株は一斉に売られたのか。",
+          "primaryFunction": "Anchor",
+          "screenState": "Data",
+          "visualMode": "number-comparison",
+          "contentType": "数値・関係図",
+          "screenQuestion": "どこが最も弱い？",
+          "primaryElement": "NASDAQと半導体の相対差",
+          "viewerTexts": [
+            "半導体の下げが突出",
+            "需要は強いのになぜ売られた？"
+          ],
+          "changeCue": "半導体の下げが突出",
+          "objectIds": [
+            "s1-number-01",
+            "s1-number-02"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001",
+            "source-002"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-01-beat-002",
+          "startChunkId": "scene-01-chunk-002",
+          "endChunkId": "scene-01-chunk-002",
+          "narrationStartCue": "僕の第一印象は、中東情勢",
+          "narrationEndCue": "けでは説明しきれません。",
+          "primaryFunction": "Anchor",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "需要は強いのになぜ売られた？",
+          "primaryElement": "中心質問",
+          "viewerTexts": [
+            "半導体の下げが突出",
+            "需要は強いのになぜ売られた？"
+          ],
+          "changeCue": "需要は強いのになぜ売られた？",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001",
+            "source-002"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [],
+      "numbers": [
+        {
+          "numberId": "s1-number-01",
+          "label": "NASDAQ総合",
+          "value": "-1.55",
+          "unit": "%",
+          "comparison": "前日比",
+          "tone": "negative"
+        },
+        {
+          "numberId": "s1-number-02",
+          "label": "半導体株",
+          "value": "下げ突出",
+          "unit": "",
+          "comparison": "大型テックの一部は上昇",
+          "tone": "warning"
+        }
+      ],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-01-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-01-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-02",
+      "sceneNumber": 2,
+      "sceneRole": "editorial-body",
+      "formalName": "今朝の矛盾",
+      "purpose": "上場初日の熱狂と翌営業日の急落を衝突させる",
+      "causalScope": "lead-stock",
+      "performanceIntent": "価格の反転を一枚で見せる",
+      "evidenceSourceIds": [
+        "source-001"
+      ],
+      "uncertainty": "ソウル株と米国ADRは取引時間と市場構造が異なる",
+      "timelineBasis": "上場初日と翌営業日の価格",
+      "expectedBasisType": "price-inference",
+      "visualMode": "chart",
+      "initialExpression": "軽い驚き",
+      "headline": "上場初日 +13% → 翌営業日 -9.3%",
+      "supportingTexts": [
+        "需要は強い。それでも急落",
+        "HBM｜AI向け高速メモリ"
+      ],
+      "sourceLabel": "Reuters｜SK hynix上場後の価格",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-02-chunk-001",
+          "speechText": "矛盾はここです。SKハイニックスの米国預託証券、ADRは、海外企業の株を米国市場で売買しやすくした証券です。金曜日のナスダック上場初日、百四十九ドルの売り出し価格に対して百七十ドルで始まり、百六十八ドルで終えました。",
+          "captionText": "需要は強い。それでも急落",
+          "expression": "分析",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-02-chunk-002",
+          "speechText": "AI計算で大量のデータを高速に運ぶメモリ、HBMへの期待が、価格に強く表れた一日です。それが週明けには、米国で九・三パーセント安。ソウルの株価も十五パーセントを超えて下げました。強い需要の物語が、わずか一営業日で消えたのでしょうか。",
+          "captionText": "HBM｜AI向け高速メモリ",
+          "expression": "困惑",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-02-beat-001",
+          "startChunkId": "scene-02-chunk-001",
+          "endChunkId": "scene-02-chunk-001",
+          "narrationStartCue": "矛盾はここです。SKハイ",
+          "narrationEndCue": "六十八ドルで終えました。",
+          "primaryFunction": "Evidence",
+          "screenState": "Chart",
+          "visualMode": "chart",
+          "contentType": "数値・関係図",
+          "screenQuestion": "初日はどうだった？",
+          "primaryElement": "149→170→168",
+          "viewerTexts": [
+            "需要は強い。それでも急落",
+            "HBM｜AI向け高速メモリ"
+          ],
+          "changeCue": "需要は強い。それでも急落",
+          "objectIds": [
+            "s2-number-01",
+            "s2-number-02",
+            "s2-number-03",
+            "s2-number-04",
+            "s2-number-05"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-02-beat-002",
+          "startChunkId": "scene-02-chunk-002",
+          "endChunkId": "scene-02-chunk-002",
+          "narrationStartCue": "AI計算で大量のデータを",
+          "narrationEndCue": "日で消えたのでしょうか。",
+          "primaryFunction": "Compare",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "期待はなぜ反転？",
+          "primaryElement": "HBM期待と翌営業日の急落",
+          "viewerTexts": [
+            "需要は強い。それでも急落",
+            "HBM｜AI向け高速メモリ"
+          ],
+          "changeCue": "HBM｜AI向け高速メモリ",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001"
+          ],
+          "expressionChange": "困惑",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [],
+      "numbers": [
+        {
+          "numberId": "s2-number-01",
+          "label": "売り出し価格",
+          "value": "149",
+          "unit": "ドル",
+          "comparison": null,
+          "tone": "neutral"
+        },
+        {
+          "numberId": "s2-number-02",
+          "label": "初値",
+          "value": "170",
+          "unit": "ドル",
+          "comparison": "売り出し価格を上回る",
+          "tone": "positive"
+        },
+        {
+          "numberId": "s2-number-03",
+          "label": "初日終値",
+          "value": "168",
+          "unit": "ドル",
+          "comparison": null,
+          "tone": "positive"
+        },
+        {
+          "numberId": "s2-number-04",
+          "label": "翌営業日",
+          "value": "-9.3",
+          "unit": "%",
+          "comparison": "米国ADR",
+          "tone": "negative"
+        },
+        {
+          "numberId": "s2-number-05",
+          "label": "ソウル株",
+          "value": "-15超",
+          "unit": "%",
+          "comparison": "取引市場は異なる",
+          "tone": "negative"
+        }
+      ],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-02-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-02-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-03",
+      "sceneNumber": 3,
+      "sceneRole": "editorial-body",
+      "formalName": "何が起きた？",
+      "purpose": "急落の直接材料を三つへ分解する",
+      "causalScope": "lead-stock",
+      "performanceIntent": "三段の因果で直接材料を整理する",
+      "evidenceSourceIds": [
+        "source-001"
+      ],
+      "uncertainty": "HBM4量産確認待ちはReutersが報じたアナリスト見解",
+      "timelineBasis": "Reutersによる上場後の直接材料",
+      "expectedBasisType": "analyst-view",
+      "visualMode": "causal-diagram",
+      "initialExpression": "分析",
+      "headline": "利益確定 × 25.6%プレミアム × 量産確認待ち",
+      "supportingTexts": [
+        "決算悪化の発表ではない",
+        "期待先行の巻き戻し"
+      ],
+      "sourceLabel": "Reuters｜直接材料とアナリスト見解",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-03-chunk-001",
+          "speechText": "ロイターが伝えた直接材料は三つあります。第一に、上場初日の急騰後の利益確定です。第二に、米国の預託証券が韓国上場株に対して二十五・六パーセント高い水準にあったこと。",
+          "captionText": "決算悪化の発表ではない",
+          "expression": "分析",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-03-chunk-002",
+          "speechText": "預託証券は、海外企業の株を米国市場で売買しやすくした証券です。第三に、期待されていた次世代HBM、HBM4の出荷増が、まだ大きな規模では確認されていないというアナリストの見方です。つまり、悪い決算が出たというより、先に高くなった期待へ、確認の遅れがぶつかった形です。",
+          "captionText": "期待先行の巻き戻し",
+          "expression": "分析",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-03-beat-001",
+          "startChunkId": "scene-03-chunk-001",
+          "endChunkId": "scene-03-chunk-001",
+          "narrationStartCue": "ロイターが伝えた直接材料",
+          "narrationEndCue": "ト高い水準にあったこと。",
+          "primaryFunction": "Evidence",
+          "screenState": "Data",
+          "visualMode": "causal-diagram",
+          "contentType": "数値・関係図",
+          "screenQuestion": "直接材料は？",
+          "primaryElement": "利益確定と25.6%",
+          "viewerTexts": [
+            "決算悪化の発表ではない",
+            "期待先行の巻き戻し"
+          ],
+          "changeCue": "決算悪化の発表ではない",
+          "objectIds": [
+            "s3-node-01",
+            "s3-node-02",
+            "s3-node-03",
+            "s3-node-04",
+            "s3-arrow-01",
+            "s3-arrow-02",
+            "s3-arrow-03"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-03-beat-002",
+          "startChunkId": "scene-03-chunk-002",
+          "endChunkId": "scene-03-chunk-002",
+          "narrationStartCue": "預託証券は、海外企業の株",
+          "narrationEndCue": "遅れがぶつかった形です。",
+          "primaryFunction": "Explain",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "何の確認が遅れた？",
+          "primaryElement": "ADR定義とHBM4",
+          "viewerTexts": [
+            "決算悪化の発表ではない",
+            "期待先行の巻き戻し"
+          ],
+          "changeCue": "期待先行の巻き戻し",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [],
+      "numbers": [],
+      "nodes": [
+        {
+          "nodeId": "s3-node-01",
+          "label": "利益確定｜上場初日の急騰後"
+        },
+        {
+          "nodeId": "s3-node-02",
+          "label": "ADRプレミアム｜韓国株比25.6%高"
+        },
+        {
+          "nodeId": "s3-node-03",
+          "label": "量産確認待ち｜HBM4出荷増は小規模"
+        },
+        {
+          "nodeId": "s3-node-04",
+          "label": "期待修正｜価格と確認の時間差"
+        }
+      ],
+      "arrows": [
+        {
+          "arrowId": "s3-arrow-01",
+          "fromNodeId": "s3-node-01",
+          "toNodeId": "s3-node-04",
+          "label": "巻き戻し"
+        },
+        {
+          "arrowId": "s3-arrow-02",
+          "fromNodeId": "s3-node-02",
+          "toNodeId": "s3-node-04",
+          "label": "割高修正"
+        },
+        {
+          "arrowId": "s3-arrow-03",
+          "fromNodeId": "s3-node-03",
+          "toNodeId": "s3-node-04",
+          "label": "実績待ち"
+        }
+      ],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-03-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-03-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-04",
+      "sceneNumber": 4,
+      "sceneRole": "editorial-body",
+      "formalName": "市場は何を期待していた？",
+      "purpose": "Expected・Actual・Gapで仮説を解く",
+      "causalScope": "lead-stock",
+      "performanceIntent": "第一印象を証拠で修正する",
+      "evidenceSourceIds": [
+        "source-001"
+      ],
+      "uncertainty": "Expectedは会社公式ガイダンスではなく価格推論と報道上の見解",
+      "timelineBasis": "年初来価格と上場初日、HBM4出荷見通し",
+      "expectedBasisType": "price-inference",
+      "visualMode": "expected-actual-gap",
+      "initialExpression": "分析",
+      "headline": "Gap＝需要ではなく価格の先取り",
+      "supportingTexts": [
+        "Expected → Actual → Gap",
+        "主因は半導体の期待修正"
+      ],
+      "sourceLabel": "価格からの推論／Reutersが報じたアナリスト見解",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-04-chunk-001",
+          "speechText": "ここでExpected、Actual、Gapを分けます。Expectedは、AI向けメモリ不足とHBM4の立ち上がりが続き、高い価格にも成長が追いつくことでした。根拠の一つは、韓国株が年初から三倍を超えて上昇し、米国上場初日にも売り出し価格を大きく上回ったという価格からの推論です。もう一つは、HBM4の出荷が第二四半期から増えるというアナリスト見解です。",
+          "captionText": "Expected → Actual → Gap",
+          "expression": "通常",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-04-chunk-002",
+          "speechText": "Actualは、出荷増がまだ大規模には見えず、上場直後の割高な部分から利益確定が集中したこと。Gapは、需要の強さではなく、需要をどこまで先取りした価格だったのか、という点にありました。ここまでで僕の見方は変わります。主因は単なる地政学ショックではなく、半導体の期待修正です。",
+          "captionText": "主因は半導体の期待修正",
+          "expression": "ニヤリ",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-04-beat-001",
+          "startChunkId": "scene-04-chunk-001",
+          "endChunkId": "scene-04-chunk-001",
+          "narrationStartCue": "ここでExpected、",
+          "narrationEndCue": "いうアナリスト見解です。",
+          "primaryFunction": "Explain",
+          "screenState": "Data",
+          "visualMode": "expected-actual-gap",
+          "contentType": "数値・関係図",
+          "screenQuestion": "何を期待していた？",
+          "primaryElement": "Expected・Actual・Gap",
+          "viewerTexts": [
+            "Expected → Actual → Gap",
+            "主因は半導体の期待修正"
+          ],
+          "changeCue": "Expected → Actual → Gap",
+          "objectIds": [
+            "s4-card-01",
+            "s4-card-02",
+            "s4-card-03"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001"
+          ],
+          "expressionChange": "通常",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-04-beat-002",
+          "startChunkId": "scene-04-chunk-002",
+          "endChunkId": "scene-04-chunk-002",
+          "narrationStartCue": "Actualは、出荷増が",
+          "narrationEndCue": "、半導体の期待修正です。",
+          "primaryFunction": "Explain",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "差はどこにあった？",
+          "primaryElement": "僕の見方の修正",
+          "viewerTexts": [
+            "Expected → Actual → Gap",
+            "主因は半導体の期待修正"
+          ],
+          "changeCue": "主因は半導体の期待修正",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001"
+          ],
+          "expressionChange": "ニヤリ",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [
+        {
+          "cardId": "s4-card-01",
+          "role": "expected",
+          "title": "Expected",
+          "lines": [
+            {
+              "label": "市場の期待",
+              "value": "高い価格に成長が追いつく",
+              "tone": "emphasis"
+            }
+          ]
+        },
+        {
+          "cardId": "s4-card-02",
+          "role": "actual",
+          "title": "Actual",
+          "lines": [
+            {
+              "label": "確認できた現実",
+              "value": "大規模出荷は未確認、利益確定集中",
+              "tone": "warning"
+            }
+          ]
+        },
+        {
+          "cardId": "s4-card-03",
+          "role": "gap",
+          "title": "Gap",
+          "lines": [
+            {
+              "label": "差",
+              "value": "需要より価格が先に走った",
+              "tone": "negative"
+            }
+          ]
+        }
+      ],
+      "numbers": [],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-04-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-04-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-05",
+      "sceneNumber": 5,
+      "sceneRole": "editorial-body",
+      "formalName": "背景にあった世界の懸念",
+      "purpose": "原油と金利を増幅要因として接続する",
+      "causalScope": "nasdaq",
+      "performanceIntent": "直接材料と増幅要因を混同させない",
+      "evidenceSourceIds": [
+        "source-002",
+        "source-003"
+      ],
+      "uncertainty": "終値ベースで個別要因の寄与率は算定できない",
+      "timelineBasis": "2026-07-13終値",
+      "expectedBasisType": null,
+      "visualMode": "chart",
+      "initialExpression": "分析",
+      "headline": "原油 +9.4%／10年債 4.62%",
+      "supportingTexts": [
+        "主因ではなく増幅要因",
+        "100bp＝1%"
+      ],
+      "sourceLabel": "Reuters／NASDAQ market data",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-05-chunk-001",
+          "speechText": "ただし、その期待修正を大きくした世界の波があります。米国とイランを巡る緊張で、米国の原油価格を見る代表的な基準、WTI原油は九・四パーセント上がり、一バレル七十八ドル十四セント。米国十年債利回りは五・〇六ベーシスポイント上がって四・六二パーセントでした。",
+          "captionText": "主因ではなく増幅要因",
+          "expression": "分析",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-05-chunk-002",
+          "speechText": "ベーシスポイントは、金利の小さな動きを表す単位で、百ベーシスポイントが一パーセントです。原油が上がれば物価が下がりにくくなり、金利も高止まりしやすい。将来の利益への期待が大きいハイテク株ほど、高い金利の影響を受けやすくなります。",
+          "captionText": "100bp＝1%",
+          "expression": "分析",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-05-beat-001",
+          "startChunkId": "scene-05-chunk-001",
+          "endChunkId": "scene-05-chunk-001",
+          "narrationStartCue": "ただし、その期待修正を大",
+          "narrationEndCue": "・六二パーセントでした。",
+          "primaryFunction": "Explain",
+          "screenState": "Chart",
+          "visualMode": "chart",
+          "contentType": "数値・関係図",
+          "screenQuestion": "売りを何が増幅？",
+          "primaryElement": "原油と10年債",
+          "viewerTexts": [
+            "主因ではなく増幅要因",
+            "100bp＝1%"
+          ],
+          "changeCue": "主因ではなく増幅要因",
+          "objectIds": [
+            "s5-number-01",
+            "s5-number-02",
+            "s5-number-03"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-002",
+            "source-003"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-05-beat-002",
+          "startChunkId": "scene-05-chunk-002",
+          "endChunkId": "scene-05-chunk-002",
+          "narrationStartCue": "ベーシスポイントは、金利",
+          "narrationEndCue": "響を受けやすくなります。",
+          "primaryFunction": "Explain",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "金利はなぜ効く？",
+          "primaryElement": "100bp定義と因果",
+          "viewerTexts": [
+            "主因ではなく増幅要因",
+            "100bp＝1%"
+          ],
+          "changeCue": "100bp＝1%",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-002",
+            "source-003"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [],
+      "numbers": [
+        {
+          "numberId": "s5-number-01",
+          "label": "WTI原油",
+          "value": "+9.4",
+          "unit": "%",
+          "comparison": "78.14ドル",
+          "tone": "warning"
+        },
+        {
+          "numberId": "s5-number-02",
+          "label": "米10年債利回り",
+          "value": "4.62",
+          "unit": "%",
+          "comparison": "+5.06bp",
+          "tone": "warning"
+        },
+        {
+          "numberId": "s5-number-03",
+          "label": "単位",
+          "value": "100bp",
+          "unit": "",
+          "comparison": "1%に相当",
+          "tone": "neutral"
+        }
+      ],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-05-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-05-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-06",
+      "sceneNumber": 6,
+      "sceneRole": "editorial-body",
+      "formalName": "市場はどう反応した？",
+      "purpose": "政策材料と終値の限界を示し、因果を言い過ぎない",
+      "causalScope": "nasdaq",
+      "performanceIntent": "断定の境界を視聴者と共有する",
+      "evidenceSourceIds": [
+        "source-002",
+        "source-004"
+      ],
+      "uncertainty": "分足照合をしておらず、個別ニュースの寄与率は不明",
+      "timelineBasis": "ウォラー理事講演と同日の終値",
+      "expectedBasisType": null,
+      "visualMode": "news-media",
+      "initialExpression": "困惑",
+      "headline": "同日重複は確認／寄与率は断定しない",
+      "supportingTexts": [
+        "政策はデータ次第",
+        "FRB｜米国の中央銀行"
+      ],
+      "sourceLabel": "Federal Reserve／Reuters",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-06-chunk-001",
+          "speechText": "さらに、米国の中央銀行で金利判断に関わるウォラー理事は同じ日、エネルギー価格の上昇でインフレが押し上げられ、今後の政策は入ってくるデータ次第だと講演しました。FRBは米国の中央銀行です。ロイターによると、市場は年末までに少なくとも一回、〇・二五パーセントの利上げを織り込む状態になりました。",
+          "captionText": "政策はデータ次第",
+          "expression": "通常",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-06-chunk-002",
+          "speechText": "ここは因果を言い過ぎないようにします。終値データだけでは、どのニュースが何時に何パーセント動かしたかまでは断定できません。それでも、原油高、金利上昇、半導体の利益確定が同じ日に重なったことは確認できます。",
+          "captionText": "FRB｜米国の中央銀行",
+          "expression": "分析",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-06-beat-001",
+          "startChunkId": "scene-06-chunk-001",
+          "endChunkId": "scene-06-chunk-001",
+          "narrationStartCue": "さらに、米国の中央銀行で",
+          "narrationEndCue": "り込む状態になりました。",
+          "primaryFunction": "Anchor",
+          "screenState": "News",
+          "visualMode": "news-media",
+          "contentType": "実写アンカー",
+          "screenQuestion": "誰の発言？",
+          "primaryElement": "ウォラーFRB理事",
+          "viewerTexts": [
+            "政策はデータ次第",
+            "FRB｜米国の中央銀行"
+          ],
+          "changeCue": "政策はデータ次第",
+          "objectIds": [
+            "s6-number-01"
+          ],
+          "assetPlacementIds": [
+            "scene-06-placement-media"
+          ],
+          "assetState": "ready",
+          "returnScreenState": "Data",
+          "evidenceSourceIds": [
+            "source-002",
+            "source-004"
+          ],
+          "expressionChange": "通常",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-06-beat-002",
+          "startChunkId": "scene-06-chunk-002",
+          "endChunkId": "scene-06-chunk-002",
+          "narrationStartCue": "ここは因果を言い過ぎない",
+          "narrationEndCue": "ったことは確認できます。",
+          "primaryFunction": "Verify",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "どこまで断定できる？",
+          "primaryElement": "因果の限界",
+          "viewerTexts": [
+            "政策はデータ次第",
+            "FRB｜米国の中央銀行"
+          ],
+          "changeCue": "FRB｜米国の中央銀行",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-002",
+            "source-004"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [],
+      "numbers": [
+        {
+          "numberId": "s6-number-01",
+          "label": "利上げ織り込み",
+          "value": "0.25",
+          "unit": "%",
+          "comparison": "年末までに少なくとも1回",
+          "tone": "warning"
+        }
+      ],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-06-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-06-placement-media",
+          "assetId": "person_christopher_waller",
+          "role": "main-media",
+          "region": "main-stage",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": "scene-06-chunk-001",
+          "endChunkId": "scene-06-chunk-001"
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-07",
+      "sceneNumber": 7,
+      "sceneRole": "editorial-body",
+      "formalName": "銘柄の明暗",
+      "purpose": "半導体と大型ハイテクを比較し、全面安説を退ける",
+      "causalScope": "multiple",
+      "performanceIntent": "比較で仮説の範囲を狭める",
+      "evidenceSourceIds": [
+        "source-002"
+      ],
+      "uncertainty": "個別銘柄には固有材料が含まれ、比較は因果証明ではない",
+      "timelineBasis": "2026-07-13終値",
+      "expectedBasisType": null,
+      "visualMode": "stock-comparison",
+      "initialExpression": "ニヤリ",
+      "headline": "全面安ではない",
+      "supportingTexts": [
+        "半導体に売りが集中",
+        "大型ハイテクの一部は上昇"
+      ],
+      "sourceLabel": "Reuters／終値データ",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-07-chunk-001",
+          "speechText": "反応の広がりを見ると、SKハイニックスだけの問題でもありません。フィラデルフィア半導体株指数は三・六パーセント安。マイクロンは六・四パーセント安、サンディスクは十二・六パーセント安でした。",
+          "captionText": "半導体に売りが集中",
+          "expression": "分析",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-07-chunk-002",
+          "speechText": "一方で、マイクロソフトは一・五三パーセント高、アップルは〇・六三パーセント高、アマゾンも〇・八〇パーセント高です。AIやハイテクが全部同じように売られたのではなく、期待が最も先に走っていたメモリと半導体へ売りが集中した、と読む方が数字に合います。ナスダック全体の下げをSKハイニックス一社のせいにはできませんが、半導体全体の再評価を映す象徴にはなりました。",
+          "captionText": "大型ハイテクの一部は上昇",
+          "expression": "分析",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-07-beat-001",
+          "startChunkId": "scene-07-chunk-001",
+          "endChunkId": "scene-07-chunk-001",
+          "narrationStartCue": "反応の広がりを見ると、S",
+          "narrationEndCue": "・六パーセント安でした。",
+          "primaryFunction": "Compare",
+          "screenState": "Chart",
+          "visualMode": "stock-comparison",
+          "contentType": "数値・関係図",
+          "screenQuestion": "半導体はどれだけ弱い？",
+          "primaryElement": "半導体3指数・銘柄",
+          "viewerTexts": [
+            "半導体に売りが集中",
+            "大型ハイテクの一部は上昇"
+          ],
+          "changeCue": "半導体に売りが集中",
+          "objectIds": [
+            "s7-number-01",
+            "s7-number-02",
+            "s7-number-03",
+            "s7-number-04",
+            "s7-number-05",
+            "s7-number-06"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-002"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-07-beat-002",
+          "startChunkId": "scene-07-chunk-002",
+          "endChunkId": "scene-07-chunk-002",
+          "narrationStartCue": "一方で、マイクロソフトは",
+          "narrationEndCue": "映す象徴にはなりました。",
+          "primaryFunction": "Compare",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "全面安だった？",
+          "primaryElement": "大型ハイテク3社",
+          "viewerTexts": [
+            "半導体に売りが集中",
+            "大型ハイテクの一部は上昇"
+          ],
+          "changeCue": "大型ハイテクの一部は上昇",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-002"
+          ],
+          "expressionChange": "分析",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [],
+      "numbers": [
+        {
+          "numberId": "s7-number-01",
+          "label": "半導体指数",
+          "value": "-3.6",
+          "unit": "%",
+          "comparison": null,
+          "tone": "negative"
+        },
+        {
+          "numberId": "s7-number-02",
+          "label": "Micron",
+          "value": "-6.4",
+          "unit": "%",
+          "comparison": "MU",
+          "tone": "negative"
+        },
+        {
+          "numberId": "s7-number-03",
+          "label": "SanDisk",
+          "value": "-12.6",
+          "unit": "%",
+          "comparison": "SNDK",
+          "tone": "negative"
+        },
+        {
+          "numberId": "s7-number-04",
+          "label": "Microsoft",
+          "value": "+1.53",
+          "unit": "%",
+          "comparison": "MSFT",
+          "tone": "positive"
+        },
+        {
+          "numberId": "s7-number-05",
+          "label": "Apple",
+          "value": "+0.63",
+          "unit": "%",
+          "comparison": "AAPL",
+          "tone": "positive"
+        },
+        {
+          "numberId": "s7-number-06",
+          "label": "Amazon",
+          "value": "+0.80",
+          "unit": "%",
+          "comparison": "AMZN",
+          "tone": "positive"
+        }
+      ],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-07-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-07-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-08",
+      "sceneNumber": 8,
+      "sceneRole": "editorial-body",
+      "formalName": "今夜、この物語は続くのか？",
+      "purpose": "反対材料と今夜の検証条件を示す",
+      "causalScope": "multiple",
+      "performanceIntent": "反証可能な監視条件へ変換する",
+      "evidenceSourceIds": [
+        "source-001",
+        "source-002",
+        "source-003"
+      ],
+      "uncertainty": "将来需要と供給は予測であり確定事実ではない",
+      "timelineBasis": "会社見解とアナリスト予測、今夜の観察条件",
+      "expectedBasisType": "analyst-view",
+      "visualMode": "verification-points",
+      "initialExpression": "分析",
+      "headline": "需要崩壊は未確認",
+      "supportingTexts": [
+        "強める条件／弱める条件",
+        "見る順番：半導体→原油→10年債"
+      ],
+      "sourceLabel": "SK hynix CEO／Reutersが紹介したアナリスト",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-08-chunk-001",
+          "speechText": "反対材料も大切です。SKハイニックスのCEOは、AIデータセンター向けメモリの深刻な不足が続くと見ています。ロイターが紹介した別のアナリストも、二〇二七年から二八年にかけて需要は非常に強いとしています。だから、今朝の下げだけでAI需要の終わりとは言えません。僕の現在の意見は、需要の崩壊ではなく、価格と実績の時間差を埋める調整だった、です。",
+          "captionText": "強める条件／弱める条件",
+          "expression": "通常",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-08-chunk-002",
+          "speechText": "ただし、HBM4の量産が今後も遅れ、二〇二七年以降の供給過剰への懸念が強まるなら、この見方は弱くなります。今夜見る条件は二つです。仮説を強めるのは、半導体が引き続き市場全体より弱く、原油と十年債利回りも高止まりすること。仮説を弱めるのは、HBM4の出荷や大口需要を示す具体的な情報が出て、SKハイニックスやメモリ株が素早く戻ることです。銀行決算と消費者物価も金利の見通しを動かしますが、見る順番は、半導体の相対的な弱さ、原油、十年債利回りです。もし一次情報と違う点があれば、概要欄の訂正履歴で直します。",
+          "captionText": "見る順番：半導体→原油→10年債",
+          "expression": "通常",
+          "pauseAfterMs": 350
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-08-beat-001",
+          "startChunkId": "scene-08-chunk-001",
+          "endChunkId": "scene-08-chunk-001",
+          "narrationStartCue": "反対材料も大切です。SK",
+          "narrationEndCue": "埋める調整だった、です。",
+          "primaryFunction": "Compare",
+          "screenState": "Data",
+          "visualMode": "verification-points",
+          "contentType": "数値・関係図",
+          "screenQuestion": "需要は崩れた？",
+          "primaryElement": "需要見通しと留保",
+          "viewerTexts": [
+            "強める条件／弱める条件",
+            "見る順番：半導体→原油→10年債"
+          ],
+          "changeCue": "強める条件／弱める条件",
+          "objectIds": [
+            "s8-card-01",
+            "s8-card-02",
+            "s8-card-03"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001",
+            "source-002",
+            "source-003"
+          ],
+          "expressionChange": "通常",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-08-beat-002",
+          "startChunkId": "scene-08-chunk-002",
+          "endChunkId": "scene-08-chunk-002",
+          "narrationStartCue": "ただし、HBM4の量産が",
+          "narrationEndCue": "欄の訂正履歴で直します。",
+          "primaryFunction": "Verify",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "何を確認する？",
+          "primaryElement": "強める・弱める条件",
+          "viewerTexts": [
+            "強める条件／弱める条件",
+            "見る順番：半導体→原油→10年債"
+          ],
+          "changeCue": "見る順番：半導体→原油→10年債",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001",
+            "source-002",
+            "source-003"
+          ],
+          "expressionChange": "通常",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [
+        {
+          "cardId": "s8-card-01",
+          "role": null,
+          "title": "反対材料",
+          "lines": [
+            {
+              "label": "需要見通し",
+              "value": "2027〜28年も非常に強いとの見方",
+              "tone": "positive"
+            }
+          ]
+        },
+        {
+          "cardId": "s8-card-02",
+          "role": null,
+          "title": "仮説を強める",
+          "lines": [
+            {
+              "label": "観察条件",
+              "value": "半導体相対安・原油・10年債",
+              "tone": "warning"
+            }
+          ]
+        },
+        {
+          "cardId": "s8-card-03",
+          "role": null,
+          "title": "仮説を弱める",
+          "lines": [
+            {
+              "label": "観察条件",
+              "value": "HBM4具体情報とメモリ株反発",
+              "tone": "emphasis"
+            }
+          ]
+        }
+      ],
+      "numbers": [],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-08-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-08-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "durationMs": 300
+      }
+    },
+    {
+      "sceneId": "scene-09",
+      "sceneNumber": 9,
+      "sceneRole": "closing-recap-sendoff-goodnight",
+      "formalName": "今朝の結論",
+      "purpose": "新しい情報を加えず結論を一文で回収する",
+      "causalScope": "multiple",
+      "performanceIntent": "簡潔に送り出す",
+      "evidenceSourceIds": [
+        "source-001",
+        "source-002",
+        "source-003",
+        "source-004"
+      ],
+      "uncertainty": "新規追加なし",
+      "timelineBasis": "Scene 1〜8の回収",
+      "expectedBasisType": null,
+      "visualMode": "conclusion-card",
+      "initialExpression": "通常",
+      "headline": "需要崩壊ではなく期待修正",
+      "supportingTexts": [
+        "価格と実績の時間差",
+        "いってらっしゃい／おやすみなさい"
+      ],
+      "sourceLabel": "",
+      "narrationChunks": [
+        {
+          "chunkId": "scene-09-chunk-001",
+          "speechText": "今朝の結論は、AI需要が消えたのではなく、期待が先に走った半導体の価格へ、上場後の利益確定と高い金利が同時に当たった、です。",
+          "captionText": "価格と実績の時間差",
+          "expression": "通常",
+          "pauseAfterMs": 220
+        },
+        {
+          "chunkId": "scene-09-chunk-002",
+          "speechText": "出典の確認で誤りが分かれば、概要欄の訂正履歴で更新します。それでは、いってらっしゃい。こちらはそろそろ、おやすみなさい。",
+          "captionText": "いってらっしゃい／おやすみなさい",
+          "expression": "通常",
+          "pauseAfterMs": 600
+        }
+      ],
+      "visualBeats": [
+        {
+          "beatId": "scene-09-beat-001",
+          "startChunkId": "scene-09-chunk-001",
+          "endChunkId": "scene-09-chunk-001",
+          "narrationStartCue": "今朝の結論は、AI需要が",
+          "narrationEndCue": "が同時に当たった、です。",
+          "primaryFunction": "Verify",
+          "screenState": "Data",
+          "visualMode": "conclusion-card",
+          "contentType": "数値・関係図",
+          "screenQuestion": "結論は？",
+          "primaryElement": "持ち帰り一文",
+          "viewerTexts": [
+            "価格と実績の時間差",
+            "いってらっしゃい／おやすみなさい"
+          ],
+          "changeCue": "価格と実績の時間差",
+          "objectIds": [
+            "s9-card-01",
+            "s9-card-02"
+          ],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001",
+            "source-002",
+            "source-003",
+            "source-004"
+          ],
+          "expressionChange": "通常",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        },
+        {
+          "beatId": "scene-09-beat-002",
+          "startChunkId": "scene-09-chunk-002",
+          "endChunkId": "scene-09-chunk-002",
+          "narrationStartCue": "出典の確認で誤りが分かれ",
+          "narrationEndCue": "ろそろ、おやすみなさい。",
+          "primaryFunction": "Anchor",
+          "screenState": "Data",
+          "visualMode": "text-focus",
+          "contentType": "要点テキスト",
+          "screenQuestion": "なし",
+          "primaryElement": "訂正案内と固定挨拶",
+          "viewerTexts": [
+            "価格と実績の時間差",
+            "いってらっしゃい／おやすみなさい"
+          ],
+          "changeCue": "いってらっしゃい／おやすみなさい",
+          "objectIds": [],
+          "assetPlacementIds": [],
+          "assetState": "not-required",
+          "returnScreenState": null,
+          "evidenceSourceIds": [
+            "source-001",
+            "source-002",
+            "source-003",
+            "source-004"
+          ],
+          "expressionChange": "通常",
+          "fallback": null,
+          "entity": null,
+          "pictureBook": null
+        }
+      ],
+      "cards": [
+        {
+          "cardId": "s9-card-01",
+          "role": null,
+          "title": "今朝の結論",
+          "lines": [
+            {
+              "label": "需要",
+              "value": "消えたのではない",
+              "tone": "positive"
+            }
+          ]
+        },
+        {
+          "cardId": "s9-card-02",
+          "role": null,
+          "title": "期待修正",
+          "lines": [
+            {
+              "label": "主役",
+              "value": "価格と実績の時間差",
+              "tone": "emphasis"
+            }
+          ]
+        }
+      ],
+      "numbers": [],
+      "nodes": [],
+      "arrows": [],
+      "visualEvents": [],
+      "assetPlacements": [
+        {
+          "placementId": "scene-09-placement-background",
+          "assetId": "mainBackground",
+          "role": "background",
+          "region": "full-canvas",
+          "fit": "cover",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxNormal",
+          "assetId": "foxNormal",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxAnalysis",
+          "assetId": "foxAnalysis",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxSmirk",
+          "assetId": "foxSmirk",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxSlightSurprise",
+          "assetId": "foxSlightSurprise",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxConfused",
+          "assetId": "foxConfused",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxAlert",
+          "assetId": "foxAlert",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        },
+        {
+          "placementId": "scene-09-placement-foxSleepy",
+          "assetId": "foxSleepy",
+          "role": "fox-expression",
+          "region": "fox-left",
+          "fit": "contain",
+          "opacity": 1,
+          "startChunkId": null,
+          "endChunkId": null
+        }
+      ],
+      "transition": {
+        "type": "none",
+        "durationMs": 0
+      }
+    }
+  ]
+}
