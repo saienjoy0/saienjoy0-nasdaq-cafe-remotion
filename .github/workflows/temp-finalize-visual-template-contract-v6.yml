@@ -90,6 +90,17 @@ jobs:
         id: install
         run: npm ci && npm run episode:spec:schema
 
+      - name: Ensure ffmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
       - name: Validate contract
         id: validate
         shell: bash
@@ -131,7 +142,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const log = fs.existsSync('/tmp/validate.log') ? fs.readFileSync('/tmp/validate.log', 'utf8').slice(-10000) : 'no validation log';
+            const log = fs.existsSync('/tmp/validate.log') ? fs.readFileSync('/tmp/validate.log', 'utf8').slice(-12000) : 'no validation log';
             await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 25, body: [
               `RUN_ID=${process.env.RUN_ID}`,
               `VISUAL_TEMPLATE_CONTRACT_COMMIT=${process.env.RESULT_SHA || 'none'}`,
