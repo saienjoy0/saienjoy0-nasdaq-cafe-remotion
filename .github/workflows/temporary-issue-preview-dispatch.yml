@@ -5,13 +5,13 @@ on:
     types: [opened]
 
 permissions:
-  contents: read
+  contents: write
   actions: write
   issues: write
 
 jobs:
   dispatch-preview:
-    if: github.event.issue.title == '[TEMP] Run 2026-07-31 fixed preview'
+    if: github.event.issue.title == '[TEMP] Fix and run 2026-07-31 fixed preview'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -19,6 +19,32 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: fix/spec-video-legibility
+          fetch-depth: 0
+
+      - name: Remove forbidden metadata wording only
+        shell: bash
+        env:
+          SPEC_PATH: render-specs/2026-07-31/render_spec.json
+        run: |
+          set -euo pipefail
+          python3 - "$SPEC_PATH" <<'PY'
+          from pathlib import Path
+          import sys
+
+          path = Path(sys.argv[1])
+          text = path.read_text(encoding="utf-8")
+          old = "Charon実測403.2秒"
+          new = "Charon音声403.2秒"
+          if old not in text:
+              raise SystemExit(f"expected metadata wording not found: {old}")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$SPEC_PATH"
+          git commit -m "fix: remove forbidden production wording"
+          git push origin HEAD:fix/spec-video-legibility
 
       - name: Dispatch official preview workflow
         id: dispatch
@@ -31,7 +57,6 @@ jobs:
           SPEC_PATH: render-specs/2026-07-31/render_spec.json
         run: |
           set -euo pipefail
-          test -s "$SPEC_PATH"
           SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
           STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
@@ -67,4 +92,5 @@ jobs:
             exit 1
           fi
 
-          gh issue comment "$ISSUE_NUMBER" --body "PREVIEW_RUN_ID=$RUN_ID\nPREVIEW_RUN_URL=$RUN_URL\nSPEC_SHA256=$SPEC_SHA\nTARGET_REF=$TARGET_REF"
+          printf 'PREVIEW_RUN_ID=%s\nPREVIEW_RUN_URL=%s\nSPEC_SHA256=%s\nTARGET_REF=%s\n' "$RUN_ID" "$RUN_URL" "$SPEC_SHA" "$TARGET_REF" > /tmp/preview-comment.txt
+          gh issue comment "$ISSUE_NUMBER" --body-file /tmp/preview-comment.txt
