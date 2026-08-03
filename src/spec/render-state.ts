@@ -64,7 +64,7 @@ export const getSceneRenderState = (
   ];
   const initiallyVisibleIds = allIds.filter((id) => firstVisibility.get(id) !== "show");
   const visible = new Set(initiallyVisibleIds);
-  const visibleSinceMs = new Map(initiallyVisibleIds.map((id) => [id, 0] as const));
+  const visibleSinceMs = new Map<string, number>(initiallyVisibleIds.map((id) => [id, 0]));
   const highlighted = new Set<string>();
   const highlightedSinceMs = new Map<string, number>();
   const reachedEvents = scene.visualEvents
