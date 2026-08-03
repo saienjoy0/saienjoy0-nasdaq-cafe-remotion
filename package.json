@@ -59,6 +59,7 @@
     "episode:spec:final": "tsx scripts/spec-cli.ts final",
     "episode:spec:inspect": "tsx scripts/spec-cli.ts inspect",
     "episode:spec:inspect:preview": "tsx scripts/inspect-preview.ts",
+    "episode:spec:ready": "tsx scripts/create-production-ready.ts",
     "episode:spec:fixture:still": "tsx scripts/spec-cli.ts still",
     "episode:spec:fixture:compile": "tsx scripts/spec-cli.ts fixture-compile",
     "episode:spec:schema": "tsx scripts/generate-render-spec-schema.ts",
