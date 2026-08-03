@@ -1,0 +1,60 @@
+name: ChatGPT Dispatch Final Retest
+
+on:
+  push:
+    branches:
+      - test-ingest-2026-07-31
+    paths:
+      - ".chatgpt-ingest/2026-07-31/final-retest-trigger.txt"
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch scheduled gate for 2026-07-31
+        id: gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BODY='{"ref":"main","inputs":{"episode_date_override":"2026-07-31"}}'
+          RESPONSE="$(gh api \
+            --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-scheduled-preview.yml/dispatches" \
+            --input - <<<"$BODY")"
+          RUN_ID="$(jq -r '.workflow_run_id // empty' <<<"$RESPONSE")"
+          RUN_URL="$(jq -r '.html_url // empty' <<<"$RESPONSE")"
+          test "$RUN_ID" != ""
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report gate run
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GATE_RUN_ID: ${{ steps.gate.outputs.run_id }}
+          GATE_RUN_URL: ${{ steps.gate.outputs.run_url }}
+        run: |
+          gh issue create \
+            --title "TEST FINAL RETEST GATE 2026-07-31 run ${GATE_RUN_ID}" \
+            --body "Final status-receipt retest gate: ${GATE_RUN_URL}"
+
+      - name: Report dispatch failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "TEST FINAL RETEST GATE FAILED ${GITHUB_RUN_ID}" \
+            --body "Gate dispatch failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
