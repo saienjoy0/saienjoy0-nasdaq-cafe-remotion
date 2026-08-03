@@ -73,4 +73,47 @@ const result = await pool.run(async (key) => {
 assert.equal(result, "ok");
 assert.deepEqual(attempted, ["key-one", "key-two"]);
 
+const limitedDirectory = await mkdtemp(
+  path.join(os.tmpdir(), "gemini-key-pool-budget-"),
+);
+let limitedNow = new Date("2026-07-30T12:00:00Z");
+const limitedPool = new GeminiApiKeyPool(
+  ["rate-limited-key"],
+  path.join(limitedDirectory, "state.json"),
+  () => limitedNow,
+  async (milliseconds) => {
+    limitedNow = new Date(limitedNow.getTime() + milliseconds);
+  },
+  {maxAttempts: 3, maxElapsedMs: 120_000},
+);
+let limitedAttempts = 0;
+await assert.rejects(
+  limitedPool.run(async () => {
+    limitedAttempts += 1;
+    throw {status: 429, message: "requests per minute; retry in 1s"};
+  }),
+  /GEMINI_RETRY_BUDGET_EXHAUSTED attempts=3/,
+);
+assert.equal(limitedAttempts, 3);
+
+const elapsedDirectory = await mkdtemp(
+  path.join(os.tmpdir(), "gemini-key-pool-elapsed-"),
+);
+let elapsedNow = new Date("2026-07-30T12:00:00Z");
+const elapsedPool = new GeminiApiKeyPool(
+  ["slow-key"],
+  path.join(elapsedDirectory, "state.json"),
+  () => elapsedNow,
+  async (milliseconds) => {
+    elapsedNow = new Date(elapsedNow.getTime() + milliseconds);
+  },
+  {maxAttempts: 12, maxElapsedMs: 20_000},
+);
+await assert.rejects(
+  elapsedPool.run(async () => {
+    throw {status: 429, message: "requests per minute; retry in 30s"};
+  }),
+  /GEMINI_RETRY_BUDGET_EXHAUSTED attempts=1/,
+);
+
 console.log("gemini-api-key-pool tests passed");
