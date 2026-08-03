@@ -22,63 +22,48 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Load updater from main
+      - name: Apply deterministic contract migration
         id: apply
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
-          git show origin/main:.github/workflows/temp-update-visual-template-contract.yml > /tmp/updater.yml
+          git show origin/main:.github/workflows/temp-update-visual-template-contract.yml > /tmp/carrier.yml
           python3 <<'PY'
           from pathlib import Path
 
-          text = Path('/tmp/updater.yml').read_text(encoding='utf-8')
+          carrier = Path('/tmp/carrier.yml').read_text(encoding='utf-8')
           start = "          python3 <<'PY'\n"
           end = "\n          PY\n"
-          if start not in text or end not in text:
+          if start not in carrier or end not in carrier:
               raise SystemExit('embedded updater block not found')
-          block = text.split(start, 1)[1].split(end, 1)[0]
-          lines = []
-          for line in block.splitlines():
-              lines.append(line[10:] if line.startswith('          ') else line)
-          script = '\n'.join(lines) + '\n'
+          block = carrier.split(start, 1)[1].split(end, 1)[0]
+          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in block.splitlines()) + '\n'
 
-          replacements = {
+          patches = {
               "text = replace_once(text, needle, addition, 'template validation insertion')": """marker = \"    });\\n  });\\n  return data;\"\nif marker not in text:\n    raise SystemExit('template validation end marker missing')\ntext = text.replace(marker, addition + marker, 1)""",
               "text = replace_once(text, old, new, 'fixture beat fields')": """target = \"    visualMode: mode,\\n\"\nif text.count(target) < 1:\n    raise SystemExit(f'fixture visualMode target count={text.count(target)}')\nfields = '''    visualTemplate: templateForMode[mode],\n    templateConfig: {\n      variant: mode === \"causal-diagram\" ? \"left-to-right\" : mode === \"stock-comparison\" ? \"center-zero\" : \"default\",\n      comparisonBasis: [\"number-comparison\", \"chart\", \"stock-comparison\"].includes(mode) ? `TEST BASIS ${number}-${beatNumber}` : null,\n      dataBasis: \"TEST TIMELINE BASIS\",\n      nodeOrder: mode === \"causal-diagram\" ? nodes.map((node) => node.nodeId) : [],\n      laneLabels: [],\n      outcomeNodeId: null,\n    },\n'''\ntext = text.replace(target, target + fields, 1)""",
               "text = replace_once(text, old, new, 'fixture entity override')": """target = '          visualMode: \"text-focus\",\\n'\nif text.count(target) != 1:\n    raise SystemExit(f'fixture entity visualMode target count={text.count(target)}')\nfields = '''          visualTemplate: \"entity-card-full\",\n          templateConfig: {variant: \"prebuilt-card\", comparisonBasis: null, dataBasis: \"TEST TIMELINE BASIS\", nodeOrder: [], laneLabels: [], outcomeNodeId: null},\n'''\ntext = text.replace(target, target + fields, 1)""",
           }
-          for old, new in replacements.items():
+          for old, new in patches.items():
               if script.count(old) != 1:
                   raise SystemExit(f'patch target count={script.count(old)} for {old}')
               script = script.replace(old, new, 1)
-
-          switch_tail = "if count != 1: raise SystemExit(f'switch replacement count={count}')\npath.write_text(text, encoding='utf-8')"
-          switch_replacement = """if count != 1: raise SystemExit(f'switch replacement count={count}')
-if 'const TailwindHeadwind:' not in text:
-    causal_marker = 'const CausalDiagram: React.FC<{content: PublicMainContent}> = ({content}) => {'
-    if text.count(causal_marker) != 1:
-        raise SystemExit(f'causal marker count={text.count(causal_marker)}')
-    text = text.replace(causal_marker, tailwind + causal_marker, 1)
-legacy_marker = 'export const SpecVisualMode: React.FC<{content: PublicMainContent}> = ({content}) => {'
-if text.count(legacy_marker) != 1:
-    raise SystemExit(f'visual renderer marker count={text.count(legacy_marker)}')
-legacy_uses = '''void NumberComparison;
-void Timeline;
-void Chart;
-void CausalDiagram;
-void StockComparison;
-
-'''
-text = text.replace(legacy_marker, legacy_uses + legacy_marker, 1)
-path.write_text(text, encoding='utf-8')"""
-          if script.count(switch_tail) != 1:
-              raise SystemExit(f'switch tail patch target count={script.count(switch_tail)}')
-          script = script.replace(switch_tail, switch_replacement, 1)
-
           Path('/tmp/update_visual_contract.py').write_text(script, encoding='utf-8')
           PY
-          python3 /tmp/update_visual_contract.py 2>&1 | tee /tmp/apply.log
+          python3 /tmp/update_visual_contract.py
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('scripts/generate-render-spec-fixtures.ts')
+          text = path.read_text(encoding='utf-8')
+          start_old = '    narrationStartCue: narrationChunks[startIndex].captionText,'
+          end_old = '    narrationEndCue: narrationChunks[endIndex].captionText,'
+          if text.count(start_old) != 1 or text.count(end_old) != 1:
+              raise SystemExit('fixture narration cue targets changed')
+          text = text.replace(start_old, '    narrationStartCue: narrationChunks[startIndex].speechText,', 1)
+          text = text.replace(end_old, '    narrationEndCue: narrationChunks[endIndex].speechText,', 1)
+          path.write_text(text, encoding='utf-8')
+          PY
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -108,7 +93,7 @@ path.write_text(text, encoding='utf-8')"""
             ! grep -R 'switch (content.renderKind)' src/components/spec/SpecVisualModes.tsx
           } 2>&1 | tee /tmp/validate.log
 
-      - name: Commit requested files
+      - name: Commit target branch
         id: commit
         shell: bash
         run: |
@@ -120,7 +105,7 @@ path.write_text(text, encoding='utf-8')"""
           git push origin HEAD:fix/spec-video-legibility
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Report result
+      - name: Report
         if: always()
         uses: actions/github-script@v8
         env:
@@ -133,29 +118,16 @@ path.write_text(text, encoding='utf-8')"""
         with:
           script: |
             const fs = require('fs');
-            const applyLog = fs.existsSync('/tmp/apply.log') ? fs.readFileSync('/tmp/apply.log', 'utf8').slice(-2500) : 'no apply log';
-            const validateLog = fs.existsSync('/tmp/validate.log') ? fs.readFileSync('/tmp/validate.log', 'utf8').slice(-5000) : 'no validate log';
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: 25,
-              body: [
-                `RUN_ID=${process.env.RUN_ID}`,
-                `VISUAL_TEMPLATE_CONTRACT_COMMIT=${process.env.RESULT_SHA || 'none'}`,
-                `APPLY=${process.env.APPLY_OUTCOME}`,
-                `INSTALL=${process.env.INSTALL_OUTCOME}`,
-                `VALIDATE=${process.env.VALIDATE_OUTCOME}`,
-                `COMMIT=${process.env.COMMIT_OUTCOME}`,
-                'PREVIEW_NOT_RUN=true',
-                'FINAL_NOT_RUN=true',
-                '',
-                'APPLY LOG',
-                '```text',
-                applyLog,
-                '```',
-                'VALIDATE LOG',
-                '```text',
-                validateLog,
-                '```'
-              ].join('\n')
-            });
+            const log = fs.existsSync('/tmp/validate.log') ? fs.readFileSync('/tmp/validate.log', 'utf8').slice(-5000) : 'no validation log';
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 25, body: [
+              `RUN_ID=${process.env.RUN_ID}`,
+              `VISUAL_TEMPLATE_CONTRACT_COMMIT=${process.env.RESULT_SHA || 'none'}`,
+              `APPLY=${process.env.APPLY_OUTCOME}`,
+              `INSTALL=${process.env.INSTALL_OUTCOME}`,
+              `VALIDATE=${process.env.VALIDATE_OUTCOME}`,
+              `COMMIT=${process.env.COMMIT_OUTCOME}`,
+              'PREVIEW_NOT_RUN=true',
+              'FINAL_NOT_RUN=true',
+              '',
+              '```text', log, '```'
+            ].join('\n')});
