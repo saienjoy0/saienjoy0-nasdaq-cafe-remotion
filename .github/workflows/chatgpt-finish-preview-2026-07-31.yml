@@ -1,0 +1,39 @@
+name: ChatGPT Finish Preview 2026-07-31
+
+on:
+  push:
+    branches:
+      - test/finish-preview-2026-07-31
+    paths:
+      - ".chatgpt-run/finish-preview.txt"
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+jobs:
+  dispatch-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch verified scheduled gate
+        id: dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BODY='{"ref":"main","inputs":{"episode_date_override":"2026-07-31"}}'
+          RESPONSE="$(gh api \
+            --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-scheduled-preview.yml/dispatches" \
+            --input - <<<"$BODY")"
+          RUN_ID="$(jq -r '.workflow_run_id // empty' <<<"$RESPONSE")"
+          RUN_URL="$(jq -r '.html_url // empty' <<<"$RESPONSE")"
+          test "$RUN_ID" != ""
+          gh issue create \
+            --title "TEST FINISH GATE 2026-07-31 ${RUN_ID}" \
+            --body "Scheduled gate dispatched for the verified 2026-07-31 package.\n\n- Gate run ID: \`${RUN_ID}\`\n- Gate URL: ${RUN_URL}\n- Render spec SHA-256: \`f94a16574d44611efb23e0596274db1cb5f7b2c6b2d5f663dd76042026a2524c\`"
