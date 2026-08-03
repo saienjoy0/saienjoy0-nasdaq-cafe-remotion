@@ -6,7 +6,9 @@
 - エピソード種別：単独ニュース
 - 主役ニュース：Amazon決算でAWS売上が市場予想を上回り、AI投資の回収証拠として評価されたこと
 - 対象指数：Nasdaq Composite / Nasdaq-100 / SOXX
-- 目標音声尺：480〜540秒
+- 音声尺区分：明示的な短縮回
+- Charon実測音声尺：403.2秒（production timeline実測）
+- 短縮理由：確認済みの主役因果と反対材料だけで説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。
 - 完成ナレーション文字数：約2,562字
 - ストーリーの背骨：AmazonではAWSの予想超過がAI投資の回収証拠として株価を押し上げ、NASDAQ全体では大型クラウド株の上昇が金利上昇とApple安を上回った一方、半導体への波及は限定的だった。
 - 中心仮説：昨夜の市場はAI設備投資の金額より、クラウド売上として回収が確認できるかを評価した。
@@ -40,7 +42,7 @@
 - 主役カード：company_amzn（Scene 2、登録済み）
 - 比較カード：company_aapl（Scene 7、登録済み）
 - render_specローカル構造検査：pass
-- repository正式validator：GitHub Actions実行前のため未実行
+- repository正式validator：pass（GitHub Actions Run 30783539322）
 - episode_package・render_spec整合：同一データから生成しローカル照合pass
 
 ### 画面構成表
@@ -529,7 +531,7 @@
 ## H. 04 興味深さ・わかりやすさ審問結果
 
 ### 判定
-合格（GitHub Actions投入前にrepository正式validatorが必要）
+合格（repository正式validator pass、実測尺を明示的な短縮回として反映）
 
 ### 得点
 - 冒頭の引力：5/5
@@ -575,10 +577,10 @@
 - AI視覚検査なし：pass
 - 軽量機械チェック：ローカル構造検査pass
 - 音声専用台本：pass
-- render_spec repository正式validator：未実行
+- render_spec repository正式validator：pass
 - episode_package・render_spec整合：pass
 - 非採用経路の除外：pass
 - 制作情報の非表示：pass
 
 ### GitHub Actionsへ渡してよいか
-repository正式validatorを通過した後に可。
+可（repository正式validator pass、Charon実測403.2秒を明示的な短縮回として反映済み）。

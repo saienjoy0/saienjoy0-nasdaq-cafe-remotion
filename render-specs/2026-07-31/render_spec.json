@@ -6,8 +6,8 @@
     "marketSession": "2026-07-31 US market",
     "informationCutoff": "2026-08-01T15:19:46Z",
     "episodeType": "single-news",
-    "durationMode": "standard",
-    "shortenedReason": null,
+    "durationMode": "shortened",
+    "shortenedReason": "確認済みの主役因果と反対材料だけで説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。",
     "fps": 30,
     "width": 1920,
     "height": 1080
