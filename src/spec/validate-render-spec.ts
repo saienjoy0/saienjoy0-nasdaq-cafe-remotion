@@ -92,7 +92,7 @@ export const validateRenderSpecReferences = (
       if (!chunks.has(event.atChunkId)) fail(`${base}.visualEvents[${index}].atChunkId`, `chunkId must exist in the same Scene: ${event.atChunkId}`);
       if (event.action === "set-expression") return;
       const targets = event.action === "show" || event.action === "hide" ? visibilityTargets : objectTargets;
-      if (!event.targetId || !targets.has(event.targetId)) fail(`${base}.visualEvents[${index}].targetId`, `invalid ${event.action} targetId: ${event.targetId}`);
+      if (!event.targetId || !targets.has(event.targetId)) fail(`${base}.visualEvents[${index}].targetId`, `unknown object ID for ${event.action}: ${event.targetId}`);
     });
     scene.assetPlacements.forEach((placement, index) => {
       const path = `${base}.assetPlacements[${index}]`;
