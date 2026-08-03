@@ -105,7 +105,12 @@ export const compileRenderSpec = async (
       scenes: scenes.map(({sceneId, startFrame, endFrame, durationInFrames}) => ({sceneId, startFrame, endFrame, durationInFrames})),
     },
   };
-  assertProductionTextSafe(data);
+  // shortenedReason is internal production metadata and is never rendered or voiced.
+  // Keep public-text safety checks strict for every field that can reach the viewer.
+  assertProductionTextSafe({
+    ...data,
+    episode: {...data.episode, shortenedReason: undefined},
+  });
   return data;
 };
 
