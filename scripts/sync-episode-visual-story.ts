@@ -25,12 +25,29 @@ const eventTimeKey = (
   return chunkIndex * 100_000 + boundary * 50_000 + event.offsetMs;
 };
 
+const eventsForBeat = (
+  scene: typeof spec.scenes[number],
+  beat: typeof scene.visualBeats[number],
+) => {
+  const chunkOrder = new Map(scene.narrationChunks.map((chunk, index) => [chunk.chunkId, index]));
+  const startIndex = chunkOrder.get(beat.startChunkId);
+  const endIndex = chunkOrder.get(beat.endChunkId);
+  if (startIndex === undefined || endIndex === undefined) {
+    throw new Error(`${beat.beatId}: invalid chunk range`);
+  }
+  return scene.visualEvents.filter((event) => {
+    if (!event.targetId || !beat.objectIds.includes(event.targetId)) return false;
+    const eventChunkIndex = chunkOrder.get(event.atChunkId);
+    return eventChunkIndex !== undefined && startIndex <= eventChunkIndex && eventChunkIndex <= endIndex;
+  });
+};
+
 const formatShow = (
   scene: typeof spec.scenes[number],
   beat: typeof scene.visualBeats[number],
 ) => {
-  const events = scene.visualEvents
-    .filter((event) => event.action === "show" && event.targetId && beat.objectIds.includes(event.targetId))
+  const events = eventsForBeat(scene, beat)
+    .filter((event) => event.action === "show")
     .sort((a, b) => eventTimeKey(scene, a) - eventTimeKey(scene, b));
   if (events.length === 0) return beat.sequencePolicy === "static" ? "完成状態" : beat.objectIds.join(" → ") || "なし";
   return events.map((event) => {
@@ -42,8 +59,8 @@ const formatShow = (
 const formatHighlights = (
   scene: typeof spec.scenes[number],
   beat: typeof scene.visualBeats[number],
-) => scene.visualEvents
-  .filter((event) => event.action === "highlight" && event.targetId && beat.objectIds.includes(event.targetId))
+) => eventsForBeat(scene, beat)
+  .filter((event) => event.action === "highlight")
   .sort((a, b) => eventTimeKey(scene, a) - eventTimeKey(scene, b))
   .map((event) => `${event.targetId}${event.motionPreset ? `［${event.motionPreset}］` : ""}`)
   .join("、") || "なし";
