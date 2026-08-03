@@ -1,0 +1,49 @@
+name: ChatGPT Duplicate Gate Check 2026-07-31
+
+on:
+  push:
+    branches:
+      - test-ingest-2026-07-31
+    paths:
+      - ".chatgpt-ingest/2026-07-31/duplicate-gate-trigger.txt"
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+jobs:
+  dispatch-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch scheduled gate for revised input
+        id: dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BODY='{"ref":"main","inputs":{"episode_date_override":"2026-07-31"}}'
+          RESPONSE="$(gh api \
+            --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-scheduled-preview.yml/dispatches" \
+            --input - <<<"$BODY")"
+          RUN_ID="$(jq -r '.workflow_run_id // empty' <<<"$RESPONSE")"
+          RUN_URL="$(jq -r '.html_url // empty' <<<"$RESPONSE")"
+          test "$RUN_ID" != ""
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report duplicate gate run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GATE_RUN_ID: ${{ steps.dispatch.outputs.run_id }}
+          GATE_RUN_URL: ${{ steps.dispatch.outputs.run_url }}
+        run: |
+          gh issue create \
+            --title "TEST DUPLICATE GATE 2026-07-31 run ${GATE_RUN_ID}" \
+            --body "Duplicate-check gate: ${GATE_RUN_URL}"
