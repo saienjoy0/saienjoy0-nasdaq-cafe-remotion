@@ -1,0 +1,64 @@
+name: ChatGPT Locate Active Preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".chatgpt-test/locate-preview.txt"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  locate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Locate revised preview run
+        id: locate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RESPONSE="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/runs?event=workflow_dispatch&branch=main&per_page=20")"
+          RUN_JSON="$(jq -c '[.workflow_runs[] | select(.head_sha == "4f32a4e9b1c790e0ef7b038bed91983ace923cdf")][0] // empty' <<<"$RESPONSE")"
+          test "$RUN_JSON" != ""
+          RUN_ID="$(jq -r '.id' <<<"$RUN_JSON")"
+          RUN_URL="$(jq -r '.html_url' <<<"$RUN_JSON")"
+          STATUS="$(jq -r '.status' <<<"$RUN_JSON")"
+          CONCLUSION="$(jq -r '.conclusion // ""' <<<"$RUN_JSON")"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
+
+      - name: Report located run
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.locate.outputs.run_id }}
+          RUN_URL: ${{ steps.locate.outputs.run_url }}
+          STATUS: ${{ steps.locate.outputs.status }}
+          CONCLUSION: ${{ steps.locate.outputs.conclusion }}
+        run: |
+          gh issue create \
+            --title "TEST PREVIEW LOCATED 2026-07-31 run ${RUN_ID}" \
+            --body "Revised preview: ${RUN_URL}\n\n- Run ID: \`${RUN_ID}\`\n- Status: \`${STATUS}\`\n- Conclusion: \`${CONCLUSION:-none}\`"
+
+      - name: Report locator failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "TEST PREVIEW LOCATOR FAILED ${GITHUB_RUN_ID}" \
+            --body "Locator failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
