@@ -24,11 +24,24 @@ export const SpecSceneFrame: React.FC<{
   const timeMs = timeMsOverride ?? (frame / fps) * 1000;
   const state = getSceneRenderState(scene, timeMs);
   const view = toPublicSceneViewModel(scene, state, assets);
+  const entityContent = view.mainContent?.renderKind === "entity" ? view.mainContent : null;
+  const entityPresentation = entityContent?.entityPresentation ?? null;
+  const showGeneratedMainContent = Boolean(
+    view.mainContent &&
+      entityPresentation !== "prebuilt-card" &&
+      entityPresentation !== "media",
+  );
+
   return <AbsoluteFill style={sceneStyle}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
     <div style={{position: "absolute", left: 416, top: 144, width: 1440, height: 648, zIndex: 10}}>
       <SpecAssetLayer assets={view.mainAssets} zIndex={10}/>
-      {view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><SpecVisualMode content={view.mainContent}/></div> : null}
+      {showGeneratedMainContent && view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><SpecVisualMode content={view.mainContent}/></div> : null}
+      {entityPresentation === "media" && entityContent?.entity ? <div style={{position: "absolute", right: 34, top: 68, width: 560, minHeight: 230, zIndex: 24, display: "flex", flexDirection: "column", justifyContent: "center", padding: "34px 40px", boxSizing: "border-box", borderRadius: 24, background: "rgba(255,250,238,.94)", border: "3px solid rgba(95,70,38,.34)", boxShadow: "0 18px 42px rgba(0,0,0,.28)", color: "#152236"}}>
+        <div style={{fontSize: 27, lineHeight: 1.2, fontWeight: 900, color: "#77572d"}}>{entityContent.entity.subjectType === "person" ? "人物" : entityContent.entity.subjectType === "company" ? "企業" : "製品"}</div>
+        <div style={{marginTop: 14, fontSize: 52, lineHeight: 1.18, fontWeight: 950}}>{entityContent.entity.displayName}</div>
+        <div style={{marginTop: 20, fontSize: 31, lineHeight: 1.36, fontWeight: 850, color: "#40516a"}}>{entityContent.entity.role}</div>
+      </div> : null}
     </div>
     <div style={{position: "absolute", left: 64, top: 176, width: 320, height: 720, zIndex: 30, opacity: view.fox.opacity, overflow: "visible"}}>
       <Img src={staticFile(view.fox.src)} style={{width: "100%", height: "100%", objectFit: view.fox.fit, objectPosition: view.fox.objectPosition, transform: "scale(1.34)", transformOrigin: "50% 82%", filter: "drop-shadow(0 16px 22px rgba(0,0,0,.38))"}}/>
