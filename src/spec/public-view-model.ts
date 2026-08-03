@@ -62,6 +62,16 @@ export type PublicMainContent = {
     | "entity"
     | "text";
   layout: "full" | "primary-with-entity";
+  sceneId: ProductionScene["sceneId"];
+  sceneNumber: number;
+  sceneRole: ProductionScene["sceneRole"];
+  headline: string;
+  supportingTexts: string[];
+  uncertainty: string | null;
+  screenQuestion: string;
+  primaryElement: string;
+  primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
+  beatProgress: number;
   cards: PublicCard[];
   numbers: PublicNumber[];
   nodes: PublicNode[];
@@ -238,6 +248,11 @@ export const toPublicSceneViewModel = (
     beat.screenState === "Chart" ||
     beat.screenState === "EntityFocus" ||
     beat.screenState === "MainWithEntity";
+  const beatDurationMs = Math.max(1, beat.endMs - beat.startMs);
+  const beatProgress = Math.max(
+    0,
+    Math.min(1, (state.timeMs - beat.startMs) / beatDurationMs),
+  );
 
   return {
     headline: scene.headline,
@@ -259,6 +274,16 @@ export const toPublicSceneViewModel = (
             beat.screenState === "MainWithEntity"
               ? "primary-with-entity"
               : "full",
+          sceneId: scene.sceneId,
+          sceneNumber: scene.sceneNumber,
+          sceneRole: scene.sceneRole,
+          headline: scene.headline,
+          supportingTexts: scene.supportingTexts,
+          uncertainty: scene.uncertainty,
+          screenQuestion: beat.screenQuestion,
+          primaryElement: beat.primaryElement,
+          primaryFunction: beat.primaryFunction,
+          beatProgress,
           cards,
           numbers,
           nodes,
