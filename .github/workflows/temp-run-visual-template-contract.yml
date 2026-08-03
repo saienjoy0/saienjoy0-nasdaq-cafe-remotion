@@ -31,27 +31,52 @@ jobs:
           git show origin/main:.github/workflows/temp-update-visual-template-contract.yml > /tmp/updater.yml
           python3 <<'PY'
           from pathlib import Path
-          text=Path('/tmp/updater.yml').read_text(encoding='utf-8')
-          start="          python3 <<'PY'\n"
-          end="\n          PY\n"
+
+          text = Path('/tmp/updater.yml').read_text(encoding='utf-8')
+          start = "          python3 <<'PY'\n"
+          end = "\n          PY\n"
           if start not in text or end not in text:
               raise SystemExit('embedded updater block not found')
-          block=text.split(start,1)[1].split(end,1)[0]
-          lines=[]
+          block = text.split(start, 1)[1].split(end, 1)[0]
+          lines = []
           for line in block.splitlines():
               lines.append(line[10:] if line.startswith('          ') else line)
-          script='\n'.join(lines)+'\n'
+          script = '\n'.join(lines) + '\n'
 
-          replacements={
-            "text = replace_once(text, needle, addition, 'template validation insertion')": """marker = \"    });\\n  });\\n  return data;\"\nif marker not in text:\n    raise SystemExit('template validation end marker missing')\ntext = text.replace(marker, addition + marker, 1)""",
-            "text = replace_once(text, old, new, 'fixture beat fields')": """target = \"    visualMode: mode,\\n\"\nif text.count(target) < 1:\n    raise SystemExit(f'fixture visualMode target count={text.count(target)}')\nfields = '''    visualTemplate: templateForMode[mode],\n    templateConfig: {\n      variant: mode === \"causal-diagram\" ? \"left-to-right\" : mode === \"stock-comparison\" ? \"center-zero\" : \"default\",\n      comparisonBasis: [\"number-comparison\", \"chart\", \"stock-comparison\"].includes(mode) ? `TEST BASIS ${number}-${beatNumber}` : null,\n      dataBasis: \"TEST TIMELINE BASIS\",\n      nodeOrder: mode === \"causal-diagram\" ? nodes.map((node) => node.nodeId) : [],\n      laneLabels: [],\n      outcomeNodeId: null,\n    },\n'''\ntext = text.replace(target, target + fields, 1)""",
-            "text = replace_once(text, old, new, 'fixture entity override')": """target = '          visualMode: \"text-focus\",\\n'\nif text.count(target) != 1:\n    raise SystemExit(f'fixture entity visualMode target count={text.count(target)}')\nfields = '''          visualTemplate: \"entity-card-full\",\n          templateConfig: {variant: \"prebuilt-card\", comparisonBasis: null, dataBasis: \"TEST TIMELINE BASIS\", nodeOrder: [], laneLabels: [], outcomeNodeId: null},\n'''\ntext = text.replace(target, target + fields, 1)"""
+          replacements = {
+              "text = replace_once(text, needle, addition, 'template validation insertion')": """marker = \"    });\\n  });\\n  return data;\"\nif marker not in text:\n    raise SystemExit('template validation end marker missing')\ntext = text.replace(marker, addition + marker, 1)""",
+              "text = replace_once(text, old, new, 'fixture beat fields')": """target = \"    visualMode: mode,\\n\"\nif text.count(target) < 1:\n    raise SystemExit(f'fixture visualMode target count={text.count(target)}')\nfields = '''    visualTemplate: templateForMode[mode],\n    templateConfig: {\n      variant: mode === \"causal-diagram\" ? \"left-to-right\" : mode === \"stock-comparison\" ? \"center-zero\" : \"default\",\n      comparisonBasis: [\"number-comparison\", \"chart\", \"stock-comparison\"].includes(mode) ? `TEST BASIS ${number}-${beatNumber}` : null,\n      dataBasis: \"TEST TIMELINE BASIS\",\n      nodeOrder: mode === \"causal-diagram\" ? nodes.map((node) => node.nodeId) : [],\n      laneLabels: [],\n      outcomeNodeId: null,\n    },\n'''\ntext = text.replace(target, target + fields, 1)""",
+              "text = replace_once(text, old, new, 'fixture entity override')": """target = '          visualMode: \"text-focus\",\\n'\nif text.count(target) != 1:\n    raise SystemExit(f'fixture entity visualMode target count={text.count(target)}')\nfields = '''          visualTemplate: \"entity-card-full\",\n          templateConfig: {variant: \"prebuilt-card\", comparisonBasis: null, dataBasis: \"TEST TIMELINE BASIS\", nodeOrder: [], laneLabels: [], outcomeNodeId: null},\n'''\ntext = text.replace(target, target + fields, 1)""",
           }
-          for old,new in replacements.items():
+          for old, new in replacements.items():
               if script.count(old) != 1:
                   raise SystemExit(f'patch target count={script.count(old)} for {old}')
-              script=script.replace(old,new,1)
-          Path('/tmp/update_visual_contract.py').write_text(script,encoding='utf-8')
+              script = script.replace(old, new, 1)
+
+          switch_tail = "if count != 1: raise SystemExit(f'switch replacement count={count}')\npath.write_text(text, encoding='utf-8')"
+          switch_replacement = """if count != 1: raise SystemExit(f'switch replacement count={count}')
+if 'const TailwindHeadwind:' not in text:
+    causal_marker = 'const CausalDiagram: React.FC<{content: PublicMainContent}> = ({content}) => {'
+    if text.count(causal_marker) != 1:
+        raise SystemExit(f'causal marker count={text.count(causal_marker)}')
+    text = text.replace(causal_marker, tailwind + causal_marker, 1)
+legacy_marker = 'export const SpecVisualMode: React.FC<{content: PublicMainContent}> = ({content}) => {'
+if text.count(legacy_marker) != 1:
+    raise SystemExit(f'visual renderer marker count={text.count(legacy_marker)}')
+legacy_uses = '''void NumberComparison;
+void Timeline;
+void Chart;
+void CausalDiagram;
+void StockComparison;
+
+'''
+text = text.replace(legacy_marker, legacy_uses + legacy_marker, 1)
+path.write_text(text, encoding='utf-8')"""
+          if script.count(switch_tail) != 1:
+              raise SystemExit(f'switch tail patch target count={script.count(switch_tail)}')
+          script = script.replace(switch_tail, switch_replacement, 1)
+
+          Path('/tmp/update_visual_contract.py').write_text(script, encoding='utf-8')
           PY
           python3 /tmp/update_visual_contract.py 2>&1 | tee /tmp/apply.log
 
@@ -70,15 +95,18 @@ jobs:
 
       - name: Validate explicit contract
         id: validate
+        shell: bash
         run: |
           set -euo pipefail
-          npm run typecheck
-          npm run test:spec
-          npm run build
-          npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
-          grep -R '"visualTemplate"' render-specs/2026-07-31/render_spec.json >/dev/null
-          grep -R 'switch (content.visualTemplate)' src/components/spec/SpecVisualModes.tsx >/dev/null
-          ! grep -R 'switch (content.renderKind)' src/components/spec/SpecVisualModes.tsx
+          {
+            npm run typecheck
+            npm run test:spec
+            npm run build
+            npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
+            grep -R '"visualTemplate"' render-specs/2026-07-31/render_spec.json >/dev/null
+            grep -R 'switch (content.visualTemplate)' src/components/spec/SpecVisualModes.tsx >/dev/null
+            ! grep -R 'switch (content.renderKind)' src/components/spec/SpecVisualModes.tsx
+          } 2>&1 | tee /tmp/validate.log
 
       - name: Commit requested files
         id: commit
@@ -105,7 +133,8 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const applyLog = fs.existsSync('/tmp/apply.log') ? fs.readFileSync('/tmp/apply.log', 'utf8').slice(-3500) : 'no apply log';
+            const applyLog = fs.existsSync('/tmp/apply.log') ? fs.readFileSync('/tmp/apply.log', 'utf8').slice(-2500) : 'no apply log';
+            const validateLog = fs.existsSync('/tmp/validate.log') ? fs.readFileSync('/tmp/validate.log', 'utf8').slice(-5000) : 'no validate log';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -120,8 +149,13 @@ jobs:
                 'PREVIEW_NOT_RUN=true',
                 'FINAL_NOT_RUN=true',
                 '',
+                'APPLY LOG',
                 '```text',
                 applyLog,
+                '```',
+                'VALIDATE LOG',
+                '```text',
+                validateLog,
                 '```'
               ].join('\n')
             });
