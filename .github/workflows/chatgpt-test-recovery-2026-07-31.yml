@@ -8,8 +8,8 @@ on:
       - ".chatgpt-ingest/2026-07-31/recovery-trigger.txt"
 
 permissions:
-  contents: write
   actions: write
+  contents: read
   issues: write
 
 concurrency:
@@ -17,151 +17,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  revise-validate-and-retry:
+  redispatch-gate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    env:
-      EPISODE_DATE: "2026-07-31"
-      ORIGINAL_MD_SHA256: "121f1067e1d289173520491ef9158f888ac33514f7abdc94c9e6c5bf1735bc89"
-      ORIGINAL_SPEC_SHA256: "5e028ffc2bc8af2bd0f1dbf32c58eb62ccd4efaec3071ebaf2d9e1d32ff2bc54"
-      EXPECTED_REVISED_MD_SHA256: "d344976c2fa8b5f924f812f2ba122d0f7e8071f3dc99473942315bcfb5dbb9b0"
-      EXPECTED_REVISED_SPEC_SHA256: "a58c085fca1c4efaacf67ced452300b5362febb6601cae23ff136aef15e780d6"
-      SHORTENED_REASON: "確認済みの主役因果と反対材料だけで説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。"
-
+    timeout-minutes: 5
     steps:
-      - name: Checkout recovery branch
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Switch to latest main and verify original daily inputs
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          git checkout -B main origin/main
-          MD="episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
-          SPEC="render-specs/${EPISODE_DATE}/render_spec.json"
-          test -s "$MD"
-          test -s "$SPEC"
-          test "$(sha256sum "$MD" | awk '{print $1}')" = "$ORIGINAL_MD_SHA256"
-          test "$(sha256sum "$SPEC" | awk '{print $1}')" = "$ORIGINAL_SPEC_SHA256"
-
-      - name: Apply ChatGPT-approved shortened-episode correction
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          date = os.environ["EPISODE_DATE"]
-          reason = os.environ["SHORTENED_REASON"]
-          md_path = Path(f"episode-packages/{date}/episode_package_{date}.md")
-          spec_path = Path(f"render-specs/{date}/render_spec.json")
-
-          text = md_path.read_text(encoding="utf-8")
-          replacements = {
-              "- 目標音声尺：480〜540秒": (
-                  "- 音声尺区分：明示的な短縮回\n"
-                  "- Charon実測音声尺：403.2秒（production timeline実測）\n"
-                  f"- 短縮理由：{reason}"
-              ),
-              "- repository正式validator：GitHub Actions実行前のため未実行":
-                  "- repository正式validator：pass（GitHub Actions Run 30783539322）",
-              "合格（GitHub Actions投入前にrepository正式validatorが必要）":
-                  "合格（repository正式validator pass、実測尺を明示的な短縮回として反映）",
-              "- render_spec repository正式validator：未実行":
-                  "- render_spec repository正式validator：pass",
-              "repository正式validatorを通過した後に可。":
-                  "可（repository正式validator pass、Charon実測403.2秒を明示的な短縮回として反映済み）。",
-          }
-          for old, new in replacements.items():
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f"expected exactly one MD replacement for {old!r}, got {count}")
-              text = text.replace(old, new)
-          md_path.write_text(text, encoding="utf-8")
-
-          spec = json.loads(spec_path.read_text(encoding="utf-8"))
-          if spec.get("episode", {}).get("durationMode") != "standard":
-              raise SystemExit("expected original durationMode=standard")
-          if spec["episode"].get("shortenedReason") is not None:
-              raise SystemExit("expected original shortenedReason=null")
-          spec["episode"]["durationMode"] = "shortened"
-          spec["episode"]["shortenedReason"] = reason
-          spec_path.write_text(
-              json.dumps(spec, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8",
-          )
-          PY
-
-          MD="episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
-          SPEC="render-specs/${EPISODE_DATE}/render_spec.json"
-          test "$(sha256sum "$MD" | awk '{print $1}')" = "$EXPECTED_REVISED_MD_SHA256"
-          test "$(sha256sum "$SPEC" | awk '{print $1}')" = "$EXPECTED_REVISED_SPEC_SHA256"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run formal validator on revised spec
-        run: npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
-
-      - name: Create revised production-ready manifest
-        run: npm run episode:spec:ready -- "$EPISODE_DATE" --consistency-pass
-
-      - name: Verify revised production-ready contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          READY="render-specs/${EPISODE_DATE}/production_ready.json"
-          jq -e \
-            --arg date "$EPISODE_DATE" \
-            --arg md_sha "$EXPECTED_REVISED_MD_SHA256" \
-            --arg spec_sha "$EXPECTED_REVISED_SPEC_SHA256" \
-            '.version == 1
-             and .status == "ready"
-             and .episodeDate == $date
-             and .renderSpecSha256 == $spec_sha
-             and .episodePackageSha256 == $md_sha
-             and .validatorStatus == "pass"
-             and .consistencyStatus == "pass"
-             and .unresolvedStateCount == 0' \
-            "$READY" >/dev/null
-
-      - name: Commit revised package atomically to main
-        id: publish
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
-            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md" \
-            "render-specs/${EPISODE_DATE}/render_spec.json" \
-            "render-specs/${EPISODE_DATE}/production_ready.json"
-          git commit -m "Mark Nasdaq Cafe ${EPISODE_DATE} as measured shortened episode"
-          git push origin HEAD:main
-          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Dispatch scheduled preview gate for revised input
+      - name: Dispatch scheduled gate for current revised input
         id: dispatch
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          BODY="$(jq -n \
-            --arg ref "main" \
-            --arg date "$EPISODE_DATE" \
-            '{ref: $ref, inputs: {episode_date_override: $date}}')"
+          BODY='{"ref":"main","inputs":{"episode_date_override":"2026-07-31"}}'
           RESPONSE="$(gh api \
             --method POST \
             -H 'Accept: application/vnd.github+json' \
@@ -174,35 +41,24 @@ jobs:
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
           echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
 
-      - name: Report recovery success
+      - name: Report gate redispatch
         if: success()
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          PUBLISHED_SHA: ${{ steps.publish.outputs.commit_sha }}
           GATE_RUN_ID: ${{ steps.dispatch.outputs.run_id }}
           GATE_RUN_URL: ${{ steps.dispatch.outputs.run_url }}
         run: |
           gh issue create \
-            --title "TEST RECOVERY ${EPISODE_DATE} SUCCESS run ${GITHUB_RUN_ID}" \
-            --body "$(cat <<EOF
-          The measured 403.2-second narration was classified as an explicit shortened episode without changing narration, scenes, visual beats, market causality, or assets.
+            --title "TEST RECOVERY GATE REDISPATCH 2026-07-31 run ${GATE_RUN_ID}" \
+            --body "Gate redispatch for duplicate/active-run inspection: ${GATE_RUN_URL}"
 
-          - Revised episode package SHA-256: \`${EXPECTED_REVISED_MD_SHA256}\`
-          - Revised render spec SHA-256: \`${EXPECTED_REVISED_SPEC_SHA256}\`
-          - Published main commit: \`${PUBLISHED_SHA}\`
-          - Scheduled gate run ID: \`${GATE_RUN_ID}\`
-          - Scheduled gate URL: ${GATE_RUN_URL}
-          - Recovery workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-          EOF
-          )"
-
-      - name: Report recovery failure
+      - name: Report gate redispatch failure
         if: failure()
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh issue create \
-            --title "TEST RECOVERY ${EPISODE_DATE} FAILED run ${GITHUB_RUN_ID}" \
-            --body "The explicit-shortened recovery failed. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            --title "TEST RECOVERY GATE REDISPATCH 2026-07-31 FAILED ${GITHUB_RUN_ID}" \
+            --body "Gate redispatch failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
