@@ -1,0 +1,139 @@
+name: ChatGPT Retest Shortened Preview Status
+
+on:
+  push:
+    branches:
+      - test-ingest-2026-07-31
+    paths:
+      - ".chatgpt-ingest/2026-07-31/retest-status-trigger.txt"
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  patch-validate-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EPISODE_DATE: "2026-07-31"
+      TARGET_BRANCH: "retest-shortened-preview-status"
+      OLD_REASON: "確認済みの主役因果と反対材料だけで説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。"
+      NEW_REASON: "Charon実測403.2秒で確認済みの主役因果と反対材料の説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。"
+      EXPECTED_MD_SHA256: "6cc8f0f924b07b625fec421acab0735a27fbab6caf74a75722674ba7f4aa80b3"
+      EXPECTED_SPEC_SHA256: "f94a16574d44611efb23e0596274db1cb5f7b2c6b2d5f663dd76042026a2524c"
+
+    steps:
+      - name: Checkout target feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+
+      - name: Apply exact shortened-reason clarification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          date = os.environ["EPISODE_DATE"]
+          old = os.environ["OLD_REASON"]
+          new = os.environ["NEW_REASON"]
+          md_path = Path(f"episode-packages/{date}/episode_package_{date}.md")
+          spec_path = Path(f"render-specs/{date}/render_spec.json")
+
+          text = md_path.read_text(encoding="utf-8")
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f"expected one old shortened reason in MD, got {count}")
+          text = text.replace(old, new)
+          md_path.write_text(text, encoding="utf-8")
+
+          spec = json.loads(spec_path.read_text(encoding="utf-8"))
+          episode = spec.get("episode")
+          if not isinstance(episode, dict):
+              raise SystemExit("render_spec is missing episode")
+          if episode.get("durationMode") != "shortened":
+              raise SystemExit("durationMode is not shortened")
+          if episode.get("shortenedReason") != old:
+              raise SystemExit("unexpected existing shortenedReason")
+          episode["shortenedReason"] = new
+          spec_path.write_text(
+              json.dumps(spec, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          MD="episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+          SPEC="render-specs/${EPISODE_DATE}/render_spec.json"
+          test "$(sha256sum "$MD" | awk '{print $1}')" = "$EXPECTED_MD_SHA256"
+          test "$(sha256sum "$SPEC" | awk '{print $1}')" = "$EXPECTED_SPEC_SHA256"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run formal validator
+        run: npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
+
+      - name: Regenerate production-ready manifest
+        run: npm run episode:spec:ready -- "$EPISODE_DATE" --consistency-pass
+
+      - name: Verify production-ready hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          READY="render-specs/${EPISODE_DATE}/production_ready.json"
+          jq -e \
+            --arg md_sha "$EXPECTED_MD_SHA256" \
+            --arg spec_sha "$EXPECTED_SPEC_SHA256" \
+            '.renderSpecSha256 == $spec_sha
+             and .episodePackageSha256 == $md_sha
+             and .validatorStatus == "pass"
+             and .consistencyStatus == "pass"
+             and .unresolvedStateCount == 0' \
+            "$READY" >/dev/null
+
+      - name: Commit verified package to feature branch
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md" \
+            "render-specs/${EPISODE_DATE}/render_spec.json" \
+            "render-specs/${EPISODE_DATE}/production_ready.json"
+          git commit -m "Clarify measured shortened duration for ${EPISODE_DATE}"
+          git push origin "HEAD:${TARGET_BRANCH}"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report feature branch ready
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ steps.publish.outputs.commit_sha }}
+        run: |
+          gh issue create \
+            --title "TEST RETEST PACKAGE READY ${EPISODE_DATE} ${COMMIT_SHA}" \
+            --body "Formal validator passed and the clarified shortened package was pushed to \`${TARGET_BRANCH}\`.\n\n- MD SHA: \`${EXPECTED_MD_SHA256}\`\n- Spec SHA: \`${EXPECTED_SPEC_SHA256}\`\n- Commit: \`${COMMIT_SHA}\`"
+
+      - name: Report failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "TEST RETEST PACKAGE FAILED ${GITHUB_RUN_ID}" \
+            --body "Retest package preparation failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
