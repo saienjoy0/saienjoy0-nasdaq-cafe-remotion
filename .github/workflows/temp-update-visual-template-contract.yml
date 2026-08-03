@@ -1,0 +1,469 @@
+name: TEMP Update Visual Template Contract
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  update:
+    if: github.event.issue.title == 'RUN VISUAL TEMPLATE CONTRACT UPDATE 2026-08-03'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/spec-video-legibility
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply explicit Visual Template contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import json, re
+
+          def replace_once(text, old, new, label):
+              if text.count(old) != 1:
+                  raise SystemExit(f"{label}: expected exactly one match, got {text.count(old)}")
+              return text.replace(old, new, 1)
+
+          path = Path('src/spec/render-spec.ts')
+          text = path.read_text(encoding='utf-8')
+          old = '''export const specVisualModeSchema = z.enum([
+            "conclusion-card", "number-comparison", "expected-actual-gap", "timeline",
+            "chart", "causal-diagram", "stock-comparison", "news-media",
+            "verification-points", "text-focus",
+          ]);
+          export const visualBeatFunctionSchema = z.enum(['''
+          new = '''export const specVisualModeSchema = z.enum([
+            "conclusion-card", "number-comparison", "expected-actual-gap", "timeline",
+            "chart", "causal-diagram", "stock-comparison", "news-media",
+            "verification-points", "text-focus",
+          ]);
+          export const visualTemplateSchema = z.enum([
+            "opening-contradiction", "closing-recap", "conclusion-card",
+            "expected-actual-bullet", "expected-actual-gap-flow", "metric-comparison-board",
+            "index-return-bars", "diverging-stock-bars", "causal-lane",
+            "tailwind-headwind", "evidence-boundary", "verification-checklist",
+            "verification-matrix", "analogy-steps", "entity-card-full",
+            "news-media", "text-focus",
+          ]);
+          export const visualTemplateVariantSchema = z.enum([
+            "default", "left-to-right", "zero-baseline", "center-zero", "two-lane",
+            "confirmed-vs-unconfirmed", "strengthen-vs-weaken", "prebuilt-card",
+          ]);
+          const visualTemplateConfigSchema = z.object({
+            variant: visualTemplateVariantSchema,
+            comparisonBasis: nullableText,
+            dataBasis: nonEmptyText,
+            nodeOrder: z.array(safeId).max(4),
+            laneLabels: z.array(nonEmptyText).max(2),
+            outcomeNodeId: safeId.nullable(),
+          }).strict();
+          export const visualBeatFunctionSchema = z.enum(['''
+          text = replace_once(text, old, new, 'render-spec template schemas')
+          old = '''  screenState: screenStateSchema,
+            visualMode: specVisualModeSchema,
+            contentType: nonEmptyText,'''
+          new = '''  screenState: screenStateSchema,
+            visualMode: specVisualModeSchema,
+            visualTemplate: visualTemplateSchema,
+            templateConfig: visualTemplateConfigSchema,
+            contentType: nonEmptyText,'''
+          text = replace_once(text, old, new, 'render-spec visual beat fields')
+          text = replace_once(text, 'schemaVersion: z.literal("2.1.0")', 'schemaVersion: z.literal("2.2.0")', 'render-spec version')
+          path.write_text(text, encoding='utf-8')
+
+          path = Path('src/spec/public-view-model.ts')
+          text = path.read_text(encoding='utf-8')
+          old = '''  primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
+            beatProgress: number;'''
+          new = '''  primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
+            visualTemplate: ProductionScene["visualBeats"][number]["visualTemplate"];
+            templateConfig: ProductionScene["visualBeats"][number]["templateConfig"];
+            beatProgress: number;'''
+          text = replace_once(text, old, new, 'public view model type')
+          old = '''          primaryFunction: beat.primaryFunction,
+                    beatProgress,'''
+          new = '''          primaryFunction: beat.primaryFunction,
+                    visualTemplate: beat.visualTemplate,
+                    templateConfig: beat.templateConfig,
+                    beatProgress,'''
+          text = replace_once(text, old, new, 'public view model construction')
+          path.write_text(text, encoding='utf-8')
+
+          path = Path('src/components/spec/SpecVisualModes.tsx')
+          text = path.read_text(encoding='utf-8')
+          opening = re.compile(r'const OpeningContradiction: React\.FC<\{content: PublicMainContent\}> = \(\{content\}\) => \{.*?\n\};\n\nconst ClosingRecap:', re.S)
+          opening_replacement = '''const OpeningContradiction: React.FC<{content: PublicMainContent}> = ({content}) => {
+            const card = content.cards[0];
+            const market = card?.lines.find((line) => line.label.includes("NASDAQ"));
+            const center = card?.lines.find((line) => line.label.includes("中心"));
+            const items = content.texts.filter((text) => !text.includes("NASDAQ")).slice(0, 3);
+            return <Surface style={{padding: "34px 44px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 22}} accent={colors.emphasis}>
+              <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", ...stagedStyle(content.beatProgress, 0, 5)}}>
+                <div><Label tone="positive">昨夜の方向</Label><div style={{marginTop: 12, fontSize: 36, color: colors.mutedInk, fontWeight: 850}}>NASDAQ</div></div>
+                <div style={{fontSize: 88, lineHeight: 1, fontWeight: 950, color: colors.positive}}>{market?.value ?? content.texts.find((text) => text.includes("NASDAQ")) ?? "+1.00%"}</div>
+              </div>
+              <div style={{display: "grid", gridTemplateColumns: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 18, alignItems: "stretch"}}>
+                {items.map((item, index) => <div key={item} style={{...stagedStyle(content.beatProgress, index + 1, 5), borderRadius: 22, padding: "24px 22px", background: index === 0 ? "rgba(12,138,102,.10)" : index === 1 ? "rgba(184,107,0,.10)" : "rgba(199,62,77,.10)", border: `3px solid ${index === 0 ? colors.positive : index === 1 ? colors.warning : colors.negative}`, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 38, lineHeight: 1.28, fontWeight: 950}}>{item}</div>)}
+              </div>
+              <div style={{...stagedStyle(content.beatProgress, 4, 5), display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24}}>
+                <div style={{fontSize: 31, color: colors.mutedInk, fontWeight: 850}}>全部のテックが同じ理由で上がった夜ではない</div>
+                <div style={{fontSize: 36, color: colors.emphasis, fontWeight: 950}}>{center?.value ?? "市場は何を評価した？"}</div>
+              </div>
+            </Surface>;
+          };
+
+          const ClosingRecap:'''
+          text, count = opening.subn(opening_replacement, text, count=1)
+          if count != 1: raise SystemExit(f'opening replacement count={count}')
+          closing = re.compile(r'const ClosingRecap: React\.FC<\{content: PublicMainContent\}> = \(\{content\}\) => \{.*?\n\};\n\nconst ConclusionCard:', re.S)
+          closing_replacement = '''const ClosingRecap: React.FC<{content: PublicMainContent}> = ({content}) => {
+            const line = content.cards[0]?.lines[0];
+            const conclusion = line?.value ?? content.texts.at(-1) ?? content.headline;
+            const chips = content.texts.filter((text) => text !== conclusion).slice(0, 3);
+            return <Surface style={{padding: "42px 54px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}} accent={colors.emphasis}>
+              <div style={{...stagedStyle(content.beatProgress, 0, 5)}}><Label tone="emphasis">今朝の結論</Label></div>
+              <div style={{display: "flex", gap: 16, marginTop: 28, width: "100%", justifyContent: "center"}}>{chips.map((chip, index) => <div key={chip} style={{...stagedStyle(content.beatProgress, index + 1, 5), flex: 1, maxWidth: 350, padding: "16px 18px", borderRadius: 18, background: "rgba(83,118,146,.10)", border: "2px solid rgba(83,118,146,.35)", fontSize: 28, fontWeight: 900}}>{chip}</div>)}</div>
+              <div style={{...stagedStyle(content.beatProgress, 4, 5), marginTop: 34, fontSize: 82, lineHeight: 1.15, color: colors.emphasis, fontWeight: 950}}>{conclusion}</div>
+              <div style={{marginTop: 34, width: "62%", height: 6, borderRadius: 999, background: `linear-gradient(90deg,transparent,${colors.cyan},transparent)`}}/>
+            </Surface>;
+          };
+
+          const ConclusionCard:'''
+          text, count = closing.subn(closing_replacement, text, count=1)
+          if count != 1: raise SystemExit(f'closing replacement count={count}')
+          text = replace_once(text, '''const ConclusionCard: React.FC<{content: PublicMainContent}> = ({content}) => {
+            if (content.sceneNumber === 1) return <OpeningContradiction content={content}/>;
+            if (content.sceneNumber === 9) return <ClosingRecap content={content}/>;
+            const card = content.cards[0];''', '''const ConclusionCard: React.FC<{content: PublicMainContent}> = ({content}) => {
+            const card = content.cards[0];''', 'remove conclusion scene inference')
+          text = replace_once(text, '''const TextFocus: React.FC<{content: PublicMainContent}> = ({content}) => {
+            if (content.primaryElement.includes("たとえ")) return <AnalogySteps content={content}/>;
+            return <Surface''', '''const TextFocus: React.FC<{content: PublicMainContent}> = ({content}) => {
+            return <Surface''', 'remove text inference')
+          marker = 'const CausalDiagram: React.FC<{content: PublicMainContent}> = ({content}) => {'
+          tailwind = '''const splitLaneTexts = (content: PublicMainContent, label: string) => content.texts
+            .filter((text) => text.startsWith(`${label}｜`))
+            .map((text) => text.slice(label.length + 1));
+
+          const TailwindHeadwind: React.FC<{content: PublicMainContent}> = ({content}) => {
+            const [tailwindLabel = "追い風", headwindLabel = "向かい風"] = content.templateConfig.laneLabels;
+            const lanes = [
+              {label: tailwindLabel, items: splitLaneTexts(content, tailwindLabel), tone: "positive" as const},
+              {label: headwindLabel, items: splitLaneTexts(content, headwindLabel), tone: "warning" as const},
+            ];
+            return <Surface style={{padding: "34px 40px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 26}} accent={colors.emphasis}>
+              {lanes.map((lane, laneIndex) => <div key={lane.label} style={{...stagedStyle(content.beatProgress, laneIndex, 2), borderRadius: 24, padding: "30px 30px", background: `${toneColor(lane.tone)}12`, border: `3px solid ${toneColor(lane.tone)}`, display: "flex", flexDirection: "column"}}>
+                <Label tone={lane.tone}>{lane.label}</Label>
+                <div style={{marginTop: 26, display: "grid", gap: 18}}>{lane.items.map((item, index) => <div key={item} style={{display: "grid", gridTemplateColumns: "42px 1fr", gap: 14, alignItems: "start", fontSize: 34, lineHeight: 1.35, fontWeight: 900}}><span style={{color: toneColor(lane.tone)}}>{index + 1}</span><span>{item}</span></div>)}</div>
+              </div>)}
+            </Surface>;
+          };
+
+          '''
+          if text.count(marker) != 1: raise SystemExit('causal marker missing')
+          text = text.replace(marker, tailwind + marker, 1)
+          matrix = re.compile(r'const VerificationMatrix: React\.FC<\{content: PublicMainContent\}> = \(\{content\}\) => \{.*?\n\};\n\nconst CausalDiagram:', re.S)
+          matrix_replacement = '''const VerificationMatrix: React.FC<{content: PublicMainContent}> = ({content}) => {
+            const [strengthenLabel = "強まる", weakenLabel = "弱まる"] = content.templateConfig.laneLabels;
+            const lanes = [
+              {label: strengthenLabel, items: splitLaneTexts(content, strengthenLabel), tone: "positive" as const},
+              {label: weakenLabel, items: splitLaneTexts(content, weakenLabel), tone: "warning" as const},
+            ];
+            return <Surface style={{padding: "34px 40px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 26}} accent={colors.emphasis}>
+              {lanes.map((lane, laneIndex) => <div key={lane.label} style={{...stagedStyle(content.beatProgress, laneIndex, 2), borderRadius: 24, padding: "30px", background: `${toneColor(lane.tone)}12`, border: `3px solid ${toneColor(lane.tone)}`}}>
+                <Label tone={lane.tone}>仮説が{lane.label}</Label>
+                <div style={{marginTop: 24, display: "grid", gap: 18}}>{lane.items.map((item) => <div key={item} style={{padding: "18px 20px", borderRadius: 18, background: "rgba(255,255,255,.55)", fontSize: 32, lineHeight: 1.35, fontWeight: 900}}>{item}</div>)}</div>
+              </div>)}
+            </Surface>;
+          };
+
+          const CausalDiagram:'''
+          text, count = matrix.subn(matrix_replacement, text, count=1)
+          if count != 1: raise SystemExit(f'matrix replacement count={count}')
+          switch = re.compile(r'export const SpecVisualMode: React\.FC<\{content: PublicMainContent\}> = \(\{content\}\) => \{.*?\n\};\s*$', re.S)
+          switch_replacement = '''export const SpecVisualMode: React.FC<{content: PublicMainContent}> = ({content}) => {
+            switch (content.visualTemplate) {
+              case "opening-contradiction": return <OpeningContradiction content={content}/>;
+              case "closing-recap": return <ClosingRecap content={content}/>;
+              case "conclusion-card": return <ConclusionCard content={content}/>;
+              case "expected-actual-bullet": return <ExpectedActualBullet content={content}/>;
+              case "expected-actual-gap-flow": return <ExpectedActualGap content={content}/>;
+              case "metric-comparison-board": return <EvidenceMetricBoard content={content}/>;
+              case "index-return-bars": return <ReturnBars content={content}/>;
+              case "diverging-stock-bars": return <ReturnBars content={content} diverging/>;
+              case "causal-lane": return <CausalLane content={content}/>;
+              case "tailwind-headwind": return <TailwindHeadwind content={content}/>;
+              case "evidence-boundary": return <EvidenceBoundary content={content}/>;
+              case "verification-checklist": return <VerificationPoints content={content}/>;
+              case "verification-matrix": return <VerificationMatrix content={content}/>;
+              case "analogy-steps": return <AnalogySteps content={content}/>;
+              case "entity-card-full": return <EntityFocus content={content}/>;
+              case "news-media": return <NewsMedia content={content}/>;
+              case "text-focus": return <TextFocus content={content}/>;
+            }
+          };
+          '''
+          text, count = switch.subn(switch_replacement, text, count=1)
+          if count != 1: raise SystemExit(f'switch replacement count={count}')
+          path.write_text(text, encoding='utf-8')
+
+          path = Path('src/spec/validate-render-layout.ts')
+          text = path.read_text(encoding='utf-8')
+          needle = '''      if (beat.visualMode === "causal-diagram") {
+                assertCausalShape(
+                  visibleNodes.map((node) => node.nodeId),
+                  visibleArrows,
+                  `${path}.objectIds`,
+                );
+              }
+          '''
+          addition = '''      if (beat.visualMode === "causal-diagram") {
+                assertCausalShape(
+                  visibleNodes.map((node) => node.nodeId),
+                  visibleArrows,
+                  `${path}.objectIds`,
+                );
+              }
+
+              const template = beat.visualTemplate;
+              const values = visibleNumbers.map((number) => Number(number.value.replace(/[^0-9+\\-.]/g, ""))).filter(Number.isFinite);
+              const requiresNumbers = ["expected-actual-bullet", "metric-comparison-board", "index-return-bars", "diverging-stock-bars"].includes(template);
+              if (requiresNumbers && (visibleNumbers.length < 2 || visibleNumbers.length > 4)) throw new Error(`${path}.objectIds: ${template} requires two to four visible numbers`);
+              if (template === "diverging-stock-bars" && !(values.some((value) => value < 0) && values.some((value) => value >= 0))) throw new Error(`${path}.objectIds: diverging-stock-bars requires both negative and non-negative values`);
+              if (template === "expected-actual-gap-flow") {
+                const roles = new Set(visibleCards.map((card) => card.role));
+                for (const role of ["expected", "actual", "gap"] as const) if (!roles.has(role)) throw new Error(`${path}.objectIds: expected-actual-gap-flow missing ${role} card`);
+              }
+              if (template === "causal-lane") {
+                assertCausalShape(visibleNodes.map((node) => node.nodeId), visibleArrows, `${path}.objectIds`);
+                if (beat.templateConfig.nodeOrder.length !== visibleNodes.length || beat.templateConfig.nodeOrder.length < 2) throw new Error(`${path}.templateConfig.nodeOrder: causal-lane requires the complete two-to-four node order`);
+                const order = beat.templateConfig.nodeOrder;
+                for (let index = 0; index < order.length - 1; index += 1) if (!visibleArrows.some((arrow) => arrow.fromNodeId === order[index] && arrow.toNodeId === order[index + 1])) throw new Error(`${path}.templateConfig.nodeOrder: missing sequential arrow ${order[index]} -> ${order[index + 1]}`);
+              }
+              if (["tailwind-headwind", "verification-matrix"].includes(template)) {
+                if (beat.templateConfig.laneLabels.length !== 2) throw new Error(`${path}.templateConfig.laneLabels: ${template} requires exactly two lanes`);
+                for (const label of beat.templateConfig.laneLabels) if (!beat.viewerTexts.some((item) => item.startsWith(`${label}｜`))) throw new Error(`${path}.viewerTexts: ${template} requires an item prefixed ${label}｜`);
+              }
+              if (template === "evidence-boundary" && (!scene.uncertainty || beat.viewerTexts.length < 1)) throw new Error(`${path}: evidence-boundary requires confirmed viewer text and uncertainty`);
+              if (template === "verification-checklist") {
+                const itemCount = visibleCards.reduce((total, card) => total + card.lines.length, 0) || beat.viewerTexts.length;
+                if (itemCount < 2 || itemCount > 4) throw new Error(`${path}: verification-checklist requires two to four items`);
+              }
+              if (template === "entity-card-full" && (beat.screenState !== "EntityFocus" || !beat.entity)) throw new Error(`${path}: entity-card-full requires EntityFocus and entity metadata`);
+              if (template === "opening-contradiction" && scene.sceneNumber !== 1) throw new Error(`${path}: opening-contradiction is reserved for Scene 1`);
+              if (template === "closing-recap" && scene.sceneNumber !== 9) throw new Error(`${path}: closing-recap is reserved for Scene 9`);
+          '''
+          text = replace_once(text, needle, addition, 'template validation insertion')
+          path.write_text(text, encoding='utf-8')
+
+          path = Path('scripts/generate-render-spec-fixtures.ts')
+          text = path.read_text(encoding='utf-8')
+          marker = '''const modes = [
+            "conclusion-card", "number-comparison", "expected-actual-gap", "timeline",
+            "chart", "causal-diagram", "stock-comparison", "verification-points", "text-focus",
+          ] as const;
+          '''
+          insert = marker + '''const templateForMode = {
+            "conclusion-card": "conclusion-card",
+            "number-comparison": "metric-comparison-board",
+            "expected-actual-gap": "expected-actual-gap-flow",
+            timeline: "evidence-boundary",
+            chart: "metric-comparison-board",
+            "causal-diagram": "causal-lane",
+            "stock-comparison": "diverging-stock-bars",
+            "verification-points": "verification-checklist",
+            "text-focus": "text-focus",
+          } as const;
+          '''
+          text = replace_once(text, marker, insert, 'fixture template map')
+          old = '''    screenState: defaultScreenState,
+                visualMode: mode,
+                contentType: `TEST ${mode}`,'''
+          new = '''    screenState: defaultScreenState,
+                visualMode: mode,
+                visualTemplate: templateForMode[mode],
+                templateConfig: {
+                  variant: mode === "causal-diagram" ? "left-to-right" : mode === "stock-comparison" ? "center-zero" : "default",
+                  comparisonBasis: ["number-comparison", "chart", "stock-comparison"].includes(mode) ? `TEST BASIS ${number}-${beatNumber}` : null,
+                  dataBasis: "TEST TIMELINE BASIS",
+                  nodeOrder: mode === "causal-diagram" ? nodes.map((node) => node.nodeId) : [],
+                  laneLabels: [],
+                  outcomeNodeId: null,
+                },
+                contentType: `TEST ${mode}`,'''
+          text = replace_once(text, old, new, 'fixture beat fields')
+          old = '''          screenState: "EntityFocus",
+                    visualMode: "text-focus",
+                    contentType: "TEST COMPANY CARD",'''
+          new = '''          screenState: "EntityFocus",
+                    visualMode: "text-focus",
+                    visualTemplate: "entity-card-full",
+                    templateConfig: {variant: "prebuilt-card", comparisonBasis: null, dataBasis: "TEST TIMELINE BASIS", nodeOrder: [], laneLabels: [], outcomeNodeId: null},
+                    contentType: "TEST COMPANY CARD",'''
+          text = replace_once(text, old, new, 'fixture entity override')
+          text = text.replace('schemaVersion: "2.1.0"', 'schemaVersion: "2.2.0"')
+          path.write_text(text, encoding='utf-8')
+
+          comparison_templates = {"expected-actual-bullet", "metric-comparison-board", "index-return-bars", "diverging-stock-bars"}
+          def selected_ids(scene, beat, key):
+              ids=set(beat.get('objectIds',[])); field={'numbers':'numberId','cards':'cardId','nodes':'nodeId','arrows':'arrowId'}[key]
+              return [item for item in scene.get(key,[]) if item.get(field) in ids]
+          def topo_order(scene, beat):
+              nodes=selected_ids(scene,beat,'nodes'); arrows=selected_ids(scene,beat,'arrows'); ids=[n['nodeId'] for n in nodes]
+              if not ids: return [], None, False
+              incoming={i:0 for i in ids}; outgoing={i:[] for i in ids}
+              for a in arrows:
+                  if a['fromNodeId'] in outgoing and a['toNodeId'] in incoming: outgoing[a['fromNodeId']].append(a['toNodeId']); incoming[a['toNodeId']]+=1
+              roots=[i for i in ids if incoming[i]==0]; sinks=[i for i in ids if not outgoing[i]]
+              direct=len(sinks)==1 and all(any(a['fromNodeId']==i and a['toNodeId']==sinks[0] for a in arrows) for i in ids if i!=sinks[0])
+              if direct: return [i for i in ids if i!=sinks[0]]+[sinks[0]], sinks[0], True
+              if len(roots)==1:
+                  order=[]; cur=roots[0]; seen=set()
+                  while cur not in seen:
+                      order.append(cur); seen.add(cur)
+                      if len(outgoing[cur])!=1: break
+                      cur=outgoing[cur][0]
+                  if len(order)==len(ids): return order, sinks[0] if len(sinks)==1 else None, False
+              return ids, sinks[0] if len(sinks)==1 else None, False
+          def choose_template(scene, beat):
+              if beat.get('screenState')=='EntityFocus': return 'entity-card-full'
+              mode=beat.get('visualMode')
+              if scene.get('sceneNumber')==1 and mode=='conclusion-card': return 'opening-contradiction'
+              if scene.get('sceneNumber')==9 and mode=='conclusion-card': return 'closing-recap'
+              mapping={'conclusion-card':'conclusion-card','expected-actual-gap':'expected-actual-gap-flow','number-comparison':'metric-comparison-board','stock-comparison':'diverging-stock-bars','timeline':'evidence-boundary','chart':'metric-comparison-board','verification-points':'verification-checklist','news-media':'news-media','text-focus':'text-focus'}
+              if mode=='causal-diagram': return 'verification-matrix' if topo_order(scene,beat)[2] else 'causal-lane'
+              return mapping.get(mode,'text-focus')
+          variants={'opening-contradiction':'default','closing-recap':'default','conclusion-card':'default','expected-actual-bullet':'zero-baseline','expected-actual-gap-flow':'left-to-right','metric-comparison-board':'default','index-return-bars':'zero-baseline','diverging-stock-bars':'center-zero','causal-lane':'left-to-right','tailwind-headwind':'two-lane','evidence-boundary':'confirmed-vs-unconfirmed','verification-checklist':'default','verification-matrix':'strengthen-vs-weaken','analogy-steps':'left-to-right','entity-card-full':'prebuilt-card','news-media':'default','text-focus':'default'}
+          for spec_path in Path('render-specs').rglob('render_spec.json'):
+              spec=json.loads(spec_path.read_text(encoding='utf-8')); spec['schemaVersion']='2.2.0'
+              for scene in spec.get('scenes',[]):
+                  for beat in scene.get('visualBeats',[]):
+                      template=choose_template(scene,beat); order,outcome,converging=topo_order(scene,beat); lane_labels=[]
+                      if template=='verification-matrix':
+                          lane_labels=['強まる','弱まる']; texts=beat.get('viewerTexts',[]); beat['viewerTexts']=([f'強まる｜{t}' for t in texts[:3]] or ['強まる｜確認条件がそろう'])+[f"弱まる｜{scene.get('uncertainty') or '反対材料が残る'}"]
+                          beat['viewerTexts']=beat['viewerTexts'][:4]
+                      beat['visualTemplate']=template
+                      beat['templateConfig']={'variant':variants[template],'comparisonBasis':beat.get('screenQuestion') if template in comparison_templates else None,'dataBasis':scene.get('timelineBasis') or scene.get('sourceLabel') or '確認済み制作入力','nodeOrder':order if template in {'causal-lane','verification-matrix'} else [],'laneLabels':lane_labels,'outcomeNodeId':outcome if template=='verification-matrix' else None}
+              if spec.get('episode',{}).get('id')=='2026-07-31':
+                  overrides={
+                    'scene-01-beat-001':('opening-contradiction','default',['NASDAQ +1.00%','Amazon +15.32%','SOXX +0.07%','Apple -7.35%'],[],[],None),'scene-01-beat-002':('text-focus','default',None,[],[],None),'scene-02-beat-001':('entity-card-full','prebuilt-card',None,[],[],None),'scene-02-beat-002':('diverging-stock-bars','center-zero',None,[],[],None),'scene-03-beat-001':('expected-actual-bullet','zero-baseline',None,[],[],None),'scene-03-beat-002':('metric-comparison-board','default',None,[],[],None),'scene-04-beat-001':('expected-actual-gap-flow','left-to-right',None,[],[],None),'scene-04-beat-002':('analogy-steps','left-to-right',None,[],[],None),'scene-04-beat-003':('causal-lane','left-to-right',None,['s4-node-spend','s4-node-cloud','s4-node-revenue','s4-node-valuation'],[],None),'scene-05-beat-001':('causal-lane','left-to-right',None,['s5-node-data','s5-node-yield','s5-node-growth'],[],None),'scene-05-beat-002':('tailwind-headwind','two-lane',['追い風｜AWS予想超過→Amazon急騰','向かい風｜強い指標→金利上昇'],[],['追い風','向かい風'],None),'scene-06-beat-001':('evidence-boundary','confirmed-vs-unconfirmed',None,[],[],None),'scene-06-beat-002':('index-return-bars','zero-baseline',None,[],[],None),'scene-07-beat-001':('entity-card-full','prebuilt-card',None,[],[],None),'scene-07-beat-002':('diverging-stock-bars','center-zero',None,[],[],None),'scene-08-beat-001':('verification-checklist','default',None,[],[],None),'scene-08-beat-002':('verification-matrix','strengthen-vs-weaken',['強まる｜クラウド売上継続','強まる｜金利安定・半導体波及','弱まる｜金利上昇継続','弱まる｜SOX・関連銘柄が弱い'],['s8-node-cloud','s8-node-yield','s8-node-semi','s8-node-hyp'],['強まる','弱まる'],'s8-node-hyp'),'scene-09-beat-001':('closing-recap','default',['AWS予想超過','金利は逆風','半導体波及は限定','投資額より回収'],[],[],None)}
+                  for scene in spec['scenes']:
+                      for beat in scene['visualBeats']:
+                          if beat['beatId'] not in overrides: continue
+                          template,variant,texts,order,lanes,outcome=overrides[beat['beatId']]; beat['visualTemplate']=template
+                          if texts is not None: beat['viewerTexts']=texts
+                          beat['templateConfig']={'variant':variant,'comparisonBasis':beat.get('screenQuestion') if template in comparison_templates else None,'dataBasis':scene.get('timelineBasis') or scene.get('sourceLabel') or '確認済み制作入力','nodeOrder':order,'laneLabels':lanes,'outcomeNodeId':outcome}
+              spec_path.write_text(json.dumps(spec,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          ep=Path('episode-packages/2026-07-31/episode_package_2026-07-31.md'); md=ep.read_text(encoding='utf-8')
+          mapping={'scene-01-beat-001':('opening-contradiction','default','NASDAQ→Amazon→SOXX→Apple','同一セッション終値','not-required','not-required','not-required'),'scene-01-beat-002':('text-focus','default','投資額より回収→相殺材料','not-required','not-required','not-required','not-required'),'scene-02-beat-001':('entity-card-full','prebuilt-card','Amazonカード','not-required','not-required','not-required','not-required'),'scene-02-beat-002':('diverging-stock-bars','center-zero','Amazon→SOXX→AMD','前日比・中央ゼロ','not-required','not-required','not-required'),'scene-03-beat-001':('expected-actual-bullet','zero-baseline','市場予想→AWS実績→Gap','億ドル・共通基準','not-required','not-required','not-required'),'scene-03-beat-002':('metric-comparison-board','default','Amazon→Alphabet','前日比','not-required','not-required','not-required'),'scene-04-beat-001':('expected-actual-gap-flow','left-to-right','Expected→Actual→Gap','市場予想と実績','not-required','not-required','Gap'),'scene-04-beat-002':('analogy-steps','left-to-right','道具を買う→使う→成果','not-required','not-required','not-required','成果'),'scene-04-beat-003':('causal-lane','left-to-right','AI設備投資→クラウド利用増→売上成長→株価評価','not-required','s4-node-spend→s4-node-cloud→s4-node-revenue→s4-node-valuation','not-required','s4-node-valuation'),'scene-05-beat-001':('causal-lane','left-to-right','強い経済指標→長期金利上昇→成長株の評価圧力','not-required','s5-node-data→s5-node-yield→s5-node-growth','not-required','s5-node-growth'),'scene-05-beat-002':('tailwind-headwind','two-lane','追い風と向かい風を同時比較','同一セッションの確認材料','not-required','追い風 / 向かい風','NASDAQへの相殺結果'),'scene-06-beat-001':('evidence-boundary','confirmed-vs-unconfirmed','確認できる→断定しない','取引区分と終値','not-required','確認できる / 断定しない','not-required'),'scene-06-beat-002':('index-return-bars','zero-baseline','Composite→Nasdaq-100→SOXX','終値・共通ゼロ基準','not-required','not-required','not-required'),'scene-07-beat-001':('entity-card-full','prebuilt-card','Appleカード','not-required','not-required','not-required','not-required'),'scene-07-beat-002':('diverging-stock-bars','center-zero','Amazon→Apple→NVIDIA→AMD','前日比・中央ゼロ','not-required','not-required','期待への答えで明暗'),'scene-08-beat-001':('verification-checklist','default','クラウド→金利→半導体','今後の確認条件','not-required','not-required','not-required'),'scene-08-beat-002':('verification-matrix','strengthen-vs-weaken','強まる条件→弱まる条件','中心仮説','s8-node-cloud→s8-node-yield→s8-node-semi→s8-node-hyp','強まる / 弱まる','s8-node-hyp'),'scene-09-beat-001':('closing-recap','default','AWS予想超過→金利逆風→半導体限定→結論','本編既出事項','not-required','not-required','投資額より回収')}
+          for beat_id,vals in mapping.items():
+              pattern=re.compile(rf'(- \*\*{re.escape(beat_id)}\*\*\n.*?  - 画面状態：[^\n]+\n)',re.S); match=pattern.search(md)
+              if not match: raise SystemExit(f'episode package beat not found: {beat_id}')
+              template,variant,order,basis,nodes,lanes,outcome=vals
+              addition=f'  - Visual Template ID：{template}\n  - Template Variant：{variant}\n  - 表示順：{order}\n  - 比較基準：{basis}\n  - 入力データの根拠：当該Scene記載の根拠・時系列範囲\n  - ノード順：{nodes}\n  - レーン名：{lanes}\n  - 最終到達点：{outcome}\n'
+              md=md[:match.end()]+addition+md[match.end():]
+          ep.write_text(md,encoding='utf-8')
+
+          Path('docs/12_visual_template_contract.md').write_text('''# Visual Template Contract
+
+`screenState`は画面の役割、`visualMode`は旧来の内容分類、`visualTemplate`は本番で使う具体的な描画テンプレートです。
+
+本番レンダーは`visualTemplate`だけで具体的な見せ方を選びます。Scene番号、文章、数値の正負・単位、ノード形状からテンプレートを推測してはいけません。
+
+## 登録済みテンプレート
+
+- `opening-contradiction`
+- `closing-recap`
+- `conclusion-card`
+- `expected-actual-bullet`
+- `expected-actual-gap-flow`
+- `metric-comparison-board`
+- `index-return-bars`
+- `diverging-stock-bars`
+- `causal-lane`
+- `tailwind-headwind`
+- `evidence-boundary`
+- `verification-checklist`
+- `verification-matrix`
+- `analogy-steps`
+- `entity-card-full`
+- `news-media`
+- `text-focus`
+
+## データ形状
+
+- 時系列点がない場合、ラインチャートを指定しない。
+- 比較は2〜4件、同一単位と比較基準を持つ。
+- 因果は最大4ノード・最大3矢印、左から右の一本道。
+- 二つの対立経路は`tailwind-headwind`。
+- Scene 8で弱まる条件を話す場合、`verification-matrix`に強まる／弱まる両レーンを含める。
+- `objectIds`は表示対象と表示順、`templateConfig.nodeOrder`は因果の読み順を確定する。
+
+GitHub Actions、Codex、Remotionは指定を変更せず、validatorを通った値を機械的に描画します。
+''',encoding='utf-8')
+
+          path=Path('scripts/test-spec-presentation.ts'); text=path.read_text(encoding='utf-8')
+          text=replace_once(text,'''assert.match(publicViewModelSource, /beatProgress/);
+          assert.match(episodeSource, /entityPresentation !== "prebuilt-card"/);''','''assert.match(publicViewModelSource, /visualTemplate: beat\\.visualTemplate/);
+          assert.match(publicViewModelSource, /templateConfig: beat\\.templateConfig/);
+          assert.match(publicViewModelSource, /beatProgress/);
+          assert.match(episodeSource, /entityPresentation !== "prebuilt-card"/);''','presentation explicit view model assertions')
+          text=replace_once(text,'''  "AnalogySteps",
+          ]) {''','''  "AnalogySteps",
+            "TailwindHeadwind",
+          ]) {''','presentation component list')
+          text=replace_once(text,'''assert.doesNotMatch(visualModesSource, /Math\\.cos|Math\\.sin/, "causal diagrams must not use circular auto-layout");''','''assert.match(visualModesSource, /switch \\(content\\.visualTemplate\\)/, "renderer must select the explicit Visual Template ID");
+          assert.doesNotMatch(visualModesSource, /switch \\(content\\.renderKind\\)/, "renderer must not select templates from legacy renderKind");
+          assert.doesNotMatch(visualModesSource, /Math\\.cos|Math\\.sin/, "causal diagrams must not use circular auto-layout");''','presentation switch assertions')
+          path.write_text(text,encoding='utf-8')
+          PY
+
+      - name: Install and regenerate schema
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run episode:spec:schema
+
+      - name: Validate explicit contract
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run test:spec
+          npm run build
+          npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
+          grep -R '"visualTemplate"' render-specs/2026-07-31/render_spec.json >/dev/null
+          grep -R 'switch (content.visualTemplate)' src/components/spec/SpecVisualModes.tsx >/dev/null
+          ! grep -R 'switch (content.renderKind)' src/components/spec/SpecVisualModes.tsx
+
+      - name: Commit requested files
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -- src/spec/render-spec.ts src/spec/public-view-model.ts src/components/spec/SpecVisualModes.tsx src/spec/validate-render-layout.ts scripts/generate-render-spec-fixtures.ts scripts/test-spec-presentation.ts schemas/render_spec.schema.json render-specs episode-packages/2026-07-31/episode_package_2026-07-31.md docs/12_visual_template_contract.md
+          git commit -m "feat: make visual templates explicit in script contract"
+          git push origin HEAD:fix/spec-video-legibility
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report result
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: [`VISUAL_TEMPLATE_CONTRACT_COMMIT=${{ steps.commit.outputs.sha }}`,'TYPECHECK=PASS','TEST_SPEC=PASS','BUILD=PASS','VALIDATOR_2026_07_31=PASS','PREVIEW_NOT_RUN=true','FINAL_NOT_RUN=true'].join('\n')});
