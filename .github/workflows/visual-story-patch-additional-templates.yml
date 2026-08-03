@@ -1,0 +1,65 @@
+name: One-time Additional Visual Template Patch
+
+on:
+  push:
+    branches:
+      - feature/visual-story-engine-v2
+    paths:
+      - ".github/workflows/visual-story-patch-additional-templates.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch-renderer:
+    if: ${{ !contains(github.event.head_commit.message, '[additional-templates]') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/visual-story-engine-v2
+          fetch-depth: 0
+
+      - name: Patch renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('src/components/spec/VisualTemplateRenderer.tsx')
+          source = path.read_text(encoding='utf-8')
+          import_anchor = 'import {SpecVisualMode} from "./SpecVisualModes";\n'
+          import_text = '''import {
+            EntityFocusStoryTemplate,
+            FinalAssemblyTemplate as FinalAssemblyStoryTemplate,
+            FocusMatrixTemplate,
+            HeroNumberTemplate,
+            SplitComparisonTemplate,
+          } from "./AdditionalVisualTemplates";
+          '''
+          if 'AdditionalVisualTemplates' not in source:
+              source = source.replace(import_anchor, import_anchor + import_text, 1)
+          switch_anchor = '  switch (content.visualTemplate) {\n'
+          cases = '''    case "hero-number": return <HeroNumberTemplate content={content}/>;
+              case "split-comparison": return <SplitComparisonTemplate content={content}/>;
+              case "focus-matrix": return <FocusMatrixTemplate content={content}/>;
+              case "final-assembly": return <FinalAssemblyStoryTemplate content={content}/>;
+              case "entity-card-full": return <EntityFocusStoryTemplate content={content}/>;
+          '''
+          if 'case "hero-number"' not in source:
+              source = source.replace(switch_anchor, switch_anchor + cases, 1)
+          source = source.replace('    case "entity-card-full":\n', '', 1)
+          path.write_text(source, encoding='utf-8')
+          PY
+
+      - name: Commit renderer patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/spec/VisualTemplateRenderer.tsx
+          git commit -m "[additional-templates] Connect remaining Visual Story templates"
+          git push origin HEAD:feature/visual-story-engine-v2
