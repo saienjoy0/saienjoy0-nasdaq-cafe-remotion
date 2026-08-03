@@ -128,9 +128,10 @@ const ConclusionCard: React.FC<{content: PublicMainContent}> = ({content}) => {
   if (content.sceneNumber === 1) return <OpeningContradiction content={content}/>;
   if (content.sceneNumber === 9) return <ClosingRecap content={content}/>;
   const card = content.cards[0];
-  return <Surface style={{padding: "44px 54px"}} accent={card ? toneColor(card.lines[0]?.tone ?? "neutral") : colors.cyan}>
+  const lines = card?.lines ?? [];
+  return <Surface style={{padding: "44px 54px"}} accent={card ? toneColor(lines[0]?.tone ?? "neutral") : colors.cyan}>
     <div style={{fontSize: 42, fontWeight: 950}}>{card?.title ?? content.headline}</div>
-    <div style={{marginTop: 30, display: "grid", gap: 22}}>{card?.lines.map((line, index) => <div key={`${line.label}-${line.value}`} style={{...stagedStyle(content.beatProgress, index, card.lines.length), display: "grid", gridTemplateColumns: "220px 1fr", alignItems: "center", gap: 28, padding: "22px 26px", borderRadius: 20, background: `${toneColor(line.tone)}12`, borderLeft: `10px solid ${toneColor(line.tone)}`}}><div style={{fontSize: 29, color: colors.mutedInk, fontWeight: 900}}>{line.label}</div><div style={{fontSize: 46, fontWeight: 950}}>{line.value}</div></div>)}</div>
+    <div style={{marginTop: 30, display: "grid", gap: 22}}>{lines.map((line, index) => <div key={`${line.label}-${line.value}`} style={{...stagedStyle(content.beatProgress, index, lines.length), display: "grid", gridTemplateColumns: "220px 1fr", alignItems: "center", gap: 28, padding: "22px 26px", borderRadius: 20, background: `${toneColor(line.tone)}12`, borderLeft: `10px solid ${toneColor(line.tone)}`}}><div style={{fontSize: 29, color: colors.mutedInk, fontWeight: 900}}>{line.label}</div><div style={{fontSize: 46, fontWeight: 950}}>{line.value}</div></div>)}</div>
   </Surface>;
 };
 
@@ -272,7 +273,7 @@ const orderedNodes = (content: PublicMainContent) => {
   while (current && !seen.has(current.key)) {
     result.push(current);
     seen.add(current.key);
-    const nextKeys = outgoing.get(current.key) ?? [];
+    const nextKeys: string[] = outgoing.get(current.key) ?? [];
     if (nextKeys.length !== 1) break;
     current = content.nodes.find((node) => node.key === nextKeys[0]);
   }
