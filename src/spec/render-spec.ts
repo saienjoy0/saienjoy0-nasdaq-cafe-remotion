@@ -1,4 +1,15 @@
 import {z} from "zod";
+import {
+  EASING_PRESET_IDS,
+  MOTION_PRESET_IDS,
+  SEQUENCE_POLICY_IDS,
+  isMotionPresetAllowed,
+  type MotionAction,
+} from "./motion-preset-contract";
+import {
+  VISUAL_TEMPLATE_IDS,
+  VISUAL_TEMPLATE_VARIANT_IDS,
+} from "./visual-template-contract";
 
 const nonEmptyText = z.string().refine((value) => value.trim().length > 0, "must not be empty");
 const nullableText = nonEmptyText.nullable();
@@ -13,18 +24,11 @@ export const specVisualModeSchema = z.enum([
   "chart", "causal-diagram", "stock-comparison", "news-media",
   "verification-points", "text-focus",
 ]);
-export const visualTemplateSchema = z.enum([
-  "opening-contradiction", "closing-recap", "conclusion-card",
-  "expected-actual-bullet", "expected-actual-gap-flow", "metric-comparison-board",
-  "index-return-bars", "diverging-stock-bars", "causal-lane",
-  "tailwind-headwind", "evidence-boundary", "verification-checklist",
-  "verification-matrix", "analogy-steps", "entity-card-full",
-  "news-media", "text-focus",
-]);
-export const visualTemplateVariantSchema = z.enum([
-  "default", "left-to-right", "zero-baseline", "center-zero", "two-lane",
-  "confirmed-vs-unconfirmed", "strengthen-vs-weaken", "prebuilt-card",
-]);
+export const visualTemplateSchema = z.enum(VISUAL_TEMPLATE_IDS);
+export const visualTemplateVariantSchema = z.enum(VISUAL_TEMPLATE_VARIANT_IDS);
+export const sequencePolicySchema = z.enum(SEQUENCE_POLICY_IDS);
+export const motionPresetSchema = z.enum(MOTION_PRESET_IDS);
+export const easingPresetSchema = z.enum(EASING_PRESET_IDS);
 const visualTemplateConfigSchema = z.object({
   variant: visualTemplateVariantSchema,
   comparisonBasis: nullableText,
@@ -170,6 +174,8 @@ const numberSchema = z.object({
   numberId: safeId,
   label: nonEmptyText,
   value: nonEmptyText,
+  numericValue: z.number().finite().nullable().optional(),
+  precision: z.number().int().min(0).max(6).optional(),
   unit: z.string(),
   comparison: nullableText,
   tone: z.enum(["positive", "negative", "warning", "neutral", "emphasis"]),
@@ -224,6 +230,8 @@ const visualBeatSchema = z.object({
   visualMode: specVisualModeSchema,
   visualTemplate: visualTemplateSchema,
   templateConfig: visualTemplateConfigSchema,
+  sequencePolicy: sequencePolicySchema.optional(),
+  finalHoldMs: z.number().int().min(0).max(1_500).optional(),
   contentType: nonEmptyText,
   screenQuestion: nonEmptyText,
   primaryElement: nonEmptyText,
@@ -249,13 +257,29 @@ const visualEventSchema = z.object({
   targetId: safeId.nullable(),
   offsetMs: z.number().int().min(0).max(10_000),
   expression: expressionSchema.nullable(),
+  motionPreset: motionPresetSchema.nullable().optional(),
+  durationMs: z.number().int().min(100).max(3_000).nullable().optional(),
+  easingPreset: easingPresetSchema.nullable().optional(),
 }).strict().superRefine((event, context) => {
   if (event.action === "set-expression") {
     if (event.expression === null) context.addIssue({code: "custom", path: ["expression"], message: "set-expression requires expression"});
     if (event.targetId !== null) context.addIssue({code: "custom", path: ["targetId"], message: "set-expression must not target an object"});
-  } else {
-    if (event.targetId === null) context.addIssue({code: "custom", path: ["targetId"], message: `${event.action} requires targetId`});
-    if (event.expression !== null) context.addIssue({code: "custom", path: ["expression"], message: `${event.action} must not specify expression`});
+    if (event.motionPreset != null || event.durationMs != null || event.easingPreset != null) {
+      context.addIssue({code: "custom", path: ["motionPreset"], message: "set-expression must not specify motion fields"});
+    }
+    return;
+  }
+  if (event.targetId === null) context.addIssue({code: "custom", path: ["targetId"], message: `${event.action} requires targetId`});
+  if (event.expression !== null) context.addIssue({code: "custom", path: ["expression"], message: `${event.action} must not specify expression`});
+  if (event.motionPreset != null) {
+    if (!isMotionPresetAllowed(event.action as MotionAction, event.motionPreset)) {
+      context.addIssue({code: "custom", path: ["motionPreset"], message: `${event.motionPreset} is not allowed for ${event.action}`});
+    }
+    if (event.durationMs == null) {
+      context.addIssue({code: "custom", path: ["durationMs"], message: "motionPreset requires durationMs"});
+    }
+  } else if (event.durationMs != null || event.easingPreset != null) {
+    context.addIssue({code: "custom", path: ["motionPreset"], message: "durationMs and easingPreset require motionPreset"});
   }
 });
 
