@@ -5,7 +5,12 @@ import {isPlacementActive, type SceneRenderState} from "./render-state";
 type PublicTone = "positive" | "negative" | "warning" | "neutral" | "emphasis";
 type PublicFit = "cover" | "contain" | "fill";
 
-export type PublicCard = {
+type PublicMotion = {
+  revealAtMs: number;
+  highlightedAtMs: number | null;
+};
+
+export type PublicCard = PublicMotion & {
   key: string;
   title: string;
   lines: Array<{label: string; value: string; tone: PublicTone}>;
@@ -13,7 +18,7 @@ export type PublicCard = {
   role: "expected" | "actual" | "gap" | null;
 };
 
-export type PublicNumber = {
+export type PublicNumber = PublicMotion & {
   key: string;
   label: string;
   value: string;
@@ -23,13 +28,13 @@ export type PublicNumber = {
   highlighted: boolean;
 };
 
-export type PublicNode = {
+export type PublicNode = PublicMotion & {
   key: string;
   label: string;
   highlighted: boolean;
 };
 
-export type PublicArrow = {
+export type PublicArrow = PublicMotion & {
   key: string;
   fromKey: string;
   toKey: string;
@@ -65,6 +70,9 @@ export type PublicMainContent = {
   nodes: PublicNode[];
   arrows: PublicArrow[];
   texts: string[];
+  sceneTimeMs: number;
+  beatStartMs: number;
+  beatEndMs: number;
   entity: null | {
     subjectType: "person" | "company" | "product";
     displayName: string;
@@ -147,7 +155,23 @@ export const toPublicSceneViewModel = (
   if (!foxPlacement) throw new Error(`fox expression asset is unavailable: ${expressionAsset.assetId}`);
 
   const selectedIds = new Set(beat.objectIds);
-  const cards = scene.cards
+  const beatDurationMs = Math.max(1, beat.endMs - beat.startMs);
+  const staggerMs = Math.min(900, Math.max(260, beatDurationMs * 0.11));
+  const defaultRevealAtMs = (id: string) => {
+    const index = Math.max(0, beat.objectIds.indexOf(id));
+    return beat.startMs + Math.min(index * staggerMs, beatDurationMs * 0.62);
+  };
+  const objectOrder = new Map(beat.objectIds.map((id, index) => [id, index]));
+  const sortByBeatOrder = <T extends {key: string}>(items: T[]) => items.sort(
+    (a, b) => (objectOrder.get(a.key) ?? Number.MAX_SAFE_INTEGER) - (objectOrder.get(b.key) ?? Number.MAX_SAFE_INTEGER),
+  );
+  const motionFor = (id: string): PublicMotion => ({
+    // objectIds is the canonical default reveal order. Explicit show events can delay it.
+    revealAtMs: Math.max(defaultRevealAtMs(id), state.visibleSinceMs.get(id) ?? 0),
+    highlightedAtMs: state.highlightedSinceMs.get(id) ?? null,
+  });
+
+  const cards = sortByBeatOrder(scene.cards
     .filter((card) => selectedIds.has(card.cardId) && state.visible.has(card.cardId))
     .map((card): PublicCard => ({
       key: card.cardId,
@@ -155,8 +179,9 @@ export const toPublicSceneViewModel = (
       lines: card.lines,
       highlighted: state.highlighted.has(card.cardId),
       role: card.role,
-    }));
-  const numbers = scene.numbers
+      ...motionFor(card.cardId),
+    })));
+  const numbers = sortByBeatOrder(scene.numbers
     .filter((number) => selectedIds.has(number.numberId) && state.visible.has(number.numberId))
     .map((number): PublicNumber => ({
       key: number.numberId,
@@ -166,15 +191,17 @@ export const toPublicSceneViewModel = (
       comparison: number.comparison,
       tone: number.tone,
       highlighted: state.highlighted.has(number.numberId),
-    }));
-  const nodes = scene.nodes
+      ...motionFor(number.numberId),
+    })));
+  const nodes = sortByBeatOrder(scene.nodes
     .filter((node) => selectedIds.has(node.nodeId) && state.visible.has(node.nodeId))
     .map((node): PublicNode => ({
       key: node.nodeId,
       label: node.label,
       highlighted: state.highlighted.has(node.nodeId),
-    }));
-  const arrows = scene.arrows
+      ...motionFor(node.nodeId),
+    })));
+  const arrows = sortByBeatOrder(scene.arrows
     .filter((arrow) => selectedIds.has(arrow.arrowId) && state.visible.has(arrow.arrowId))
     .map((arrow): PublicArrow => ({
       key: arrow.arrowId,
@@ -182,7 +209,8 @@ export const toPublicSceneViewModel = (
       toKey: arrow.toNodeId,
       label: arrow.label,
       highlighted: state.highlighted.has(arrow.arrowId),
-    }));
+      ...motionFor(arrow.arrowId),
+    })));
 
   const beatPlacementIds = new Set(beat.assetPlacementIds);
   const mainAssets = scene.assetPlacements
@@ -215,6 +243,9 @@ export const toPublicSceneViewModel = (
           nodes,
           arrows,
           texts: beat.viewerTexts,
+          sceneTimeMs: state.timeMs,
+          beatStartMs: beat.startMs,
+          beatEndMs: beat.endMs,
           entity: beat.entity ? {
             subjectType: beat.entity.subjectType,
             displayName: beat.entity.displayName,
