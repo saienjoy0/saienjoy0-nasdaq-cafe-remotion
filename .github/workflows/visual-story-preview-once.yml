@@ -10,6 +10,8 @@ on:
 permissions:
   contents: read
   actions: read
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: visual-story-preview-once-2026-07-31
@@ -31,10 +33,16 @@ jobs:
       GEMINI_TTS_VOICE: Charon
       GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
       GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
+      GH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout feature branch
         uses: actions/checkout@v6
+
+      - name: Announce preview run
+        shell: bash
+        run: |
+          gh pr comment 26 --body "Visual Story Engine v2 preview started. Run ID: $GITHUB_RUN_ID. This run creates preview only; final is disabled."
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -64,7 +72,58 @@ jobs:
           test -s "$SPEC_PATH"
           npm run episode:spec:validate -- "$SPEC_PATH"
           SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
-          TTS_INPUT_SHA="$(node --import tsx scripts/print-spec-tts-input-sha.ts "$SPEC_PATH")"
+          TTS_INPUT_SHA="$(python3 - "$SPEC_PATH" <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+
+          spec_path = sys.argv[1]
+          with open(spec_path, "r", encoding="utf-8") as handle:
+              value = json.load(handle)
+
+          scenes = value.get("scenes")
+          if not isinstance(scenes, list):
+              raise SystemExit("render_spec is missing scenes array")
+
+          blocks = []
+          for block_id, first_scene, last_scene in (
+              ("scenes-01-04", 1, 4),
+              ("scenes-05-09", 5, 9),
+          ):
+              speech = []
+              for scene in scenes:
+                  if not isinstance(scene, dict):
+                      continue
+                  scene_number = scene.get("sceneNumber")
+                  if not isinstance(scene_number, int) or not (first_scene <= scene_number <= last_scene):
+                      continue
+                  for chunk in scene.get("narrationChunks", []):
+                      text = chunk.get("speechText") if isinstance(chunk, dict) else None
+                      if not isinstance(text, str):
+                          raise SystemExit(f"scene {scene_number} contains invalid speechText")
+                      speech.append(text)
+              if not speech:
+                  raise SystemExit(f"TTS block {block_id} has no speechText")
+              blocks.append({"id": block_id, "speechText": speech})
+
+          payload = {
+              "synthesisVersion": "gemini-two-block-v1",
+              "model": os.environ["GEMINI_TTS_MODEL"],
+              "voice": os.environ["GEMINI_TTS_VOICE"],
+              "voiceProfileId": value.get("voiceProfileId"),
+              "pronunciations": value.get("pronunciations"),
+              "blocks": blocks,
+          }
+          encoded = json.dumps(
+              payload,
+              ensure_ascii=False,
+              sort_keys=True,
+              separators=(",", ":"),
+          ).encode("utf-8")
+          print(hashlib.sha256(encoded).hexdigest())
+          PY
+          )"
           echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
           echo "tts_input_sha=$TTS_INPUT_SHA" >> "$GITHUB_OUTPUT"
           {
@@ -104,6 +163,7 @@ jobs:
           key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.input.outputs.tts_input_sha }}
 
       - name: Upload preview payload
+        id: artifact
         uses: actions/upload-artifact@v6
         with:
           name: visual-story-preview-${{ env.EPISODE_ID }}-${{ github.run_id }}
@@ -115,3 +175,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+      - name: Report preview result
+        if: always()
+        shell: bash
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            gh pr comment 26 --body "Visual Story Engine v2 preview completed successfully. Run ID: $GITHUB_RUN_ID. Artifact: visual-story-preview-${EPISODE_ID}-${GITHUB_RUN_ID}."
+          else
+            gh pr comment 26 --body "Visual Story Engine v2 preview failed. Run ID: $GITHUB_RUN_ID. Failed step details are in the Actions log."
+          fi
