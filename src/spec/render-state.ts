@@ -1,4 +1,12 @@
 import type {Expression, ProductionScene} from "./render-spec";
+import type {EasingPreset, MotionPreset} from "./motion-preset-contract";
+
+export type MotionInstruction = {
+  preset: MotionPreset;
+  durationMs: number;
+  easing: EasingPreset;
+  startedAtMs: number;
+};
 
 export type SceneRenderState = {
   timeMs: number;
@@ -10,6 +18,10 @@ export type SceneRenderState = {
   highlighted: ReadonlySet<string>;
   visibleSinceMs: ReadonlyMap<string, number>;
   highlightedSinceMs: ReadonlyMap<string, number>;
+  showMotionByTarget: ReadonlyMap<string, MotionInstruction>;
+  hideMotionByTarget: ReadonlyMap<string, MotionInstruction>;
+  highlightMotionByTarget: ReadonlyMap<string, MotionInstruction>;
+  unhighlightMotionByTarget: ReadonlyMap<string, MotionInstruction>;
 };
 
 const eventTimeMs = (
@@ -21,6 +33,18 @@ const eventTimeMs = (
   const boundary = event.timing === "chunk-start" ? chunk.startMs : chunk.endMs;
   return boundary + event.offsetMs;
 };
+
+const motionInstruction = (
+  event: ProductionScene["visualEvents"][number],
+  startedAtMs: number,
+): MotionInstruction | null => event.motionPreset && event.durationMs
+  ? {
+      preset: event.motionPreset,
+      durationMs: event.durationMs,
+      easing: event.easingPreset ?? "smooth-out",
+      startedAtMs,
+    }
+  : null;
 
 export const getSceneRenderState = (
   scene: ProductionScene,
@@ -67,31 +91,64 @@ export const getSceneRenderState = (
   const visibleSinceMs = new Map<string, number>(initiallyVisibleIds.map((id) => [id, 0]));
   const highlighted = new Set<string>();
   const highlightedSinceMs = new Map<string, number>();
+  const showMotionByTarget = new Map<string, MotionInstruction>();
+  const hideMotionByTarget = new Map<string, MotionInstruction>();
+  const highlightMotionByTarget = new Map<string, MotionInstruction>();
+  const unhighlightMotionByTarget = new Map<string, MotionInstruction>();
+
   const reachedEvents = scene.visualEvents
     .map((event, order) => ({event, order, timeMs: eventTimeMs(scene, event)}))
     .filter((item) => item.timeMs <= timeMs)
     .sort((a, b) => a.timeMs - b.timeMs || a.order - b.order);
+
   for (const reached of reachedEvents) {
     const {event} = reached;
     if (event.action === "show" && event.targetId) {
       visible.add(event.targetId);
       visibleSinceMs.set(event.targetId, reached.timeMs);
+      hideMotionByTarget.delete(event.targetId);
+      const instruction = motionInstruction(event, reached.timeMs);
+      if (instruction) showMotionByTarget.set(event.targetId, instruction);
     }
     if (event.action === "hide" && event.targetId) {
-      visible.delete(event.targetId);
-      visibleSinceMs.delete(event.targetId);
-      highlighted.delete(event.targetId);
-      highlightedSinceMs.delete(event.targetId);
+      const instruction = motionInstruction(event, reached.timeMs);
+      const isExiting = instruction && timeMs < reached.timeMs + instruction.durationMs;
+      if (isExiting && instruction) {
+        visible.add(event.targetId);
+        hideMotionByTarget.set(event.targetId, instruction);
+      } else {
+        visible.delete(event.targetId);
+        visibleSinceMs.delete(event.targetId);
+        highlighted.delete(event.targetId);
+        highlightedSinceMs.delete(event.targetId);
+        showMotionByTarget.delete(event.targetId);
+        hideMotionByTarget.delete(event.targetId);
+        highlightMotionByTarget.delete(event.targetId);
+        unhighlightMotionByTarget.delete(event.targetId);
+      }
     }
     if (event.action === "highlight" && event.targetId) {
       highlighted.add(event.targetId);
       highlightedSinceMs.set(event.targetId, reached.timeMs);
+      unhighlightMotionByTarget.delete(event.targetId);
+      const instruction = motionInstruction(event, reached.timeMs);
+      if (instruction) highlightMotionByTarget.set(event.targetId, instruction);
     }
     if (event.action === "unhighlight" && event.targetId) {
-      highlighted.delete(event.targetId);
-      highlightedSinceMs.delete(event.targetId);
+      const instruction = motionInstruction(event, reached.timeMs);
+      const isSettling = instruction && timeMs < reached.timeMs + instruction.durationMs;
+      if (isSettling && instruction) {
+        highlighted.add(event.targetId);
+        unhighlightMotionByTarget.set(event.targetId, instruction);
+      } else {
+        highlighted.delete(event.targetId);
+        highlightedSinceMs.delete(event.targetId);
+        highlightMotionByTarget.delete(event.targetId);
+        unhighlightMotionByTarget.delete(event.targetId);
+      }
     }
   }
+
   return {
     timeMs,
     activeChunkIndex: activeChunkIndex < 0 ? null : activeChunkIndex,
@@ -103,6 +160,10 @@ export const getSceneRenderState = (
     highlighted,
     visibleSinceMs,
     highlightedSinceMs,
+    showMotionByTarget,
+    hideMotionByTarget,
+    highlightMotionByTarget,
+    unhighlightMotionByTarget,
   };
 };
 
