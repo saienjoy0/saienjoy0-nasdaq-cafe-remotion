@@ -5,6 +5,7 @@ import voiceProfilesJson from "../config/voice-profiles.json";
 import {productionAssetManifest} from "../src/config/production-assets";
 import {renderSpecSchema, productionDataSchema} from "../src/spec/render-spec";
 import {assertProductionTextSafe, validateRenderSpecReferences} from "../src/spec/validate-render-spec";
+import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
 import {preflightProductionExpressions} from "../src/spec/preflight-render-spec";
 
 export const resolveSpecPath = (input: string) => path.resolve(process.cwd(), input);
@@ -20,6 +21,9 @@ export const loadRenderSpec = async (input: string) => {
     productionAssetManifest,
     voiceProfilesJson,
   );
+  validateVisualStoryContract(parsed.data, {
+    enforceVariety: !resolved.includes(`${path.sep}fixtures${path.sep}`),
+  });
   return {spec: parsed.data, resolved, sha256: createHash("sha256").update(source).digest("hex")};
 };
 
