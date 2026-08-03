@@ -1,0 +1,114 @@
+name: One-time Final Visual Story Template Sync
+
+on:
+  push:
+    branches:
+      - feature/visual-story-engine-v2
+    paths:
+      - ".github/workflows/visual-story-final-template-sync.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: ${{ !contains(github.event.head_commit.message, '[final-template-sync]') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/visual-story-engine-v2
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scope explicit events to each Visual Beat
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('src/spec/validate-visual-story.ts')
+          source = path.read_text(encoding='utf-8')
+          old = '''      const policy = beat.sequencePolicy ?? (beat.objectIds.length === 0 ? "static" : "object-order-fallback");
+                const showTargets = new Set(
+                  scene.visualEvents
+                    .filter((event) => event.action === "show" && event.targetId && beat.objectIds.includes(event.targetId))
+                    .map((event) => event.targetId as string),
+                );'''
+          new = '''      const startIndex = chunkOrder.get(beat.startChunkId)!;
+                const endIndex = chunkOrder.get(beat.endChunkId)!;
+                const beatEvents = scene.visualEvents.filter((event) => {
+                  if (!event.targetId || !beat.objectIds.includes(event.targetId)) return false;
+                  const eventChunkIndex = chunkOrder.get(event.atChunkId);
+                  return eventChunkIndex !== undefined && startIndex <= eventChunkIndex && eventChunkIndex <= endIndex;
+                });
+                const policy = beat.sequencePolicy ?? (beat.objectIds.length === 0 ? "static" : "object-order-fallback");
+                const showTargets = new Set(
+                  beatEvents
+                    .filter((event) => event.action === "show" && event.targetId)
+                    .map((event) => event.targetId as string),
+                );'''
+          if old not in source:
+              raise SystemExit('policy/showTargets block not found')
+          source = source.replace(old, new, 1)
+          old_timing = '''      const startIndex = chunkOrder.get(beat.startChunkId)!;
+                const endIndex = chunkOrder.get(beat.endChunkId)!;
+                scene.visualEvents.forEach((event, eventIndex) => {
+                  if (event.action === "set-expression" || !event.targetId || !beat.objectIds.includes(event.targetId)) return;
+                  const eventChunkIndex = chunkOrder.get(event.atChunkId);
+                  if (eventChunkIndex === undefined || eventChunkIndex < startIndex || eventChunkIndex > endIndex) {
+                    fail(`${scenePath}.visualEvents[${eventIndex}].atChunkId`, `event for ${event.targetId} must stay inside ${beat.beatId}`);
+                  }
+                });
+
+          '''
+          if old_timing not in source:
+              raise SystemExit('old timing block not found')
+          source = source.replace(old_timing, '', 1)
+          source = source.replace(
+              'if (!spec.scenes[8].visualBeats.some((beat) => beat.visualTemplate === "closing-recap")) {\n      fail("$.scenes[8].visualBeats", "Scene 9 requires closing-recap");\n    }',
+              'if (!spec.scenes[8].visualBeats.some((beat) => beat.visualTemplate === "final-assembly")) {\n      fail("$.scenes[8].visualBeats", "Scene 9 requires final-assembly");\n    }',
+              1,
+          )
+          path.write_text(source, encoding='utf-8')
+
+          variety = Path('scripts/test-visual-variety.ts')
+          text = variety.read_text(encoding='utf-8')
+          text = text.replace('closing.includes("closing-recap")', 'closing.includes("final-assembly")')
+          text = text.replace('"Scene 9 requires closing-recap"', '"Scene 9 requires final-assembly"')
+          variety.write_text(text, encoding='utf-8')
+
+          validator_test = Path('scripts/test-visual-validator.ts')
+          text = validator_test.read_text(encoding='utf-8')
+          text = text.replace('/must stay inside/', '/explicit sequence requires a show event/')
+          validator_test.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Assign final templates to 2026-07-31
+        run: node --import tsx scripts/migrations/assign-2026-07-31-visual-story-templates.ts render-specs/2026-07-31/render_spec.json
+
+      - name: Regenerate JSON Schema
+        run: npm run episode:spec:schema
+
+      - name: Sync episode package visual implementation section
+        run: node --import tsx scripts/sync-episode-visual-story.ts --write render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md
+
+      - name: Commit deterministic outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/spec/validate-visual-story.ts scripts/test-visual-variety.ts scripts/test-visual-validator.ts schemas/render_spec.schema.json render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md
+          git commit -m "[final-template-sync] Assign final Visual Story templates and package contract"
+          git push origin HEAD:feature/visual-story-engine-v2
