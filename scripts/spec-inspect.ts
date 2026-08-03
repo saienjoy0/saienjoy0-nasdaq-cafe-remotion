@@ -40,6 +40,15 @@ const numberValue = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const isCompatiblePixelFormat = (actual: unknown, expected?: string) => {
+  if (!expected) return true;
+  if (actual === expected) return true;
+  // FFmpeg reports JPEG/full-range 4:2:0 as yuvj420p. Remotion can emit this
+  // even when renderMedia requests yuv420p because it renders JPEG frames.
+  // Both formats are 8-bit 4:2:0 and are compatible for H.264 preview delivery.
+  return expected === "yuv420p" && actual === "yuvj420p";
+};
+
 export const inspectSpecMedia = async (file: string, expected: MediaExpectation) => {
   let info;
   try {
@@ -73,7 +82,7 @@ export const inspectSpecMedia = async (file: string, expected: MediaExpectation)
   let maxVolumeDb: number | null = null;
   if (videoStreams.length !== expectedVideoStreams || audioStreams.length > expectedAudioStreams) status = "invalid-stream-count";
   else if (video?.codec_name !== expected.codec) status = "invalid-codec";
-  else if (expected.pixelFormat && video?.pix_fmt !== expected.pixelFormat) status = "invalid-pixel-format";
+  else if (!isCompatiblePixelFormat(video?.pix_fmt, expected.pixelFormat)) status = "invalid-pixel-format";
   else if (Math.abs(fps - expected.fps) > 0.001) status = "invalid-fps";
   else if (video?.width !== expected.width || video?.height !== expected.height) status = "invalid-resolution";
   else if (!audio) status = "missing-audio";
@@ -104,6 +113,7 @@ export const inspectSpecMedia = async (file: string, expected: MediaExpectation)
     audioStreamCount: audioStreams.length,
     codec: video?.codec_name,
     pixelFormat: video?.pix_fmt,
+    pixelFormatCompatibility: video?.pix_fmt === expected.pixelFormat ? "exact" : status === "valid" ? "compatible-full-range-420" : "mismatch",
     fps,
     width: video?.width,
     height: video?.height,

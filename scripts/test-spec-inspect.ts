@@ -11,10 +11,13 @@ const directory = path.join(PROJECT_DIR, "renders", "tests", "phase4-inspect-fix
 await mkdir(directory, {recursive: true});
 const valid = path.join(directory, "valid.mp4");
 await execFileAsync("ffmpeg", ["-y", "-v", "error", "-f", "lavfi", "-i", "color=c=black:s=320x180:r=30:d=1", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=1", "-t", "1", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-ar", "48000", "-ac", "1", valid], {windowsHide: true});
+const fullRange = path.join(directory, "full-range-420.mp4");
+await execFileAsync("ffmpeg", ["-y", "-v", "error", "-f", "lavfi", "-i", "color=c=black:s=320x180:r=30:d=1", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=1", "-t", "1", "-c:v", "libx264", "-pix_fmt", "yuvj420p", "-c:a", "aac", "-ar", "48000", "-ac", "1", fullRange], {windowsHide: true});
 const expected = {codec: "h264", pixelFormat: "yuv420p", fps: 30, width: 320, height: 180, audioCodec: "aac", sampleRate: 48000, channels: 1, videoStreams: 1, audioStreams: 1, durationMs: 1000, toleranceMs: 100};
 const tests: Array<{name: string; run: () => Promise<void>}> = [];
 const test = (name: string, run: () => Promise<void>) => tests.push({name, run});
-test("inspect valid media and full A/V decode", async () => {const result = await inspectSpecMedia(valid, {...expected, requireNonSilentAudio: true}); assert.equal(result.status, "valid"); assert.equal(result.fullDecode, true); assert.equal(result.videoStreamCount, 1); assert.equal(result.audioStreamCount, 1);});
+test("inspect valid media and full A/V decode", async () => {const result = await inspectSpecMedia(valid, {...expected, requireNonSilentAudio: true}); assert.equal(result.status, "valid"); assert.equal(result.fullDecode, true); assert.equal(result.videoStreamCount, 1); assert.equal(result.audioStreamCount, 1); assert.equal(result.pixelFormatCompatibility, "exact");});
+test("inspect full-range 4:2:0 as compatible preview output", async () => {const result = await inspectSpecMedia(fullRange, {...expected, requireNonSilentAudio: true}); assert.equal(result.status, "valid"); assert.equal(result.fullDecode, true); assert.equal(result.pixelFormat, "yuvj420p"); assert.equal(result.pixelFormatCompatibility, "compatible-full-range-420");});
 test("inspect not-generated", async () => {assert.equal((await inspectSpecMedia(path.join(directory, "missing.mp4"), expected)).status, "not-generated");});
 test("inspect zero-byte", async () => {const file = path.join(directory, "zero.mp4"); await writeFile(file, ""); assert.equal((await inspectSpecMedia(file, expected)).status, "zero-byte");});
 test("inspect invalid-codec", async () => {assert.equal((await inspectSpecMedia(valid, {...expected, codec: "vp9"})).status, "invalid-codec");});
