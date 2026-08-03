@@ -59,7 +59,19 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "$SPEC_PATH")"
-          cat render-specs/2026-07-31/.raw-parts/part-*.txt > "$SPEC_PATH"
+          cat \
+            render-specs/2026-07-31/.raw-parts/part-00.txt \
+            render-specs/2026-07-31/.raw-parts/part-01.txt \
+            render-specs/2026-07-31/.raw-parts-fix/part-02-0.txt \
+            render-specs/2026-07-31/.raw-parts-fix/part-02-1.txt \
+            render-specs/2026-07-31/.raw-parts-fix2/part-02-2-0.txt \
+            render-specs/2026-07-31/.raw-parts-fix2/part-02-2-1.txt \
+            render-specs/2026-07-31/.raw-parts-fix2/part-02-2-2.txt \
+            render-specs/2026-07-31/.raw-parts/part-03.txt \
+            render-specs/2026-07-31/.raw-parts/part-04.txt \
+            render-specs/2026-07-31/.raw-parts/part-05.txt \
+            render-specs/2026-07-31/.raw-parts/part-06.txt \
+            > "$SPEC_PATH"
           test "$(sha256sum "$SPEC_PATH" | awk '{print $1}')" = "5ba084fd32c2b567469efd0cf8cb915c750c009183d0a195412bc60def5e62c4"
 
       - name: Check input and secrets
