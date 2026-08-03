@@ -841,6 +841,19 @@
                   ],
                   "additionalProperties": false
                 },
+                "sequencePolicy": {
+                  "type": "string",
+                  "enum": [
+                    "explicit",
+                    "object-order-fallback",
+                    "static"
+                  ]
+                },
+                "finalHoldMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1500
+                },
                 "contentType": {
                   "type": "string"
                 },
@@ -1202,6 +1215,21 @@
                 "value": {
                   "type": "string"
                 },
+                "numericValue": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "precision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
                 "unit": {
                   "type": "string"
                 },
@@ -1345,6 +1373,61 @@
                         "困惑",
                         "警戒",
                         "眠そう"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "motionPreset": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "fade-soft",
+                        "slide-soft-left",
+                        "slide-soft-right",
+                        "rise-soft",
+                        "scale-settle",
+                        "grow-from-baseline",
+                        "grow-from-center",
+                        "draw-line",
+                        "count-up",
+                        "focus-ring",
+                        "scale-focus",
+                        "dim-others",
+                        "pulse-once",
+                        "fade-out",
+                        "slide-out-soft",
+                        "collapse-to-outcome"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "durationMs": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 3000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "easingPreset": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "smooth-out",
+                        "spring-settle",
+                        "linear"
                       ]
                     },
                     {

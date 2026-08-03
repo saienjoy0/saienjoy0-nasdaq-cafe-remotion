@@ -173,6 +173,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "conclusion-card",
+          "visualTemplate": "conclusion-card",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST conclusion-card",
           "screenQuestion": "TEST QUESTION 1-1",
           "primaryElement": "TEST PRIMARY 1-1",
@@ -192,16 +203,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "conclusion-card",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         },
         {
           "beatId": "scene-01-beat-002",
@@ -212,6 +214,17 @@
           "primaryFunction": "Anchor",
           "screenState": "EntityFocus",
           "visualMode": "text-focus",
+          "visualTemplate": "entity-card-full",
+          "templateConfig": {
+            "variant": "prebuilt-card",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST COMPANY CARD",
           "screenQuestion": "TEST QUESTION 1-2",
           "primaryElement": "NVIDIA",
@@ -240,16 +253,7 @@
             "rightsStatus": "not-required",
             "targetDurationMs": 6000
           },
-          "pictureBook": null,
-          "visualTemplate": "entity-card-full",
-          "templateConfig": {
-            "variant": "prebuilt-card",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         },
         {
           "beatId": "scene-01-beat-003",
@@ -260,6 +264,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "conclusion-card",
+          "visualTemplate": "conclusion-card",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST conclusion-card",
           "screenQuestion": "TEST QUESTION 1-3",
           "primaryElement": "TEST PRIMARY 1-3",
@@ -279,16 +294,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "conclusion-card",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -316,7 +322,10 @@
           "action": "show",
           "targetId": "scene-01-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-002",
@@ -334,7 +343,10 @@
           "action": "highlight",
           "targetId": "scene-01-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -481,6 +493,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "number-comparison",
+          "visualTemplate": "metric-comparison-board",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "TEST QUESTION 2-1",
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST number-comparison",
           "screenQuestion": "TEST QUESTION 2-1",
           "primaryElement": "TEST PRIMARY 2-1",
@@ -502,16 +525,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "metric-comparison-board",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": "TEST QUESTION 2-1",
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -533,6 +547,8 @@
           "numberId": "scene-02-number-001",
           "label": "TEST NUMBER A",
           "value": "10",
+          "numericValue": 10,
+          "precision": 0,
           "unit": "%",
           "comparison": "TEST BASE",
           "tone": "positive"
@@ -541,6 +557,8 @@
           "numberId": "scene-02-number-002",
           "label": "TEST NUMBER B",
           "value": "20",
+          "numericValue": 20,
+          "precision": 0,
           "unit": "%",
           "comparison": "TEST BASE",
           "tone": "negative"
@@ -556,7 +574,34 @@
           "action": "show",
           "targetId": "scene-02-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-028",
+          "atChunkId": "scene-02-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-02-number-001",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-029",
+          "atChunkId": "scene-02-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-02-number-002",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
         },
         {
           "eventId": "event-005",
@@ -574,7 +619,22 @@
           "action": "highlight",
           "targetId": "scene-02-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-030",
+          "atChunkId": "scene-02-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "scene-02-number-002",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -711,6 +771,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "expected-actual-gap",
+          "visualTemplate": "expected-actual-gap-flow",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 900,
           "contentType": "TEST expected-actual-gap",
           "screenQuestion": "TEST QUESTION 3-1",
           "primaryElement": "TEST PRIMARY 3-1",
@@ -732,16 +803,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "expected-actual-gap-flow",
-          "templateConfig": {
-            "variant": "left-to-right",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -793,7 +855,34 @@
           "action": "show",
           "targetId": "scene-03-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-031",
+          "atChunkId": "scene-03-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-03-card-002",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-032",
+          "atChunkId": "scene-03-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-03-card-003",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-008",
@@ -811,7 +900,10 @@
           "action": "highlight",
           "targetId": "scene-03-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -948,6 +1040,17 @@
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "timeline",
+          "visualTemplate": "evidence-boundary",
+          "templateConfig": {
+            "variant": "confirmed-vs-unconfirmed",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST timeline",
           "screenQuestion": "TEST QUESTION 4-1",
           "primaryElement": "TEST PRIMARY 4-1",
@@ -967,16 +1070,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "evidence-boundary",
-          "templateConfig": {
-            "variant": "confirmed-vs-unconfirmed",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -1004,7 +1098,10 @@
           "action": "show",
           "targetId": "scene-04-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-011",
@@ -1022,7 +1119,10 @@
           "action": "highlight",
           "targetId": "scene-04-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -1159,6 +1259,17 @@
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "chart",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST chart",
           "screenQuestion": "TEST QUESTION 5-1",
           "primaryElement": "TEST PRIMARY 5-1",
@@ -1179,16 +1290,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -1210,6 +1312,8 @@
           "numberId": "scene-05-number-001",
           "label": "TEST CHART VALUE",
           "value": "30",
+          "numericValue": 30,
+          "precision": 0,
           "unit": "pt",
           "comparison": null,
           "tone": "emphasis"
@@ -1225,7 +1329,22 @@
           "action": "show",
           "targetId": "scene-05-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-033",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-05-number-001",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
         },
         {
           "eventId": "event-014",
@@ -1243,7 +1362,22 @@
           "action": "highlight",
           "targetId": "scene-05-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-034",
+          "atChunkId": "scene-05-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "scene-05-number-001",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -1380,6 +1514,23 @@
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "causal-diagram",
+          "visualTemplate": "verification-matrix",
+          "templateConfig": {
+            "variant": "strengthen-vs-weaken",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [
+              "scene-06-node-001",
+              "scene-06-node-002"
+            ],
+            "laneLabels": [
+              "強まる",
+              "弱まる"
+            ],
+            "outcomeNodeId": "scene-06-node-002"
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "TEST causal-diagram",
           "screenQuestion": "TEST QUESTION 6-1",
           "primaryElement": "TEST PRIMARY 6-1",
@@ -1403,22 +1554,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "verification-matrix",
-          "templateConfig": {
-            "variant": "strengthen-vs-weaken",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [
-              "scene-06-node-001",
-              "scene-06-node-002"
-            ],
-            "laneLabels": [
-              "強まる",
-              "弱まる"
-            ],
-            "outcomeNodeId": "scene-06-node-002"
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -1462,7 +1598,46 @@
           "action": "show",
           "targetId": "scene-06-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-035",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-06-node-001",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-036",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-06-node-002",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-037",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-06-arrow-001",
+          "offsetMs": 1860,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-017",
@@ -1480,7 +1655,22 @@
           "action": "highlight",
           "targetId": "scene-06-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-038",
+          "atChunkId": "scene-06-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "scene-06-node-002",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -1617,6 +1807,17 @@
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "stock-comparison",
+          "visualTemplate": "metric-comparison-board",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "TEST QUESTION 7-1",
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST stock-comparison",
           "screenQuestion": "TEST QUESTION 7-1",
           "primaryElement": "TEST PRIMARY 7-1",
@@ -1639,16 +1840,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "metric-comparison-board",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": "TEST QUESTION 7-1",
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -1670,6 +1862,8 @@
           "numberId": "scene-07-number-001",
           "label": "TEST NUMBER A",
           "value": "10",
+          "numericValue": 10,
+          "precision": 0,
           "unit": "%",
           "comparison": "TEST BASE",
           "tone": "positive"
@@ -1678,6 +1872,8 @@
           "numberId": "scene-07-number-002",
           "label": "TEST NUMBER B",
           "value": "20",
+          "numericValue": 20,
+          "precision": 0,
           "unit": "%",
           "comparison": "TEST BASE",
           "tone": "negative"
@@ -1686,6 +1882,8 @@
           "numberId": "scene-07-number-003",
           "label": "TEST NUMBER C",
           "value": "30",
+          "numericValue": 30,
+          "precision": 0,
           "unit": "%",
           "comparison": "TEST BASE",
           "tone": "warning"
@@ -1701,7 +1899,46 @@
           "action": "show",
           "targetId": "scene-07-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-039",
+          "atChunkId": "scene-07-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-07-number-001",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-040",
+          "atChunkId": "scene-07-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-07-number-002",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-041",
+          "atChunkId": "scene-07-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-07-number-003",
+          "offsetMs": 1860,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
         },
         {
           "eventId": "event-020",
@@ -1719,7 +1956,22 @@
           "action": "highlight",
           "targetId": "scene-07-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-042",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "scene-07-number-003",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -1856,6 +2108,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "verification-points",
+          "visualTemplate": "verification-checklist",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST verification-points",
           "screenQuestion": "TEST QUESTION 8-1",
           "primaryElement": "TEST PRIMARY 8-1",
@@ -1877,16 +2140,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "verification-checklist",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -1938,7 +2192,34 @@
           "action": "show",
           "targetId": "scene-08-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-043",
+          "atChunkId": "scene-08-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-08-card-002",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-044",
+          "atChunkId": "scene-08-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-08-card-003",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-023",
@@ -1956,7 +2237,22 @@
           "action": "highlight",
           "targetId": "scene-08-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-045",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "scene-08-card-003",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -2100,6 +2396,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 9-1",
           "primaryElement": "TEST PRIMARY 9-1",
@@ -2119,16 +2426,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [
@@ -2156,7 +2454,10 @@
           "action": "show",
           "targetId": "scene-09-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-026",
@@ -2174,7 +2475,10 @@
           "action": "highlight",
           "targetId": "scene-09-card-001",
           "offsetMs": 0,
-          "expression": null
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [

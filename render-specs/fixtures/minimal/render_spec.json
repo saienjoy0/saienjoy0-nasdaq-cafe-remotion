@@ -140,6 +140,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 1-1",
           "primaryElement": "TEST PRIMARY 1-1",
@@ -157,16 +168,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -301,6 +303,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 2-1",
           "primaryElement": "TEST PRIMARY 2-1",
@@ -318,16 +331,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -462,6 +466,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 3-1",
           "primaryElement": "TEST PRIMARY 3-1",
@@ -479,16 +494,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -623,6 +629,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 4-1",
           "primaryElement": "TEST PRIMARY 4-1",
@@ -640,16 +657,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -784,6 +792,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 5-1",
           "primaryElement": "TEST PRIMARY 5-1",
@@ -801,16 +820,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -945,6 +955,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 6-1",
           "primaryElement": "TEST PRIMARY 6-1",
@@ -962,16 +983,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -1106,6 +1118,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 7-1",
           "primaryElement": "TEST PRIMARY 7-1",
@@ -1123,16 +1146,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -1267,6 +1281,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 8-1",
           "primaryElement": "TEST PRIMARY 8-1",
@@ -1284,16 +1309,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
@@ -1428,6 +1444,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "TEST text-focus",
           "screenQuestion": "TEST QUESTION 9-1",
           "primaryElement": "TEST PRIMARY 9-1",
@@ -1445,16 +1472,7 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null,
-          "visualTemplate": "text-focus",
-          "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
-            "dataBasis": "TEST TIMELINE BASIS",
-            "nodeOrder": [],
-            "laneLabels": [],
-            "outcomeNodeId": null
-          }
+          "pictureBook": null
         }
       ],
       "cards": [],
