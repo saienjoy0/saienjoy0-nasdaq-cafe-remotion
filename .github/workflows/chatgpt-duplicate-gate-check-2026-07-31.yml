@@ -38,6 +38,7 @@ jobs:
           echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
 
       - name: Report duplicate gate run
+        if: success()
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -47,3 +48,13 @@ jobs:
           gh issue create \
             --title "TEST DUPLICATE GATE 2026-07-31 run ${GATE_RUN_ID}" \
             --body "Duplicate-check gate: ${GATE_RUN_URL}"
+
+      - name: Report duplicate gate failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "TEST DUPLICATE GATE 2026-07-31 FAILED ${GITHUB_RUN_ID}" \
+            --body "Temporary duplicate gate workflow failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
