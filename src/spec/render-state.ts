@@ -10,6 +10,72 @@ export type SceneRenderState = {
   highlighted: ReadonlySet<string>;
 };
 
+const CAPTION_PAGE_MAX_CHARS = 58;
+const CAPTION_LINE_MAX_CHARS = 29;
+
+const normalizeCaptionText = (value: string) => value.replace(/\s+/g, "").trim();
+
+const splitLongCaptionPart = (value: string, maxChars: number) => {
+  const parts: string[] = [];
+  let remaining = value;
+  while (remaining.length > maxChars) {
+    const candidates = ["、", "，", ",", "・"];
+    let splitAt = -1;
+    for (const separator of candidates) {
+      const index = remaining.lastIndexOf(separator, maxChars - 1);
+      if (index > Math.floor(maxChars * 0.55)) splitAt = Math.max(splitAt, index + 1);
+    }
+    if (splitAt < 0) splitAt = maxChars;
+    parts.push(remaining.slice(0, splitAt));
+    remaining = remaining.slice(splitAt);
+  }
+  if (remaining) parts.push(remaining);
+  return parts;
+};
+
+export const paginateNarrationCaption = (speechText: string) => {
+  const normalized = normalizeCaptionText(speechText);
+  if (!normalized) return [];
+  const sentenceParts = normalized.match(/[^。！？!?]+[。！？!?]?/g) ?? [normalized];
+  const atomicParts = sentenceParts.flatMap((part) => splitLongCaptionPart(part, CAPTION_PAGE_MAX_CHARS));
+  const pages: string[] = [];
+  let current = "";
+  for (const part of atomicParts) {
+    if (!current) {
+      current = part;
+      continue;
+    }
+    if (current.length + part.length <= CAPTION_PAGE_MAX_CHARS) {
+      current += part;
+      continue;
+    }
+    pages.push(current);
+    current = part;
+  }
+  if (current) pages.push(current);
+  return pages.map((page) => {
+    if (page.length <= CAPTION_LINE_MAX_CHARS) return page;
+    const preferredBreak = ["。", "！", "？", "、", "，", ","]
+      .map((separator) => page.lastIndexOf(separator, CAPTION_LINE_MAX_CHARS - 1))
+      .filter((index) => index >= Math.floor(CAPTION_LINE_MAX_CHARS * 0.55))
+      .sort((a, b) => b - a)[0];
+    const breakAt = preferredBreak === undefined ? CAPTION_LINE_MAX_CHARS : preferredBreak + 1;
+    return `${page.slice(0, breakAt)}\n${page.slice(breakAt)}`;
+  });
+};
+
+export const getTimedNarrationCaption = (
+  speechText: string,
+  elapsedMs: number,
+  durationMs: number,
+) => {
+  const pages = paginateNarrationCaption(speechText);
+  if (pages.length === 0) return null;
+  if (pages.length === 1 || durationMs <= 0) return pages[0];
+  const progress = Math.min(0.999999, Math.max(0, elapsedMs / durationMs));
+  return pages[Math.min(pages.length - 1, Math.floor(progress * pages.length))];
+};
+
 const eventTimeMs = (
   scene: ProductionScene,
   event: ProductionScene["visualEvents"][number],
@@ -74,12 +140,15 @@ export const getSceneRenderState = (
     if (event.action === "highlight" && event.targetId) highlighted.add(event.targetId);
     if (event.action === "unhighlight" && event.targetId) highlighted.delete(event.targetId);
   }
+  const activeChunk = activeChunkIndex < 0 ? null : scene.narrationChunks[activeChunkIndex];
   return {
     timeMs,
     activeChunkIndex: activeChunkIndex < 0 ? null : activeChunkIndex,
     activeBeatIndex: activeBeatIndex < 0 ? Math.max(0, scene.visualBeats.length - 1) : activeBeatIndex,
-    // Contract B: captions are hidden during pauses.
-    captionText: activeChunkIndex < 0 ? null : scene.narrationChunks[activeChunkIndex].caption.text,
+    // Subtitles follow the spoken narration. captionText remains available as a short viewer-facing summary only.
+    captionText: activeChunk
+      ? getTimedNarrationCaption(activeChunk.speechText, timeMs - activeChunk.startMs, activeChunk.endMs - activeChunk.startMs)
+      : null,
     expression,
     visible,
     highlighted,
