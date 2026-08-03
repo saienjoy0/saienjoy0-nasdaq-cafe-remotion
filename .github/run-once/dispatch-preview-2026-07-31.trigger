@@ -1,4 +1,0 @@
-episode_date=2026-07-31
-spec_sha256=f94a16574d44611efb23e0596274db1cb5f7b2c6b2d5f663dd76042026a2524c
-confirmation=PREVIEW
-created_at=2026-08-03T21:08:00+09:00
