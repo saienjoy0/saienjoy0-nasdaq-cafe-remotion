@@ -22,7 +22,7 @@ validateVisualStoryContract(source, {enforceVariety: true});
   const value = clone();
   const scene = value.scenes[1];
   const beat = scene.visualBeats.find((item) => item.visualTemplate === "diverging-stock-bars")!;
-  const target = beat.objectIds[0];
+  const target = beat.objectIds.find((id) => !scene.visualBeats[0].objectIds.includes(id))!;
   scene.visualEvents = scene.visualEvents.filter((event) => !(event.action === "show" && event.targetId === target));
   assert.throws(
     () => validateVisualStoryContract(value, {enforceVariety: true}),
@@ -67,7 +67,7 @@ validateVisualStoryContract(source, {enforceVariety: true});
   const value = clone();
   const scene = value.scenes[1];
   const beat = scene.visualBeats.find((item) => item.visualTemplate === "diverging-stock-bars")!;
-  const target = beat.objectIds[0];
+  const target = beat.objectIds.find((id) => !scene.visualBeats[0].objectIds.includes(id))!;
   const show = scene.visualEvents.find((event) => event.action === "show" && event.targetId === target)!;
   show.atChunkId = scene.visualBeats[0].startChunkId;
   assert.throws(
