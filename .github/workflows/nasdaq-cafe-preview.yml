@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nasdaq-cafe-preview-${{ inputs.episode_date }}-${{ inputs.expected_spec_sha256 }}
+  group: nasdaq-cafe-preview-${{ inputs.episode_date }}
   cancel-in-progress: true
 
 jobs:
@@ -281,10 +281,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .cache/spec-tts-blocks
-          key: >-
-            ${{ runner.os }}-spec-tts-block-v2-
-            ${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-
-            ${{ env.TTS_INPUT_SHA }}
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
           restore-keys: |
             ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-
 
@@ -310,10 +307,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: .cache/spec-tts-blocks
-          key: >-
-            ${{ runner.os }}-spec-tts-block-v2-
-            ${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-
-            ${{ env.TTS_INPUT_SHA }}
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
 
       - name: Save recoverable partial Gemini TTS cache
         if: always() && steps.generate.outcome != 'success' && steps.tts_cache_restore.outputs.cache-hit != 'true' && steps.tts_cache_content.outputs.ready == 'true'
@@ -321,10 +315,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: .cache/spec-tts-blocks
-          key: >-
-            ${{ runner.os }}-spec-tts-block-v2-
-            ${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-
-            ${{ env.TTS_INPUT_SHA }}-partial-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Inspect preview MP4 video and audio
         id: inspect
