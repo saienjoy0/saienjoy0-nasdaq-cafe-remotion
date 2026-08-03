@@ -1,0 +1,70 @@
+name: Temporary Issue Preview Dispatch
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+
+jobs:
+  dispatch-preview:
+    if: github.event.issue.title == '[TEMP] Run 2026-07-31 fixed preview'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout fixed preview branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/spec-video-legibility
+
+      - name: Dispatch official preview workflow
+        id: dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          TARGET_REF: fix/spec-video-legibility
+          EPISODE_DATE: 2026-07-31
+          SPEC_PATH: render-specs/2026-07-31/render_spec.json
+        run: |
+          set -euo pipefail
+          test -s "$SPEC_PATH"
+          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          BODY="$(jq -n \
+            --arg ref "$TARGET_REF" \
+            --arg episode_date "$EPISODE_DATE" \
+            --arg spec_sha "$SPEC_SHA" \
+            '{ref:$ref,inputs:{episode_date:$episode_date,expected_spec_sha256:$spec_sha,confirmation:"PREVIEW"}}')"
+
+          gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/dispatches" \
+            --input - <<<"$BODY"
+
+          RUN_ID=""
+          RUN_URL=""
+          for attempt in $(seq 1 30); do
+            RUN_JSON="$(gh api \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${TARGET_REF}&event=workflow_dispatch&per_page=20")"
+            RUN_ID="$(jq -r --arg started "$STARTED_AT" '.workflow_runs | map(select(.created_at >= $started)) | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$RUN_JSON")"
+            RUN_URL="$(jq -r --arg started "$STARTED_AT" '.workflow_runs | map(select(.created_at >= $started)) | sort_by(.created_at) | reverse | .[0].html_url // empty' <<<"$RUN_JSON")"
+            if [[ "$RUN_ID" =~ ^[0-9]+$ ]]; then
+              break
+            fi
+            sleep 2
+          done
+
+          if [[ ! "$RUN_ID" =~ ^[0-9]+$ ]]; then
+            gh issue comment "$ISSUE_NUMBER" --body "DISPATCH_FAILED spec_sha=$SPEC_SHA"
+            exit 1
+          fi
+
+          gh issue comment "$ISSUE_NUMBER" --body "PREVIEW_RUN_ID=$RUN_ID\nPREVIEW_RUN_URL=$RUN_URL\nSPEC_SHA256=$SPEC_SHA\nTARGET_REF=$TARGET_REF"
