@@ -1,0 +1,163 @@
+name: Nasdaq Cafe Repair Inspection 2026-07-31
+
+on:
+  push:
+    branches:
+      - run/repair-inspection-2026-07-31-20260803
+    paths:
+      - .github/run-once/repair-inspection-2026-07-31.trigger
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-repair-inspection-2026-07-31
+  cancel-in-progress: true
+
+jobs:
+  inspect-and-package:
+    name: Inspect completed preview and package delivery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CI: "true"
+      EPISODE_ID: "2026-07-31"
+      SPEC_PATH: render-specs/2026-07-31/render_spec.json
+      SPEC_SHA: f94a16574d44611efb23e0596274db1cb5f7b2c6b2d5f663dd76042026a2524c
+      TTS_INPUT_SHA: 07b8566af579ead2210b0beafe6fe6f05d50d1a8b7773e5a0be3565017e665ba
+      SOURCE_RUN_ID: "30813694637"
+      RAW_ARTIFACT_NAME: nasdaq-cafe-preview-raw-2026-07-31-30813694637
+
+    steps:
+      - name: Checkout patched production code
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Verify immutable render input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$SPEC_PATH"
+          actual="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          if [[ "$actual" != "$SPEC_SHA" ]]; then
+            echo "::error::render_spec SHA mismatch"
+            echo "::error::expected=$SPEC_SHA"
+            echo "::error::actual=$actual"
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Download completed raw preview
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ env.RAW_ARTIFACT_NAME }}
+          path: .
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      - name: Verify raw preview identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mp4="renders/preview/${EPISODE_ID}_nasdaq-cafe-spec-preview.mp4"
+          report="build/${EPISODE_ID}/technical_report.json"
+          data="build/${EPISODE_ID}/render_data.production.json"
+          test -s "$mp4"
+          test -s "$report"
+          test -s "$data"
+          node -e '
+            const fs = require("node:fs");
+            const report = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (report.inputSpecSha256 !== process.env.SPEC_SHA) {
+              throw new Error(`raw artifact spec SHA mismatch: ${report.inputSpecSha256}`);
+            }
+            if (report.episodeId !== process.env.EPISODE_ID) {
+              throw new Error(`raw artifact episode mismatch: ${report.episodeId}`);
+            }
+            if (report.status !== "preview-generated" || !report.previewPath) {
+              throw new Error(`raw artifact is not preview-generated: ${report.status}`);
+            }
+          ' "$report"
+
+      - name: Inspect preview MP4 video and audio
+        run: npm run episode:spec:inspect:preview -- "$SPEC_PATH"
+
+      - name: Create delivery manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mp4="renders/preview/${EPISODE_ID}_nasdaq-cafe-spec-preview.mp4"
+          report="build/${EPISODE_ID}/technical_report.json"
+          data="build/${EPISODE_ID}/render_data.production.json"
+          inspection="build/${EPISODE_ID}/preview_inspection.json"
+          manifest="build/${EPISODE_ID}/delivery_manifest.json"
+          test -s "$mp4"
+          test -s "$report"
+          test -s "$data"
+          test -s "$inspection"
+          mp4_sha="$(sha256sum "$mp4" | awk '{print $1}')"
+          mp4_bytes="$(stat -c '%s' "$mp4")"
+          export mp4 report data inspection manifest mp4_sha mp4_bytes
+          python3 <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          value = {
+              "status": "preview-delivery-ready",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "sourceRunId": os.environ["SOURCE_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "commitSha": os.environ["GITHUB_SHA"],
+              "episodeId": os.environ["EPISODE_ID"],
+              "specPath": os.environ["SPEC_PATH"],
+              "specSha256": os.environ["SPEC_SHA"],
+              "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
+              "previewPath": os.environ["mp4"],
+              "previewSha256": os.environ["mp4_sha"],
+              "previewBytes": int(os.environ["mp4_bytes"]),
+              "technicalReportPath": os.environ["report"],
+              "productionDataPath": os.environ["data"],
+              "previewInspectionPath": os.environ["inspection"],
+              "fullVideoAndAudioDecode": True,
+              "createdAt": datetime.now(timezone.utc).isoformat(),
+          }
+          with open(os.environ["manifest"], "w", encoding="utf-8") as handle:
+              json.dump(value, handle, ensure_ascii=False, indent=2)
+              handle.write("\n")
+          PY
+
+      - name: Upload verified preview and reports
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-preview-2026-07-31-${{ github.run_id }}
+          path: |
+            renders/preview/2026-07-31_nasdaq-cafe-spec-preview.mp4
+            build/2026-07-31/technical_report.json
+            build/2026-07-31/render_data.production.json
+            build/2026-07-31/preview_inspection.json
+            build/2026-07-31/delivery_manifest.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
