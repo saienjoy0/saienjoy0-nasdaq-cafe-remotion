@@ -71,6 +71,8 @@ The gate invokes only `.github/workflows/nasdaq-cafe-preview.yml` with:
 - `expected_spec_sha256`
 - `confirmation=PREVIEW`
 
+It uses the repository `GITHUB_TOKEN` with `actions: write` only for the official `workflow_dispatch` API. The dispatch response must include a workflow run ID; otherwise the gate fails and does not record a successful dispatch.
+
 It never invokes the final renderer.
 
 ## Failure semantics
