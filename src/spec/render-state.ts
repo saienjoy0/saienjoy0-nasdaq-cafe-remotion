@@ -8,6 +8,8 @@ export type SceneRenderState = {
   expression: Expression;
   visible: ReadonlySet<string>;
   highlighted: ReadonlySet<string>;
+  visibleSinceMs: ReadonlyMap<string, number>;
+  highlightedSinceMs: ReadonlyMap<string, number>;
 };
 
 const eventTimeMs = (
@@ -60,19 +62,35 @@ export const getSceneRenderState = (
     ...scene.arrows.map((item) => item.arrowId),
     ...scene.assetPlacements.map((item) => item.placementId),
   ];
-  const visible = new Set(
-    allIds.filter((id) => firstVisibility.get(id) !== "show"),
-  );
+  const initiallyVisibleIds = allIds.filter((id) => firstVisibility.get(id) !== "show");
+  const visible = new Set(initiallyVisibleIds);
+  const visibleSinceMs = new Map(initiallyVisibleIds.map((id) => [id, 0] as const));
   const highlighted = new Set<string>();
+  const highlightedSinceMs = new Map<string, number>();
   const reachedEvents = scene.visualEvents
     .map((event, order) => ({event, order, timeMs: eventTimeMs(scene, event)}))
     .filter((item) => item.timeMs <= timeMs)
     .sort((a, b) => a.timeMs - b.timeMs || a.order - b.order);
-  for (const {event} of reachedEvents) {
-    if (event.action === "show" && event.targetId) visible.add(event.targetId);
-    if (event.action === "hide" && event.targetId) visible.delete(event.targetId);
-    if (event.action === "highlight" && event.targetId) highlighted.add(event.targetId);
-    if (event.action === "unhighlight" && event.targetId) highlighted.delete(event.targetId);
+  for (const reached of reachedEvents) {
+    const {event} = reached;
+    if (event.action === "show" && event.targetId) {
+      visible.add(event.targetId);
+      visibleSinceMs.set(event.targetId, reached.timeMs);
+    }
+    if (event.action === "hide" && event.targetId) {
+      visible.delete(event.targetId);
+      visibleSinceMs.delete(event.targetId);
+      highlighted.delete(event.targetId);
+      highlightedSinceMs.delete(event.targetId);
+    }
+    if (event.action === "highlight" && event.targetId) {
+      highlighted.add(event.targetId);
+      highlightedSinceMs.set(event.targetId, reached.timeMs);
+    }
+    if (event.action === "unhighlight" && event.targetId) {
+      highlighted.delete(event.targetId);
+      highlightedSinceMs.delete(event.targetId);
+    }
   }
   return {
     timeMs,
@@ -83,6 +101,8 @@ export const getSceneRenderState = (
     expression,
     visible,
     highlighted,
+    visibleSinceMs,
+    highlightedSinceMs,
   };
 };
 
