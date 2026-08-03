@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: nasdaq-cafe-preview-${{ inputs.episode_date }}
@@ -189,11 +190,11 @@ jobs:
             echo "- Result: pass"
           } >> "$GITHUB_STEP_SUMMARY"
 
-  render-preview:
-    name: Validate, TTS, render, and inspect preview
+  build-preview:
+    name: Validate, TTS, and render preview
     needs: input-preflight
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: 65
 
     env:
       CI: "true"
@@ -317,6 +318,183 @@ jobs:
           path: .cache/spec-tts-blocks
           key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-${{ github.run_id }}-${{ github.run_attempt }}
 
+      - name: Upload raw preview payload
+        if: steps.generate.outcome == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-preview-raw-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_id }}
+          path: |
+            renders/preview/${{ env.EPISODE_ID }}_nasdaq-cafe-spec-preview.mp4
+            build/${{ env.EPISODE_ID }}/technical_report.json
+            build/${{ env.EPISODE_ID }}/render_data.production.json
+            public/spec-audio/${{ env.EPISODE_ID }}/tts-block-state.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+      - name: Create build failure manifest
+        if: failure()
+        shell: bash
+        env:
+          RECHECK_OUTCOME: ${{ steps.recheck.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
+          STABILITY_TESTS_OUTCOME: ${{ steps.stability_tests.outcome }}
+          GENERATE_OUTCOME: ${{ steps.generate.outcome }}
+        run: |
+          set -euo pipefail
+          mkdir -p "build/${EPISODE_ID}"
+          python3 <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+
+          steps = {
+              "recheck": os.environ.get("RECHECK_OUTCOME", "unknown"),
+              "install": os.environ.get("INSTALL_OUTCOME", "unknown"),
+              "validate": os.environ.get("VALIDATE_OUTCOME", "unknown"),
+              "ffmpeg": os.environ.get("FFMPEG_OUTCOME", "unknown"),
+              "stabilityTests": os.environ.get("STABILITY_TESTS_OUTCOME", "unknown"),
+              "generate": os.environ.get("GENERATE_OUTCOME", "unknown"),
+          }
+          failed_step = next(
+              (name for name, outcome in steps.items() if outcome == "failure"),
+              "unknown",
+          )
+          manifest = {
+              "status": "preview-build-failed",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "commitSha": os.environ["GITHUB_SHA"],
+              "episodeId": os.environ["EPISODE_ID"],
+              "specPath": os.environ["SPEC_PATH"],
+              "specSha256": os.environ["SPEC_SHA"],
+              "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
+              "failedStep": failed_step,
+              "steps": steps,
+              "createdAt": datetime.now(timezone.utc).isoformat(),
+          }
+          output = f"build/{os.environ['EPISODE_ID']}/build_failure_manifest.json"
+          with open(output, "w", encoding="utf-8") as handle:
+              json.dump(manifest, handle, ensure_ascii=False, indent=2)
+              handle.write("\n")
+          PY
+
+      - name: Upload build failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-preview-build-failure-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            build/${{ env.EPISODE_ID }}/build_failure_manifest.json
+            build/${{ env.EPISODE_ID }}/technical_report.json
+            build/${{ env.EPISODE_ID }}/render_data.production.json
+            public/spec-audio/${{ env.EPISODE_ID }}/tts-block-state.json
+            .cache/spec-tts-blocks/**/metadata.json
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 14
+
+  inspect-preview:
+    name: Inspect and package preview
+    needs: [input-preflight, build-preview]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    env:
+      CI: "true"
+      SPEC_PATH: ${{ needs.input-preflight.outputs.spec_path }}
+      EPISODE_ID: ${{ needs.input-preflight.outputs.episode_id }}
+      SPEC_SHA: ${{ needs.input-preflight.outputs.spec_sha }}
+      TTS_INPUT_SHA: ${{ needs.input-preflight.outputs.tts_input_sha }}
+      RAW_ARTIFACT_NAME: nasdaq-cafe-preview-raw-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_id }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Recheck immutable input before inspection
+        id: recheck
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$SPEC_PATH"
+          ACTUAL_SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          if [[ "$ACTUAL_SPEC_SHA" != "$SPEC_SHA" ]]; then
+            echo "::error::render_spec changed before inspection"
+            echo "::error::expected=$SPEC_SHA"
+            echo "::error::actual=$ACTUAL_SPEC_SHA"
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        id: install
+        timeout-minutes: 10
+        run: npm ci
+
+      - name: Ensure ffmpeg is available
+        id: ffmpeg
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            for attempt in 1 2 3; do
+              if sudo apt-get update && sudo apt-get install -y ffmpeg; then
+                break
+              fi
+              if [[ "$attempt" = "3" ]]; then
+                echo "::error::ffmpeg installation failed after 3 attempts"
+                exit 1
+              fi
+              sleep $((attempt * 10))
+            done
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Download raw preview payload
+        id: download_raw
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ env.RAW_ARTIFACT_NAME }}
+          path: .
+
+      - name: Verify raw preview identity
+        id: raw_identity
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          MP4="renders/preview/${EPISODE_ID}_nasdaq-cafe-spec-preview.mp4"
+          REPORT="build/${EPISODE_ID}/technical_report.json"
+          DATA="build/${EPISODE_ID}/render_data.production.json"
+          test -s "$MP4"
+          test -s "$REPORT"
+          test -s "$DATA"
+          node -e '
+            const fs = require("node:fs");
+            const report = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (report.inputSpecSha256 !== process.env.SPEC_SHA) {
+              throw new Error(`raw artifact spec SHA mismatch: ${report.inputSpecSha256}`);
+            }
+            if (report.episodeId !== process.env.EPISODE_ID) {
+              throw new Error(`raw artifact episode mismatch: ${report.episodeId}`);
+            }
+            if (report.status !== "preview-generated" || !report.previewPath) {
+              throw new Error(`raw artifact is not preview-generated: ${report.status}`);
+            }
+          ' "$REPORT"
+
       - name: Inspect preview MP4 video and audio
         id: inspect
         timeout-minutes: 10
@@ -371,6 +549,7 @@ jobs:
               "specPath": os.environ["SPEC_PATH"],
               "specSha256": os.environ["SPEC_SHA"],
               "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
+              "rawArtifactName": os.environ["RAW_ARTIFACT_NAME"],
               "previewPath": os.environ["MP4"],
               "previewSha256": os.environ["MP4_SHA"],
               "previewBytes": int(os.environ["MP4_BYTES"]),
@@ -388,6 +567,7 @@ jobs:
 
           {
             echo "### Preview delivery"
+            echo "- Raw Artifact: \`$RAW_ARTIFACT_NAME\`"
             echo "- MP4: \`$MP4\`"
             echo "- MP4 bytes: \`$MP4_BYTES\`"
             echo "- MP4 SHA-256: \`$MP4_SHA\`"
@@ -395,16 +575,15 @@ jobs:
             echo "- Delivery manifest: \`$DELIVERY_MANIFEST\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Create failure manifest
+      - name: Create inspection failure manifest
         if: failure()
         shell: bash
         env:
           RECHECK_OUTCOME: ${{ steps.recheck.outcome }}
           INSTALL_OUTCOME: ${{ steps.install.outcome }}
-          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
           FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
-          STABILITY_TESTS_OUTCOME: ${{ steps.stability_tests.outcome }}
-          GENERATE_OUTCOME: ${{ steps.generate.outcome }}
+          DOWNLOAD_OUTCOME: ${{ steps.download_raw.outcome }}
+          RAW_IDENTITY_OUTCOME: ${{ steps.raw_identity.outcome }}
           INSPECT_OUTCOME: ${{ steps.inspect.outcome }}
           DELIVERY_OUTCOME: ${{ steps.delivery.outcome }}
         run: |
@@ -418,10 +597,9 @@ jobs:
           steps = {
               "recheck": os.environ.get("RECHECK_OUTCOME", "unknown"),
               "install": os.environ.get("INSTALL_OUTCOME", "unknown"),
-              "validate": os.environ.get("VALIDATE_OUTCOME", "unknown"),
               "ffmpeg": os.environ.get("FFMPEG_OUTCOME", "unknown"),
-              "stabilityTests": os.environ.get("STABILITY_TESTS_OUTCOME", "unknown"),
-              "generate": os.environ.get("GENERATE_OUTCOME", "unknown"),
+              "downloadRaw": os.environ.get("DOWNLOAD_OUTCOME", "unknown"),
+              "rawIdentity": os.environ.get("RAW_IDENTITY_OUTCOME", "unknown"),
               "inspect": os.environ.get("INSPECT_OUTCOME", "unknown"),
               "delivery": os.environ.get("DELIVERY_OUTCOME", "unknown"),
           }
@@ -430,7 +608,7 @@ jobs:
               "unknown",
           )
           manifest = {
-              "status": "preview-failed",
+              "status": "preview-inspection-failed",
               "repository": os.environ["GITHUB_REPOSITORY"],
               "runId": os.environ["GITHUB_RUN_ID"],
               "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
@@ -439,11 +617,13 @@ jobs:
               "specPath": os.environ["SPEC_PATH"],
               "specSha256": os.environ["SPEC_SHA"],
               "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
+              "rawArtifactName": os.environ["RAW_ARTIFACT_NAME"],
+              "rawPreviewPreserved": True,
               "failedStep": failed_step,
               "steps": steps,
               "createdAt": datetime.now(timezone.utc).isoformat(),
           }
-          output = f"build/{os.environ['EPISODE_ID']}/failure_manifest.json"
+          output = f"build/{os.environ['EPISODE_ID']}/inspection_failure_manifest.json"
           with open(output, "w", encoding="utf-8") as handle:
               json.dump(manifest, handle, ensure_ascii=False, indent=2)
               handle.write("\n")
@@ -463,18 +643,15 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Upload failure diagnostics
+      - name: Upload inspection failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: nasdaq-cafe-preview-failure-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_number }}-${{ github.run_attempt }}
+          name: nasdaq-cafe-preview-inspection-failure-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_number }}-${{ github.run_attempt }}
           path: |
-            build/${{ env.EPISODE_ID }}/failure_manifest.json
+            build/${{ env.EPISODE_ID }}/inspection_failure_manifest.json
             build/${{ env.EPISODE_ID }}/technical_report.json
             build/${{ env.EPISODE_ID }}/render_data.production.json
             build/${{ env.EPISODE_ID }}/preview_inspection.json
-            public/spec-audio/${{ env.EPISODE_ID }}/tts-block-state.json
-            .cache/spec-tts-blocks/**/metadata.json
           if-no-files-found: warn
-          include-hidden-files: true
           retention-days: 14
