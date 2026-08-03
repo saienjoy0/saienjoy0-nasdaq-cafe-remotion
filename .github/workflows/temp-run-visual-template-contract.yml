@@ -41,11 +41,16 @@ jobs:
           for line in block.splitlines():
               lines.append(line[10:] if line.startswith('          ') else line)
           script='\n'.join(lines)+'\n'
-          old="text = replace_once(text, needle, addition, 'template validation insertion')"
-          new="""marker = \"    });\\n  });\\n  return data;\"\nif marker not in text:\n    raise SystemExit('template validation end marker missing')\ntext = text.replace(marker, addition + marker, 1)"""
-          if script.count(old) != 1:
-              raise SystemExit(f'validation patch target count={script.count(old)}')
-          script=script.replace(old,new,1)
+
+          replacements={
+            "text = replace_once(text, needle, addition, 'template validation insertion')": """marker = \"    });\\n  });\\n  return data;\"\nif marker not in text:\n    raise SystemExit('template validation end marker missing')\ntext = text.replace(marker, addition + marker, 1)""",
+            "text = replace_once(text, old, new, 'fixture beat fields')": """target = \"    visualMode: mode,\\n\"\nif text.count(target) != 1:\n    raise SystemExit(f'fixture visualMode target count={text.count(target)}')\nfields = '''    visualTemplate: templateForMode[mode],\n    templateConfig: {\n      variant: mode === \"causal-diagram\" ? \"left-to-right\" : mode === \"stock-comparison\" ? \"center-zero\" : \"default\",\n      comparisonBasis: [\"number-comparison\", \"chart\", \"stock-comparison\"].includes(mode) ? `TEST BASIS ${number}-${beatNumber}` : null,\n      dataBasis: \"TEST TIMELINE BASIS\",\n      nodeOrder: mode === \"causal-diagram\" ? nodes.map((node) => node.nodeId) : [],\n      laneLabels: [],\n      outcomeNodeId: null,\n    },\n'''\ntext = text.replace(target, target + fields, 1)""",
+            "text = replace_once(text, old, new, 'fixture entity override')": """target = '          visualMode: \"text-focus\",\\n'\nif text.count(target) != 1:\n    raise SystemExit(f'fixture entity visualMode target count={text.count(target)}')\nfields = '''          visualTemplate: \"entity-card-full\",\n          templateConfig: {variant: \"prebuilt-card\", comparisonBasis: null, dataBasis: \"TEST TIMELINE BASIS\", nodeOrder: [], laneLabels: [], outcomeNodeId: null},\n'''\ntext = text.replace(target, target + fields, 1)"""
+          }
+          for old,new in replacements.items():
+              if script.count(old) != 1:
+                  raise SystemExit(f'patch target count={script.count(old)} for {old}')
+              script=script.replace(old,new,1)
           Path('/tmp/update_visual_contract.py').write_text(script,encoding='utf-8')
           PY
           python3 /tmp/update_visual_contract.py 2>&1 | tee /tmp/apply.log
