@@ -8,6 +8,13 @@ import type {
   PublicNumber,
 } from "../../spec/public-view-model";
 import {SpecVisualMode} from "./SpecVisualModes";
+import {
+  EntityFocusStoryTemplate,
+  FinalAssemblyTemplate as FinalAssemblyStoryTemplate,
+  FocusMatrixTemplate,
+  HeroNumberTemplate,
+  SplitComparisonTemplate,
+} from "./AdditionalVisualTemplates";
 
 const FPS = 30;
 const color = {
@@ -302,6 +309,11 @@ const FinalAssembly: React.FC<{content: PublicMainContent}> = ({content}) => {
 
 export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
   switch (content.visualTemplate) {
+    case "hero-number": return <HeroNumberTemplate content={content}/>;
+    case "split-comparison": return <SplitComparisonTemplate content={content}/>;
+    case "focus-matrix": return <FocusMatrixTemplate content={content}/>;
+    case "final-assembly": return <FinalAssemblyStoryTemplate content={content}/>;
+    case "entity-card-full": return <EntityFocusStoryTemplate content={content}/>;
     case "opening-contradiction": return <OpeningContradiction content={content}/>;
     case "closing-recap": return <FinalAssembly content={content}/>;
     case "expected-actual-bullet": return <BulletComparison content={content}/>;
@@ -316,7 +328,6 @@ export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({
     case "index-return-bars":
     case "evidence-boundary":
     case "analogy-steps":
-    case "entity-card-full":
     case "news-media":
     case "text-focus":
       return <SpecVisualMode content={content}/>;
