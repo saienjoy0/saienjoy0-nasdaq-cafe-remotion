@@ -65,6 +65,15 @@ export type PublicMainContent = {
     | "entity"
     | "text";
   layout: "full" | "primary-with-entity";
+  headline: string;
+  supportingTexts: string[];
+  uncertainty: string | null;
+  screenQuestion: string;
+  primaryElement: string;
+  primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
+  visualTemplate: ProductionScene["visualBeats"][number]["visualTemplate"];
+  templateConfig: ProductionScene["visualBeats"][number]["templateConfig"];
+  sequencePolicy: "explicit" | "object-order-fallback" | "static";
   cards: PublicCard[];
   numbers: PublicNumber[];
   nodes: PublicNode[];
@@ -73,6 +82,9 @@ export type PublicMainContent = {
   sceneTimeMs: number;
   beatStartMs: number;
   beatEndMs: number;
+  beatProgress: number;
+  holdProgress: number;
+  entityPresentation: "prebuilt-card" | "media" | "fallback" | null;
   entity: null | {
     subjectType: "person" | "company" | "product";
     displayName: string;
@@ -97,8 +109,8 @@ const renderKindMap = {
   "conclusion-card": "conclusion",
   "number-comparison": "numbers",
   "expected-actual-gap": "expected-actual-gap",
-  "timeline": "timeline",
-  "chart": "chart",
+  timeline: "timeline",
+  chart: "chart",
   "causal-diagram": "causal",
   "stock-comparison": "stock-comparison",
   "news-media": "news",
@@ -127,7 +139,9 @@ const publicAsset = (
     src,
     slot: slotOverride ?? slotMap[placement.region],
     fit: placement.fit,
-    objectPosition: placement.focalPoint ? `${placement.focalPoint.x * 100}% ${placement.focalPoint.y * 100}%` : "50% 50%",
+    objectPosition: placement.focalPoint
+      ? `${placement.focalPoint.x * 100}% ${placement.focalPoint.y * 100}%`
+      : "50% 50%",
     opacity: placement.opacity,
   };
 };
@@ -156,18 +170,33 @@ export const toPublicSceneViewModel = (
 
   const selectedIds = new Set(beat.objectIds);
   const beatDurationMs = Math.max(1, beat.endMs - beat.startMs);
+  const showTargets = new Set(
+    scene.visualEvents
+      .filter((event) => event.action === "show" && event.targetId && selectedIds.has(event.targetId))
+      .map((event) => event.targetId as string),
+  );
+  const sequencePolicy: PublicMainContent["sequencePolicy"] =
+    beat.objectIds.length === 0 || beat.screenState === "News" || beat.screenState === "PictureBook"
+      ? "static"
+      : showTargets.size > 0
+        ? "explicit"
+        : "object-order-fallback";
   const staggerMs = Math.min(900, Math.max(260, beatDurationMs * 0.11));
   const defaultRevealAtMs = (id: string) => {
+    if (sequencePolicy === "static") return beat.startMs;
     const index = Math.max(0, beat.objectIds.indexOf(id));
     return beat.startMs + Math.min(index * staggerMs, beatDurationMs * 0.62);
   };
   const objectOrder = new Map(beat.objectIds.map((id, index) => [id, index]));
   const sortByBeatOrder = <T extends {key: string}>(items: T[]) => items.sort(
-    (a, b) => (objectOrder.get(a.key) ?? Number.MAX_SAFE_INTEGER) - (objectOrder.get(b.key) ?? Number.MAX_SAFE_INTEGER),
+    (a, b) =>
+      (objectOrder.get(a.key) ?? Number.MAX_SAFE_INTEGER) -
+      (objectOrder.get(b.key) ?? Number.MAX_SAFE_INTEGER),
   );
   const motionFor = (id: string): PublicMotion => ({
-    // objectIds is the canonical default reveal order. Explicit show events can delay it.
-    revealAtMs: Math.max(defaultRevealAtMs(id), state.visibleSinceMs.get(id) ?? 0),
+    revealAtMs: sequencePolicy === "explicit"
+      ? state.visibleSinceMs.get(id) ?? defaultRevealAtMs(id)
+      : Math.max(defaultRevealAtMs(id), state.visibleSinceMs.get(id) ?? 0),
     highlightedAtMs: state.highlightedSinceMs.get(id) ?? null,
   });
 
@@ -213,9 +242,25 @@ export const toPublicSceneViewModel = (
     })));
 
   const beatPlacementIds = new Set(beat.assetPlacementIds);
-  const mainAssets = scene.assetPlacements
-    .filter((placement) => beatPlacementIds.has(placement.placementId) && isPlacementActive(scene, placement, state))
-    .map((placement) => publicAsset(placement, assets, beat.screenState === "EntityFocus" ? "focus-media" : undefined));
+  const activeBeatPlacements = scene.assetPlacements.filter(
+    (placement) => beatPlacementIds.has(placement.placementId) && isPlacementActive(scene, placement, state),
+  );
+  const entityPlacement = beat.screenState === "EntityFocus"
+    ? activeBeatPlacements.find((placement) => placement.role === "entity-card") ??
+      activeBeatPlacements.find((placement) => ["main-media", "illustration", "chart"].includes(placement.role))
+    : undefined;
+  const entityPresentation: PublicMainContent["entityPresentation"] = beat.screenState !== "EntityFocus"
+    ? null
+    : entityPlacement?.role === "entity-card"
+      ? "prebuilt-card"
+      : entityPlacement
+        ? "media"
+        : "fallback";
+  const mainAssets = activeBeatPlacements.map((placement) => publicAsset(
+    placement,
+    assets,
+    beat.screenState === "EntityFocus" ? "full" : undefined,
+  ));
   const overlays = scene.assetPlacements
     .filter((placement) => placement.role === "overlay" && isPlacementActive(scene, placement, state))
     .map((placement) => publicAsset(placement, assets));
@@ -224,6 +269,12 @@ export const toPublicSceneViewModel = (
     beat.screenState === "Chart" ||
     beat.screenState === "EntityFocus" ||
     beat.screenState === "MainWithEntity";
+  const beatProgress = Math.max(0, Math.min(1, (state.timeMs - beat.startMs) / beatDurationMs));
+  const revealTimes = [...cards, ...numbers, ...nodes, ...arrows].map((item) => item.revealAtMs);
+  const lastRevealAtMs = revealTimes.length > 0 ? Math.max(...revealTimes) : beat.startMs;
+  const holdWindowMs = Math.min(1100, Math.max(350, beatDurationMs * 0.12));
+  const holdStartMs = Math.min(beat.endMs - holdWindowMs, lastRevealAtMs + 650);
+  const holdProgress = Math.max(0, Math.min(1, (state.timeMs - holdStartMs) / holdWindowMs));
 
   return {
     headline: scene.headline,
@@ -238,6 +289,15 @@ export const toPublicSceneViewModel = (
       ? {
           renderKind: beat.screenState === "EntityFocus" ? "entity" : renderKindMap[beat.visualMode],
           layout: beat.screenState === "MainWithEntity" ? "primary-with-entity" : "full",
+          headline: scene.headline,
+          supportingTexts: scene.supportingTexts,
+          uncertainty: scene.uncertainty,
+          screenQuestion: beat.screenQuestion,
+          primaryElement: beat.primaryElement,
+          primaryFunction: beat.primaryFunction,
+          visualTemplate: beat.visualTemplate,
+          templateConfig: beat.templateConfig,
+          sequencePolicy,
           cards,
           numbers,
           nodes,
@@ -246,6 +306,9 @@ export const toPublicSceneViewModel = (
           sceneTimeMs: state.timeMs,
           beatStartMs: beat.startMs,
           beatEndMs: beat.endMs,
+          beatProgress,
+          holdProgress,
+          entityPresentation,
           entity: beat.entity ? {
             subjectType: beat.entity.subjectType,
             displayName: beat.entity.displayName,
