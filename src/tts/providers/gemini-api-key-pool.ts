@@ -5,6 +5,8 @@ const PACIFIC_TIME_ZONE = "America/Los_Angeles";
 const DEFAULT_SUCCESS_COOLDOWN_MS = 25_000;
 const DEFAULT_RATE_LIMIT_COOLDOWN_MS = 30_000;
 const RATE_LIMIT_GUARD_MS = 5_000;
+const DEFAULT_MAX_ATTEMPTS = 12;
+const DEFAULT_MAX_ELAPSED_MS = 12 * 60_000;
 
 type KeyState = {
   slot: number;
@@ -21,6 +23,15 @@ type PersistedState = {
 };
 
 export type GeminiQuotaKind = "daily" | "rate" | "auth" | "other";
+export type GeminiKeyPoolLimits = {
+  maxAttempts?: number;
+  maxElapsedMs?: number;
+};
+
+const positiveInteger = (value: unknown, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
 
 export const collectGeminiApiKeys = (
   environment: NodeJS.ProcessEnv = process.env,
@@ -162,6 +173,8 @@ const freshState = (keyCount: number): PersistedState => ({
 
 export class GeminiApiKeyPool {
   private state: PersistedState | null = null;
+  private readonly maxAttempts: number;
+  private readonly maxElapsedMs: number;
 
   public constructor(
     private readonly keys = collectGeminiApiKeys(),
@@ -173,10 +186,19 @@ export class GeminiApiKeyPool {
     private readonly now = () => new Date(),
     private readonly wait = (milliseconds: number) =>
       new Promise<void>((resolve) => setTimeout(resolve, milliseconds)),
+    limits: GeminiKeyPoolLimits = {},
   ) {
     if (keys.length === 0) {
       throw new Error("Gemini APIキーが設定されていません");
     }
+    this.maxAttempts = positiveInteger(
+      limits.maxAttempts ?? process.env.GEMINI_KEY_POOL_MAX_ATTEMPTS,
+      DEFAULT_MAX_ATTEMPTS,
+    );
+    this.maxElapsedMs = positiveInteger(
+      limits.maxElapsedMs ?? process.env.GEMINI_KEY_POOL_MAX_ELAPSED_MS,
+      DEFAULT_MAX_ELAPSED_MS,
+    );
   }
 
   private async load() {
@@ -232,6 +254,21 @@ export class GeminiApiKeyPool {
 
   public async run<T>(operation: (apiKey: string) => Promise<T>): Promise<T> {
     const state = await this.load();
+    const startedAt = this.now().getTime();
+    let attempts = 0;
+
+    const assertRetryBudget = (additionalWaitMs = 0) => {
+      const elapsedMs = Math.max(0, this.now().getTime() - startedAt);
+      if (
+        attempts >= this.maxAttempts ||
+        elapsedMs + additionalWaitMs > this.maxElapsedMs
+      ) {
+        throw new Error(
+          `GEMINI_RETRY_BUDGET_EXHAUSTED attempts=${attempts} elapsed_ms=${elapsedMs} max_attempts=${this.maxAttempts} max_elapsed_ms=${this.maxElapsedMs}`,
+        );
+      }
+    };
+
     while (true) {
       const now = this.now();
       const nowMs = now.getTime();
@@ -260,10 +297,14 @@ export class GeminiApiKeyPool {
             )
             .map((item) => item.cooldownUntil),
         );
-        await this.wait(Math.max(250, nextCooldown - nowMs));
+        const waitMs = Math.max(250, nextCooldown - nowMs);
+        assertRetryBudget(waitMs);
+        await this.wait(waitMs);
         continue;
       }
 
+      assertRetryBudget();
+      attempts += 1;
       try {
         const result = await operation(this.keys[ready.slot]);
         ready.cooldownUntil =

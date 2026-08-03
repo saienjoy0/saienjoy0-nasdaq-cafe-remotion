@@ -21,24 +21,25 @@ permissions:
 
 concurrency:
   group: nasdaq-cafe-preview-${{ inputs.episode_date }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   input-preflight:
     name: Verify immutable render input
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
 
     outputs:
       spec_path: ${{ steps.verify.outputs.spec_path }}
       episode_id: ${{ steps.verify.outputs.episode_id }}
       spec_sha: ${{ steps.verify.outputs.spec_sha }}
+      tts_input_sha: ${{ steps.verify.outputs.tts_input_sha }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Verify path, JSON, date, SHA, and secrets
+      - name: Verify path, JSON, date, SHA, TTS identity, and secrets
         id: verify
         shell: bash
         env:
@@ -48,6 +49,8 @@ jobs:
           GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
           GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+          GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+          GEMINI_TTS_VOICE: Charon
         run: |
           set -euo pipefail
 
@@ -82,9 +85,11 @@ jobs:
             exit 1
           fi
 
-          EPISODE_ID="$(
+          mapfile -t PREFLIGHT_VALUES < <(
             python3 - "$SPEC_PATH" "$EPISODE_DATE" <<'PY'
+          import hashlib
           import json
+          import os
           import re
           import sys
 
@@ -112,9 +117,58 @@ jobs:
           if not isinstance(episode_id, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_id):
               raise SystemExit("episode.id is missing or unsafe")
 
+          scenes = value.get("scenes")
+          if not isinstance(scenes, list):
+              raise SystemExit("render_spec is missing scenes array")
+
+          blocks = []
+          for block_id, first_scene, last_scene in (
+              ("scenes-01-04", 1, 4),
+              ("scenes-05-09", 5, 9),
+          ):
+              speech = []
+              for scene in scenes:
+                  if not isinstance(scene, dict):
+                      continue
+                  scene_number = scene.get("sceneNumber")
+                  if not isinstance(scene_number, int) or not (first_scene <= scene_number <= last_scene):
+                      continue
+                  chunks = scene.get("narrationChunks")
+                  if not isinstance(chunks, list):
+                      raise SystemExit(f"scene {scene_number} is missing narrationChunks")
+                  for chunk in chunks:
+                      if not isinstance(chunk, dict) or not isinstance(chunk.get("speechText"), str):
+                          raise SystemExit(f"scene {scene_number} contains invalid speechText")
+                      speech.append(chunk["speechText"])
+              if not speech:
+                  raise SystemExit(f"TTS block {block_id} has no speechText")
+              blocks.append({"id": block_id, "speechText": speech})
+
+          payload = {
+              "synthesisVersion": "gemini-two-block-v1",
+              "model": os.environ["GEMINI_TTS_MODEL"],
+              "voice": os.environ["GEMINI_TTS_VOICE"],
+              "voiceProfileId": value.get("voiceProfileId"),
+              "pronunciations": value.get("pronunciations"),
+              "blocks": blocks,
+          }
+          encoded = json.dumps(
+              payload,
+              ensure_ascii=False,
+              sort_keys=True,
+              separators=(",", ":"),
+          ).encode("utf-8")
           print(episode_id)
+          print(hashlib.sha256(encoded).hexdigest())
           PY
-          )"
+          )
+
+          EPISODE_ID="${PREFLIGHT_VALUES[0]:-}"
+          TTS_INPUT_SHA="${PREFLIGHT_VALUES[1]:-}"
+          if [[ ! "$TTS_INPUT_SHA" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::failed to calculate TTS input SHA-256"
+            exit 1
+          fi
 
           if [[ -z "${GEMINI_API_KEY_1:-}" && -z "${GEMINI_API_KEY_2:-}" && -z "${GEMINI_API_KEY_3:-}" ]]; then
             echo "::error::At least one Gemini API key secret is required"
@@ -124,38 +178,45 @@ jobs:
           echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
           echo "episode_id=$EPISODE_ID" >> "$GITHUB_OUTPUT"
           echo "spec_sha=$ACTUAL_SPEC_SHA" >> "$GITHUB_OUTPUT"
+          echo "tts_input_sha=$TTS_INPUT_SHA" >> "$GITHUB_OUTPUT"
 
           {
             echo "### Immutable input preflight"
             echo "- Spec path: \`$SPEC_PATH\`"
             echo "- Episode ID: \`$EPISODE_ID\`"
-            echo "- SHA-256: \`$ACTUAL_SPEC_SHA\`"
+            echo "- Spec SHA-256: \`$ACTUAL_SPEC_SHA\`"
+            echo "- TTS input SHA-256: \`$TTS_INPUT_SHA\`"
             echo "- Result: pass"
           } >> "$GITHUB_STEP_SUMMARY"
 
   render-preview:
-    name: Validate, TTS, and render preview
+    name: Validate, TTS, render, and inspect preview
     needs: input-preflight
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
 
     env:
       CI: "true"
       SPEC_PATH: ${{ needs.input-preflight.outputs.spec_path }}
       EPISODE_ID: ${{ needs.input-preflight.outputs.episode_id }}
       SPEC_SHA: ${{ needs.input-preflight.outputs.spec_sha }}
+      TTS_INPUT_SHA: ${{ needs.input-preflight.outputs.tts_input_sha }}
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
       TTS_PROVIDER: gemini
       GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
       GEMINI_TTS_VOICE: Charon
+      GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
+      GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Recheck immutable input after checkout
+        id: recheck
+        timeout-minutes: 2
         shell: bash
         run: |
           set -euo pipefail
@@ -175,37 +236,95 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        id: install
+        timeout-minutes: 10
         run: npm ci
 
       - name: Validate render spec
+        id: validate
+        timeout-minutes: 5
         run: npm run episode:spec:validate -- "$SPEC_PATH"
 
       - name: Ensure ffmpeg is available
+        id: ffmpeg
+        timeout-minutes: 10
         shell: bash
         run: |
           set -euo pipefail
           if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
+            for attempt in 1 2 3; do
+              if sudo apt-get update && sudo apt-get install -y ffmpeg; then
+                break
+              fi
+              if [[ "$attempt" = "3" ]]; then
+                echo "::error::ffmpeg installation failed after 3 attempts"
+                exit 1
+              fi
+              sleep $((attempt * 10))
+            done
           fi
           ffmpeg -version | head -n 1
           ffprobe -version | head -n 1
 
-      - name: Restore Gemini TTS cache
-        uses: actions/cache@v5
+      - name: Run runtime stability tests
+        id: stability_tests
+        timeout-minutes: 5
+        run: npm run test:runtime-stability
+
+      - name: Prepare TTS cache directory
+        shell: bash
+        run: mkdir -p .cache/spec-tts-blocks
+
+      - name: Restore Gemini two-block TTS cache
+        id: tts_cache_restore
+        continue-on-error: true
+        uses: actions/cache/restore@v5
         with:
-          path: .cache/spec-tts
-          key: >-
-            ${{ runner.os }}-spec-tts-v1-
-            ${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts') }}-
-            ${{ env.SPEC_SHA }}
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
           restore-keys: |
-            ${{ runner.os }}-spec-tts-v1-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts') }}-
+            ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-
 
       - name: Generate preview
+        id: generate
+        timeout-minutes: 55
         run: npm run episode:spec:preview -- "$SPEC_PATH"
 
-      - name: Mechanical output and decode checks
+      - name: Detect generated TTS cache content
+        id: tts_cache_content
+        if: always()
+        shell: bash
+        run: |
+          if find .cache/spec-tts-blocks -type f -name audio.wav -print -quit 2>/dev/null | grep -q .; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save complete Gemini two-block TTS cache
+        if: steps.generate.outcome == 'success' && steps.tts_cache_restore.outputs.cache-hit != 'true' && steps.tts_cache_content.outputs.ready == 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
+
+      - name: Save recoverable partial Gemini TTS cache
+        if: always() && steps.generate.outcome != 'success' && steps.tts_cache_restore.outputs.cache-hit != 'true' && steps.tts_cache_content.outputs.ready == 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Inspect preview MP4 video and audio
+        id: inspect
+        timeout-minutes: 10
+        run: npm run episode:spec:inspect:preview -- "$SPEC_PATH"
+
+      - name: Create delivery manifest
+        id: delivery
+        timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
@@ -213,37 +332,30 @@ jobs:
           MP4="renders/preview/${EPISODE_ID}_nasdaq-cafe-spec-preview.mp4"
           REPORT="build/${EPISODE_ID}/technical_report.json"
           DATA="build/${EPISODE_ID}/render_data.production.json"
-          FFPROBE_REPORT="build/${EPISODE_ID}/preview_ffprobe.json"
+          INSPECTION="build/${EPISODE_ID}/preview_inspection.json"
           DELIVERY_MANIFEST="build/${EPISODE_ID}/delivery_manifest.json"
 
           test -s "$MP4"
           test -s "$REPORT"
           test -s "$DATA"
+          test -s "$INSPECTION"
 
           node -e '
             const fs = require("node:fs");
-            const reportPath = process.argv[1];
-            const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
-            if (report.status !== "preview-generated") {
-              throw new Error(`unexpected technical report status: ${report.status}`);
+            const technical = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            const inspection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+            if (technical.status !== "preview-generated" || !technical.previewPath) {
+              throw new Error("technical report is not preview-generated");
             }
-            if (!report.previewPath) {
-              throw new Error("technical report has no previewPath");
+            if (inspection.status !== "valid" || inspection.inspection?.fullDecode !== true) {
+              throw new Error(`preview A/V inspection is not valid: ${inspection.status}`);
             }
-          ' "$REPORT"
-
-          ffprobe \
-            -v error \
-            -show_entries format=duration,size:stream=index,codec_type,codec_name,width,height \
-            -of json \
-            "$MP4" > "$FFPROBE_REPORT"
-
-          ffmpeg -v error -i "$MP4" -map 0:v:0 -f null -
+          ' "$REPORT" "$INSPECTION"
 
           MP4_SHA="$(sha256sum "$MP4" | awk '{print $1}')"
           MP4_BYTES="$(stat -c '%s' "$MP4")"
 
-          export MP4 REPORT DATA FFPROBE_REPORT DELIVERY_MANIFEST MP4_SHA MP4_BYTES
+          export MP4 REPORT DATA INSPECTION DELIVERY_MANIFEST MP4_SHA MP4_BYTES
           python3 <<'PY'
           import json
           import os
@@ -258,12 +370,14 @@ jobs:
               "episodeId": os.environ["EPISODE_ID"],
               "specPath": os.environ["SPEC_PATH"],
               "specSha256": os.environ["SPEC_SHA"],
+              "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
               "previewPath": os.environ["MP4"],
               "previewSha256": os.environ["MP4_SHA"],
               "previewBytes": int(os.environ["MP4_BYTES"]),
               "technicalReportPath": os.environ["REPORT"],
               "productionDataPath": os.environ["DATA"],
-              "ffprobeReportPath": os.environ["FFPROBE_REPORT"],
+              "previewInspectionPath": os.environ["INSPECTION"],
+              "fullVideoAndAudioDecode": True,
               "createdAt": datetime.now(timezone.utc).isoformat(),
           }
 
@@ -277,9 +391,63 @@ jobs:
             echo "- MP4: \`$MP4\`"
             echo "- MP4 bytes: \`$MP4_BYTES\`"
             echo "- MP4 SHA-256: \`$MP4_SHA\`"
-            echo "- Full video decode: pass"
+            echo "- Full video and audio decode: pass"
             echo "- Delivery manifest: \`$DELIVERY_MANIFEST\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create failure manifest
+        if: failure()
+        shell: bash
+        env:
+          RECHECK_OUTCOME: ${{ steps.recheck.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
+          STABILITY_TESTS_OUTCOME: ${{ steps.stability_tests.outcome }}
+          GENERATE_OUTCOME: ${{ steps.generate.outcome }}
+          INSPECT_OUTCOME: ${{ steps.inspect.outcome }}
+          DELIVERY_OUTCOME: ${{ steps.delivery.outcome }}
+        run: |
+          set -euo pipefail
+          mkdir -p "build/${EPISODE_ID}"
+          python3 <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+
+          steps = {
+              "recheck": os.environ.get("RECHECK_OUTCOME", "unknown"),
+              "install": os.environ.get("INSTALL_OUTCOME", "unknown"),
+              "validate": os.environ.get("VALIDATE_OUTCOME", "unknown"),
+              "ffmpeg": os.environ.get("FFMPEG_OUTCOME", "unknown"),
+              "stabilityTests": os.environ.get("STABILITY_TESTS_OUTCOME", "unknown"),
+              "generate": os.environ.get("GENERATE_OUTCOME", "unknown"),
+              "inspect": os.environ.get("INSPECT_OUTCOME", "unknown"),
+              "delivery": os.environ.get("DELIVERY_OUTCOME", "unknown"),
+          }
+          failed_step = next(
+              (name for name, outcome in steps.items() if outcome == "failure"),
+              "unknown",
+          )
+          manifest = {
+              "status": "preview-failed",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "commitSha": os.environ["GITHUB_SHA"],
+              "episodeId": os.environ["EPISODE_ID"],
+              "specPath": os.environ["SPEC_PATH"],
+              "specSha256": os.environ["SPEC_SHA"],
+              "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
+              "failedStep": failed_step,
+              "steps": steps,
+              "createdAt": datetime.now(timezone.utc).isoformat(),
+          }
+          output = f"build/{os.environ['EPISODE_ID']}/failure_manifest.json"
+          with open(output, "w", encoding="utf-8") as handle:
+              json.dump(manifest, handle, ensure_ascii=False, indent=2)
+              handle.write("\n")
+          PY
 
       - name: Upload verified preview and reports
         if: success()
@@ -290,7 +458,23 @@ jobs:
             renders/preview/*.mp4
             build/*/technical_report.json
             build/*/render_data.production.json
-            build/*/preview_ffprobe.json
+            build/*/preview_inspection.json
             build/*/delivery_manifest.json
           if-no-files-found: error
           retention-days: 30
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-preview-failure-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            build/${{ env.EPISODE_ID }}/failure_manifest.json
+            build/${{ env.EPISODE_ID }}/technical_report.json
+            build/${{ env.EPISODE_ID }}/render_data.production.json
+            build/${{ env.EPISODE_ID }}/preview_inspection.json
+            public/spec-audio/${{ env.EPISODE_ID }}/tts-block-state.json
+            .cache/spec-tts-blocks/**/metadata.json
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 14
