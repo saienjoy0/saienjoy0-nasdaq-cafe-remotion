@@ -1,13 +1,20 @@
 import {resolveStrictExpressionAsset} from "../config/spec-expressions";
 import type {ProductionScene} from "./render-spec";
-import {isPlacementActive, type SceneRenderState} from "./render-state";
+import {isPlacementActive, type MotionInstruction, type SceneRenderState} from "./render-state";
+import type {SequencePolicy} from "./motion-preset-contract";
 
 type PublicTone = "positive" | "negative" | "warning" | "neutral" | "emphasis";
 type PublicFit = "cover" | "contain" | "fill";
 
+export type PublicMotionInstruction = MotionInstruction;
+
 type PublicMotion = {
   revealAtMs: number;
   highlightedAtMs: number | null;
+  enterMotion: PublicMotionInstruction | null;
+  exitMotion: PublicMotionInstruction | null;
+  highlightMotion: PublicMotionInstruction | null;
+  unhighlightMotion: PublicMotionInstruction | null;
 };
 
 export type PublicCard = PublicMotion & {
@@ -22,6 +29,8 @@ export type PublicNumber = PublicMotion & {
   key: string;
   label: string;
   value: string;
+  numericValue: number | null;
+  precision: number | null;
   unit: string;
   comparison: string | null;
   tone: PublicTone;
@@ -73,7 +82,8 @@ export type PublicMainContent = {
   primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
   visualTemplate: ProductionScene["visualBeats"][number]["visualTemplate"];
   templateConfig: ProductionScene["visualBeats"][number]["templateConfig"];
-  sequencePolicy: "explicit" | "object-order-fallback" | "static";
+  sequencePolicy: SequencePolicy;
+  finalHoldMs: number;
   cards: PublicCard[];
   numbers: PublicNumber[];
   nodes: PublicNode[];
@@ -175,12 +185,13 @@ export const toPublicSceneViewModel = (
       .filter((event) => event.action === "show" && event.targetId && selectedIds.has(event.targetId))
       .map((event) => event.targetId as string),
   );
-  const sequencePolicy: PublicMainContent["sequencePolicy"] =
+  const inferredSequencePolicy: SequencePolicy =
     beat.objectIds.length === 0 || beat.screenState === "News" || beat.screenState === "PictureBook"
       ? "static"
       : showTargets.size > 0
         ? "explicit"
         : "object-order-fallback";
+  const sequencePolicy = beat.sequencePolicy ?? inferredSequencePolicy;
   const staggerMs = Math.min(900, Math.max(260, beatDurationMs * 0.11));
   const defaultRevealAtMs = (id: string) => {
     if (sequencePolicy === "static") return beat.startMs;
@@ -198,6 +209,10 @@ export const toPublicSceneViewModel = (
       ? state.visibleSinceMs.get(id) ?? defaultRevealAtMs(id)
       : Math.max(defaultRevealAtMs(id), state.visibleSinceMs.get(id) ?? 0),
     highlightedAtMs: state.highlightedSinceMs.get(id) ?? null,
+    enterMotion: state.showMotionByTarget.get(id) ?? null,
+    exitMotion: state.hideMotionByTarget.get(id) ?? null,
+    highlightMotion: state.highlightMotionByTarget.get(id) ?? null,
+    unhighlightMotion: state.unhighlightMotionByTarget.get(id) ?? null,
   });
 
   const cards = sortByBeatOrder(scene.cards
@@ -216,6 +231,8 @@ export const toPublicSceneViewModel = (
       key: number.numberId,
       label: number.label,
       value: number.value,
+      numericValue: number.numericValue ?? null,
+      precision: number.precision ?? null,
       unit: number.unit,
       comparison: number.comparison,
       tone: number.tone,
@@ -272,9 +289,11 @@ export const toPublicSceneViewModel = (
   const beatProgress = Math.max(0, Math.min(1, (state.timeMs - beat.startMs) / beatDurationMs));
   const revealTimes = [...cards, ...numbers, ...nodes, ...arrows].map((item) => item.revealAtMs);
   const lastRevealAtMs = revealTimes.length > 0 ? Math.max(...revealTimes) : beat.startMs;
-  const holdWindowMs = Math.min(1100, Math.max(350, beatDurationMs * 0.12));
-  const holdStartMs = Math.min(beat.endMs - holdWindowMs, lastRevealAtMs + 650);
-  const holdProgress = Math.max(0, Math.min(1, (state.timeMs - holdStartMs) / holdWindowMs));
+  const finalHoldMs = beat.finalHoldMs ?? Math.min(1_100, Math.max(350, beatDurationMs * 0.12));
+  const holdStartMs = Math.min(beat.endMs - finalHoldMs, lastRevealAtMs + 650);
+  const holdProgress = finalHoldMs === 0
+    ? 1
+    : Math.max(0, Math.min(1, (state.timeMs - holdStartMs) / finalHoldMs));
 
   return {
     headline: scene.headline,
@@ -298,6 +317,7 @@ export const toPublicSceneViewModel = (
           visualTemplate: beat.visualTemplate,
           templateConfig: beat.templateConfig,
           sequencePolicy,
+          finalHoldMs,
           cards,
           numbers,
           nodes,
