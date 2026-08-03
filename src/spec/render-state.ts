@@ -14,7 +14,7 @@ export type SceneRenderState = {
   activeChunkIndex: number | null;
   activeBeatIndex: number;
   captionText: string | null;
-  summaryCaptionText: string | null;
+  subtitleText: string | null;
   expression: Expression;
   visible: ReadonlySet<string>;
   highlighted: ReadonlySet<string>;
@@ -156,12 +156,12 @@ export const getSceneRenderState = (
     timeMs,
     activeChunkIndex: activeChunkIndex < 0 ? null : activeChunkIndex,
     activeBeatIndex: activeBeatIndex < 0 ? Math.max(0, scene.visualBeats.length - 1) : activeBeatIndex,
-    // Full narration subtitles are timed inside the measured audio chunk.
-    // The short captionText remains separate production metadata and is never substituted for subtitles.
-    captionText: activeChunk
+    // captionText is the existing short summary telop kept for compatibility.
+    captionText: activeChunk?.caption.text ?? null,
+    // subtitleText is the complete narration, paged and timed inside the measured audio chunk.
+    subtitleText: activeChunk
       ? getSubtitleTextAtTime(activeChunk.speechText, activeChunk.startMs, activeChunk.endMs, timeMs)
       : null,
-    summaryCaptionText: activeChunk?.caption.text ?? null,
     expression,
     visible,
     highlighted,
