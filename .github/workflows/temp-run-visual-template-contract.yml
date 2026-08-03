@@ -40,7 +40,13 @@ jobs:
           lines=[]
           for line in block.splitlines():
               lines.append(line[10:] if line.startswith('          ') else line)
-          Path('/tmp/update_visual_contract.py').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+          script='\n'.join(lines)+'\n'
+          old="text = replace_once(text, needle, addition, 'template validation insertion')"
+          new="""marker = \"    });\\n  });\\n  return data;\"\nif marker not in text:\n    raise SystemExit('template validation end marker missing')\ntext = text.replace(marker, addition + marker, 1)"""
+          if script.count(old) != 1:
+              raise SystemExit(f'validation patch target count={script.count(old)}')
+          script=script.replace(old,new,1)
+          Path('/tmp/update_visual_contract.py').write_text(script,encoding='utf-8')
           PY
           python3 /tmp/update_visual_contract.py 2>&1 | tee /tmp/apply.log
 
