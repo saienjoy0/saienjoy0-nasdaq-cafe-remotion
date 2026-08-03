@@ -1,5 +1,6 @@
 import type {Expression, ProductionScene} from "./render-spec";
 import type {EasingPreset, MotionPreset} from "./motion-preset-contract";
+import {getSubtitleTextAtTime} from "./subtitle-cues";
 
 export type MotionInstruction = {
   preset: MotionPreset;
@@ -13,6 +14,7 @@ export type SceneRenderState = {
   activeChunkIndex: number | null;
   activeBeatIndex: number;
   captionText: string | null;
+  summaryCaptionText: string | null;
   expression: Expression;
   visible: ReadonlySet<string>;
   highlighted: ReadonlySet<string>;
@@ -149,12 +151,17 @@ export const getSceneRenderState = (
     }
   }
 
+  const activeChunk = activeChunkIndex < 0 ? null : scene.narrationChunks[activeChunkIndex];
   return {
     timeMs,
     activeChunkIndex: activeChunkIndex < 0 ? null : activeChunkIndex,
     activeBeatIndex: activeBeatIndex < 0 ? Math.max(0, scene.visualBeats.length - 1) : activeBeatIndex,
-    // Contract B: captions are hidden during pauses.
-    captionText: activeChunkIndex < 0 ? null : scene.narrationChunks[activeChunkIndex].caption.text,
+    // Full narration subtitles are timed inside the measured audio chunk.
+    // The short captionText remains separate production metadata and is never substituted for subtitles.
+    captionText: activeChunk
+      ? getSubtitleTextAtTime(activeChunk.speechText, activeChunk.startMs, activeChunk.endMs, timeMs)
+      : null,
+    summaryCaptionText: activeChunk?.caption.text ?? null,
     expression,
     visible,
     highlighted,
