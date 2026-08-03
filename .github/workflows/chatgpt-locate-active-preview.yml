@@ -1,11 +1,11 @@
 name: ChatGPT Locate Active Preview
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - ".chatgpt-test/locate-preview.txt"
+  schedule:
+    - cron: "34 4 * * *"
+    - cron: "36 4 * * *"
+    - cron: "38 4 * * *"
+  workflow_dispatch:
 
 permissions:
   actions: read
