@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.1.0",
+  "schemaVersion": "2.2.0",
   "episode": {
     "id": "2026-07-31",
     "targetDate": "2026-07-31",
@@ -224,7 +224,9 @@
           "primaryElement": "NASDAQ方向と主役",
           "viewerTexts": [
             "NASDAQ +1.00%",
-            "Amazon +15.32%"
+            "Amazon +15.32%",
+            "SOXX +0.07%",
+            "Apple -7.35%"
           ],
           "changeCue": "NASDAQ +1.00%",
           "objectIds": [
@@ -240,7 +242,16 @@
           "expressionChange": "軽い驚き",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "opening-contradiction",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-01-beat-002",
@@ -270,7 +281,16 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -469,7 +489,16 @@
             "rightsStatus": "cleared",
             "targetDurationMs": 6000
           },
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "entity-card-full",
+          "templateConfig": {
+            "variant": "prebuilt-card",
+            "comparisonBasis": null,
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-02-beat-002",
@@ -504,7 +533,16 @@
           "expressionChange": "困惑",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "diverging-stock-bars",
+          "templateConfig": {
+            "variant": "center-zero",
+            "comparisonBasis": "上昇はどこまで広がったか",
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [],
@@ -715,7 +753,16 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "expected-actual-bullet",
+          "templateConfig": {
+            "variant": "zero-baseline",
+            "comparisonBasis": "AWSは予想を超えたか",
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-03-beat-002",
@@ -749,7 +796,16 @@
           "expressionChange": "通常",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "metric-comparison-board",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "反応はAmazonだけか",
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [],
@@ -964,7 +1020,16 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "expected-actual-gap-flow",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要報道と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-04-beat-002",
@@ -994,7 +1059,16 @@
           "expressionChange": "ニヤリ",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "analogy-steps",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要報道と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-04-beat-003",
@@ -1034,7 +1108,21 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "causal-lane",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要報道と終値",
+            "nodeOrder": [
+              "s4-node-spend",
+              "s4-node-cloud",
+              "s4-node-revenue",
+              "s4-node-valuation"
+            ],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -1289,7 +1377,20 @@
           "expressionChange": "警戒",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "causal-lane",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要市場記事",
+            "nodeOrder": [
+              "s5-node-data",
+              "s5-node-yield",
+              "s5-node-growth"
+            ],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-05-beat-002",
@@ -1304,8 +1405,8 @@
           "screenQuestion": "向かい風の大きさは",
           "primaryElement": "雇用コストと米10年金利",
           "viewerTexts": [
-            "ECI 0.9%",
-            "米10年 約4.75%"
+            "追い風｜AWS予想超過→Amazon急騰",
+            "向かい風｜強い指標→金利上昇"
           ],
           "changeCue": "ECI 0.9%",
           "objectIds": [
@@ -1322,7 +1423,19 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "tailwind-headwind",
+          "templateConfig": {
+            "variant": "two-lane",
+            "comparisonBasis": null,
+            "dataBasis": "主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [
+              "追い風",
+              "向かい風"
+            ],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [],
@@ -1537,7 +1650,16 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "evidence-boundary",
+          "templateConfig": {
+            "variant": "confirmed-vs-unconfirmed",
+            "comparisonBasis": null,
+            "dataBasis": "取引区分と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-06-beat-002",
@@ -1573,7 +1695,16 @@
           "expressionChange": "警戒",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "index-return-bars",
+          "templateConfig": {
+            "variant": "zero-baseline",
+            "comparisonBasis": "指数と半導体は同じ強さか",
+            "dataBasis": "取引区分と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [],
@@ -1779,7 +1910,16 @@
             "rightsStatus": "cleared",
             "targetDurationMs": 6000
           },
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "entity-card-full",
+          "templateConfig": {
+            "variant": "prebuilt-card",
+            "comparisonBasis": null,
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-07-beat-002",
@@ -1816,7 +1956,16 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "diverging-stock-bars",
+          "templateConfig": {
+            "variant": "center-zero",
+            "comparisonBasis": "評価軸はどこへ表れたか",
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [],
@@ -2035,7 +2184,16 @@
           "expressionChange": "通常",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "verification-checklist",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "今後の確認条件",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-08-beat-002",
@@ -2050,9 +2208,10 @@
           "screenQuestion": "何がそろえば仮説は強まるか",
           "primaryElement": "検証条件の因果図",
           "viewerTexts": [
-            "売上継続",
-            "金利安定",
-            "半導体波及"
+            "強まる｜クラウド売上継続",
+            "強まる｜金利安定・半導体波及",
+            "弱まる｜金利上昇継続",
+            "弱まる｜SOX・関連銘柄が弱い"
           ],
           "changeCue": "売上継続",
           "objectIds": [
@@ -2075,7 +2234,24 @@
           "expressionChange": "警戒",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "verification-matrix",
+          "templateConfig": {
+            "variant": "strengthen-vs-weaken",
+            "comparisonBasis": null,
+            "dataBasis": "今後の確認条件",
+            "nodeOrder": [
+              "s8-node-cloud",
+              "s8-node-yield",
+              "s8-node-semi",
+              "s8-node-hyp"
+            ],
+            "laneLabels": [
+              "強まる",
+              "弱まる"
+            ],
+            "outcomeNodeId": "s8-node-hyp"
+          }
         }
       ],
       "cards": [
@@ -2282,6 +2458,9 @@
           "screenQuestion": "今朝の答えは何か",
           "primaryElement": "結論カード",
           "viewerTexts": [
+            "AWS予想超過",
+            "金利は逆風",
+            "半導体波及は限定",
             "投資額より回収"
           ],
           "changeCue": "投資額より回収",
@@ -2298,7 +2477,16 @@
           "expressionChange": "通常",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "closing-recap",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "朝のNASDAQカフェ",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [

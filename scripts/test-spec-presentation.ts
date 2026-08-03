@@ -33,6 +33,8 @@ assert.match(assetLayerSource, /height: 584/);
 assert.match(publicViewModelSource, /"prebuilt-card"/);
 assert.match(publicViewModelSource, /placement\.role === "entity-card"/);
 assert.match(publicViewModelSource, /beat\.screenState === "EntityFocus" \? "full"/);
+assert.match(publicViewModelSource, /visualTemplate: beat\.visualTemplate/);
+assert.match(publicViewModelSource, /templateConfig: beat\.templateConfig/);
 assert.match(publicViewModelSource, /beatProgress/);
 assert.match(episodeSource, /entityPresentation !== "prebuilt-card"/);
 assert.match(episodeSource, /entityPresentation === "media"/);
@@ -48,9 +50,12 @@ for (const component of [
   "CausalLane",
   "VerificationMatrix",
   "AnalogySteps",
+  "TailwindHeadwind",
 ]) {
   assert.match(visualModesSource, new RegExp(`const ${component}`), `missing presentation component: ${component}`);
 }
+assert.match(visualModesSource, /switch \(content\.visualTemplate\)/, "renderer must select the explicit Visual Template ID");
+assert.doesNotMatch(visualModesSource, /switch \(content\.renderKind\)/, "renderer must not select templates from legacy renderKind");
 assert.doesNotMatch(visualModesSource, /Math\.cos|Math\.sin/, "causal diagrams must not use circular auto-layout");
 assert.doesNotMatch(visualModesSource, /responsiveGrid/, "legacy card-grid chart renderer must stay removed");
 assert.match(visualModesSource, /gridTemplateColumns: "260px 1fr 190px"/);

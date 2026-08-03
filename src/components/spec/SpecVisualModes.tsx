@@ -92,41 +92,35 @@ const OpeningContradiction: React.FC<{content: PublicMainContent}> = ({content})
   const card = content.cards[0];
   const market = card?.lines.find((line) => line.label.includes("NASDAQ"));
   const center = card?.lines.find((line) => line.label.includes("中心"));
-  const split = content.supportingTexts[0]?.split(/[、,]/).map((item) => item.trim()).filter(Boolean) ?? [];
-  const amazon = content.texts.find((text) => text.includes("Amazon")) ?? split[0] ?? "Amazon急騰";
-  const breadth = split[1] ?? "半導体は横ばい";
-  const items = [amazon, breadth];
-  return <Surface style={{padding: "42px 52px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 28}} accent={colors.emphasis}>
-    <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", ...stagedStyle(content.beatProgress, 0, 4)}}>
-      <div>
-        <Label tone="positive">昨夜の方向</Label>
-        <div style={{marginTop: 16, fontSize: 38, color: colors.mutedInk, fontWeight: 850}}>NASDAQ</div>
-      </div>
-      <div style={{fontSize: 94, lineHeight: 1, fontWeight: 950, color: colors.positive}}>{market?.value ?? "+1.00%"}</div>
+  const items = content.texts.filter((item) => !item.includes("NASDAQ")).slice(0, 3);
+  return <Surface style={{padding: "34px 44px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 22}} accent={colors.emphasis}>
+    <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", ...stagedStyle(content.beatProgress, 0, 5)}}>
+      <div><Label tone="positive">昨夜の方向</Label><div style={{marginTop: 12, fontSize: 36, color: colors.mutedInk, fontWeight: 850}}>NASDAQ</div></div>
+      <div style={{fontSize: 88, lineHeight: 1, fontWeight: 950, color: colors.positive}}>{market?.value ?? content.texts.find((item) => item.includes("NASDAQ")) ?? "+1.00%"}</div>
     </div>
-    <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "stretch"}}>
-      {items.map((text, index) => <div key={text} style={{...stagedStyle(content.beatProgress, index + 1, 4), borderRadius: 24, padding: "30px 34px", background: index === 0 ? "rgba(12,138,102,.10)" : "rgba(184,107,0,.10)", border: `3px solid ${index === 0 ? colors.positive : colors.warning}`, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 46, lineHeight: 1.3, fontWeight: 950}}>{text}</div>)}
+    <div style={{display: "grid", gridTemplateColumns: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 18, alignItems: "stretch"}}>
+      {items.map((item, index) => <div key={item} style={{...stagedStyle(content.beatProgress, index + 1, 5), borderRadius: 22, padding: "24px 22px", background: index === 0 ? "rgba(12,138,102,.10)" : index === 1 ? "rgba(184,107,0,.10)" : "rgba(199,62,77,.10)", border: `3px solid ${index === 0 ? colors.positive : index === 1 ? colors.warning : colors.negative}`, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 38, lineHeight: 1.28, fontWeight: 950}}>{item}</div>)}
     </div>
-    <div style={{...stagedStyle(content.beatProgress, 3, 4), display: "flex", alignItems: "center", justifyContent: "space-between", gap: 28, paddingTop: 6}}>
-      <div style={{fontSize: 34, color: colors.mutedInk, fontWeight: 850}}>全部のテックが同じ理由で上がった夜ではない</div>
-      <div style={{fontSize: 38, color: colors.emphasis, fontWeight: 950}}>{center?.value ?? "市場は何を評価した？"}</div>
+    <div style={{...stagedStyle(content.beatProgress, 4, 5), display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24}}>
+      <div style={{fontSize: 31, color: colors.mutedInk, fontWeight: 850}}>全部のテックが同じ理由で上がった夜ではない</div>
+      <div style={{fontSize: 36, color: colors.emphasis, fontWeight: 950}}>{center?.value ?? "市場は何を評価した？"}</div>
     </div>
   </Surface>;
 };
 
 const ClosingRecap: React.FC<{content: PublicMainContent}> = ({content}) => {
   const line = content.cards[0]?.lines[0];
-  return <Surface style={{padding: "54px 64px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}} accent={colors.emphasis}>
-    <div style={{...stagedStyle(content.beatProgress, 0, 3)}}><Label tone="emphasis">今朝の結論</Label></div>
-    <div style={{...stagedStyle(content.beatProgress, 1, 3), marginTop: 34, fontSize: 42, color: colors.mutedInk, fontWeight: 850}}>{line?.label ?? "市場が見たもの"}</div>
-    <div style={{...stagedStyle(content.beatProgress, 2, 3), marginTop: 18, fontSize: 88, lineHeight: 1.15, color: colors.emphasis, fontWeight: 950}}>{line?.value ?? content.texts[0]}</div>
-    <div style={{marginTop: 42, width: "62%", height: 6, borderRadius: 999, background: `linear-gradient(90deg,transparent,${colors.cyan},transparent)`}}/>
+  const conclusion = line?.value ?? content.texts.at(-1) ?? content.headline;
+  const chips = content.texts.filter((item) => item !== conclusion).slice(0, 3);
+  return <Surface style={{padding: "42px 54px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}} accent={colors.emphasis}>
+    <div style={{...stagedStyle(content.beatProgress, 0, 5)}}><Label tone="emphasis">今朝の結論</Label></div>
+    <div style={{display: "flex", gap: 16, marginTop: 28, width: "100%", justifyContent: "center"}}>{chips.map((chip, index) => <div key={chip} style={{...stagedStyle(content.beatProgress, index + 1, 5), flex: 1, maxWidth: 350, padding: "16px 18px", borderRadius: 18, background: "rgba(83,118,146,.10)", border: "2px solid rgba(83,118,146,.35)", fontSize: 28, fontWeight: 900}}>{chip}</div>)}</div>
+    <div style={{...stagedStyle(content.beatProgress, 4, 5), marginTop: 34, fontSize: 82, lineHeight: 1.15, color: colors.emphasis, fontWeight: 950}}>{conclusion}</div>
+    <div style={{marginTop: 34, width: "62%", height: 6, borderRadius: 999, background: `linear-gradient(90deg,transparent,${colors.cyan},transparent)`}}/>
   </Surface>;
 };
 
 const ConclusionCard: React.FC<{content: PublicMainContent}> = ({content}) => {
-  if (content.sceneNumber === 1) return <OpeningContradiction content={content}/>;
-  if (content.sceneNumber === 9) return <ClosingRecap content={content}/>;
   const card = content.cards[0];
   const lines = card?.lines ?? [];
   return <Surface style={{padding: "44px 54px"}} accent={card ? toneColor(lines[0]?.tone ?? "neutral") : colors.cyan}>
@@ -244,14 +238,12 @@ const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => 
 </Surface>;
 
 const Timeline: React.FC<{content: PublicMainContent}> = ({content}) => {
-  if (content.sceneNumber === 6) return <EvidenceBoundary content={content}/>;
   return <Surface style={{padding: "40px 52px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 22}} accent={colors.cyan}>
     {content.texts.map((text, index) => <div key={text} style={{...stagedStyle(content.beatProgress, index, content.texts.length), display: "grid", gridTemplateColumns: "62px 1fr", gap: 22, alignItems: "center"}}><div style={{width: 54, height: 54, borderRadius: 999, background: colors.cyan, color: colors.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 950}}>{String(index + 1).padStart(2, "0")}</div><div style={{padding: "20px 26px", borderRadius: 20, background: "rgba(12,143,179,.10)", borderLeft: `8px solid ${colors.cyan}`, fontSize: 36, fontWeight: 900}}>{text}</div></div>)}
   </Surface>;
 };
 
 const Chart: React.FC<{content: PublicMainContent}> = ({content}) => {
-  if (content.sceneNumber === 5) return <EvidenceMetricBoard content={content}/>;
   const values = content.numbers.map((number) => parseNumber(number.value));
   const diverging = values.some((value) => value < 0) && values.some((value) => value >= 0);
   return <ReturnBars content={content} diverging={diverging}/>;
@@ -282,7 +274,7 @@ const orderedNodes = (content: PublicMainContent) => {
 
 const CausalLane: React.FC<{content: PublicMainContent}> = ({content}) => {
   const nodes = orderedNodes(content);
-  return <Surface style={{padding: "50px 34px", display: "flex", alignItems: "center", justifyContent: "center", gap: 14}} accent={content.sceneNumber === 5 ? colors.warning : colors.cyan}>
+  return <Surface style={{padding: "50px 34px", display: "flex", alignItems: "center", justifyContent: "center", gap: 14}} accent={colors.cyan}>
     {nodes.flatMap((node, index) => {
       const arrow = index < nodes.length - 1 ? content.arrows.find((item) => item.fromKey === node.key && item.toKey === nodes[index + 1].key) : undefined;
       const nodeElement = <div key={node.key} style={{...stagedStyle(content.beatProgress, index, nodes.length), width: nodes.length >= 4 ? 250 : 310, minHeight: 180, boxSizing: "border-box", padding: "26px 22px", borderRadius: 24, background: node.highlighted ? "rgba(255,196,95,.22)" : "rgba(12,143,179,.10)", border: `3px solid ${node.highlighted ? colors.warning : colors.cyan}`, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: nodes.length >= 4 ? 34 : 38, lineHeight: 1.3, fontWeight: 950}}>{node.label}</div>;
@@ -292,15 +284,35 @@ const CausalLane: React.FC<{content: PublicMainContent}> = ({content}) => {
   </Surface>;
 };
 
+const splitLaneTexts = (content: PublicMainContent, label: string): string[] => content.texts
+  .filter((item) => item.startsWith(`${label}｜`))
+  .map((item) => item.slice(label.length + 1));
+
 const VerificationMatrix: React.FC<{content: PublicMainContent}> = ({content}) => {
-  const incomingCounts = new Map(content.nodes.map((node) => [node.key, 0]));
-  for (const arrow of content.arrows) incomingCounts.set(arrow.toKey, (incomingCounts.get(arrow.toKey) ?? 0) + 1);
-  const outcome = [...content.nodes].sort((a, b) => (incomingCounts.get(b.key) ?? 0) - (incomingCounts.get(a.key) ?? 0))[0];
-  const conditions = content.nodes.filter((node) => node.key !== outcome?.key);
-  return <Surface style={{padding: "34px 40px", display: "grid", gridTemplateColumns: "1fr 120px .72fr", gap: 22, alignItems: "center"}} accent={colors.emphasis}>
-    <div style={{display: "grid", gap: 18}}>{conditions.map((node, index) => <div key={node.key} style={{...stagedStyle(content.beatProgress, index, conditions.length + 1), borderRadius: 20, background: "rgba(12,143,179,.10)", border: `3px solid ${colors.cyan}`, padding: "22px 26px", display: "grid", gridTemplateColumns: "60px 1fr", gap: 16, alignItems: "center"}}><div style={{width: 48, height: 48, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", background: colors.cyan, color: colors.white, fontSize: 23, fontWeight: 950}}>{String(index + 1).padStart(2, "0")}</div><div style={{fontSize: 34, lineHeight: 1.25, fontWeight: 950}}>{node.label}</div></div>)}</div>
-    <div style={{fontSize: 72, color: colors.emphasis, textAlign: "center", fontWeight: 950}}>→</div>
-    <div style={{...stagedStyle(content.beatProgress, conditions.length, conditions.length + 1), minHeight: 300, borderRadius: 28, padding: "34px 28px", background: "rgba(112,71,168,.12)", border: `4px solid ${colors.emphasis}`, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 46, lineHeight: 1.3, color: colors.emphasis, fontWeight: 950}}>{outcome?.label ?? content.primaryElement}</div>
+  const [strengthenLabel = "強まる", weakenLabel = "弱まる"] = content.templateConfig.laneLabels;
+  const lanes = [
+    {label: strengthenLabel, items: splitLaneTexts(content, strengthenLabel), tone: "positive" as const},
+    {label: weakenLabel, items: splitLaneTexts(content, weakenLabel), tone: "warning" as const},
+  ];
+  return <Surface style={{padding: "34px 40px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 26}} accent={colors.emphasis}>
+    {lanes.map((lane, laneIndex) => <div key={lane.label} style={{...stagedStyle(content.beatProgress, laneIndex, 2), borderRadius: 24, padding: "30px", background: `${toneColor(lane.tone)}12`, border: `3px solid ${toneColor(lane.tone)}`}}>
+      <Label tone={lane.tone}>仮説が{lane.label}</Label>
+      <div style={{marginTop: 24, display: "grid", gap: 18}}>{lane.items.map((item) => <div key={item} style={{padding: "18px 20px", borderRadius: 18, background: "rgba(255,255,255,.55)", fontSize: 32, lineHeight: 1.35, fontWeight: 900}}>{item}</div>)}</div>
+    </div>)}
+  </Surface>;
+};
+
+const TailwindHeadwind: React.FC<{content: PublicMainContent}> = ({content}) => {
+  const [tailwindLabel = "追い風", headwindLabel = "向かい風"] = content.templateConfig.laneLabels;
+  const lanes = [
+    {label: tailwindLabel, items: splitLaneTexts(content, tailwindLabel), tone: "positive" as const},
+    {label: headwindLabel, items: splitLaneTexts(content, headwindLabel), tone: "warning" as const},
+  ];
+  return <Surface style={{padding: "34px 40px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 26}} accent={colors.emphasis}>
+    {lanes.map((lane, laneIndex) => <div key={lane.label} style={{...stagedStyle(content.beatProgress, laneIndex, 2), borderRadius: 24, padding: "30px", background: `${toneColor(lane.tone)}12`, border: `3px solid ${toneColor(lane.tone)}`, display: "flex", flexDirection: "column"}}>
+      <Label tone={lane.tone}>{lane.label}</Label>
+      <div style={{marginTop: 26, display: "grid", gap: 18}}>{lane.items.map((item, index) => <div key={item} style={{display: "grid", gridTemplateColumns: "42px 1fr", gap: 14, alignItems: "start", fontSize: 34, lineHeight: 1.35, fontWeight: 900}}><span style={{color: toneColor(lane.tone)}}>{index + 1}</span><span>{item}</span></div>)}</div>
+    </div>)}
   </Surface>;
 };
 
@@ -308,7 +320,7 @@ const CausalDiagram: React.FC<{content: PublicMainContent}> = ({content}) => {
   const incomingCounts = new Map(content.nodes.map((node) => [node.key, 0]));
   for (const arrow of content.arrows) incomingCounts.set(arrow.toKey, (incomingCounts.get(arrow.toKey) ?? 0) + 1);
   const converging = [...incomingCounts.values()].some((count) => count > 1);
-  if (converging || content.sceneNumber === 8) return <VerificationMatrix content={content}/>;
+  if (converging) return <VerificationMatrix content={content}/>;
   return <CausalLane content={content}/>;
 };
 
@@ -338,7 +350,6 @@ const AnalogySteps: React.FC<{content: PublicMainContent}> = ({content}) => {
 };
 
 const TextFocus: React.FC<{content: PublicMainContent}> = ({content}) => {
-  if (content.primaryElement.includes("たとえ")) return <AnalogySteps content={content}/>;
   return <Surface style={{padding: "46px 52px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 26}} accent={colors.emphasis}>
     {content.texts.map((text, index) => <div key={`${index}-${text}`} style={{...stagedStyle(content.beatProgress, index, content.texts.length), padding: "26px 34px", borderRadius: 22, background: index === 0 ? "rgba(112,71,168,.12)" : "rgba(184,107,0,.10)", borderLeft: `12px solid ${index === 0 ? colors.emphasis : colors.warning}`, fontSize: 48, lineHeight: 1.3, color: colors.ink, fontWeight: 950}}>{text}</div>)}
   </Surface>;
@@ -369,18 +380,30 @@ const EntityFocus: React.FC<{content: PublicMainContent}> = ({content}) => {
   </Surface>;
 };
 
+void NumberComparison;
+void Timeline;
+void Chart;
+void CausalDiagram;
+void StockComparison;
+
 export const SpecVisualMode: React.FC<{content: PublicMainContent}> = ({content}) => {
-  switch (content.renderKind) {
-    case "conclusion": return <ConclusionCard content={content}/>;
-    case "numbers": return <NumberComparison content={content}/>;
-    case "expected-actual-gap": return <ExpectedActualGap content={content}/>;
-    case "timeline": return <Timeline content={content}/>;
-    case "chart": return <Chart content={content}/>;
-    case "causal": return <CausalDiagram content={content}/>;
-    case "stock-comparison": return <StockComparison content={content}/>;
-    case "news": return <NewsMedia content={content}/>;
-    case "verification": return <VerificationPoints content={content}/>;
-    case "entity": return <EntityFocus content={content}/>;
-    case "text": return <TextFocus content={content}/>;
+  switch (content.visualTemplate) {
+    case "opening-contradiction": return <OpeningContradiction content={content}/>;
+    case "closing-recap": return <ClosingRecap content={content}/>;
+    case "conclusion-card": return <ConclusionCard content={content}/>;
+    case "expected-actual-bullet": return <ExpectedActualBullet content={content}/>;
+    case "expected-actual-gap-flow": return <ExpectedActualGap content={content}/>;
+    case "metric-comparison-board": return <EvidenceMetricBoard content={content}/>;
+    case "index-return-bars": return <ReturnBars content={content}/>;
+    case "diverging-stock-bars": return <ReturnBars content={content} diverging/>;
+    case "causal-lane": return <CausalLane content={content}/>;
+    case "tailwind-headwind": return <TailwindHeadwind content={content}/>;
+    case "evidence-boundary": return <EvidenceBoundary content={content}/>;
+    case "verification-checklist": return <VerificationPoints content={content}/>;
+    case "verification-matrix": return <VerificationMatrix content={content}/>;
+    case "analogy-steps": return <AnalogySteps content={content}/>;
+    case "entity-card-full": return <EntityFocus content={content}/>;
+    case "news-media": return <NewsMedia content={content}/>;
+    case "text-focus": return <TextFocus content={content}/>;
   }
 };

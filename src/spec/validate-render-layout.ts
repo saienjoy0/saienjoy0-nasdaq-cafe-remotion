@@ -112,6 +112,35 @@ export const assertSpecLayoutFits = (data: RenderProductionData) => {
           `${path}.objectIds`,
         );
       }
+      const template = beat.visualTemplate;
+    const values = visibleNumbers
+      .map((number) => Number(number.value.replace(/[^0-9+\-.]/g, "")))
+      .filter((value) => Number.isFinite(value));
+    const requiresNumbers = ["expected-actual-bullet", "metric-comparison-board", "index-return-bars", "diverging-stock-bars"].includes(template);
+    if (requiresNumbers && (visibleNumbers.length < 2 || visibleNumbers.length > 4)) throw new Error(`${path}.objectIds: ${template} requires two to four visible numbers`);
+    if (template === "diverging-stock-bars" && !(values.some((value) => value < 0) && values.some((value) => value >= 0))) throw new Error(`${path}.objectIds: diverging-stock-bars requires both negative and non-negative values`);
+    if (template === "expected-actual-gap-flow") {
+      const roles = new Set(visibleCards.map((card) => card.role));
+      for (const role of ["expected", "actual", "gap"] as const) if (!roles.has(role)) throw new Error(`${path}.objectIds: expected-actual-gap-flow missing ${role} card`);
+    }
+    if (template === "causal-lane") {
+      assertCausalShape(visibleNodes.map((node) => node.nodeId), visibleArrows, `${path}.objectIds`);
+      if (beat.templateConfig.nodeOrder.length !== visibleNodes.length || beat.templateConfig.nodeOrder.length < 2) throw new Error(`${path}.templateConfig.nodeOrder: causal-lane requires the complete two-to-four node order`);
+      const order = beat.templateConfig.nodeOrder;
+      for (let index = 0; index < order.length - 1; index += 1) if (!visibleArrows.some((arrow) => arrow.fromNodeId === order[index] && arrow.toNodeId === order[index + 1])) throw new Error(`${path}.templateConfig.nodeOrder: missing sequential arrow ${order[index]} -> ${order[index + 1]}`);
+    }
+    if (["tailwind-headwind", "verification-matrix"].includes(template)) {
+      if (beat.templateConfig.laneLabels.length !== 2) throw new Error(`${path}.templateConfig.laneLabels: ${template} requires exactly two lanes`);
+      for (const label of beat.templateConfig.laneLabels) if (!beat.viewerTexts.some((item) => item.startsWith(`${label}｜`))) throw new Error(`${path}.viewerTexts: ${template} requires an item prefixed ${label}｜`);
+    }
+    if (template === "evidence-boundary" && (!scene.uncertainty || beat.viewerTexts.length < 1)) throw new Error(`${path}: evidence-boundary requires confirmed viewer text and uncertainty`);
+    if (template === "verification-checklist") {
+      const itemCount = visibleCards.reduce((total, card) => total + card.lines.length, 0) || beat.viewerTexts.length;
+      if (itemCount < 2 || itemCount > 4) throw new Error(`${path}: verification-checklist requires two to four items`);
+    }
+    if (template === "entity-card-full" && (beat.screenState !== "EntityFocus" || !beat.entity)) throw new Error(`${path}: entity-card-full requires EntityFocus and entity metadata`);
+    if (template === "opening-contradiction" && scene.sceneNumber !== 1) throw new Error(`${path}: opening-contradiction is reserved for Scene 1`);
+    if (template === "closing-recap" && scene.sceneNumber !== 9) throw new Error(`${path}: closing-recap is reserved for Scene 9`);
     });
   });
   return data;

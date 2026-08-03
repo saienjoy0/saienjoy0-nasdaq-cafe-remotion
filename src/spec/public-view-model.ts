@@ -4,7 +4,6 @@ import {isPlacementActive, type SceneRenderState} from "./render-state";
 
 type PublicTone = "positive" | "negative" | "warning" | "neutral" | "emphasis";
 type PublicFit = "cover" | "contain" | "fill";
-type PlacementRole = ProductionScene["assetPlacements"][number]["role"];
 
 export type PublicCard = {
   key: string;
@@ -41,7 +40,6 @@ export type PublicArrow = {
 export type PublicPlacedAsset = {
   key: string;
   src: string;
-  role: PlacementRole;
   slot: "full" | "focus-media" | "primary" | "entity" | "lower";
   fit: PublicFit;
   objectPosition: string;
@@ -62,15 +60,14 @@ export type PublicMainContent = {
     | "entity"
     | "text";
   layout: "full" | "primary-with-entity";
-  sceneId: ProductionScene["sceneId"];
-  sceneNumber: number;
-  sceneRole: ProductionScene["sceneRole"];
   headline: string;
   supportingTexts: string[];
   uncertainty: string | null;
   screenQuestion: string;
   primaryElement: string;
   primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
+  visualTemplate: ProductionScene["visualBeats"][number]["visualTemplate"];
+  templateConfig: ProductionScene["visualBeats"][number]["templateConfig"];
   beatProgress: number;
   cards: PublicCard[];
   numbers: PublicNumber[];
@@ -130,7 +127,6 @@ const publicAsset = (
   return {
     key: placement.placementId,
     src,
-    role: placement.role,
     slot: slotOverride ?? slotMap[placement.region],
     fit: placement.fit,
     objectPosition: placement.focalPoint
@@ -274,15 +270,14 @@ export const toPublicSceneViewModel = (
             beat.screenState === "MainWithEntity"
               ? "primary-with-entity"
               : "full",
-          sceneId: scene.sceneId,
-          sceneNumber: scene.sceneNumber,
-          sceneRole: scene.sceneRole,
           headline: scene.headline,
           supportingTexts: scene.supportingTexts,
           uncertainty: scene.uncertainty,
           screenQuestion: beat.screenQuestion,
           primaryElement: beat.primaryElement,
           primaryFunction: beat.primaryFunction,
+          visualTemplate: beat.visualTemplate,
+          templateConfig: beat.templateConfig,
           beatProgress,
           cards,
           numbers,
