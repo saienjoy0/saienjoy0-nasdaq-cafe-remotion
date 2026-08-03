@@ -195,7 +195,7 @@ const NumberComparison: React.FC<{content: PublicMainContent}> = ({content}) => 
       const progress = revealProgress(content, number, fps);
       return <div key={number.key} style={{...motionStyle(content, number, fps), display: "grid", gridTemplateColumns: "250px 1fr 230px", gap: 22, alignItems: "center", minHeight: 112}}>
         <div><div style={{fontSize: 33, lineHeight: 1.15, fontWeight: 950}}>{number.label}</div>{number.comparison ? <div style={{fontSize: 22, color: colors.muted, marginTop: 8, fontWeight: 800}}>{number.comparison}</div> : null}</div>
-        <div style={{height: 64, borderRadius: 15, background: "rgba(82,118,145,.13)", border: "2px solid rgba(82,118,145,.25)", overflow: "hidden"}}><div style={{height: "100%", width: `${(values[index] / max) * 100 * progress}%`, borderRadius: 12, background: `linear-gradient(90deg,${toneColor(number.tone)}88,${toneColor(number.tone)})`}}/></div>
+        <div style={{height: 64, borderRadius: 15, background: "rgba(82,118,145,.13)", border: "2px solid rgba(82,118,145,.25)", overflow: "hidden"}}><div style={{height: "100%", width: `${clamp((values[index] / max) * progress) * 100}%`, borderRadius: 12, background: `linear-gradient(90deg,${toneColor(number.tone)}88,${toneColor(number.tone)})`}}/></div>
         <div style={{color: toneColor(number.tone), textAlign: "right"}}><AnimatedValue content={content} number={number} size={56}/></div>
       </div>;
     })}
@@ -264,7 +264,7 @@ const StockComparison: React.FC<{content: PublicMainContent}> = ({content}) => {
     {content.numbers.map((number, index) => {
       const value = values[index];
       const progress = revealProgress(content, number, fps);
-      const width = `${(Math.abs(value) / max) * 47 * progress}%`;
+      const width = `${clamp((Math.abs(value) / max) * progress) * 47}%`;
       return <div key={number.key} style={{...motionStyle(content, number, fps), display: "grid", gridTemplateColumns: "240px 1fr 190px", gap: 20, alignItems: "center", minHeight: 94}}>
         <div style={{fontSize: 31, fontWeight: 950}}>{number.label}</div>
         <div style={{position: "relative", height: 55, borderRadius: 14, background: "rgba(82,118,145,.12)", border: "2px solid rgba(82,118,145,.23)", overflow: "hidden"}}><div style={{position: "absolute", left: "50%", top: 0, bottom: 0, width: 3, background: colors.muted}}/><div style={{position: "absolute", top: 5, bottom: 5, ...(value < 0 ? {right: "50%", width} : {left: "50%", width}), borderRadius: 10, background: toneColor(number.tone)}}/></div>
