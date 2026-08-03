@@ -13,7 +13,7 @@ export type SceneRenderState = {
 const CAPTION_PAGE_MAX_CHARS = 58;
 const CAPTION_LINE_MAX_CHARS = 29;
 
-const normalizeCaptionText = (value: string) => value.replace(/\s+/g, "").trim();
+const normalizeCaptionText = (value: string) => value.replace(/\s+/g, " ").trim();
 
 const splitLongCaptionPart = (value: string, maxChars: number) => {
   const parts: string[] = [];
