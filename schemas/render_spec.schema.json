@@ -4,7 +4,7 @@
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "const": "2.1.0"
+      "const": "2.2.0"
     },
     "episode": {
       "type": "object",
@@ -753,6 +753,94 @@
                     "text-focus"
                   ]
                 },
+                "visualTemplate": {
+                  "type": "string",
+                  "enum": [
+                    "opening-contradiction",
+                    "closing-recap",
+                    "conclusion-card",
+                    "expected-actual-bullet",
+                    "expected-actual-gap-flow",
+                    "metric-comparison-board",
+                    "index-return-bars",
+                    "diverging-stock-bars",
+                    "causal-lane",
+                    "tailwind-headwind",
+                    "evidence-boundary",
+                    "verification-checklist",
+                    "verification-matrix",
+                    "analogy-steps",
+                    "entity-card-full",
+                    "news-media",
+                    "text-focus"
+                  ]
+                },
+                "templateConfig": {
+                  "type": "object",
+                  "properties": {
+                    "variant": {
+                      "type": "string",
+                      "enum": [
+                        "default",
+                        "left-to-right",
+                        "zero-baseline",
+                        "center-zero",
+                        "two-lane",
+                        "confirmed-vs-unconfirmed",
+                        "strengthen-vs-weaken",
+                        "prebuilt-card"
+                      ]
+                    },
+                    "comparisonBasis": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "dataBasis": {
+                      "type": "string"
+                    },
+                    "nodeOrder": {
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "laneLabels": {
+                      "maxItems": 2,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "outcomeNodeId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "variant",
+                    "comparisonBasis",
+                    "dataBasis",
+                    "nodeOrder",
+                    "laneLabels",
+                    "outcomeNodeId"
+                  ],
+                  "additionalProperties": false
+                },
                 "contentType": {
                   "type": "string"
                 },
@@ -1011,6 +1099,8 @@
                 "primaryFunction",
                 "screenState",
                 "visualMode",
+                "visualTemplate",
+                "templateConfig",
                 "contentType",
                 "screenQuestion",
                 "primaryElement",

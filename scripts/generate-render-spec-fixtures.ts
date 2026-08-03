@@ -30,6 +30,17 @@ const modes = [
   "conclusion-card", "number-comparison", "expected-actual-gap", "timeline",
   "chart", "causal-diagram", "stock-comparison", "verification-points", "text-focus",
 ] as const;
+const templateForMode = {
+  "conclusion-card": "conclusion-card",
+  "number-comparison": "metric-comparison-board",
+  "expected-actual-gap": "expected-actual-gap-flow",
+  timeline: "evidence-boundary",
+  chart: "metric-comparison-board",
+  "causal-diagram": "causal-lane",
+  "stock-comparison": "diverging-stock-bars",
+  "verification-points": "verification-checklist",
+  "text-focus": "text-focus",
+} as const;
 
 const sceneRole = (index: number): RenderSpecScene["sceneRole"] =>
   index === 0
@@ -79,10 +90,13 @@ const makeScene = (index: number, kind: FixtureKind): RenderSpecScene => {
   const numbers: RenderSpecScene["numbers"] = mode === "number-comparison" || mode === "stock-comparison"
     ? [
         {numberId: `${sceneId}-number-001`, label: "TEST NUMBER A", value: "10", unit: "%", comparison: "TEST BASE", tone: "positive"},
-        {numberId: `${sceneId}-number-002`, label: "TEST NUMBER B", value: "20", unit: "%", comparison: "TEST BASE", tone: "negative"},
+        {numberId: `${sceneId}-number-002`, label: "TEST NUMBER B", value: "-20", unit: "%", comparison: "TEST BASE", tone: "negative"},
       ]
     : mode === "chart"
-      ? [{numberId: `${sceneId}-number-001`, label: "TEST CHART VALUE", value: "30", unit: "pt", comparison: null, tone: "emphasis"}]
+      ? [
+          {numberId: `${sceneId}-number-001`, label: "TEST CHART VALUE A", value: "30", unit: "pt", comparison: "TEST BASE", tone: "emphasis"},
+          {numberId: `${sceneId}-number-002`, label: "TEST CHART VALUE B", value: "20", unit: "pt", comparison: "TEST BASE", tone: "neutral"},
+        ]
       : [];
   if (mode === "stock-comparison") numbers.push({numberId: `${sceneId}-number-003`, label: "TEST NUMBER C", value: "30", unit: "%", comparison: "TEST BASE", tone: "warning"});
   const nodes = mode === "causal-diagram" ? [{nodeId: `${sceneId}-node-001`, label: "TEST NODE A"}, {nodeId: `${sceneId}-node-002`, label: "TEST NODE B"}] : [];
@@ -137,11 +151,20 @@ const makeScene = (index: number, kind: FixtureKind): RenderSpecScene => {
     beatId: `${sceneId}-beat-${String(beatNumber).padStart(3, "0")}`,
     startChunkId: narrationChunks[startIndex].chunkId,
     endChunkId: narrationChunks[endIndex].chunkId,
-    narrationStartCue: narrationChunks[startIndex].captionText,
-    narrationEndCue: narrationChunks[endIndex].captionText,
+    narrationStartCue: narrationChunks[startIndex].speechText,
+    narrationEndCue: narrationChunks[endIndex].speechText,
     primaryFunction: "Explain",
     screenState: defaultScreenState,
     visualMode: mode,
+    visualTemplate: templateForMode[mode],
+    templateConfig: {
+      variant: mode === "causal-diagram" ? "left-to-right" : mode === "stock-comparison" ? "center-zero" : "default",
+      comparisonBasis: ["number-comparison", "chart", "stock-comparison"].includes(mode) ? `TEST BASIS ${number}-${beatNumber}` : null,
+      dataBasis: "TEST TIMELINE BASIS",
+      nodeOrder: mode === "causal-diagram" ? nodes.map((node) => node.nodeId) : [],
+      laneLabels: [],
+      outcomeNodeId: null,
+    },
     contentType: `TEST ${mode}`,
     screenQuestion: `TEST QUESTION ${number}-${beatNumber}`,
     primaryElement: `TEST PRIMARY ${number}-${beatNumber}`,
@@ -165,6 +188,8 @@ const makeScene = (index: number, kind: FixtureKind): RenderSpecScene => {
           primaryFunction: "Anchor",
           screenState: "EntityFocus",
           visualMode: "text-focus",
+          visualTemplate: "entity-card-full",
+          templateConfig: {variant: "prebuilt-card", comparisonBasis: null, dataBasis: "TEST TIMELINE BASIS", nodeOrder: [], laneLabels: [], outcomeNodeId: null},
           contentType: "TEST COMPANY CARD",
           primaryElement: "NVIDIA",
           viewerTexts: ["AI計算向け半導体"],
@@ -219,7 +244,7 @@ const makeScene = (index: number, kind: FixtureKind): RenderSpecScene => {
 const makeSpec = (kind: FixtureKind): RenderSpec => {
   const complete = kind !== "minimal";
   return ({
-  schemaVersion: "2.1.0",
+  schemaVersion: "2.2.0",
   episode: {
     id: complete ? "2099-02-02" : "2099-01-01",
     targetDate: complete ? "2099-02-02" : "2099-01-01",

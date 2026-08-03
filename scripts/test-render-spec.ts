@@ -170,9 +170,9 @@ test("renderer hides captions during pauses", async () => {
   const assetPaths = Object.fromEntries(Object.entries(assetManifestJson.assets).map(([id, asset]) => [id, asset.path]));
   const production = await compileRenderSpec(fixture, async ({chunkId}) => ({audioSrc: `audio/${chunkId}.wav`, durationMs: 1000}), assetPaths);
   const scene = production.scenes[0];
-  assert.equal(getSceneRenderState(scene, 500).captionText, scene.narrationChunks[0].caption.text);
+  assert.equal(getSceneRenderState(scene, 500).captionText, scene.narrationChunks[0].speechText);
   assert.equal(getSceneRenderState(scene, 1050).captionText, null);
-  assert.equal(getSceneRenderState(scene, 1150).captionText, scene.narrationChunks[1].caption.text);
+  assert.equal(getSceneRenderState(scene, 1150).captionText, scene.narrationChunks[1].speechText);
 });
 test("renderer switches Visual Beats inside one Scene and returns to Data", async () => {
   const production = await compileRenderSpec(fixture, async ({chunkId}) => ({audioSrc: `audio/${chunkId}.wav`, durationMs: 1000}), assetPaths);

@@ -13,6 +13,26 @@ export const specVisualModeSchema = z.enum([
   "chart", "causal-diagram", "stock-comparison", "news-media",
   "verification-points", "text-focus",
 ]);
+export const visualTemplateSchema = z.enum([
+  "opening-contradiction", "closing-recap", "conclusion-card",
+  "expected-actual-bullet", "expected-actual-gap-flow", "metric-comparison-board",
+  "index-return-bars", "diverging-stock-bars", "causal-lane",
+  "tailwind-headwind", "evidence-boundary", "verification-checklist",
+  "verification-matrix", "analogy-steps", "entity-card-full",
+  "news-media", "text-focus",
+]);
+export const visualTemplateVariantSchema = z.enum([
+  "default", "left-to-right", "zero-baseline", "center-zero", "two-lane",
+  "confirmed-vs-unconfirmed", "strengthen-vs-weaken", "prebuilt-card",
+]);
+const visualTemplateConfigSchema = z.object({
+  variant: visualTemplateVariantSchema,
+  comparisonBasis: nullableText,
+  dataBasis: nonEmptyText,
+  nodeOrder: z.array(safeId).max(4),
+  laneLabels: z.array(nonEmptyText).max(2),
+  outcomeNodeId: safeId.nullable(),
+}).strict();
 export const visualBeatFunctionSchema = z.enum([
   "Anchor", "Evidence", "Compare", "Explain", "Verify",
 ]);
@@ -202,6 +222,8 @@ const visualBeatSchema = z.object({
   primaryFunction: visualBeatFunctionSchema,
   screenState: screenStateSchema,
   visualMode: specVisualModeSchema,
+  visualTemplate: visualTemplateSchema,
+  templateConfig: visualTemplateConfigSchema,
   contentType: nonEmptyText,
   screenQuestion: nonEmptyText,
   primaryElement: nonEmptyText,
@@ -292,7 +314,7 @@ const sceneSchema = z.object({
 }).strict();
 
 export const renderSpecSchema = z.object({
-  schemaVersion: z.literal("2.1.0"),
+  schemaVersion: z.literal("2.2.0"),
   episode: episodeSchema,
   editorial: editorialSchema,
   publishing: publishingSchema,

@@ -79,6 +79,14 @@
   - 終了合図：同じ理由で上がった夜ではありません。
   - 主要視覚機能：Anchor
   - 画面状態：Data
+  - Visual Template ID：opening-contradiction
+  - Template Variant：default
+  - 表示順：NASDAQ→Amazon→SOXX→Apple
+  - 比較基準：同一セッション終値
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：昨夜の中心は何か
   - 主要要素：NASDAQ方向と主役
   - 視聴者向けテキスト：NASDAQ +1.00% / Amazon +15.32%
@@ -91,6 +99,14 @@
   - 終了合図：こまで打ち消したのかを順番に見ます。
   - 主要視覚機能：Anchor
   - 画面状態：Data
+  - Visual Template ID：text-focus
+  - Template Variant：default
+  - 表示順：投資額より回収→相殺材料
+  - 比較基準：not-required
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：市場が見た論点は何か
   - 主要要素：AI投資の回収証拠
   - 視聴者向けテキスト：投資額より回収 / 金利とAppleが相殺
@@ -127,6 +143,14 @@
   - 終了合図：の大型テック全体の空気を変えました。
   - 主要視覚機能：Anchor
   - 画面状態：EntityFocus
+  - Visual Template ID：entity-card-full
+  - Template Variant：prebuilt-card
+  - 表示順：Amazonカード
+  - 比較基準：not-required
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：主役は誰か
   - 主要要素：Amazon企業カード
   - 視聴者向けテキスト：Amazon / AWSと消費の二つの柱
@@ -139,6 +163,14 @@
   - 終了合図：収を示せた企業へ強く寄った動きです。
   - 主要視覚機能：Compare
   - 画面状態：Data
+  - Visual Template ID：diverging-stock-bars
+  - Template Variant：center-zero
+  - 表示順：Amazon→SOXX→AMD
+  - 比較基準：前日比・中央ゼロ
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：上昇はどこまで広がったか
   - 主要要素：Amazonと半導体の差
   - 視聴者向けテキスト：Amazon +15.32% / SOXX +0.07% / AMD -1.90%
@@ -175,6 +207,14 @@
   - 終了合図：想を超える成長が確認されたことです。
   - 主要視覚機能：Evidence
   - 画面状態：Data
+  - Visual Template ID：expected-actual-bullet
+  - Template Variant：zero-baseline
+  - 表示順：市場予想→AWS実績→Gap
+  - 比較基準：億ドル・共通基準
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：AWSは予想を超えたか
   - 主要要素：AWS売上と市場予想
   - 視聴者向けテキスト：422.3億ドル / 予想405.7億ドル
@@ -187,6 +227,14 @@
   - 終了合図：mazon決算だけで断定はしません。
   - 主要視覚機能：Evidence
   - 画面状態：Chart
+  - Visual Template ID：metric-comparison-board
+  - Template Variant：default
+  - 表示順：Amazon→Alphabet
+  - 比較基準：前日比
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：反応はAmazonだけか
   - 主要要素：大型クラウドの終値比較
   - 視聴者向けテキスト：Amazon +15.32% / Alphabet +6.73%
@@ -223,6 +271,14 @@
   - 終了合図：るのかが繰り返し注目されていました。
   - 主要視覚機能：Explain
   - 画面状態：Data
+  - Visual Template ID：expected-actual-gap-flow
+  - Template Variant：left-to-right
+  - 表示順：Expected→Actual→Gap
+  - 比較基準：市場予想と実績
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：Gap
   - 画面の問い：期待と結果の差は何か
   - 主要要素：Expected・Actual・Gap
   - 視聴者向けテキスト：Expected｜回収できるか / Actual｜AWS 422.3億ドル / Gap｜回収速度へ
@@ -235,6 +291,14 @@
   - 終了合図：の伸びは、その成果に近い数字でした。
   - 主要視覚機能：Explain
   - 画面状態：Data
+  - Visual Template ID：analogy-steps
+  - Template Variant：left-to-right
+  - 表示順：道具を買う→使う→成果
+  - 比較基準：not-required
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：成果
   - 画面の問い：投資と成果は何が違うか
   - 主要要素：短いパソコンのたとえ
   - 視聴者向けテキスト：道具を買う / 成果を出す
@@ -247,6 +311,14 @@
   - 終了合図：が、金額から回収速度へ移った、です。
   - 主要視覚機能：Explain
   - 画面状態：Data
+  - Visual Template ID：causal-lane
+  - Template Variant：left-to-right
+  - 表示順：AI設備投資→クラウド利用増→売上成長→株価評価
+  - 比較基準：not-required
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：s4-node-spend→s4-node-cloud→s4-node-revenue→s4-node-valuation
+  - レーン名：not-required
+  - 最終到達点：s4-node-valuation
   - 画面の問い：評価軸はどう変わったか
   - 主要要素：AI投資から株価評価まで
   - 視聴者向けテキスト：投資 / 利用 / 売上 / 評価
@@ -286,6 +358,14 @@
   - 終了合図：ならないのが昨夜の難しいところです。
   - 主要視覚機能：Explain
   - 画面状態：Chart
+  - Visual Template ID：causal-lane
+  - Template Variant：left-to-right
+  - 表示順：強い経済指標→長期金利上昇→成長株の評価圧力
+  - 比較基準：not-required
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：s5-node-data→s5-node-yield→s5-node-growth
+  - レーン名：not-required
+  - 最終到達点：s5-node-growth
   - 画面の問い：強い景気がなぜ重荷か
   - 主要要素：経済指標から成長株まで
   - 視聴者向けテキスト：強い指標 / 金利上昇 / 評価圧力
@@ -298,6 +378,14 @@
   - 終了合図：い風の中で評価されたことになります。
   - 主要視覚機能：Evidence
   - 画面状態：Chart
+  - Visual Template ID：tailwind-headwind
+  - Template Variant：two-lane
+  - 表示順：追い風と向かい風を同時比較
+  - 比較基準：同一セッションの確認材料
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：追い風 / 向かい風
+  - 最終到達点：NASDAQへの相殺結果
   - 画面の問い：向かい風の大きさは
   - 主要要素：雇用コストと米10年金利
   - 視聴者向けテキスト：ECI 0.9% / 米10年 約4.75%
@@ -334,6 +422,14 @@
   - 終了合図：じ日に金利の逆風が存在したことです。
   - 主要視覚機能：Evidence
   - 画面状態：Chart
+  - Visual Template ID：evidence-boundary
+  - Template Variant：confirmed-vs-unconfirmed
+  - 表示順：確認できる→断定しない
+  - 比較基準：取引区分と終値
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：確認できる / 断定しない
+  - 最終到達点：not-required
   - 画面の問い：確認できる順序はどこまでか
   - 主要要素：取引区分と記事の説明
   - 視聴者向けテキスト：Amazon・半導体が支援 / 金利が上値を抑制
@@ -346,6 +442,14 @@
   - 終了合図：金利上昇とApple安がありました。
   - 主要視覚機能：Compare
   - 画面状態：Data
+  - Visual Template ID：index-return-bars
+  - Template Variant：zero-baseline
+  - 表示順：Composite→Nasdaq-100→SOXX
+  - 比較基準：終値・共通ゼロ基準
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：指数と半導体は同じ強さか
   - 主要要素：主要指数の終値差
   - 視聴者向けテキスト：Composite +1.00% / Nasdaq-100 +0.60% / SOXX +0.07%
@@ -383,6 +487,14 @@
   - 終了合図：on一社だけへ絞ることはできません。
   - 主要視覚機能：Compare
   - 画面状態：EntityFocus
+  - Visual Template ID：entity-card-full
+  - Template Variant：prebuilt-card
+  - 表示順：Appleカード
+  - 比較基準：not-required
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：相殺要因の代表は誰か
   - 主要要素：Apple企業カード
   - 視聴者向けテキスト：Apple / 端末とサービスの生態系
@@ -395,6 +507,14 @@
   - 終了合図：えた内容の差が株価へ強く表れました。
   - 主要視覚機能：Compare
   - 画面状態：Data
+  - Visual Template ID：diverging-stock-bars
+  - Template Variant：center-zero
+  - 表示順：Amazon→Apple→NVIDIA→AMD
+  - 比較基準：前日比・中央ゼロ
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：期待への答えで明暗
   - 画面の問い：評価軸はどこへ表れたか
   - 主要要素：大型テックと半導体の明暗
   - 視聴者向けテキスト：Amazon +15.32% / Apple -7.35% / NVIDIA +2.93% / AMD -1.90%
@@ -431,6 +551,14 @@
   - 終了合図：型クラウド株の上昇へ追いつくかです。
   - 主要視覚機能：Verify
   - 画面状態：Data
+  - Visual Template ID：verification-checklist
+  - Template Variant：default
+  - 表示順：クラウド→金利→半導体
+  - 比較基準：今後の確認条件
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：not-required
   - 画面の問い：今夜は何を見るか
   - 主要要素：三つの検証カード
   - 視聴者向けテキスト：クラウド売上 / 米10年金利 / 半導体への波及
@@ -443,6 +571,14 @@
   - 終了合図：げるのは早い、という判断になります。
   - 主要視覚機能：Verify
   - 画面状態：Chart
+  - Visual Template ID：verification-matrix
+  - Template Variant：strengthen-vs-weaken
+  - 表示順：強まる条件→弱まる条件
+  - 比較基準：中心仮説
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：s8-node-cloud→s8-node-yield→s8-node-semi→s8-node-hyp
+  - レーン名：強まる / 弱まる
+  - 最終到達点：s8-node-hyp
   - 画面の問い：何がそろえば仮説は強まるか
   - 主要要素：検証条件の因果図
   - 視聴者向けテキスト：売上継続 / 金利安定 / 半導体波及
@@ -479,6 +615,14 @@
   - 終了合図：。こちらはそろそろ、おやすみなさい。
   - 主要視覚機能：Anchor
   - 画面状態：Data
+  - Visual Template ID：closing-recap
+  - Template Variant：default
+  - 表示順：AWS予想超過→金利逆風→半導体限定→結論
+  - 比較基準：本編既出事項
+  - 入力データの根拠：当該Scene記載の根拠・時系列範囲
+  - ノード順：not-required
+  - レーン名：not-required
+  - 最終到達点：投資額より回収
   - 画面の問い：今朝の答えは何か
   - 主要要素：結論カード
   - 視聴者向けテキスト：投資額より回収

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.1.0",
+  "schemaVersion": "2.2.0",
   "episode": {
     "id": "2099-02-02",
     "targetDate": "2099-02-02",
@@ -168,8 +168,8 @@
           "beatId": "scene-01-beat-001",
           "startChunkId": "scene-01-chunk-001",
           "endChunkId": "scene-01-chunk-001",
-          "narrationStartCue": "TEST OPENING HOOK",
-          "narrationEndCue": "TEST OPENING HOOK",
+          "narrationStartCue": "TEST OPENING HOOK。",
+          "narrationEndCue": "TEST OPENING HOOK。",
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "conclusion-card",
@@ -192,14 +192,23 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "conclusion-card",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-01-beat-002",
           "startChunkId": "scene-01-chunk-002",
           "endChunkId": "scene-01-chunk-002",
-          "narrationStartCue": "TEST INDEX DIRECTION",
-          "narrationEndCue": "TEST INDEX DIRECTION",
+          "narrationStartCue": "TEST INDEX DIRECTION。",
+          "narrationEndCue": "TEST INDEX DIRECTION。",
           "primaryFunction": "Anchor",
           "screenState": "EntityFocus",
           "visualMode": "text-focus",
@@ -231,14 +240,23 @@
             "rightsStatus": "not-required",
             "targetDurationMs": 6000
           },
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "entity-card-full",
+          "templateConfig": {
+            "variant": "prebuilt-card",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         },
         {
           "beatId": "scene-01-beat-003",
           "startChunkId": "scene-01-chunk-003",
           "endChunkId": "scene-01-chunk-004",
-          "narrationStartCue": "TEST SHORT GREETING",
-          "narrationEndCue": "TEST CENTRAL CONCLUSION",
+          "narrationStartCue": "TEST SHORT GREETING。",
+          "narrationEndCue": "TEST CENTRAL CONCLUSION。",
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "conclusion-card",
@@ -261,7 +279,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "conclusion-card",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -449,8 +476,8 @@
           "beatId": "scene-02-beat-001",
           "startChunkId": "scene-02-chunk-001",
           "endChunkId": "scene-02-chunk-002",
-          "narrationStartCue": "TEST SCENE 2 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 2 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 2 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 2 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "number-comparison",
@@ -475,7 +502,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "metric-comparison-board",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "TEST QUESTION 2-1",
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -670,8 +706,8 @@
           "beatId": "scene-03-beat-001",
           "startChunkId": "scene-03-chunk-001",
           "endChunkId": "scene-03-chunk-002",
-          "narrationStartCue": "TEST SCENE 3 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 3 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 3 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 3 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "expected-actual-gap",
@@ -696,7 +732,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "expected-actual-gap-flow",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -898,8 +943,8 @@
           "beatId": "scene-04-beat-001",
           "startChunkId": "scene-04-chunk-001",
           "endChunkId": "scene-04-chunk-002",
-          "narrationStartCue": "TEST SCENE 4 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 4 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 4 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 4 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "timeline",
@@ -922,7 +967,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "evidence-boundary",
+          "templateConfig": {
+            "variant": "confirmed-vs-unconfirmed",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -1100,8 +1154,8 @@
           "beatId": "scene-05-beat-001",
           "startChunkId": "scene-05-chunk-001",
           "endChunkId": "scene-05-chunk-002",
-          "narrationStartCue": "TEST SCENE 5 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 5 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 5 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 5 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "chart",
@@ -1125,7 +1179,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -1312,8 +1375,8 @@
           "beatId": "scene-06-beat-001",
           "startChunkId": "scene-06-chunk-001",
           "endChunkId": "scene-06-chunk-002",
-          "narrationStartCue": "TEST SCENE 6 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 6 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 6 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 6 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "causal-diagram",
@@ -1321,7 +1384,8 @@
           "screenQuestion": "TEST QUESTION 6-1",
           "primaryElement": "TEST PRIMARY 6-1",
           "viewerTexts": [
-            "TEST VIEWER TEXT 6-1"
+            "強まる｜TEST VIEWER TEXT 6-1",
+            "弱まる｜TEST UNCERTAINTY"
           ],
           "changeCue": "TEST SCENE 6 CAPTION 1",
           "objectIds": [
@@ -1339,7 +1403,22 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "verification-matrix",
+          "templateConfig": {
+            "variant": "strengthen-vs-weaken",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [
+              "scene-06-node-001",
+              "scene-06-node-002"
+            ],
+            "laneLabels": [
+              "強まる",
+              "弱まる"
+            ],
+            "outcomeNodeId": "scene-06-node-002"
+          }
         }
       ],
       "cards": [
@@ -1533,8 +1612,8 @@
           "beatId": "scene-07-beat-001",
           "startChunkId": "scene-07-chunk-001",
           "endChunkId": "scene-07-chunk-002",
-          "narrationStartCue": "TEST SCENE 7 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 7 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 7 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 7 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "stock-comparison",
@@ -1560,7 +1639,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "metric-comparison-board",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "TEST QUESTION 7-1",
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -1763,8 +1851,8 @@
           "beatId": "scene-08-beat-001",
           "startChunkId": "scene-08-chunk-001",
           "endChunkId": "scene-08-chunk-002",
-          "narrationStartCue": "TEST SCENE 8 CAPTION 1",
-          "narrationEndCue": "TEST SCENE 8 CAPTION 2",
+          "narrationStartCue": "TEST SCENE 8 SPEECH 1。",
+          "narrationEndCue": "TEST SCENE 8 SPEECH 2。",
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "verification-points",
@@ -1789,7 +1877,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "verification-checklist",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
@@ -1998,8 +2095,8 @@
           "beatId": "scene-09-beat-001",
           "startChunkId": "scene-09-chunk-001",
           "endChunkId": "scene-09-chunk-003",
-          "narrationStartCue": "TEST SHORT RECAP",
-          "narrationEndCue": "狐側のおやすみなさい",
+          "narrationStartCue": "TEST SHORT RECAP。",
+          "narrationEndCue": "狐側のおやすみなさい。",
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
@@ -2022,7 +2119,16 @@
           "expressionChange": null,
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "TEST TIMELINE BASIS",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          }
         }
       ],
       "cards": [
