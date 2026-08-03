@@ -4,6 +4,7 @@ import {isPlacementActive, type SceneRenderState} from "./render-state";
 
 type PublicTone = "positive" | "negative" | "warning" | "neutral" | "emphasis";
 type PublicFit = "cover" | "contain" | "fill";
+type PlacementRole = ProductionScene["assetPlacements"][number]["role"];
 
 export type PublicCard = {
   key: string;
@@ -40,6 +41,7 @@ export type PublicArrow = {
 export type PublicPlacedAsset = {
   key: string;
   src: string;
+  role: PlacementRole;
   slot: "full" | "focus-media" | "primary" | "entity" | "lower";
   fit: PublicFit;
   objectPosition: string;
@@ -65,6 +67,7 @@ export type PublicMainContent = {
   nodes: PublicNode[];
   arrows: PublicArrow[];
   texts: string[];
+  entityPresentation: "prebuilt-card" | "media" | "fallback" | null;
   entity: null | {
     subjectType: "person" | "company" | "product";
     displayName: string;
@@ -89,8 +92,8 @@ const renderKindMap = {
   "conclusion-card": "conclusion",
   "number-comparison": "numbers",
   "expected-actual-gap": "expected-actual-gap",
-  "timeline": "timeline",
-  "chart": "chart",
+  timeline: "timeline",
+  chart: "chart",
   "causal-diagram": "causal",
   "stock-comparison": "stock-comparison",
   "news-media": "news",
@@ -117,9 +120,12 @@ const publicAsset = (
   return {
     key: placement.placementId,
     src,
+    role: placement.role,
     slot: slotOverride ?? slotMap[placement.region],
     fit: placement.fit,
-    objectPosition: placement.focalPoint ? `${placement.focalPoint.x * 100}% ${placement.focalPoint.y * 100}%` : "50% 50%",
+    objectPosition: placement.focalPoint
+      ? `${placement.focalPoint.x * 100}% ${placement.focalPoint.y * 100}%`
+      : "50% 50%",
     opacity: placement.opacity,
   };
 };
@@ -133,7 +139,9 @@ export const toPublicSceneViewModel = (
   if (!beat) throw new Error("active Visual Beat is unavailable");
 
   const backgroundPlacement = scene.assetPlacements.find(
-    (placement) => placement.role === "background" && isPlacementActive(scene, placement, state),
+    (placement) =>
+      placement.role === "background" &&
+      isPlacementActive(scene, placement, state),
   );
   if (!backgroundPlacement) throw new Error("canonical background is unavailable");
 
@@ -144,7 +152,9 @@ export const toPublicSceneViewModel = (
       placement.assetId === expressionAsset.assetId &&
       isPlacementActive(scene, placement, state),
   );
-  if (!foxPlacement) throw new Error(`fox expression asset is unavailable: ${expressionAsset.assetId}`);
+  if (!foxPlacement) {
+    throw new Error(`fox expression asset is unavailable: ${expressionAsset.assetId}`);
+  }
 
   const selectedIds = new Set(beat.objectIds);
   const cards = scene.cards
@@ -185,11 +195,43 @@ export const toPublicSceneViewModel = (
     }));
 
   const beatPlacementIds = new Set(beat.assetPlacementIds);
-  const mainAssets = scene.assetPlacements
-    .filter((placement) => beatPlacementIds.has(placement.placementId) && isPlacementActive(scene, placement, state))
-    .map((placement) => publicAsset(placement, assets, beat.screenState === "EntityFocus" ? "focus-media" : undefined));
+  const activeBeatPlacements = scene.assetPlacements.filter(
+    (placement) =>
+      beatPlacementIds.has(placement.placementId) &&
+      isPlacementActive(scene, placement, state),
+  );
+  const entityPlacement =
+    beat.screenState === "EntityFocus"
+      ? activeBeatPlacements.find((placement) => placement.role === "entity-card") ??
+        activeBeatPlacements.find(
+          (placement) =>
+            placement.role === "main-media" ||
+            placement.role === "illustration" ||
+            placement.role === "chart",
+        )
+      : undefined;
+  const entityPresentation =
+    beat.screenState !== "EntityFocus"
+      ? null
+      : entityPlacement?.role === "entity-card"
+        ? "prebuilt-card"
+        : entityPlacement
+          ? "media"
+          : "fallback";
+
+  const mainAssets = activeBeatPlacements.map((placement) =>
+    publicAsset(
+      placement,
+      assets,
+      beat.screenState === "EntityFocus" ? "full" : undefined,
+    ),
+  );
   const overlays = scene.assetPlacements
-    .filter((placement) => placement.role === "overlay" && isPlacementActive(scene, placement, state))
+    .filter(
+      (placement) =>
+        placement.role === "overlay" &&
+        isPlacementActive(scene, placement, state),
+    )
     .map((placement) => publicAsset(placement, assets));
   const generatedContentVisible =
     beat.screenState === "Data" ||
@@ -199,7 +241,8 @@ export const toPublicSceneViewModel = (
 
   return {
     headline: scene.headline,
-    supportingTexts: beat.viewerTexts.length > 0 ? beat.viewerTexts : scene.supportingTexts,
+    supportingTexts:
+      beat.viewerTexts.length > 0 ? beat.viewerTexts : scene.supportingTexts,
     sourceLabel: scene.sourceLabel || null,
     captionText: state.captionText,
     background: publicAsset(backgroundPlacement, assets),
@@ -208,19 +251,28 @@ export const toPublicSceneViewModel = (
     overlays,
     mainContent: generatedContentVisible
       ? {
-          renderKind: beat.screenState === "EntityFocus" ? "entity" : renderKindMap[beat.visualMode],
-          layout: beat.screenState === "MainWithEntity" ? "primary-with-entity" : "full",
+          renderKind:
+            beat.screenState === "EntityFocus"
+              ? "entity"
+              : renderKindMap[beat.visualMode],
+          layout:
+            beat.screenState === "MainWithEntity"
+              ? "primary-with-entity"
+              : "full",
           cards,
           numbers,
           nodes,
           arrows,
           texts: beat.viewerTexts,
-          entity: beat.entity ? {
-            subjectType: beat.entity.subjectType,
-            displayName: beat.entity.displayName,
-            role: beat.entity.role,
-            variant: beat.entity.variant,
-          } : null,
+          entityPresentation,
+          entity: beat.entity
+            ? {
+                subjectType: beat.entity.subjectType,
+                displayName: beat.entity.displayName,
+                role: beat.entity.role,
+                variant: beat.entity.variant,
+              }
+            : null,
         }
       : null,
   };
