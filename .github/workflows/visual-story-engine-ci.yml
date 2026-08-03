@@ -53,6 +53,38 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Generate JSON Schema
+        run: npm run episode:spec:schema
+
+      - name: Generate migrated Visual Story inputs
+        run: |
+          node --import tsx scripts/migrate-visual-story-v2.ts \
+            --output-dir build/visual-story-migrated \
+            render-specs/2026-07-31/render_spec.json \
+            render-specs/fixtures/minimal/render_spec.json \
+            render-specs/fixtures/complete-9scene/render_spec.json \
+            render-specs/fixtures/renderable-9scene/render_spec.json \
+            render-specs/fixtures/schema-all-expressions/render_spec.json
+
+      - name: Collect generated contract files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/visual-story-generated/schemas
+          cp schemas/render_spec.schema.json build/visual-story-generated/schemas/render_spec.schema.json
+          cp -R build/visual-story-migrated/render-specs build/visual-story-generated/render-specs
+
+      - name: Upload generated contracts
+        uses: actions/upload-artifact@v6
+        with:
+          name: visual-story-generated-${{ github.run_id }}
+          path: build/visual-story-generated
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Verify committed JSON Schema is current
+        run: git diff --exit-code -- schemas/render_spec.schema.json
+
       - name: Render spec contract tests
         run: npm run test:spec
 
