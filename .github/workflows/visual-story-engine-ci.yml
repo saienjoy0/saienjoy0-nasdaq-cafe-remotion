@@ -91,5 +91,8 @@ jobs:
       - name: Public screen boundary
         run: npm run test:public-screen
 
+      - name: Clean generated contract workspace
+        run: rm -rf build
+
       - name: Bundle Remotion
         run: npm run build
