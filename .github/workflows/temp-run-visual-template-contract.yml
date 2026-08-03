@@ -54,15 +54,26 @@ jobs:
           python3 /tmp/update_visual_contract.py
           python3 <<'PY'
           from pathlib import Path
-          path = Path('scripts/generate-render-spec-fixtures.ts')
-          text = path.read_text(encoding='utf-8')
+          import json
+
+          generator = Path('scripts/generate-render-spec-fixtures.ts')
+          text = generator.read_text(encoding='utf-8')
           start_old = '    narrationStartCue: narrationChunks[startIndex].captionText,'
           end_old = '    narrationEndCue: narrationChunks[endIndex].captionText,'
           if text.count(start_old) != 1 or text.count(end_old) != 1:
               raise SystemExit('fixture narration cue targets changed')
           text = text.replace(start_old, '    narrationStartCue: narrationChunks[startIndex].speechText,', 1)
           text = text.replace(end_old, '    narrationEndCue: narrationChunks[endIndex].speechText,', 1)
-          path.write_text(text, encoding='utf-8')
+          generator.write_text(text, encoding='utf-8')
+
+          for spec_path in Path('render-specs/fixtures').rglob('render_spec.json'):
+              spec = json.loads(spec_path.read_text(encoding='utf-8'))
+              for scene in spec.get('scenes', []):
+                  chunks = {chunk['chunkId']: chunk for chunk in scene.get('narrationChunks', [])}
+                  for beat in scene.get('visualBeats', []):
+                      beat['narrationStartCue'] = chunks[beat['startChunkId']]['speechText']
+                      beat['narrationEndCue'] = chunks[beat['endChunkId']]['speechText']
+              spec_path.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           PY
 
       - name: Set up Node.js
