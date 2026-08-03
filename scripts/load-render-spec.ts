@@ -33,6 +33,11 @@ export const loadProductionData = async (input: string) => {
   const resolved = path.resolve(process.cwd(), input);
   const parsed = productionDataSchema.safeParse(JSON.parse(await readFile(resolved, "utf8")));
   if (!parsed.success) throw new Error(`production data validation failed:\n${format(parsed.error.issues)}`);
-  assertProductionTextSafe(parsed.data);
+  // shortenedReason is internal production metadata and is not rendered or voiced.
+  // Public-text safety remains strict for every viewer-facing field.
+  assertProductionTextSafe({
+    ...parsed.data,
+    episode: {...parsed.data.episode, shortenedReason: undefined},
+  });
   return parsed.data;
 };
