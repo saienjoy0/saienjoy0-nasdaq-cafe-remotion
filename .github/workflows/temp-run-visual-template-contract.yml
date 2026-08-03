@@ -42,7 +42,7 @@ jobs:
               lines.append(line[10:] if line.startswith('          ') else line)
           Path('/tmp/update_visual_contract.py').write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
-          python3 /tmp/update_visual_contract.py
+          python3 /tmp/update_visual_contract.py 2>&1 | tee /tmp/apply.log
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -90,19 +90,27 @@ jobs:
           VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
           COMMIT_OUTCOME: ${{ steps.commit.outcome }}
           RESULT_SHA: ${{ steps.commit.outputs.sha }}
+          RUN_ID: ${{ github.run_id }}
         with:
           script: |
+            const fs = require('fs');
+            const applyLog = fs.existsSync('/tmp/apply.log') ? fs.readFileSync('/tmp/apply.log', 'utf8').slice(-3500) : 'no apply log';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: 25,
               body: [
+                `RUN_ID=${process.env.RUN_ID}`,
                 `VISUAL_TEMPLATE_CONTRACT_COMMIT=${process.env.RESULT_SHA || 'none'}`,
                 `APPLY=${process.env.APPLY_OUTCOME}`,
                 `INSTALL=${process.env.INSTALL_OUTCOME}`,
                 `VALIDATE=${process.env.VALIDATE_OUTCOME}`,
                 `COMMIT=${process.env.COMMIT_OUTCOME}`,
                 'PREVIEW_NOT_RUN=true',
-                'FINAL_NOT_RUN=true'
+                'FINAL_NOT_RUN=true',
+                '',
+                '```text',
+                applyLog,
+                '```'
               ].join('\n')
             });
