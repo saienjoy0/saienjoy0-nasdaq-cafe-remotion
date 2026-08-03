@@ -745,8 +745,8 @@
 |---|---|---|---|---|---:|---|---|
 | Scene 1 | scene-01-beat-001 | opening-contradiction | default | explicit | 900ms | s1-card-main［rise-soft／560ms］ | s1-card-main［focus-ring］ |
 | Scene 1 | scene-01-beat-002 | text-focus | default | static | 500ms | 完成状態 | なし |
-| Scene 2 | scene-02-beat-001 | hero-number | prebuilt-card | explicit | 750ms | s2-number-amzn［count-up／760ms］ → s2-number-amzn［count-up／760ms］ | なし |
-| Scene 2 | scene-02-beat-002 | diverging-stock-bars | center-zero | explicit | 500ms | s2-number-amzn［count-up／760ms］ → s2-number-amzn［count-up／760ms］ → s2-number-soxx［count-up／760ms］ → s2-number-amd［count-up／760ms］ | s2-number-amd［focus-ring］ |
+| Scene 2 | scene-02-beat-001 | hero-number | prebuilt-card | explicit | 750ms | s2-number-amzn［count-up／760ms］ | なし |
+| Scene 2 | scene-02-beat-002 | diverging-stock-bars | center-zero | explicit | 500ms | s2-number-amzn［count-up／760ms］ → s2-number-soxx［count-up／760ms］ → s2-number-amd［count-up／760ms］ | s2-number-amd［focus-ring］ |
 | Scene 3 | scene-03-beat-001 | expected-actual-bullet | zero-baseline | explicit | 750ms | s3-number-aws［count-up／760ms］ → s3-number-gap［count-up／760ms］ | s3-number-gap［focus-ring］ |
 | Scene 3 | scene-03-beat-002 | metric-comparison-board | default | explicit | 500ms | s3-number-amzn［count-up／680ms］ → s3-number-googl［count-up／680ms］ | s3-number-googl［focus-ring］ |
 | Scene 4 | scene-04-beat-001 | expected-actual-gap-flow | left-to-right | explicit | 900ms | s4-card-expected［rise-soft／560ms］ → s4-card-actual［rise-soft／560ms］ → s4-card-gap［rise-soft／560ms］ | s4-card-gap［focus-ring］ |
