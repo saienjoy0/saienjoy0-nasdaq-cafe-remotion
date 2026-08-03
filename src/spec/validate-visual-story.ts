@@ -21,7 +21,7 @@ const numericFromText = (value: string) => {
   return match ? Number(match[0]) : null;
 };
 
-const normalized = (value: string) => value.replace(/[\s　|｜、。,.・:：+＋-−]/g, "").toLowerCase();
+const normalized = (value: string) => value.replace(/[\s　|｜、。,.・:：+＋−-]/g, "").toLowerCase();
 
 export const validateVisualStoryContract = (
   spec: RenderSpec,
@@ -63,11 +63,12 @@ export const validateVisualStoryContract = (
       if (contract.requiresNumericValue) {
         selectedNumbers.forEach((number) => {
           const numberIndex = scene.numbers.indexOf(number);
-          if (number.numericValue == null) {
+          const numericValue = number.numericValue;
+          if (numericValue == null) {
             fail(`${scenePath}.numbers[${numberIndex}].numericValue`, `${beat.visualTemplate} requires numericValue`);
           }
           const parsed = numericFromText(number.value);
-          if (parsed !== null && Math.abs(parsed - number.numericValue) > 1e-8) {
+          if (parsed !== null && Math.abs(parsed - numericValue) > 1e-8) {
             fail(`${scenePath}.numbers[${numberIndex}].numericValue`, `must match visible value ${number.value}`);
           }
         });
@@ -108,11 +109,13 @@ export const validateVisualStoryContract = (
       const objectOrder = new Map(beat.objectIds.map((id, index) => [id, index]));
       selectedArrows.forEach((arrow) => {
         const arrowIndex = objectOrder.get(arrow.arrowId)!;
-        const fromIndex = objectOrder.get(arrow.fromNodeId);
-        const toIndex = objectOrder.get(arrow.toNodeId);
-        if (fromIndex === undefined || toIndex === undefined) {
+        const fromIndexValue = objectOrder.get(arrow.fromNodeId);
+        const toIndexValue = objectOrder.get(arrow.toNodeId);
+        if (fromIndexValue === undefined || toIndexValue === undefined) {
           fail(`${path}.objectIds`, `arrow ${arrow.arrowId} requires both connected nodes in the same Beat`);
         }
+        const fromIndex = fromIndexValue as number;
+        const toIndex = toIndexValue as number;
         if (arrowIndex <= fromIndex || arrowIndex <= toIndex) {
           fail(`${path}.objectIds[${arrowIndex}]`, `arrow ${arrow.arrowId} must appear after both connected nodes`);
         }
