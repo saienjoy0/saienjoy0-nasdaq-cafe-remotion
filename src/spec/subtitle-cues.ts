@@ -10,7 +10,7 @@ const cache = new Map<string, SubtitleCue[]>();
 
 const visibleLength = (value: string) => Array.from(value.replace(/\s+/gu, "")).length;
 
-const normalizeSpeech = (value: string) => value
+const normalizeSpeech = (value?: string) => (value ?? "")
   .replace(/\r\n?/gu, "\n")
   .replace(/[\t ]+/gu, " ")
   .replace(/\n+/gu, " ")
@@ -25,7 +25,7 @@ const hardSplit = (value: string, maxChars: number) => {
   return parts;
 };
 
-const sentenceParts = (speechText: string) => {
+const sentenceParts = (speechText?: string) => {
   const normalized = normalizeSpeech(speechText);
   if (!normalized) return [];
   return normalized.match(/[^。！？!?]+[。！？!?]?/gu) ?? [normalized];
@@ -39,7 +39,7 @@ const clauseParts = (sentence: string) => {
     : [clause]);
 };
 
-const buildPages = (speechText: string) => {
+const buildPages = (speechText?: string) => {
   const units = sentenceParts(speechText).flatMap(clauseParts);
   const pages: string[] = [];
   let current = "";
@@ -85,15 +85,16 @@ const speechWeight = (value: string) => Array.from(value).reduce((total, charact
 }, 0);
 
 export const createSubtitleCues = (
-  speechText: string,
+  speechText: string | undefined,
   startMs: number,
   endMs: number,
 ): SubtitleCue[] => {
-  const cacheKey = `${startMs}:${endMs}:${speechText}`;
+  const normalizedSpeech = normalizeSpeech(speechText);
+  const cacheKey = `${startMs}:${endMs}:${normalizedSpeech}`;
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const pages = buildPages(speechText);
+  const pages = buildPages(normalizedSpeech);
   if (pages.length === 0 || endMs <= startMs) return [];
 
   const totalDurationMs = endMs - startMs;
@@ -121,7 +122,7 @@ export const createSubtitleCues = (
 };
 
 export const getSubtitleTextAtTime = (
-  speechText: string,
+  speechText: string | undefined,
   startMs: number,
   endMs: number,
   timeMs: number,
