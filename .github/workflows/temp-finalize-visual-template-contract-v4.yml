@@ -1,0 +1,154 @@
+name: TEMP Finalize Visual Template Contract V4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/visual-template-final-v4-trigger
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/spec-video-legibility
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply contract migration and remove all Scene inference
+        id: apply
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          git show origin/main:.github/workflows/temp-run-visual-template-contract.yml > /tmp/runner.yml
+          python3 <<'PY'
+          from pathlib import Path
+          text = Path('/tmp/runner.yml').read_text(encoding='utf-8')
+          start_marker = '      - name: Apply deterministic contract migration\n'
+          end_marker = '      - name: Set up Node.js\n'
+          section = text.split(start_marker, 1)[1].rsplit(end_marker, 1)[0]
+          block = section.split('        run: |\n', 1)[1]
+          Path('/tmp/apply-contract.sh').write_text('\n'.join(line[10:] if line.startswith('          ') else line for line in block.splitlines()) + '\n', encoding='utf-8')
+          PY
+          bash /tmp/apply-contract.sh
+          python3 <<'PY'
+          from pathlib import Path
+
+          test_path = Path('scripts/test-render-spec.ts')
+          test_text = test_path.read_text(encoding='utf-8')
+          for old, new in {
+            'assert.equal(getSceneRenderState(scene, 500).captionText, scene.narrationChunks[0].caption.text);': 'assert.equal(getSceneRenderState(scene, 500).captionText, scene.narrationChunks[0].speechText);',
+            'assert.equal(getSceneRenderState(scene, 1150).captionText, scene.narrationChunks[1].caption.text);': 'assert.equal(getSceneRenderState(scene, 1150).captionText, scene.narrationChunks[1].speechText);',
+          }.items():
+              if test_text.count(old) != 1:
+                  raise SystemExit(f'subtitle test target count={test_text.count(old)}: {old}')
+              test_text = test_text.replace(old, new, 1)
+          test_path.write_text(test_text, encoding='utf-8')
+
+          public_path = Path('src/spec/public-view-model.ts')
+          public_text = public_path.read_text(encoding='utf-8')
+          for line in [
+              '  sceneId: ProductionScene["sceneId"];\n',
+              '  sceneNumber: number;\n',
+              '  sceneRole: ProductionScene["sceneRole"];\n',
+              '          sceneId: scene.sceneId,\n',
+              '          sceneNumber: scene.sceneNumber,\n',
+              '          sceneRole: scene.sceneRole,\n',
+          ]:
+              if public_text.count(line) != 1:
+                  raise SystemExit(f'public identifier target count={public_text.count(line)}: {line.strip()}')
+              public_text = public_text.replace(line, '', 1)
+          public_path.write_text(public_text, encoding='utf-8')
+
+          visual_path = Path('src/components/spec/SpecVisualModes.tsx')
+          visual_text = visual_path.read_text(encoding='utf-8')
+          inference_replacements = {
+              '  if (content.sceneNumber === 6) return <EvidenceBoundary content={content}/>;\n': '',
+              '  if (content.sceneNumber === 5) return <EvidenceMetricBoard content={content}/>;\n': '',
+              'accent={content.sceneNumber === 5 ? colors.warning : colors.cyan}': 'accent={colors.cyan}',
+              '  if (converging || content.sceneNumber === 8) return <VerificationMatrix content={content}/>;': '  if (converging) return <VerificationMatrix content={content}/>;',
+          }
+          for old, new in inference_replacements.items():
+              if visual_text.count(old) != 1:
+                  raise SystemExit(f'Scene inference target count={visual_text.count(old)}: {old.strip()}')
+              visual_text = visual_text.replace(old, new, 1)
+          if 'content.sceneNumber' in visual_text or 'content.sceneId' in visual_text or 'content.sceneRole' in visual_text:
+              raise SystemExit('internal Scene metadata still used by visual renderer')
+          visual_path.write_text(visual_text, encoding='utf-8')
+          PY
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install and regenerate schema
+        id: install
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run episode:spec:schema
+
+      - name: Validate contract
+        id: validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            npm run typecheck
+            npm run test:spec
+            npm run build
+            npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
+            grep -R '"visualTemplate"' render-specs/2026-07-31/render_spec.json >/dev/null
+            grep -R 'switch (content.visualTemplate)' src/components/spec/SpecVisualModes.tsx >/dev/null
+            ! grep -R 'switch (content.renderKind)' src/components/spec/SpecVisualModes.tsx
+            ! grep -R 'content.sceneNumber\|content.sceneId\|content.sceneRole' src/components/spec/SpecVisualModes.tsx
+          } 2>&1 | tee /tmp/validate.log
+
+      - name: Commit target branch
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -- src/spec/render-spec.ts src/spec/public-view-model.ts src/components/spec/SpecVisualModes.tsx src/spec/validate-render-layout.ts scripts/generate-render-spec-fixtures.ts scripts/test-render-spec.ts scripts/test-spec-presentation.ts schemas/render_spec.schema.json render-specs episode-packages/2026-07-31/episode_package_2026-07-31.md docs/12_visual_template_contract.md
+          git commit -m "feat: make visual templates explicit in script contract"
+          git push origin HEAD:fix/spec-video-legibility
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report
+        if: always()
+        uses: actions/github-script@v8
+        env:
+          APPLY_OUTCOME: ${{ steps.apply.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          COMMIT_OUTCOME: ${{ steps.commit.outcome }}
+          RESULT_SHA: ${{ steps.commit.outputs.sha }}
+          RUN_ID: ${{ github.run_id }}
+        with:
+          script: |
+            const fs = require('fs');
+            const log = fs.existsSync('/tmp/validate.log') ? fs.readFileSync('/tmp/validate.log', 'utf8').slice(-8000) : 'no validation log';
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: 25, body: [
+              `RUN_ID=${process.env.RUN_ID}`,
+              `VISUAL_TEMPLATE_CONTRACT_COMMIT=${process.env.RESULT_SHA || 'none'}`,
+              `APPLY=${process.env.APPLY_OUTCOME}`,
+              `INSTALL=${process.env.INSTALL_OUTCOME}`,
+              `VALIDATE=${process.env.VALIDATE_OUTCOME}`,
+              `COMMIT=${process.env.COMMIT_OUTCOME}`,
+              'PREVIEW_NOT_RUN=true',
+              'FINAL_NOT_RUN=true',
+              '',
+              '```text', log, '```'
+            ].join('\n')});
