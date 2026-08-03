@@ -1,0 +1,189 @@
+name: ChatGPT Test Ingest 2026-07-31
+
+on:
+  push:
+    branches:
+      - test-ingest-2026-07-31
+    paths:
+      - ".chatgpt-ingest/2026-07-31/trigger.txt"
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+concurrency:
+  group: chatgpt-test-ingest-2026-07-31
+  cancel-in-progress: true
+
+jobs:
+  ingest-validate-and-dispatch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EPISODE_DATE: "2026-07-31"
+      ZIP_SHA256: "953e2c125d97249d31d6430f11910064a46da8195bb5b3e2a82ae92ab9615d14"
+      MD_SHA256: "121f1067e1d289173520491ef9158f888ac33514f7abdc94c9e6c5bf1735bc89"
+      SPEC_SHA256: "5e028ffc2bc8af2bd0f1dbf32c58eb62ccd4efaec3071ebaf2d9e1d32ff2bc54"
+
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Reassemble exact uploaded ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          PART_DIR=".chatgpt-ingest/${EPISODE_DATE}"
+          cat \
+            "${PART_DIR}/input.part-00.b64" \
+            "${PART_DIR}/input.part-01.b64" \
+            "${PART_DIR}/input.part-02.b64" \
+            "${PART_DIR}/input.part-03.b64" \
+            > /tmp/nasdaq-cafe-input.b64
+          base64 --decode /tmp/nasdaq-cafe-input.b64 > /tmp/nasdaq-cafe-input.zip
+          ACTUAL_ZIP_SHA="$(sha256sum /tmp/nasdaq-cafe-input.zip | awk '{print $1}')"
+          test "$ACTUAL_ZIP_SHA" = "$ZIP_SHA256"
+          unzip -q /tmp/nasdaq-cafe-input.zip -d /tmp/nasdaq-cafe-input
+
+      - name: Verify exact MD and JSON bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="/tmp/nasdaq-cafe-input/nasdaq_cafe_${EPISODE_DATE}"
+          SOURCE_MD="${ROOT}/episode_package_${EPISODE_DATE}.md"
+          SOURCE_SPEC="${ROOT}/render-specs/${EPISODE_DATE}/render_spec.json"
+          test -s "$SOURCE_MD"
+          test -s "$SOURCE_SPEC"
+          test "$(sha256sum "$SOURCE_MD" | awk '{print $1}')" = "$MD_SHA256"
+          test "$(sha256sum "$SOURCE_SPEC" | awk '{print $1}')" = "$SPEC_SHA256"
+
+      - name: Switch to latest main and place canonical inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          ROOT="/tmp/nasdaq-cafe-input/nasdaq_cafe_${EPISODE_DATE}"
+          mkdir -p "episode-packages/${EPISODE_DATE}" "render-specs/${EPISODE_DATE}"
+          cp "${ROOT}/episode_package_${EPISODE_DATE}.md" \
+             "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+          cp "${ROOT}/render-specs/${EPISODE_DATE}/render_spec.json" \
+             "render-specs/${EPISODE_DATE}/render_spec.json"
+          test "$(sha256sum "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md" | awk '{print $1}')" = "$MD_SHA256"
+          test "$(sha256sum "render-specs/${EPISODE_DATE}/render_spec.json" | awk '{print $1}')" = "$SPEC_SHA256"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run formal validator
+        run: npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
+
+      - name: Create production-ready manifest
+        run: npm run episode:spec:ready -- "$EPISODE_DATE" --consistency-pass
+
+      - name: Verify production-ready contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          READY="render-specs/${EPISODE_DATE}/production_ready.json"
+          test -s "$READY"
+          jq -e \
+            --arg date "$EPISODE_DATE" \
+            --arg md_sha "$MD_SHA256" \
+            --arg spec_sha "$SPEC_SHA256" \
+            '.version == 1
+             and .status == "ready"
+             and .episodeDate == $date
+             and .renderSpecSha256 == $spec_sha
+             and .episodePackageSha256 == $md_sha
+             and .validatorStatus == "pass"
+             and .consistencyStatus == "pass"
+             and .unresolvedStateCount == 0' \
+            "$READY" >/dev/null
+
+      - name: Commit verified daily package to main
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md" \
+            "render-specs/${EPISODE_DATE}/render_spec.json" \
+            "render-specs/${EPISODE_DATE}/production_ready.json"
+          if git diff --cached --quiet; then
+            echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Add verified Nasdaq Cafe package ${EPISODE_DATE}"
+            git push origin HEAD:main
+            echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dispatch scheduled preview gate for test date
+        id: dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BODY="$(jq -n \
+            --arg ref "main" \
+            --arg date "$EPISODE_DATE" \
+            '{ref: $ref, inputs: {episode_date_override: $date}}')"
+          RESPONSE="$(gh api \
+            --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-scheduled-preview.yml/dispatches" \
+            --input - <<<"$BODY")"
+          RUN_ID="$(jq -r '.workflow_run_id // empty' <<<"$RESPONSE")"
+          RUN_URL="$(jq -r '.html_url // empty' <<<"$RESPONSE")"
+          test "$RUN_ID" != ""
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report successful ingest and gate dispatch
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISHED_SHA: ${{ steps.publish.outputs.commit_sha }}
+          GATE_RUN_ID: ${{ steps.dispatch.outputs.run_id }}
+          GATE_RUN_URL: ${{ steps.dispatch.outputs.run_url }}
+        run: |
+          gh issue create \
+            --title "TEST INGEST ${EPISODE_DATE} SUCCESS run ${GITHUB_RUN_ID}" \
+            --body "$(cat <<EOF
+          The uploaded ZIP was reconstructed byte-for-byte and passed the repository formal validator.
+
+          - ZIP SHA-256: \`${ZIP_SHA256}\`
+          - Episode package SHA-256: \`${MD_SHA256}\`
+          - Render spec SHA-256: \`${SPEC_SHA256}\`
+          - Published main commit: \`${PUBLISHED_SHA}\`
+          - Scheduled gate run ID: \`${GATE_RUN_ID}\`
+          - Scheduled gate URL: ${GATE_RUN_URL}
+          - Ingest workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          EOF
+          )"
+
+      - name: Report ingest failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "TEST INGEST ${EPISODE_DATE} FAILED run ${GITHUB_RUN_ID}" \
+            --body "The test ingest failed before a successful scheduled-gate dispatch. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
