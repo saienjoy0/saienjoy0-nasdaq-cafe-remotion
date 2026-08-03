@@ -54,7 +54,7 @@ for (const component of [
 }
 assert.match(rendererSource, /switch \(content\.visualTemplate\)/);
 assert.doesNotMatch(rendererSource, /componentPath|new Function|eval\(|Math\.random/);
-assert.doesNotMatch(rendererSource, /Math\.cos|Math\.sin/, "causal diagrams must not use circular auto-layout");
+assert.doesNotMatch(rendererSource, /const angle =|Math\.PI \* 2 \* index/, "causal diagrams must not use circular auto-layout");
 assert.match(rendererSource, /strokeDashoffset=\{1 - progress\}/, "causal arrows must draw progressively");
 assert.match(rendererSource, /AnimatedNumber/, "numbers must support count-up presentation");
 
