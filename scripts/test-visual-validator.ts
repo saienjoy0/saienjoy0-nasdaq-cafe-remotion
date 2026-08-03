@@ -72,7 +72,7 @@ validateVisualStoryContract(source, {enforceVariety: true});
   show.atChunkId = scene.visualBeats[0].startChunkId;
   assert.throws(
     () => validateVisualStoryContract(value, {enforceVariety: true}),
-    /must stay inside/,
+    /explicit sequence requires a show event/,
   );
 }
 

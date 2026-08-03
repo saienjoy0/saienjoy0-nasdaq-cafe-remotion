@@ -30,7 +30,7 @@ assert.ok(longestRun <= 2, `the same visual template must not lead more than 2 c
 const opening = spec.scenes[0].visualBeats.map((beat) => beat.visualTemplate);
 assert.ok(opening.includes("opening-contradiction"), "Scene 1 requires opening-contradiction");
 const closing = spec.scenes[8].visualBeats.map((beat) => beat.visualTemplate);
-assert.ok(closing.includes("closing-recap"), "Scene 9 requires closing-recap");
+assert.ok(closing.includes("final-assembly"), "Scene 9 requires final-assembly");
 
 const verification = spec.scenes[7].visualBeats.map((beat) => beat.visualTemplate);
 assert.ok(

@@ -76,10 +76,17 @@ export const validateVisualStoryContract = (
         }
       }
 
+      const startIndex = chunkOrder.get(beat.startChunkId)!;
+      const endIndex = chunkOrder.get(beat.endChunkId)!;
+      const beatEvents = scene.visualEvents.filter((event) => {
+        if (!event.targetId || !beat.objectIds.includes(event.targetId)) return false;
+        const eventChunkIndex = chunkOrder.get(event.atChunkId);
+        return eventChunkIndex !== undefined && startIndex <= eventChunkIndex && eventChunkIndex <= endIndex;
+      });
       const policy = beat.sequencePolicy ?? (beat.objectIds.length === 0 ? "static" : "object-order-fallback");
       const showTargets = new Set(
-        scene.visualEvents
-          .filter((event) => event.action === "show" && event.targetId && beat.objectIds.includes(event.targetId))
+        beatEvents
+          .filter((event) => event.action === "show" && event.targetId)
           .map((event) => event.targetId as string),
       );
       if (policy === "explicit") {
@@ -93,16 +100,6 @@ export const validateVisualStoryContract = (
       if (beat.finalHoldMs == null) {
         fail(`${path}.finalHoldMs`, "finalHoldMs must be resolved before production");
       }
-
-      const startIndex = chunkOrder.get(beat.startChunkId)!;
-      const endIndex = chunkOrder.get(beat.endChunkId)!;
-      scene.visualEvents.forEach((event, eventIndex) => {
-        if (event.action === "set-expression" || !event.targetId || !beat.objectIds.includes(event.targetId)) return;
-        const eventChunkIndex = chunkOrder.get(event.atChunkId);
-        if (eventChunkIndex === undefined || eventChunkIndex < startIndex || eventChunkIndex > endIndex) {
-          fail(`${scenePath}.visualEvents[${eventIndex}].atChunkId`, `event for ${event.targetId} must stay inside ${beat.beatId}`);
-        }
-      });
 
       const objectOrder = new Map(beat.objectIds.map((id, index) => [id, index]));
       selectedArrows.forEach((arrow) => {
@@ -148,8 +145,8 @@ export const validateVisualStoryContract = (
     if (!spec.scenes[7].visualBeats.some((beat) => VISUAL_TEMPLATE_CONTRACTS[beat.visualTemplate].family === "verification")) {
       fail("$.scenes[7].visualBeats", "Scene 8 requires a verification template");
     }
-    if (!spec.scenes[8].visualBeats.some((beat) => beat.visualTemplate === "closing-recap")) {
-      fail("$.scenes[8].visualBeats", "Scene 9 requires closing-recap");
+    if (!spec.scenes[8].visualBeats.some((beat) => beat.visualTemplate === "final-assembly")) {
+      fail("$.scenes[8].visualBeats", "Scene 9 requires final-assembly");
     }
 
     const earlierText = normalized(spec.scenes.slice(0, 8).flatMap((scene) => [

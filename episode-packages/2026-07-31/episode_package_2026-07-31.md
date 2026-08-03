@@ -728,3 +728,47 @@
 
 ### GitHub Actionsへ渡してよいか
 可（repository正式validator pass、Charon実測403.2秒を明示的な短縮回として反映済み）。
+
+<!-- VISUAL_STORY_ENGINE_V2_START -->
+## Visual Story Engine v2 実装正本
+
+この節は `render-specs/2026-07-31/render_spec.json` から機械生成する。市場因果、ナレーション、字幕、数字、Scene順を再判断せず、確定済みの画面テンプレート、表示順、Motion、完成保持、結果強調だけを記録する。
+
+- 入力スキーマ：`2.2.0`
+- Renderer：`NasdaqCafeSpec / VisualTemplateRenderer`
+- 外部コード動的読込：なし
+- 表示順の正本：`visualEvents`。互換Fallbackが指定された場合だけ`objectIds`順
+- TTSへの影響：なし。Visual Story変更はTTS identityへ含めない
+- final：preview目視確認後、ユーザーの明示依頼がある場合だけ
+
+| Scene | Beat | visualTemplate | Variant | sequencePolicy | finalHold | 表示順とMotion | 結果強調 |
+|---|---|---|---|---|---:|---|---|
+| Scene 1 | scene-01-beat-001 | opening-contradiction | default | explicit | 900ms | s1-card-main［rise-soft／560ms］ | s1-card-main［focus-ring］ |
+| Scene 1 | scene-01-beat-002 | text-focus | default | static | 500ms | 完成状態 | なし |
+| Scene 2 | scene-02-beat-001 | hero-number | prebuilt-card | explicit | 750ms | s2-number-amzn［count-up／760ms］ → s2-number-amzn［count-up／760ms］ | なし |
+| Scene 2 | scene-02-beat-002 | diverging-stock-bars | center-zero | explicit | 500ms | s2-number-amzn［count-up／760ms］ → s2-number-amzn［count-up／760ms］ → s2-number-soxx［count-up／760ms］ → s2-number-amd［count-up／760ms］ | s2-number-amd［focus-ring］ |
+| Scene 3 | scene-03-beat-001 | expected-actual-bullet | zero-baseline | explicit | 750ms | s3-number-aws［count-up／760ms］ → s3-number-gap［count-up／760ms］ | s3-number-gap［focus-ring］ |
+| Scene 3 | scene-03-beat-002 | metric-comparison-board | default | explicit | 500ms | s3-number-amzn［count-up／680ms］ → s3-number-googl［count-up／680ms］ | s3-number-googl［focus-ring］ |
+| Scene 4 | scene-04-beat-001 | expected-actual-gap-flow | left-to-right | explicit | 900ms | s4-card-expected［rise-soft／560ms］ → s4-card-actual［rise-soft／560ms］ → s4-card-gap［rise-soft／560ms］ | s4-card-gap［focus-ring］ |
+| Scene 4 | scene-04-beat-002 | analogy-steps | left-to-right | static | 500ms | 完成状態 | なし |
+| Scene 4 | scene-04-beat-003 | causal-lane | left-to-right | explicit | 900ms | s4-node-spend［scale-settle／620ms］ → s4-node-cloud［scale-settle／620ms］ → s4-node-revenue［scale-settle／620ms］ → s4-node-valuation［scale-settle／620ms］ → s4-arrow-1［draw-line／720ms］ → s4-arrow-2［draw-line／720ms］ → s4-arrow-3［draw-line／720ms］ | s4-arrow-3［focus-ring］ |
+| Scene 5 | scene-05-beat-001 | causal-lane | left-to-right | explicit | 900ms | s5-node-data［scale-settle／620ms］ → s5-node-yield［scale-settle／620ms］ → s5-node-growth［scale-settle／620ms］ → s5-arrow-1［draw-line／720ms］ → s5-arrow-2［draw-line／720ms］ | s5-arrow-2［focus-ring］ |
+| Scene 5 | scene-05-beat-002 | tailwind-headwind | two-lane | explicit | 750ms | s5-number-eci［count-up／680ms］ → s5-number-yield［count-up／680ms］ | s5-number-yield［focus-ring］ |
+| Scene 6 | scene-06-beat-001 | evidence-boundary | confirmed-vs-unconfirmed | static | 500ms | 完成状態 | なし |
+| Scene 6 | scene-06-beat-002 | split-comparison | two-lane | explicit | 750ms | s6-number-comp［count-up／760ms］ → s6-number-ndx［count-up／760ms］ → s6-number-soxx［count-up／760ms］ | s6-number-soxx［focus-ring］ |
+| Scene 7 | scene-07-beat-001 | entity-card-full | prebuilt-card | static | 500ms | 完成状態 | なし |
+| Scene 7 | scene-07-beat-002 | focus-matrix | default | explicit | 750ms | s7-number-amzn［count-up／760ms］ → s7-number-aapl［count-up／760ms］ → s7-number-nvda［count-up／760ms］ → s7-number-amd［count-up／760ms］ | s7-number-amd［focus-ring］ |
+| Scene 8 | scene-08-beat-001 | verification-checklist | default | explicit | 500ms | s8-card-checks［rise-soft／560ms］ | s8-card-checks［focus-ring］ |
+| Scene 8 | scene-08-beat-002 | verification-matrix | strengthen-vs-weaken | explicit | 750ms | s8-node-cloud［scale-settle／620ms］ → s8-node-yield［scale-settle／620ms］ → s8-node-semi［scale-settle／620ms］ → s8-node-hyp［scale-settle／620ms］ → s8-arrow-1［draw-line／720ms］ → s8-arrow-2［draw-line／720ms］ → s8-arrow-3［draw-line／720ms］ | s8-node-hyp［focus-ring］ |
+| Scene 9 | scene-09-beat-001 | final-assembly | left-to-right | explicit | 1000ms | s9-card-close［rise-soft／560ms］ | s9-card-close［focus-ring］ |
+
+### 整合確認
+
+- Scene数：9
+- Visual Beat数：18
+- 未解決sequencePolicy：0
+- 未解決finalHoldMs：0
+- 明示showイベント対象数：42
+- Motion指定イベント数：55
+- 最終採用経路：既存episode packageとrender_specに記録された採用経路を維持し、非採用経路を追加しない
+<!-- VISUAL_STORY_ENGINE_V2_END -->

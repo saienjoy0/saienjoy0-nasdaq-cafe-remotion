@@ -488,17 +488,17 @@
           "primaryFunction": "Anchor",
           "screenState": "EntityFocus",
           "visualMode": "text-focus",
-          "visualTemplate": "entity-card-full",
+          "visualTemplate": "hero-number",
           "templateConfig": {
             "variant": "prebuilt-card",
-            "comparisonBasis": null,
+            "comparisonBasis": "主役企業と株価反応",
             "dataBasis": "終値",
             "nodeOrder": [],
             "laneLabels": [],
             "outcomeNodeId": null
           },
-          "sequencePolicy": "static",
-          "finalHoldMs": 500,
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "企業カード",
           "screenQuestion": "主役は誰か",
           "primaryElement": "Amazon企業カード",
@@ -507,7 +507,9 @@
             "AWSと消費の二つの柱"
           ],
           "changeCue": "Amazon",
-          "objectIds": [],
+          "objectIds": [
+            "s2-number-amzn"
+          ],
           "assetPlacementIds": [
             "scene-02-placement-amzn"
           ],
@@ -615,6 +617,18 @@
       "arrows": [],
       "visualEvents": [
         {
+          "eventId": "event-055",
+          "atChunkId": "scene-02-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s2-number-amzn",
+          "offsetMs": 350,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
           "eventId": "event-003",
           "atChunkId": "scene-02-chunk-002",
           "timing": "chunk-start",
@@ -625,18 +639,6 @@
           "motionPreset": "count-up",
           "durationMs": 760,
           "easingPreset": "spring-settle"
-        },
-        {
-          "eventId": "event-006",
-          "atChunkId": "scene-02-chunk-002",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s2-number-amd",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-004",
@@ -661,6 +663,18 @@
           "motionPreset": "count-up",
           "durationMs": 760,
           "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-006",
+          "atChunkId": "scene-02-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s2-number-amd",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -959,18 +973,6 @@
           "easingPreset": "spring-settle"
         },
         {
-          "eventId": "event-009",
-          "atChunkId": "scene-03-chunk-001",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s3-number-gap",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
-        },
-        {
           "eventId": "event-008",
           "atChunkId": "scene-03-chunk-001",
           "timing": "chunk-start",
@@ -983,12 +985,36 @@
           "easingPreset": "spring-settle"
         },
         {
+          "eventId": "event-009",
+          "atChunkId": "scene-03-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s3-number-gap",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
           "eventId": "event-010",
           "atChunkId": "scene-03-chunk-002",
           "timing": "chunk-start",
           "action": "show",
           "targetId": "s3-number-amzn",
           "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-011",
+          "atChunkId": "scene-03-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s3-number-googl",
+          "offsetMs": 620,
           "expression": null,
           "motionPreset": "count-up",
           "durationMs": 680,
@@ -1005,18 +1031,6 @@
           "motionPreset": "focus-ring",
           "durationMs": 420,
           "easingPreset": "smooth-out"
-        },
-        {
-          "eventId": "event-011",
-          "atChunkId": "scene-03-chunk-002",
-          "timing": "chunk-start",
-          "action": "show",
-          "targetId": "s3-number-googl",
-          "offsetMs": 620,
-          "expression": null,
-          "motionPreset": "count-up",
-          "durationMs": 680,
-          "easingPreset": "spring-settle"
         }
       ],
       "assetPlacements": [
@@ -1400,18 +1414,6 @@
           "easingPreset": "smooth-out"
         },
         {
-          "eventId": "event-016",
-          "atChunkId": "scene-04-chunk-001",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s4-card-gap",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
-        },
-        {
           "eventId": "event-014",
           "atChunkId": "scene-04-chunk-001",
           "timing": "chunk-start",
@@ -1436,6 +1438,18 @@
           "easingPreset": "smooth-out"
         },
         {
+          "eventId": "event-016",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s4-card-gap",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
           "eventId": "event-017",
           "atChunkId": "scene-04-chunk-003",
           "timing": "chunk-start",
@@ -1446,18 +1460,6 @@
           "motionPreset": "scale-settle",
           "durationMs": 620,
           "easingPreset": "spring-settle"
-        },
-        {
-          "eventId": "event-024",
-          "atChunkId": "scene-04-chunk-003",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s4-arrow-3",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
         },
         {
           "eventId": "event-018",
@@ -1529,6 +1531,18 @@
           "expression": null,
           "motionPreset": "draw-line",
           "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-024",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s4-arrow-3",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
           "easingPreset": "smooth-out"
         }
       ],
@@ -1831,18 +1845,6 @@
           "easingPreset": "spring-settle"
         },
         {
-          "eventId": "event-030",
-          "atChunkId": "scene-05-chunk-001",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s5-arrow-2",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
-        },
-        {
           "eventId": "event-026",
           "atChunkId": "scene-05-chunk-001",
           "timing": "chunk-start",
@@ -1891,12 +1893,36 @@
           "easingPreset": "smooth-out"
         },
         {
+          "eventId": "event-030",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s5-arrow-2",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
           "eventId": "event-031",
           "atChunkId": "scene-05-chunk-002",
           "timing": "chunk-start",
           "action": "show",
           "targetId": "s5-number-eci",
           "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-032",
+          "atChunkId": "scene-05-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-number-yield",
+          "offsetMs": 620,
           "expression": null,
           "motionPreset": "count-up",
           "durationMs": 680,
@@ -1913,18 +1939,6 @@
           "motionPreset": "focus-ring",
           "durationMs": 420,
           "easingPreset": "smooth-out"
-        },
-        {
-          "eventId": "event-032",
-          "atChunkId": "scene-05-chunk-002",
-          "timing": "chunk-start",
-          "action": "show",
-          "targetId": "s5-number-yield",
-          "offsetMs": 620,
-          "expression": null,
-          "motionPreset": "count-up",
-          "durationMs": 680,
-          "easingPreset": "spring-settle"
         }
       ],
       "assetPlacements": [
@@ -2113,17 +2127,20 @@
           "primaryFunction": "Compare",
           "screenState": "Data",
           "visualMode": "number-comparison",
-          "visualTemplate": "index-return-bars",
+          "visualTemplate": "split-comparison",
           "templateConfig": {
-            "variant": "zero-baseline",
-            "comparisonBasis": "指数と半導体は同じ強さか",
+            "variant": "two-lane",
+            "comparisonBasis": "指数上昇と半導体への広がり",
             "dataBasis": "取引区分と終値",
             "nodeOrder": [],
-            "laneLabels": [],
+            "laneLabels": [
+              "指数",
+              "半導体"
+            ],
             "outcomeNodeId": null
           },
           "sequencePolicy": "explicit",
-          "finalHoldMs": 500,
+          "finalHoldMs": 750,
           "contentType": "数値・要点",
           "screenQuestion": "指数と半導体は同じ強さか",
           "primaryElement": "主要指数の終値差",
@@ -2201,18 +2218,6 @@
           "easingPreset": "spring-settle"
         },
         {
-          "eventId": "event-037",
-          "atChunkId": "scene-06-chunk-002",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s6-number-soxx",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
-        },
-        {
           "eventId": "event-035",
           "atChunkId": "scene-06-chunk-002",
           "timing": "chunk-start",
@@ -2235,6 +2240,18 @@
           "motionPreset": "count-up",
           "durationMs": 760,
           "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-037",
+          "atChunkId": "scene-06-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s6-number-soxx",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -2432,17 +2449,17 @@
           "primaryFunction": "Compare",
           "screenState": "Data",
           "visualMode": "stock-comparison",
-          "visualTemplate": "diverging-stock-bars",
+          "visualTemplate": "focus-matrix",
           "templateConfig": {
-            "variant": "center-zero",
-            "comparisonBasis": "評価軸はどこへ表れたか",
+            "variant": "default",
+            "comparisonBasis": "大型テックと半導体の波及差",
             "dataBasis": "終値",
             "nodeOrder": [],
             "laneLabels": [],
             "outcomeNodeId": null
           },
           "sequencePolicy": "explicit",
-          "finalHoldMs": 500,
+          "finalHoldMs": 750,
           "contentType": "数値・要点",
           "screenQuestion": "評価軸はどこへ表れたか",
           "primaryElement": "大型テックと半導体の明暗",
@@ -2531,18 +2548,6 @@
           "easingPreset": "spring-settle"
         },
         {
-          "eventId": "event-042",
-          "atChunkId": "scene-07-chunk-002",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s7-number-amd",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
-        },
-        {
           "eventId": "event-039",
           "atChunkId": "scene-07-chunk-002",
           "timing": "chunk-start",
@@ -2577,6 +2582,18 @@
           "motionPreset": "count-up",
           "durationMs": 760,
           "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-042",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s7-number-amd",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
         }
       ],
       "assetPlacements": [
@@ -2932,18 +2949,6 @@
           "easingPreset": "spring-settle"
         },
         {
-          "eventId": "event-052",
-          "atChunkId": "scene-08-chunk-002",
-          "timing": "chunk-end",
-          "action": "highlight",
-          "targetId": "s8-node-hyp",
-          "offsetMs": 0,
-          "expression": null,
-          "motionPreset": "focus-ring",
-          "durationMs": 420,
-          "easingPreset": "smooth-out"
-        },
-        {
           "eventId": "event-046",
           "atChunkId": "scene-08-chunk-002",
           "timing": "chunk-start",
@@ -3013,6 +3018,18 @@
           "expression": null,
           "motionPreset": "draw-line",
           "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-052",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s8-node-hyp",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
           "easingPreset": "smooth-out"
         }
       ],
@@ -3152,20 +3169,20 @@
           "primaryFunction": "Anchor",
           "screenState": "Data",
           "visualMode": "conclusion-card",
-          "visualTemplate": "closing-recap",
+          "visualTemplate": "final-assembly",
           "templateConfig": {
-            "variant": "default",
-            "comparisonBasis": null,
+            "variant": "left-to-right",
+            "comparisonBasis": "既出要素の再構成",
             "dataBasis": "朝のNASDAQカフェ",
             "nodeOrder": [],
             "laneLabels": [],
             "outcomeNodeId": null
           },
           "sequencePolicy": "explicit",
-          "finalHoldMs": 900,
+          "finalHoldMs": 1000,
           "contentType": "数値・要点",
           "screenQuestion": "今朝の答えは何か",
-          "primaryElement": "結論カード",
+          "primaryElement": "投資額より回収",
           "viewerTexts": [
             "AWS予想超過",
             "金利は逆風",
