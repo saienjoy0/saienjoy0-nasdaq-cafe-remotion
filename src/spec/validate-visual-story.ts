@@ -63,13 +63,11 @@ export const validateVisualStoryContract = (
       if (contract.requiresNumericValue) {
         selectedNumbers.forEach((number) => {
           const numberIndex = scene.numbers.indexOf(number);
-          const numericValue = number.numericValue;
-          if (numericValue == null) {
-            fail(`${scenePath}.numbers[${numberIndex}].numericValue`, `${beat.visualTemplate} requires numericValue`);
-          }
+          const numericPath = `${scenePath}.numbers[${numberIndex}].numericValue`;
+          const numericValue = number.numericValue ?? fail(numericPath, `${beat.visualTemplate} requires numericValue`);
           const parsed = numericFromText(number.value);
           if (parsed !== null && Math.abs(parsed - numericValue) > 1e-8) {
-            fail(`${scenePath}.numbers[${numberIndex}].numericValue`, `must match visible value ${number.value}`);
+            fail(numericPath, `must match visible value ${number.value}`);
           }
         });
         if (selectedNumbers.length > 1) {
@@ -109,13 +107,8 @@ export const validateVisualStoryContract = (
       const objectOrder = new Map(beat.objectIds.map((id, index) => [id, index]));
       selectedArrows.forEach((arrow) => {
         const arrowIndex = objectOrder.get(arrow.arrowId)!;
-        const fromIndexValue = objectOrder.get(arrow.fromNodeId);
-        const toIndexValue = objectOrder.get(arrow.toNodeId);
-        if (fromIndexValue === undefined || toIndexValue === undefined) {
-          fail(`${path}.objectIds`, `arrow ${arrow.arrowId} requires both connected nodes in the same Beat`);
-        }
-        const fromIndex = fromIndexValue as number;
-        const toIndex = toIndexValue as number;
+        const fromIndex = objectOrder.get(arrow.fromNodeId) ?? fail(`${path}.objectIds`, `arrow ${arrow.arrowId} requires source node ${arrow.fromNodeId}`);
+        const toIndex = objectOrder.get(arrow.toNodeId) ?? fail(`${path}.objectIds`, `arrow ${arrow.arrowId} requires target node ${arrow.toNodeId}`);
         if (arrowIndex <= fromIndex || arrowIndex <= toIndex) {
           fail(`${path}.objectIds[${arrowIndex}]`, `arrow ${arrow.arrowId} must appear after both connected nodes`);
         }
