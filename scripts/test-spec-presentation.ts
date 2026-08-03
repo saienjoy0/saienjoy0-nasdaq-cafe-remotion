@@ -12,11 +12,12 @@ assert.equal(getTimedNarrationCaption(narration, 9_999, 10_000), pages.at(-1));
 assert.equal(getTimedNarrationCaption("短い字幕です。", 0, 1_000), "短い字幕です。");
 
 const project = process.cwd();
-const [episodeSource, visualModesSource, assetLayerSource, renderStateSource] = await Promise.all([
+const [episodeSource, visualModesSource, assetLayerSource, renderStateSource, publicViewModelSource] = await Promise.all([
   readFile(path.join(project, "src/compositions/NasdaqCafeSpecEpisode.tsx"), "utf8"),
   readFile(path.join(project, "src/components/spec/SpecVisualModes.tsx"), "utf8"),
   readFile(path.join(project, "src/components/spec/SpecAssetLayer.tsx"), "utf8"),
   readFile(path.join(project, "src/spec/render-state.ts"), "utf8"),
+  readFile(path.join(project, "src/spec/public-view-model.ts"), "utf8"),
 ]);
 
 assert.match(renderStateSource, /activeChunk\.speechText/);
@@ -29,5 +30,11 @@ assert.match(visualModesSource, /responsiveGrid/);
 assert.match(visualModesSource, /gridTemplateColumns: responsiveGrid\(content\.numbers\.length\)/);
 assert.match(assetLayerSource, /width: 608/);
 assert.match(assetLayerSource, /height: 584/);
+assert.match(publicViewModelSource, /"prebuilt-card"/);
+assert.match(publicViewModelSource, /placement\.role === "entity-card"/);
+assert.match(publicViewModelSource, /beat\.screenState === "EntityFocus" \? "full"/);
+assert.match(episodeSource, /entityPresentation !== "prebuilt-card"/);
+assert.match(episodeSource, /entityPresentation === "media"/);
+assert.match(episodeSource, /rgba\(255,250,238,\.94\)/);
 
-console.log("PASS: subtitle paging and fixed presentation contracts");
+console.log("PASS: subtitle paging, fixed presentation, and prebuilt entity-card routing");
