@@ -12,12 +12,13 @@ assert.equal(getTimedNarrationCaption(narration, 9_999, 10_000), pages.at(-1));
 assert.equal(getTimedNarrationCaption("短い字幕です。", 0, 1_000), "短い字幕です。");
 
 const project = process.cwd();
-const [episodeSource, visualModesSource, assetLayerSource, renderStateSource, publicViewModelSource, episodeSpecSource] = await Promise.all([
+const [episodeSource, visualModesSource, assetLayerSource, renderStateSource, publicViewModelSource, layoutValidatorSource, episodeSpecSource] = await Promise.all([
   readFile(path.join(project, "src/compositions/NasdaqCafeSpecEpisode.tsx"), "utf8"),
   readFile(path.join(project, "src/components/spec/SpecVisualModes.tsx"), "utf8"),
   readFile(path.join(project, "src/components/spec/SpecAssetLayer.tsx"), "utf8"),
   readFile(path.join(project, "src/spec/render-state.ts"), "utf8"),
   readFile(path.join(project, "src/spec/public-view-model.ts"), "utf8"),
+  readFile(path.join(project, "src/spec/validate-render-layout.ts"), "utf8"),
   readFile(path.join(project, "render-specs/2026-07-31/render_spec.json"), "utf8"),
 ]);
 
@@ -58,6 +59,12 @@ assert.match(visualModesSource, /断定しない/);
 assert.match(visualModesSource, /下落/);
 assert.match(visualModesSource, /上昇/);
 
+assert.match(layoutValidatorSource, /causal diagram supports at most four visible nodes/);
+assert.match(layoutValidatorSource, /causal diagram supports at most three visible arrows/);
+assert.match(layoutValidatorSource, /single chain or direct convergence without crossing paths/);
+assert.match(layoutValidatorSource, /comparison view supports at most four visible numbers/);
+assert.match(layoutValidatorSource, /verification view supports at most four items/);
+
 const episodeSpec = JSON.parse(episodeSpecSource) as {
   scenes: Array<{
     sceneId: string;
@@ -75,4 +82,4 @@ for (const scene of episodeSpec.scenes) {
   }
 }
 
-console.log("PASS: subtitles, entity routing, and editorial presentation templates");
+console.log("PASS: subtitles, entity routing, editorial templates, and layout constraints");
