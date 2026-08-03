@@ -74,7 +74,10 @@
     "test:duration-policy": "tsx scripts/test-duration-policy.ts",
     "test:workflow-contract": "tsx scripts/test-workflow-contract.ts",
     "test:visual-sequence": "tsx scripts/test-visual-sequence.ts",
-    "test:runtime-stability": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-duration-policy.ts && tsx scripts/test-spec-inspect.ts && node --import tsx scripts/test-gemini-api-key-pool.ts && tsx scripts/test-visual-sequence.ts",
+    "test:visual-variety": "tsx scripts/test-visual-variety.ts",
+    "test:visual-templates": "tsx scripts/test-visual-templates.ts",
+    "test:visual-story": "npm run test:visual-sequence && npm run test:visual-variety && npm run test:visual-templates && tsx scripts/test-spec-presentation.ts",
+    "test:runtime-stability": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-duration-policy.ts && tsx scripts/test-spec-inspect.ts && node --import tsx scripts/test-gemini-api-key-pool.ts && tsx scripts/test-visual-sequence.ts && tsx scripts/test-visual-variety.ts && tsx scripts/test-visual-templates.ts",
     "test:public-screen": "tsx scripts/test-public-screen.ts",
     "assets:reusable": "node scripts/generate-reusable-entity-assets.mjs",
     "test:reusable-assets": "node --import tsx scripts/test-reusable-entity-cues.ts",
@@ -88,7 +91,7 @@
     "remaining-assets:all": "npm run remaining-assets:data && npm run remaining-assets:render",
     "remaining-assets:preview": "node --import tsx scripts/render-remaining-assets-integration-preview.ts",
     "test:remaining-assets": "node --import tsx scripts/test-remaining-assets.ts",
-    "test:spec": "tsx scripts/test-render-spec.ts && tsx scripts/test-spec-inspect.ts && tsx scripts/test-visual-sequence.ts"
+    "test:spec": "tsx scripts/test-render-spec.ts && tsx scripts/test-spec-inspect.ts && npm run test:visual-story"
   },
   "sideEffects": [
     "*.css"
