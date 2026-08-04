@@ -15,18 +15,24 @@ const motionQueueScript = await readFile(
   path.join(PROJECT_DIR, "scripts", "motion_preview_request_queue.py"),
   "utf8",
 );
+const shotPlanScript = await readFile(
+  path.join(PROJECT_DIR, "scripts", "apply_measured_shot_plan.py"),
+  "utf8",
+);
 
 const previewName = "nasdaq-cafe-preview.yml";
 const scheduledName = "nasdaq-cafe-scheduled-preview.yml";
 const statusName = "nasdaq-cafe-preview-status.yml";
 const motionPreviewName = "nasdaq-cafe-motion-preview.yml";
 const motionRequestName = "nasdaq-cafe-motion-preview-request.yml";
+const shotPlanName = "nasdaq-cafe-shot-plan-apply.yml";
 for (const required of [
   previewName,
   scheduledName,
   statusName,
   motionPreviewName,
   motionRequestName,
+  shotPlanName,
 ]) {
   assert(contents.has(required), `required workflow is missing: ${required}`);
 }
@@ -205,5 +211,47 @@ assert(!motionRequest.includes("GEMINI_API_KEY_"));
 assert(!motionRequest.includes("episode:spec:preview"));
 assert(!motionRequest.includes("episode:spec:final"));
 console.log("PASS: Motion Preview queue is serialized, tested, at-most-once, and least-privilege");
+
+const shotPlan = contents.get(shotPlanName)!;
+assert(hasEvent(shotPlan, "push"));
+for (const event of ["pull_request", "issues", "schedule", "workflow_run", "workflow_dispatch"]) {
+  assert(!hasEvent(shotPlan, event), `${shotPlanName}: unexpected trigger ${event}`);
+}
+assert(
+  shotPlan.includes('      - "shot-timing-requests/*.json"'),
+  `${shotPlanName}: the workflow must be restricted to measured Shot requests`,
+);
+assert(
+  shotPlan.includes("github.actor == github.repository_owner"),
+  `${shotPlanName}: only the repository owner may apply an approved Shot plan`,
+);
+assert(
+  shotPlan.includes("Exactly one Shot timing request must be added") &&
+    shotPlan.includes("Shot timing requests are append-only JSON files"),
+  `${shotPlanName}: requests must be append-only and singular`,
+);
+assert(
+  shotPlan.includes("scripts/apply_measured_shot_plan.py") &&
+    shotPlan.includes("npm run episode:spec:validate") &&
+    shotPlan.includes("npm run test:shot-story"),
+  `${shotPlanName}: generated render input must be mechanically applied and validated`,
+);
+assert(
+  shotPlan.includes("Restrict generated changes") &&
+    shotPlan.includes("shot-timing-reports/${EPISODE_DATE}.json"),
+  `${shotPlanName}: generated changes must be path-restricted and auditable`,
+);
+assert(shotPlan.includes("permissions:\n  contents: write"));
+assert(!shotPlan.includes("GEMINI_API_KEY"));
+assert(!shotPlan.includes("episode:spec:preview"));
+assert(!shotPlan.includes("episode:spec:final"));
+assert(
+  shotPlanScript.includes("Shot plan attempted to modify non-Shot render_spec content") &&
+    shotPlanScript.includes("expectedEpisodePackageBlobSha") &&
+    shotPlanScript.includes("localTimingAudit") &&
+    shotPlanScript.includes("ttsInputExpectedUnchanged"),
+  "measured Shot applicator must preserve content and record its audit boundary",
+);
+console.log("PASS: measured Shot plans are owner-only, append-only, mechanical, and content-preserving");
 
 console.log(`workflow contract tests: ${workflowFiles.length} workflow files checked`);

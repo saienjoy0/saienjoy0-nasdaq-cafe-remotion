@@ -1,0 +1,114 @@
+name: Nasdaq Cafe Shot Plan Apply
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "shot-timing-requests/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasdaq-cafe-shot-plan-apply
+  cancel-in-progress: false
+
+jobs:
+  apply-shot-plan:
+    name: Apply one approved measured Shot plan
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout request commit
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Resolve one append-only request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(
+            git diff --name-status "$BEFORE_SHA" "$GITHUB_SHA" -- 'shot-timing-requests/*.json'
+          )
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one Shot timing request must be added"
+            exit 1
+          fi
+          IFS=$'\t' read -r STATUS REQUEST_PATH <<< "${CHANGED[0]}"
+          if [[ "$STATUS" != "A" || ! "$REQUEST_PATH" =~ ^shot-timing-requests/[A-Za-z0-9._-]+\.json$ ]]; then
+            echo "::error::Shot timing requests are append-only JSON files"
+            exit 1
+          fi
+          test -s "$REQUEST_PATH"
+          echo "request_path=$REQUEST_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Apply the approved Shot plan mechanically
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/apply_measured_shot_plan.py
+          python3 scripts/apply_measured_shot_plan.py "${{ steps.request.outputs.request_path }}"
+
+      - name: Validate generated render input
+        shell: bash
+        run: |
+          set -euo pipefail
+          EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${{ steps.request.outputs.request_path }}")"
+          npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
+          npm run test:shot-story
+          git diff --check
+
+      - name: Restrict generated changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${{ steps.request.outputs.request_path }}")"
+          mapfile -t CHANGED < <(git diff --name-only)
+          EXPECTED=(
+            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+            "render-specs/${EPISODE_DATE}/render_spec.json"
+            "shot-timing-reports/${EPISODE_DATE}.json"
+          )
+          if [[ "${#CHANGED[@]}" -ne 3 ]]; then
+            printf '::error::Unexpected generated change: %s\n' "${CHANGED[@]}"
+            exit 1
+          fi
+          for expected in "${EXPECTED[@]}"; do
+            printf '%s\n' "${CHANGED[@]}" | grep -Fx -- "$expected" >/dev/null || {
+              echo "::error::Missing expected generated file: $expected"
+              exit 1
+            }
+          done
+
+      - name: Commit generated Shot plan outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${{ steps.request.outputs.request_path }}")"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            "render-specs/${EPISODE_DATE}/render_spec.json" \
+            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md" \
+            "shot-timing-reports/${EPISODE_DATE}.json"
+          git commit -m "Apply measured Shot plan for ${EPISODE_DATE}"
+          git push origin HEAD:main

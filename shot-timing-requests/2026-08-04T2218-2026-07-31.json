@@ -1,0 +1,405 @@
+{
+  "requestVersion": "1.0",
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "7cc40f56137cbbde0b80ff7902751a376a94bc983f93953f5371967382946fd8",
+  "expectedEpisodePackageBlobSha": "311165fbff9cde5a707af561c2784fd08b250aad",
+  "shotPlanVersion": "3.2.0",
+  "expectedShotCount": 50,
+  "localTimingAudit": {
+    "sourceProductionDurationMs": 403200,
+    "maximumShotDurationMs": 9606,
+    "maximumGapMs": 0,
+    "maximumOverlapMs": 0,
+    "maximumTailGapMs": 350
+  },
+  "beats": {
+    "scene-03-beat-001": [
+      {
+        "startCue": "確認できた数字を置きます。",
+        "endCue": "AWSの四半期売上は",
+        "sourceShot": 1,
+        "overrides": {}
+      },
+      {
+        "startCue": "四百二十二億三千万ドル。",
+        "endCue": "差は十六億六千万ドルです。",
+        "sourceShot": 2,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "記事は、",
+        "endCue": "Amazon全体の売上が大きい",
+        "sourceShot": 3,
+        "overrides": {
+          "transitionOut": "carry-forward",
+          "typographyText": "+16.6億ドル",
+          "foxExpression": "軽い驚き"
+        }
+      },
+      {
+        "startCue": "という一般論ではなく、",
+        "endCue": "確認されたことです。",
+        "sourceShot": 3,
+        "overrides": {
+          "shotRecipe": "causal-build",
+          "primaryTargetId": "s3-number-aws",
+          "referenceTargetId": "s3-number-gap",
+          "cameraTargetId": "s3-number-aws",
+          "stageLayout": "lane-left-right",
+          "cameraPreset": "reframe-outcome",
+          "typographyTreatment": "word-build",
+          "typographyText": "AWSで予想超過"
+        }
+      }
+    ],
+    "scene-03-beat-002": [
+      {
+        "startCue": "同じ市場データでは、",
+        "endCue": "Alphabetが六・七三パーセント高、",
+        "sourceShot": 1,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "MicrosoftとMetaも",
+        "endCue": "Amazon一社だけの孤立した反応ではなく、",
+        "sourceShot": 2,
+        "overrides": {}
+      },
+      {
+        "startCue": "大型クラウド企業へ買いが広がった形です。",
+        "endCue": "断定はしません。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "contradiction-interrupt",
+          "stageLayout": "full-stage",
+          "cameraPreset": "pull-back",
+          "typographyTreatment": "word-build",
+          "typographyText": "断定はしない",
+          "soundCue": null
+        }
+      }
+    ],
+    "scene-04-beat-001": [
+      {
+        "startCue": "市場が事前に見ていた論点は、",
+        "endCue": "GPU、電力、",
+        "sourceShot": 1,
+        "overrides": {}
+      },
+      {
+        "startCue": "ネットワークへ巨額の資金を使っています。",
+        "endCue": "利用者と料金収入は",
+        "sourceShot": 2,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "後からついてきます。",
+        "endCue": "繰り返し注目されていました。",
+        "sourceShot": 3,
+        "overrides": {}
+      }
+    ],
+    "scene-05-beat-001": [
+      {
+        "startCue": "ただし、株にとって",
+        "endCue": "予想の〇・八パーセントを上回り、",
+        "sourceShot": 1,
+        "overrides": {}
+      },
+      {
+        "startCue": "シカゴの景況指数と消費者心理も",
+        "endCue": "安心材料です。",
+        "sourceShot": 1,
+        "overrides": {
+          "shotRecipe": "hero-metric-impact",
+          "secondaryTargetIds": [
+            "s5-node-yield",
+            "s5-node-growth"
+          ],
+          "stageLayout": "hero-center",
+          "cameraPreset": "push-in",
+          "transitionIn": "reframe-shared-element",
+          "transitionOut": "pin-to-corner",
+          "typographyTreatment": "word-build",
+          "typographyText": "強い指標",
+          "soundCue": null
+        }
+      },
+      {
+        "startCue": "その一方で、",
+        "endCue": "薄れます。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "counterforce-interrupt",
+          "referenceTargetId": "s5-node-data",
+          "stageLayout": "split-horizontal",
+          "cameraPreset": "pan-left",
+          "typographyTreatment": "word-build",
+          "typographyText": "利下げを急がない",
+          "soundCue": "soft-whoosh"
+        }
+      },
+      {
+        "startCue": "良い景気の数字が、",
+        "endCue": "難しいところです。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "counterforce-interrupt",
+          "primaryTargetId": "s5-node-growth",
+          "referenceTargetId": "s5-node-yield",
+          "cameraTargetId": "s5-node-growth",
+          "stageLayout": "macro-detail",
+          "cameraPreset": "macro-detail",
+          "transitionOut": "collapse-to-node",
+          "typographyTreatment": "word-build",
+          "typographyText": "成長株には逆風",
+          "soundCue": null
+        }
+      }
+    ],
+    "scene-05-beat-002": [
+      {
+        "startCue": "米十年債利回りは",
+        "endCue": "金利上昇が",
+        "sourceShot": 1,
+        "overrides": {}
+      },
+      {
+        "startCue": "重荷になりやすいです。",
+        "endCue": "ことになります。",
+        "sourceShot": 2,
+        "overrides": {
+          "transitionOut": "collapse-to-node"
+        }
+      }
+    ],
+    "scene-06-beat-001": [
+      {
+        "startCue": "時系列は細かく断定しません。",
+        "endCue": "終値が中心です。",
+        "sourceShot": 1,
+        "overrides": {
+          "shotRecipe": "hero-metric-impact",
+          "stageLayout": "full-stage",
+          "cameraPreset": "static",
+          "typographyTreatment": "word-build",
+          "typographyText": "分足データなし",
+          "soundCue": null
+        }
+      },
+      {
+        "startCue": "市場記事では、",
+        "endCue": "債券利回りが上がり、",
+        "sourceShot": 1,
+        "overrides": {
+          "transitionIn": "reframe-shared-element"
+        }
+      },
+      {
+        "startCue": "上げ幅を抑えたと説明されています。",
+        "endCue": "言えません。",
+        "sourceShot": 2,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "確認できるのは、",
+        "endCue": "存在したことです。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "contradiction-interrupt",
+          "stageLayout": "full-stage",
+          "cameraPreset": "pull-back",
+          "transitionOut": "carry-forward",
+          "typographyText": "一直線とは断定しない",
+          "soundCue": null
+        }
+      }
+    ],
+    "scene-06-beat-002": [
+      {
+        "startCue": "終値ではNasdaq Compositeが",
+        "endCue": "高でした。",
+        "sourceShot": 1,
+        "overrides": {}
+      },
+      {
+        "startCue": "一方、SOXXは",
+        "endCue": "Amazonの直接材料はAWSです。",
+        "sourceShot": 2,
+        "overrides": {
+          "primaryTargetId": "s6-number-soxx",
+          "secondaryTargetIds": [
+            "s6-number-comp",
+            "s6-number-ndx"
+          ],
+          "cameraTargetId": "s6-number-soxx",
+          "stageLayout": "matrix-2x2",
+          "cameraPreset": "pan-right",
+          "typographyText": "SOXX +0.07%",
+          "soundCue": null
+        }
+      },
+      {
+        "startCue": "NASDAQ全体の支援材料は",
+        "endCue": "Apple安がありました。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "counterforce-interrupt",
+          "referenceTargetId": "s6-number-soxx",
+          "stageLayout": "split-horizontal",
+          "cameraPreset": "pan-left",
+          "typographyTreatment": "word-build",
+          "typographyText": "支援と相殺を分ける",
+          "soundCue": "soft-whoosh"
+        }
+      }
+    ],
+    "scene-07-beat-001": [
+      {
+        "startCue": "反対側の代表がAppleです。",
+        "endCue": "下落しました。",
+        "sourceShot": 1,
+        "overrides": {}
+      },
+      {
+        "startCue": "市場記事では、",
+        "endCue": "されています。",
+        "sourceShot": 2,
+        "overrides": {
+          "primaryTargetId": "scene-07-placement-aapl",
+          "cameraTargetId": "scene-07-placement-aapl",
+          "typographyText": "サービス予想未達"
+        }
+      },
+      {
+        "startCue": "Appleは指数への影響が大きい大型株です。",
+        "endCue": "他の大型クラウド株の",
+        "sourceShot": 1,
+        "overrides": {
+          "shotRecipe": "split-opposition",
+          "stageLayout": "split-vertical",
+          "cameraPreset": "pan-right",
+          "transitionIn": "reframe-shared-element",
+          "typographyTreatment": "word-build",
+          "typographyText": "Apple安でもNASDAQ高"
+        }
+      },
+      {
+        "startCue": "支えが無視できなかったことを示します。",
+        "endCue": "できません。",
+        "sourceShot": 1,
+        "overrides": {
+          "shotRecipe": "contradiction-interrupt",
+          "stageLayout": "full-stage",
+          "transitionIn": "reframe-shared-element",
+          "typographyTreatment": "word-build",
+          "typographyText": "Amazon一社だけではない"
+        }
+      }
+    ],
+    "scene-07-beat-002": [
+      {
+        "startCue": "ここで見えるのは、",
+        "endCue": "Appleは重要事業の予想未達で下落。",
+        "sourceShot": 1,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "NVIDIAは二・九三パーセント高でしたが、",
+        "endCue": "AMDは一・九〇パーセント安です。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "split-opposition",
+          "primaryTargetId": "s7-number-nvda",
+          "referenceTargetId": "s7-number-amd",
+          "secondaryTargetIds": [
+            "s7-number-amd",
+            "s7-number-amzn",
+            "s7-number-aapl"
+          ],
+          "cameraTargetId": "s7-number-nvda",
+          "stageLayout": "split-vertical",
+          "transitionOut": "carry-forward",
+          "typographyTreatment": "zero-line-split",
+          "typographyText": "NVIDIA高・AMD安",
+          "soundCue": "comparison-split"
+        }
+      },
+      {
+        "startCue": "一日の値動きだけで",
+        "endCue": "表れました。",
+        "sourceShot": 2,
+        "overrides": {
+          "shotRecipe": "contradiction-interrupt",
+          "referenceTargetId": "s7-number-aapl",
+          "cameraPreset": "pull-back",
+          "transitionOut": "carry-forward",
+          "typographyTreatment": "word-build",
+          "typographyText": "長期勝者は決めない"
+        }
+      }
+    ],
+    "scene-08-beat-001": [
+      {
+        "startCue": "次に確認するポイントは三",
+        "endCue": "売上成長が同時に続くか。",
+        "sourceShot": 1,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "二つ目は、米十年債利回り",
+        "endCue": "の上昇へ追いつくかです。",
+        "sourceShot": 2,
+        "overrides": {
+          "transitionOut": "collapse-to-node"
+        }
+      }
+    ],
+    "scene-08-beat-002": [
+      {
+        "startCue": "クラウド売上が続き、",
+        "endCue": "強まります。",
+        "sourceShot": 1,
+        "overrides": {
+          "transitionOut": "carry-forward"
+        }
+      },
+      {
+        "startCue": "反対に、",
+        "endCue": "Amazon一社の好決算を",
+        "sourceShot": 2,
+        "overrides": {
+          "transitionOut": "carry-forward",
+          "typographyText": "弱まる｜金利上昇継続"
+        }
+      },
+      {
+        "startCue": "NASDAQ全体の持続的な追い風へ",
+        "endCue": "判断になります。",
+        "sourceShot": 2,
+        "overrides": {
+          "primaryTargetId": "s8-node-hyp",
+          "referenceTargetId": "s8-node-yield",
+          "cameraTargetId": "s8-node-hyp",
+          "stageLayout": "macro-detail",
+          "cameraPreset": "reframe-outcome",
+          "typographyTreatment": "final-phrase-lock",
+          "typographyText": "NASDAQへ広げるのは早い"
+        }
+      }
+    ]
+  },
+  "confirmation": "APPLY_MEASURED_SHOT_PLAN"
+}

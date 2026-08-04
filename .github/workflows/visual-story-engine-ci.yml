@@ -8,6 +8,7 @@ on:
       - "schemas/**"
       - "render-specs/**"
       - "episode-packages/**"
+      - "shot-timing-requests/**"
       - "package.json"
       - "package-lock.json"
       - "AGENTS.md"
@@ -59,6 +60,7 @@ jobs:
             .github/workflows/nasdaq-cafe-motion-preview.yml \
             .github/workflows/nasdaq-cafe-motion-preview-request.yml \
             .github/workflows/nasdaq-cafe-tts-cache-export.yml \
+            .github/workflows/nasdaq-cafe-shot-plan-apply.yml \
             motion-preview-requests/README.md
 
       - name: Workflow contract
@@ -70,8 +72,26 @@ jobs:
             scripts/motion_preview_request_queue.py \
             scripts/test_motion_preview_request_queue.py \
             scripts/restore_exported_tts_cache.py \
-            scripts/test_restore_exported_tts_cache.py
+            scripts/test_restore_exported_tts_cache.py \
+            scripts/apply_measured_shot_plan.py
           python3 scripts/test_motion_preview_request_queue.py
+
+      - name: Dry-run committed measured Shot plan request
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t REQUESTS < <(find shot-timing-requests -maxdepth 1 -type f -name '*.json' -print | sort)
+          if [[ "${#REQUESTS[@]}" -gt 1 ]]; then
+            echo "::error::CI fixture expects at most one measured Shot plan request"
+            exit 1
+          fi
+          if [[ "${#REQUESTS[@]}" -eq 1 ]]; then
+            python3 scripts/apply_measured_shot_plan.py "${REQUESTS[0]}"
+            EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${REQUESTS[0]}")"
+            npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
+            npm run test:shot-story
+            git diff --check
+          fi
 
       - name: Generate JSON Schema
         run: npm run episode:spec:schema
