@@ -113,25 +113,32 @@ assert(
   `${motionPreviewName}: Codespace runner label is required`,
 );
 assert(
-  motionPreview.includes("github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner"),
-  `${motionPreviewName}: manual execution must remain repository-owner-only`,
+  motionPreview.includes("github.workflow == 'Nasdaq Cafe Motion Preview'") &&
+    motionPreview.includes("github.actor == github.repository_owner"),
+  `${motionPreviewName}: direct manual execution must remain repository-owner-only`,
 );
 assert(
-  motionPreview.includes("github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'"),
-  `${motionPreviewName}: reusable execution must remain scoped to this repository`,
+  motionPreview.includes("github.workflow == 'Nasdaq Cafe Motion Preview Request'") &&
+    motionPreview.includes("github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'"),
+  `${motionPreviewName}: reusable execution must accept only the trusted queue workflow`,
 );
+assert(!motionPreview.includes("github.event_name != 'workflow_dispatch' && github.repository"));
 assert(motionPreview.includes("actions/cache/restore@v5"));
 assert(motionPreview.includes("Exact two-block production TTS cache was not found"));
 assert(motionPreview.includes("Motion Preview does not generate or regenerate narration"));
 assert(!motionPreview.includes("GEMINI_API_KEY_"));
 assert(!motionPreview.includes("episode:spec:preview"));
 assert(!motionPreview.includes("episode:spec:final"));
-console.log("PASS: Motion Preview is reusable, repository-scoped, and cache-only");
+console.log("PASS: Motion Preview is reusable, trusted-caller-only, and cache-only");
 
 const motionRequest = contents.get(motionRequestName)!;
 assert(hasEvent(motionRequest, "push"));
 assert(hasEvent(motionRequest, "schedule"));
 assert(hasEvent(motionRequest, "workflow_dispatch"));
+assert(
+  motionRequest.includes("github.actor == github.repository_owner"),
+  `${motionRequestName}: manual queue execution must remain repository-owner-only`,
+);
 assert(
   motionRequest.includes("group: nasdaq-cafe-motion-preview-request-queue"),
   `${motionRequestName}: all queue triggers must share one concurrency group`,
@@ -149,30 +156,46 @@ assert(
   `${motionRequestName}: REST workflow dispatch is forbidden`,
 );
 assert(
-  motionRequest.includes('root / "motion-preview-state" / "processed"') &&
-    motionRequest.includes("marker_path"),
-  `${motionRequestName}: durable repository markers are required`,
+  motionRequest.includes('root / "motion-preview-state" / "outcomes"') &&
+    motionRequest.includes("outcome_path"),
+  `${motionRequestName}: durable terminal outcomes are required`,
 );
 assert(
-  motionRequest.includes("Semantically identical") ||
+  motionRequest.includes("digest.update(relative_path.encode") &&
     motionRequest.includes("sort_keys=True"),
-  `${motionRequestName}: canonical request fingerprinting is required`,
+  `${motionRequestName}: path-scoped canonical request fingerprinting is required`,
+);
+assert(
+  motionRequest.includes('"succeeded"') &&
+    motionRequest.includes('"failed"') &&
+    motionRequest.includes('"rejected"'),
+  `${motionRequestName}: every selected request must reach one terminal outcome`,
+);
+assert(
+  motionRequest.includes("always()") &&
+    motionRequest.includes("Persist one terminal request outcome"),
+  `${motionRequestName}: failed and rejected requests must be durably closed`,
+);
+assert(
+  motionRequest.includes("request_valid == 'true'") &&
+    motionRequest.includes("Rejected Motion Preview request"),
+  `${motionRequestName}: invalid requests must not wake the Codespace`,
 );
 assert(
   !motionRequest.includes("actions/cache/restore") &&
     !motionRequest.includes("actions/cache/save"),
-  `${motionRequestName}: dependency cache cannot be used as a processed-request ledger`,
+  `${motionRequestName}: dependency cache cannot be used as a request ledger`,
 );
 assert(
   motionRequest.indexOf("uses: ./.github/workflows/nasdaq-cafe-motion-preview.yml") <
-    motionRequest.indexOf("Persist successful request marker"),
-  `${motionRequestName}: marker must be written only after the reusable preview succeeds`,
+    motionRequest.indexOf("Persist one terminal request outcome"),
+  `${motionRequestName}: successful outcome must be recorded after reusable preview completion`,
 );
 assert(motionRequest.includes("contents: write"));
 assert(motionRequest.includes("actions: read"));
 assert(!motionRequest.includes("GEMINI_API_KEY_"));
 assert(!motionRequest.includes("episode:spec:preview"));
 assert(!motionRequest.includes("episode:spec:final"));
-console.log("PASS: Motion Preview queue is serialized, durable, and non-dispatching");
+console.log("PASS: Motion Preview queue is serialized, at-most-once, and non-dispatching");
 
 console.log(`workflow contract tests: ${workflowFiles.length} workflow files checked`);
