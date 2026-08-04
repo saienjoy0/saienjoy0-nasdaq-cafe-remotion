@@ -35,7 +35,7 @@ def initialize(root: pathlib.Path) -> str:
     spec_path = root / "render-specs" / DATE / "render_spec.json"
     spec_path.parent.mkdir(parents=True)
     spec_path.write_text('{"fixture":true}\n', encoding="utf-8")
-    git(root, "add", "--", "render-specs", "motion-preview-requests")
+    git(root, "add", "--", "render-specs")
     git(root, "commit", "-m", "Initial fixture")
     return hashlib.sha256(spec_path.read_bytes()).hexdigest()
 
@@ -163,7 +163,6 @@ def test_at_most_once_and_explicit_retry() -> None:
         assert exhausted == {"has_request": "false"}
 
 
-
 def test_invalid_request_is_rejected_without_blocking() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = pathlib.Path(temporary)
@@ -180,7 +179,6 @@ def test_invalid_request_is_rejected_without_blocking() -> None:
         assert valid["has_request"] == "true"
         assert valid["request_valid"] == "true"
         assert valid["request_path"].endswith("002-valid.json")
-
 
 
 def test_push_is_append_only() -> None:
