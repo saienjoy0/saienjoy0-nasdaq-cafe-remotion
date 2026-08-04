@@ -3,7 +3,7 @@ set -euo pipefail
 
 REPOSITORY="${GITHUB_REPOSITORY:-saienjoy0/saienjoy0-nasdaq-cafe-remotion}"
 REPOSITORY_URL="https://github.com/${REPOSITORY}"
-RUNNER_DIR="${HOME}/.local/share/nasdaq-cafe-actions-runner"
+RUNNER_DIR="${RUNNER_DIR:-/workspaces/.nasdaq-cafe-actions-runner}"
 RUNNER_NAME="${CODESPACE_NAME:-codespace}-nasdaq-cafe"
 RUNNER_LABELS="nasdaq-cafe-codespace"
 PID_FILE="${RUNNER_DIR}/runner.pid"
@@ -22,7 +22,8 @@ Usage:
 register:
   Downloads the official GitHub Actions runner, verifies its release digest when
   available, and registers this Codespace with the custom label
-  nasdaq-cafe-codespace.
+  nasdaq-cafe-codespace. The registration is stored under /workspaces so it
+  survives a dev-container rebuild.
 
   Codespaces' injected GITHUB_TOKEN may not have repository Administration
   permission. In that case, obtain the one-hour token from repository
