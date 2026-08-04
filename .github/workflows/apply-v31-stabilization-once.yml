@@ -10,6 +10,8 @@ on:
 permissions:
   contents: write
   actions: read
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: visual-story-v3-1-stabilization
@@ -18,7 +20,7 @@ concurrency:
 jobs:
   apply-test-commit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Checkout exact branch
         uses: actions/checkout@v6
@@ -33,39 +35,58 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
-      - name: Materialize stabilization implementation
+      - name: Reassemble and verify stabilization implementation
+        id: materialize
         shell: bash
-        env:
-          IMPLEMENTATION_GZIP_BASE64: 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[...truncated for brevity...]
         run: |
           set -euo pipefail
-          printf '%s' "$IMPLEMENTATION_GZIP_BASE64" | base64 -d | gzip -d > scripts/apply-v31-stabilization.py
+          test "$(find scripts/.v31-payload -maxdepth 1 -type f -name 'part-*' | wc -l | tr -d ' ')" = "5"
+          cat \
+            scripts/.v31-payload/part-00 \
+            scripts/.v31-payload/part-01 \
+            scripts/.v31-payload/part-02 \
+            scripts/.v31-payload/part-03 \
+            scripts/.v31-payload/part-04 \
+            > /tmp/apply-v31.b64
+          test "$(wc -c < /tmp/apply-v31.b64 | tr -d ' ')" = "22108"
+          echo "04df3a251adf79665fadb62b210d9f5354be41fbca6bffe6d7f3d7b77771533c  /tmp/apply-v31.b64" | sha256sum -c -
+          base64 --decode /tmp/apply-v31.b64 | gzip --decompress > scripts/apply-v31-stabilization.py
+          echo "5833af17e5019bf9404b20ba4cf54fa5000091cd63445d315ae2c5ff6ca6d4ff  scripts/apply-v31-stabilization.py" | sha256sum -c -
           python -m py_compile scripts/apply-v31-stabilization.py
           python scripts/apply-v31-stabilization.py
+          rm -rf scripts/.v31-payload
+          rm -f .github/workflows/report-v31-runs-once.yml
 
       - name: Typecheck and validate production input
+        id: validate
         run: |
           npm run typecheck
           npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
 
       - name: Run full runtime and visual contracts
+        id: contracts
         run: |
           npm run test:runtime-stability
           npm run test:public-screen
 
       - name: Bundle Remotion
+        id: bundle
         run: npm run build
 
       - name: Commit only verified stabilization files
+        id: commit
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
+          git add -A -- \
             .github/workflows/apply-v31-stabilization-once.yml \
+            .github/workflows/report-v31-runs-once.yml \
+            scripts/.v31-payload \
             package.json \
             schemas/render_spec.schema.json \
             render-specs/2026-07-31/render_spec.json \
@@ -86,5 +107,35 @@ jobs:
             src/components/spec/ShotStageRenderer.tsx \
             src/components/spec/shots/ShotRecipes.tsx
           git diff --cached --check
+          git diff --cached --stat
           git commit -m "Stabilize Visual Story Engine v3.1"
           git push origin HEAD:feature/visual-story-engine-v2
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report stabilization result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          CONTRACTS_OUTCOME: ${{ steps.contracts.outcome }}
+          BUNDLE_OUTCOME: ${{ steps.bundle.outcome }}
+          COMMIT_OUTCOME: ${{ steps.commit.outcome }}
+          RESULT_SHA: ${{ steps.commit.outputs.commit_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "### Visual Story Engine v3.1 stabilization"
+            echo "- Run: \`${GITHUB_RUN_ID}\`"
+            echo "- Install: \`${INSTALL_OUTCOME:-unknown}\`"
+            echo "- Materialize: \`${MATERIALIZE_OUTCOME:-unknown}\`"
+            echo "- Typecheck / validator: \`${VALIDATE_OUTCOME:-unknown}\`"
+            echo "- Runtime / visual contracts: \`${CONTRACTS_OUTCOME:-unknown}\`"
+            echo "- Remotion bundle: \`${BUNDLE_OUTCOME:-unknown}\`"
+            echo "- Verified commit: \`${RESULT_SHA:-not-created}\`"
+            echo "- Final render: not run"
+          } > /tmp/v31-result.md
+          gh pr comment 26 --repo "$REPO" --body-file /tmp/v31-result.md
