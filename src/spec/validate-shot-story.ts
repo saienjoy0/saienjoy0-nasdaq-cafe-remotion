@@ -16,6 +16,11 @@ const shotMoment = (
   return (index + progress) * 100_000 + offsetMs;
 };
 
+const longestRun = (values: string[]) => values.reduce((state, value) => {
+  const current = value === state.previous ? state.current + 1 : 1;
+  return {previous: value, current, longest: Math.max(state.longest, current)};
+}, {previous: "", current: 0, longest: 0}).longest;
+
 export const validateShotStoryContract = (
   spec: RenderSpec,
   options: {enforceVariety?: boolean} = {},
@@ -24,8 +29,6 @@ export const validateShotStoryContract = (
   let totalContinuities = 0;
   let totalNiyari = 0;
   const recipes: string[] = [];
-  const layouts: string[] = [];
-  const cameras: string[] = [];
 
   spec.scenes.forEach((scene, sceneIndex) => {
     const scenePath = `$.scenes[${sceneIndex}]`;
@@ -83,11 +86,16 @@ export const validateShotStoryContract = (
           fail(`${shotPath}.transitionIn`, "reframe-shared-element requires the same continuityKey on the previous Shot");
         }
         recipes.push(SHOT_RECIPE_FAMILIES[shot.shotRecipe]);
-        layouts.push(shot.stageLayout);
-        cameras.push(shot.cameraPreset);
         previousShot = shot;
       });
+
       if (beatSoundCues > 2) fail(path, "one Visual Beat may use at most 2 sound cues");
+      if (longestRun(shots.map((shot) => shot.stageLayout)) > 3) {
+        fail(path, "the same Stage Layout may not lead more than 3 consecutive Shots inside one Visual Beat");
+      }
+      if (longestRun(shots.map((shot) => shot.cameraPreset)) > 4) {
+        fail(path, "the same Camera Preset may not lead more than 4 consecutive Shots inside one Visual Beat");
+      }
     });
 
     if (expressionChanges > 2) fail(scenePath, `fox expression may change at most twice in one Scene, got ${expressionChanges}`);
@@ -99,11 +107,5 @@ export const validateShotStoryContract = (
     if (totalShots < 24 || totalShots > 50) fail("$.scenes", `v3 episode requires 24-50 Shots, got ${totalShots}`);
     if (new Set(recipes).size < 6) fail("$.scenes", `v3 episode requires at least 6 Shot families, got ${new Set(recipes).size}`);
     if (totalContinuities < 3) fail("$.scenes", `v3 episode requires at least 3 continuity handoffs, got ${totalContinuities}`);
-    const longestRun = (values: string[]) => values.reduce((state, value) => {
-      const current = value === state.previous ? state.current + 1 : 1;
-      return {previous: value, current, longest: Math.max(state.longest, current)};
-    }, {previous: "", current: 0, longest: 0}).longest;
-    if (longestRun(layouts) > 3) fail("$.scenes", "the same Stage Layout may not lead more than 3 consecutive Shots");
-    if (longestRun(cameras) > 4) fail("$.scenes", "the same Camera Preset may not lead more than 4 consecutive Shots");
   }
 };
