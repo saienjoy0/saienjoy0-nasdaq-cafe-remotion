@@ -32,12 +32,15 @@ def write_registry(root: pathlib.Path) -> None:
     )
 
 
-def make_artifact(path: pathlib.Path, member_name: str = ".cache/spec-tts-blocks/block/audio.wav") -> None:
+def make_artifact(
+    path: pathlib.Path,
+    prefix: str = ".cache/spec-tts-blocks",
+) -> None:
     tar_bytes = io.BytesIO()
     with tarfile.open(fileobj=tar_bytes, mode="w:gz") as archive:
         for index in range(2):
             payload = b"RIFF-test"
-            name = member_name.replace("block", f"block-{index}")
+            name = f"{prefix}/block-{index}/audio.wav"
             info = tarfile.TarInfo(name)
             info.size = len(payload)
             archive.addfile(info, io.BytesIO(payload))
@@ -59,7 +62,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = pathlib.Path(temporary)
         artifact = root / "unsafe.zip"
-        make_artifact(artifact, "../escaped/audio.wav")
+        make_artifact(artifact, "../escaped")
         try:
             extract_portable_cache(artifact, root)
         except ValueError as error:
