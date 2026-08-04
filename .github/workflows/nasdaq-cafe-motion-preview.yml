@@ -76,8 +76,20 @@ jobs:
   render-motion-preview:
     name: Render cache-only Scene motion preview
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner) ||
-      (github.event_name != 'workflow_dispatch' && github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion')
+      (
+        github.event_name == 'workflow_dispatch' &&
+        github.workflow == 'Nasdaq Cafe Motion Preview' &&
+        github.actor == github.repository_owner
+      ) ||
+      (
+        github.workflow == 'Nasdaq Cafe Motion Preview Request' &&
+        github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
+        (
+          github.event_name == 'push' ||
+          github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner)
+        )
+      )
     runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
     timeout-minutes: 20
 
