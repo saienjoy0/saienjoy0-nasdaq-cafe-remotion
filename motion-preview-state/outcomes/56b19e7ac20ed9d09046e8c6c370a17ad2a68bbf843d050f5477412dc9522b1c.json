@@ -1,0 +1,19 @@
+{
+  "outcomeVersion": "1.0",
+  "status": "rejected",
+  "stage": "validation",
+  "requestPath": "motion-preview-requests/2026-08-04T1743-scene-06-retry.json",
+  "requestFingerprint": "56b19e7ac20ed9d09046e8c6c370a17ad2a68bbf843d050f5477412dc9522b1c",
+  "requestValid": false,
+  "validationError": "render_spec SHA-256 mismatch: expected=7cc40f56137cbbde0b80ff7902751a376a94bc983f93953f5371967382946fd8 actual=d85777574d72ec184bc33dfb3a073c1b4f6f01feb68c50b41a37849ac940f9c1",
+  "episodeDate": null,
+  "expectedSpecSha256": null,
+  "sceneNumber": null,
+  "offsetSeconds": null,
+  "durationSeconds": null,
+  "wakeResult": "skipped",
+  "renderResult": "skipped",
+  "workflow": "Nasdaq Cafe Motion Preview Request",
+  "runId": "30930457430",
+  "recordedAt": "2026-08-04T16:43:23.060392Z"
+}
