@@ -1,0 +1,178 @@
+name: Retry Visual Story v3.1 Actual Implementation Once
+
+on:
+  push:
+    branches:
+      - fix/visual-story-v3-1-actual
+    paths:
+      - .github/workflows/retry-v31-actual-once.yml
+
+permissions:
+  contents: write
+  actions: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: visual-story-v3-1-actual
+  cancel-in-progress: true
+
+jobs:
+  apply-test-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/visual-story-v3-1-actual
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Materialize v3.1 and update contracts
+        id: materialize
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat scripts/.v31-payload/part-00 scripts/.v31-payload/part-01 scripts/.v31-payload/part-02 scripts/.v31-payload/part-03 scripts/.v31-payload/part-04 > /tmp/apply-v31.b64
+          test "$(wc -c < /tmp/apply-v31.b64 | tr -d ' ')" = "22108"
+          echo "04df3a251adf79665fadb62b210d9f5354be41fbca6bffe6d7f3d7b77771533c  /tmp/apply-v31.b64" | sha256sum -c -
+          base64 --decode /tmp/apply-v31.b64 | gzip --decompress > scripts/apply-v31-stabilization.py
+          echo "5833af17e5019bf9404b20ba4cf54fa5000091cd63445d315ae2c5ff6ca6d4ff  scripts/apply-v31-stabilization.py" | sha256sum -c -
+          python scripts/.v31-payload/patch-generated.py before
+          python scripts/apply-v31-stabilization.py
+          python scripts/.v31-payload/patch-generated.py after
+          node --import tsx scripts/migrate-visual-story-v3.ts render-specs/2026-07-31/render_spec.json
+
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path("scripts/test-visual-templates.ts")
+          text = path.read_text(encoding="utf-8")
+          reader = 'const shotRenderer = await readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8");\n'
+          text = text.replace(reader, reader + 'const shotRecipes = await readFile(path.join(project, "src/components/spec/shots/ShotRecipes.tsx"), "utf8");\nconst shotTransitionHost = await readFile(path.join(project, "src/components/spec/ShotTransitionHost.tsx"), "utf8");\n', 1)
+          forbidden = '  assert.equal(shotRenderer.includes(forbidden), false, `Shot renderer contains forbidden dynamic behavior: ${forbidden}`);\n'
+          text = text.replace(forbidden, forbidden + '  assert.equal(shotRecipes.includes(forbidden), false, `Dedicated Shot recipes contain forbidden dynamic behavior: ${forbidden}`);\n  assert.equal(shotTransitionHost.includes(forbidden), false, `Shot transition host contains forbidden dynamic behavior: ${forbidden}`);\n', 1)
+          old = '''assert.match(shotRenderer, /HeroMetric/);
+assert.match(shotRenderer, /Contradiction/);
+assert.match(shotRenderer, /ExpectedAnchor/);
+assert.match(shotRenderer, /ActualCrosses/);
+assert.match(shotRenderer, /GapMacro/);
+assert.match(shotRenderer, /KineticTypography/);
+assert.match(shotRenderer, /ContinuityBadge/);'''
+          new = '''assert.match(shotRenderer, /ShotTransitionHost/);
+assert.match(shotRenderer, /DedicatedShotRenderer/);
+assert.match(shotRenderer, /StageSafeArea/);
+assert.doesNotMatch(shotRenderer, /GenericShot/);
+assert.doesNotMatch(shotRenderer, /inset:\\s*-40/);
+assert.match(shotTransitionHost, /data-shot-layer="previous"/);
+assert.match(shotTransitionHost, /data-shot-layer="current"/);
+assert.match(shotTransitionHost, /SharedElementLayer/);
+for (const component of [
+  "HeroMetricShot",
+  "ContradictionShot",
+  "ExpectedAnchorShot",
+  "ActualCrossesExpectedShot",
+  "GapMacroShot",
+  "CausalBuildShot",
+  "CounterforceShot",
+  "EntityCutawayShot",
+  "SplitOppositionShot",
+  "FocusMatrixShot",
+  "VerificationPathsShot",
+  "RecapAssemblyShot",
+]) {
+  assert.match(shotRecipes, new RegExp(`const ${component}`), `missing dedicated Shot recipe: ${component}`);
+}'''
+          if old not in text:
+              raise SystemExit("stale Shot assertion block not found")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+          rm -rf scripts/.v31-payload scripts/apply-v31-stabilization.py
+          rm -f .github/workflows/apply-v31-stabilization-once.yml
+          rm -f .github/workflows/apply-v31-actual-once.yml
+          rm -f .github/workflows/retry-v31-actual-once.yml
+          rm -f .github/workflows/patch-v31-ffmpeg-once.yml
+          rm -f .github/workflows/report-v31-runs-once.yml
+
+      - name: Typecheck and formal validator
+        id: validate
+        run: |
+          npm run typecheck
+          npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
+
+      - name: Install ffmpeg when absent
+        id: ffmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Runtime, visual and public-screen contracts
+        id: contracts
+        run: |
+          npm run test:runtime-stability
+          npm run test:public-screen
+
+      - name: Remotion bundle
+        id: bundle
+        run: npm run build
+
+      - name: Commit verified implementation
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            .github/workflows/apply-v31-stabilization-once.yml \
+            .github/workflows/apply-v31-actual-once.yml \
+            .github/workflows/retry-v31-actual-once.yml \
+            .github/workflows/patch-v31-ffmpeg-once.yml \
+            .github/workflows/report-v31-runs-once.yml \
+            scripts/.v31-payload \
+            package.json schemas/render_spec.schema.json \
+            render-specs/2026-07-31/render_spec.json \
+            episode-packages/2026-07-31/episode_package_2026-07-31.md \
+            docs/14_visual_story_engine_v3_1_stabilization.md \
+            scripts/migrate-visual-story-v3.ts scripts/test-shot-stability.ts \
+            scripts/test-spec-presentation.ts scripts/test-visual-templates.ts \
+            src/spec/render-spec.ts src/spec/shot-contract.ts \
+            src/spec/shot-transition-contract.ts src/spec/shot-timeline.ts \
+            src/spec/validate-shot-story.ts \
+            src/components/spec/StageSafeArea.tsx \
+            src/components/spec/SafeCameraViewport.tsx \
+            src/components/spec/SharedElementLayer.tsx \
+            src/components/spec/ShotTransitionHost.tsx \
+            src/components/spec/ShotStageRenderer.tsx \
+            src/components/spec/shots/ShotRecipes.tsx
+          git diff --cached --check
+          git commit -m "Apply Visual Story Engine v3.1 stabilization"
+          git push origin HEAD:fix/visual-story-v3-1-actual
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
+          CONTRACTS_OUTCOME: ${{ steps.contracts.outcome }}
+          BUNDLE_OUTCOME: ${{ steps.bundle.outcome }}
+          RESULT_SHA: ${{ steps.commit.outputs.commit_sha }}
+        run: |
+          gh pr comment 27 --repo "$REPO" --body "v3.1 actual Run \`${GITHUB_RUN_ID}\`: materialize=\`${MATERIALIZE_OUTCOME:-unknown}\`, validator=\`${VALIDATE_OUTCOME:-unknown}\`, ffmpeg=\`${FFMPEG_OUTCOME:-unknown}\`, contracts=\`${CONTRACTS_OUTCOME:-unknown}\`, bundle=\`${BUNDLE_OUTCOME:-unknown}\`, verified commit=\`${RESULT_SHA:-not-created}\`, final=not-run"
