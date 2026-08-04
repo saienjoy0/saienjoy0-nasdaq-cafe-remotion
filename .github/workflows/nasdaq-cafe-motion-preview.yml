@@ -1,6 +1,26 @@
 name: Nasdaq Cafe Motion Preview
 
 on:
+  workflow_call:
+    inputs:
+      episode_date:
+        required: true
+        type: string
+      expected_spec_sha256:
+        required: true
+        type: string
+      scene_number:
+        required: true
+        type: string
+      offset_seconds:
+        required: true
+        type: string
+      duration_seconds:
+        required: true
+        type: string
+      confirmation:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       episode_date:
@@ -55,7 +75,9 @@ concurrency:
 jobs:
   render-motion-preview:
     name: Render cache-only Scene motion preview
-    if: github.actor == github.repository_owner
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner) ||
+      (github.event_name != 'workflow_dispatch' && github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion')
     runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
     timeout-minutes: 20
 
@@ -123,7 +145,6 @@ jobs:
           TTS_INPUT_SHA="$(python3 - "$SPEC_PATH" <<'PY'
           import hashlib
           import json
-          import os
           import sys
 
           with open(sys.argv[1], "r", encoding="utf-8") as handle:
