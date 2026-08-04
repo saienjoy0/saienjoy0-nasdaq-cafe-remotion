@@ -1,5 +1,6 @@
 import {createHash} from "node:crypto";
 import type {RenderProductionData, RenderSpec} from "./render-spec";
+import {validateProductionShotTimingContract} from "./validate-shot-story";
 import {assertProductionTextSafe, assertRenderSpecApprovedForCompile} from "./validate-render-spec";
 
 export type SynthesizedChunk = {
@@ -105,6 +106,7 @@ export const compileRenderSpec = async (
       scenes: scenes.map(({sceneId, startFrame, endFrame, durationInFrames}) => ({sceneId, startFrame, endFrame, durationInFrames})),
     },
   };
+  validateProductionShotTimingContract(data);
   // shortenedReason is internal production metadata and is never rendered or voiced.
   // Keep public-text safety checks strict for every field that can reach the viewer.
   assertProductionTextSafe({
