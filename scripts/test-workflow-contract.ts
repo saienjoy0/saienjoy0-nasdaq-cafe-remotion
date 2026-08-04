@@ -11,6 +11,10 @@ const contents = new Map<string, string>();
 for (const file of workflowFiles) {
   contents.set(file, await readFile(path.join(workflowDir, file), "utf8"));
 }
+const motionQueueScript = await readFile(
+  path.join(PROJECT_DIR, "scripts", "motion_preview_request_queue.py"),
+  "utf8",
+);
 
 const previewName = "nasdaq-cafe-preview.yml";
 const scheduledName = "nasdaq-cafe-scheduled-preview.yml";
@@ -137,7 +141,7 @@ assert(hasEvent(motionRequest, "schedule"));
 assert(hasEvent(motionRequest, "workflow_dispatch"));
 assert(
   motionRequest.includes("github.actor == github.repository_owner"),
-  `${motionRequestName}: manual queue execution must remain repository-owner-only`,
+  `${motionRequestName}: explicit queue triggers must remain repository-owner-only`,
 );
 assert(
   motionRequest.includes("group: nasdaq-cafe-motion-preview-request-queue"),
@@ -156,20 +160,21 @@ assert(
   `${motionRequestName}: REST workflow dispatch is forbidden`,
 );
 assert(
-  motionRequest.includes('root / "motion-preview-state" / "outcomes"') &&
+  motionRequest.includes("scripts/motion_preview_request_queue.py") &&
     motionRequest.includes("outcome_path"),
-  `${motionRequestName}: durable terminal outcomes are required`,
+  `${motionRequestName}: tested durable queue logic is required`,
 );
 assert(
-  motionRequest.includes("digest.update(relative_path.encode") &&
-    motionRequest.includes("sort_keys=True"),
-  `${motionRequestName}: path-scoped canonical request fingerprinting is required`,
+  motionQueueScript.includes('"motion-preview-state" / "outcomes"') &&
+    motionQueueScript.includes("digest.update(relative_path.encode") &&
+    motionQueueScript.includes("sort_keys=True"),
+  "Motion Preview queue must use path-scoped canonical terminal outcomes",
 );
 assert(
-  motionRequest.includes('"succeeded"') &&
-    motionRequest.includes('"failed"') &&
-    motionRequest.includes('"rejected"'),
-  `${motionRequestName}: every selected request must reach one terminal outcome`,
+  motionQueueScript.includes('status = "succeeded"') &&
+    motionQueueScript.includes('status = "failed"') &&
+    motionQueueScript.includes('status = "rejected"'),
+  "every selected Motion Preview request must reach one terminal outcome",
 );
 assert(
   motionRequest.includes("always()") &&
@@ -189,13 +194,16 @@ assert(
 assert(
   motionRequest.indexOf("uses: ./.github/workflows/nasdaq-cafe-motion-preview.yml") <
     motionRequest.indexOf("Persist one terminal request outcome"),
-  `${motionRequestName}: successful outcome must be recorded after reusable preview completion`,
+  `${motionRequestName}: terminal outcome must be recorded after reusable preview completion`,
 );
-assert(motionRequest.includes("contents: write"));
-assert(motionRequest.includes("actions: read"));
+assert(
+  motionRequest.includes("permissions:\n  contents: read\n  actions: read") &&
+    motionRequest.includes("permissions:\n      contents: write"),
+  `${motionRequestName}: contents write must be isolated to the outcome job`,
+);
 assert(!motionRequest.includes("GEMINI_API_KEY_"));
 assert(!motionRequest.includes("episode:spec:preview"));
 assert(!motionRequest.includes("episode:spec:final"));
-console.log("PASS: Motion Preview queue is serialized, at-most-once, and non-dispatching");
+console.log("PASS: Motion Preview queue is serialized, tested, at-most-once, and least-privilege");
 
 console.log(`workflow contract tests: ${workflowFiles.length} workflow files checked`);
