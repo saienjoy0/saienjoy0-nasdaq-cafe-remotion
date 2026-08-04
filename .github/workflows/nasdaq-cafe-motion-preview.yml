@@ -233,6 +233,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          echo "Direct cache miss: Exact two-block production TTS cache was not found"
+          echo "Trying the approved portable production cache artifact"
           python3 scripts/restore_exported_tts_cache.py \
             --root . \
             --tts-input-sha "${{ steps.verify.outputs.tts_input_sha }}"
