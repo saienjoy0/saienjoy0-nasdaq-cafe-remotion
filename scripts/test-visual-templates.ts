@@ -6,6 +6,7 @@ import {VISUAL_TEMPLATE_CONTRACTS, VISUAL_TEMPLATE_IDS} from "../src/spec/visual
 
 const project = process.cwd();
 const renderer = await readFile(path.join(project, "src/components/spec/VisualTemplateRenderer.tsx"), "utf8");
+const shotRenderer = await readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8");
 const viewModel = await readFile(path.join(project, "src/spec/public-view-model.ts"), "utf8");
 const composition = await readFile(path.join(project, "src/compositions/NasdaqCafeSpecEpisode.tsx"), "utf8");
 const schema = await readFile(path.join(project, "src/spec/render-spec.ts"), "utf8");
@@ -39,16 +40,20 @@ for (const forbidden of [
   "raw.githubusercontent.com",
 ]) {
   assert.equal(renderer.includes(forbidden), false, `renderer contains forbidden dynamic behavior: ${forbidden}`);
+  assert.equal(shotRenderer.includes(forbidden), false, `Shot renderer contains forbidden dynamic behavior: ${forbidden}`);
 }
 
 assert.match(viewModel, /visualTemplate:/);
 assert.match(viewModel, /templateConfig:/);
 assert.match(viewModel, /sequencePolicy:/);
+assert.match(viewModel, /shot:/);
+assert.match(viewModel, /previousShot:/);
 assert.match(viewModel, /object-order-fallback/);
 assert.match(viewModel, /explicit/);
 assert.match(viewModel, /enterMotion:/);
 assert.match(viewModel, /exitMotion:/);
-assert.match(composition, /VisualTemplateRenderer/);
+assert.match(composition, /ShotStageRenderer/);
+assert.match(shotRenderer, /VisualTemplateRenderer/);
 assert.doesNotMatch(composition, /<SpecVisualMode content=/);
 assert.match(renderer, /ExpectedActualFlow/);
 assert.match(renderer, /CausalLane/);
@@ -60,5 +65,12 @@ assert.match(renderer, /draw-line/);
 assert.match(renderer, /count-up/);
 assert.match(renderer, /dim-others/);
 assert.match(renderer, /collapse-to-outcome/);
+assert.match(shotRenderer, /HeroMetric/);
+assert.match(shotRenderer, /Contradiction/);
+assert.match(shotRenderer, /ExpectedAnchor/);
+assert.match(shotRenderer, /ActualCrosses/);
+assert.match(shotRenderer, /GapMacro/);
+assert.match(shotRenderer, /KineticTypography/);
+assert.match(shotRenderer, /ContinuityBadge/);
 
-console.log("PASS: visual template and motion preset registry contract");
+console.log("PASS: visual template, Shot renderer, and motion preset registry contract");
