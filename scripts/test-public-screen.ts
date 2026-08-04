@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import {readFile} from "node:fs/promises";
 import path from "node:path";
 
 const project = process.cwd();
@@ -9,6 +9,7 @@ const sources = await Promise.all(
     "src/components/v2/VisualModeRenderer.tsx",
     "src/components/v2/ReusableEntityCue.tsx",
     "src/components/spec/SpecVisualModes.tsx",
+    "src/components/spec/VisualTemplateRenderer.tsx",
     "src/components/spec/SpecAssetLayer.tsx",
   ].map((file) => readFile(path.join(project, file), "utf8")),
 );

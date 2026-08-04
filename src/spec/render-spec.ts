@@ -1,4 +1,23 @@
 import {z} from "zod";
+import {
+  EASING_PRESET_IDS,
+  MOTION_PRESET_IDS,
+  SEQUENCE_POLICY_IDS,
+  isMotionPresetAllowed,
+  type MotionAction,
+} from "./motion-preset-contract";
+import {
+  VISUAL_TEMPLATE_IDS,
+  VISUAL_TEMPLATE_VARIANT_IDS,
+} from "./visual-template-contract";
+import {
+  CAMERA_PRESET_IDS,
+  SHOT_RECIPE_IDS,
+  SHOT_TRANSITION_IDS,
+  SOUND_CUE_IDS,
+  STAGE_LAYOUT_IDS,
+  TYPOGRAPHY_TREATMENT_IDS,
+} from "./shot-contract";
 
 const nonEmptyText = z.string().refine((value) => value.trim().length > 0, "must not be empty");
 const nullableText = nonEmptyText.nullable();
@@ -13,6 +32,25 @@ export const specVisualModeSchema = z.enum([
   "chart", "causal-diagram", "stock-comparison", "news-media",
   "verification-points", "text-focus",
 ]);
+export const visualTemplateSchema = z.enum(VISUAL_TEMPLATE_IDS);
+export const visualTemplateVariantSchema = z.enum(VISUAL_TEMPLATE_VARIANT_IDS);
+export const sequencePolicySchema = z.enum(SEQUENCE_POLICY_IDS);
+export const motionPresetSchema = z.enum(MOTION_PRESET_IDS);
+export const easingPresetSchema = z.enum(EASING_PRESET_IDS);
+export const shotRecipeSchema = z.enum(SHOT_RECIPE_IDS);
+export const stageLayoutSchema = z.enum(STAGE_LAYOUT_IDS);
+export const cameraPresetSchema = z.enum(CAMERA_PRESET_IDS);
+export const shotTransitionSchema = z.enum(SHOT_TRANSITION_IDS);
+export const typographyTreatmentSchema = z.enum(TYPOGRAPHY_TREATMENT_IDS);
+export const soundCueSchema = z.enum(SOUND_CUE_IDS);
+const visualTemplateConfigSchema = z.object({
+  variant: visualTemplateVariantSchema,
+  comparisonBasis: nullableText,
+  dataBasis: nonEmptyText,
+  nodeOrder: z.array(safeId).max(4),
+  laneLabels: z.array(nonEmptyText).max(2),
+  outcomeNodeId: safeId.nullable(),
+}).strict();
 export const visualBeatFunctionSchema = z.enum([
   "Anchor", "Evidence", "Compare", "Explain", "Verify",
 ]);
@@ -150,6 +188,8 @@ const numberSchema = z.object({
   numberId: safeId,
   label: nonEmptyText,
   value: nonEmptyText,
+  numericValue: z.number().finite().nullable().optional(),
+  precision: z.number().int().min(0).max(6).optional(),
   unit: z.string(),
   comparison: nullableText,
   tone: z.enum(["positive", "negative", "warning", "neutral", "emphasis"]),
@@ -193,6 +233,35 @@ const pictureBookBeatSchema = z.object({
   noBakedTextCheck: z.literal("pass"),
 }).strict();
 
+const shotSchema = z.object({
+  shotId: z.string().regex(/^scene-0[1-9]-beat-[0-9]{3}-shot-[0-9]{3}$/),
+  shotRecipe: shotRecipeSchema,
+  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+  startProgress: z.number().min(0).max(1),
+  startOffsetMs: z.number().int().min(0).max(10_000),
+  endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+  endProgress: z.number().min(0).max(1),
+  endOffsetMs: z.number().int().min(0).max(10_000),
+  endCue: nonEmptyText,
+  primaryTargetId: safeId.nullable(),
+  stageLayout: stageLayoutSchema,
+  cameraPreset: cameraPresetSchema,
+  transitionIn: shotTransitionSchema,
+  transitionOut: shotTransitionSchema,
+  continuityKey: safeId.nullable(),
+  typographyTreatment: typographyTreatmentSchema.nullable(),
+  typographyText: nullableText,
+  soundCue: soundCueSchema.nullable(),
+  foxExpression: expressionSchema,
+}).strict().superRefine((shot, context) => {
+  if (shot.typographyTreatment !== null && shot.typographyText === null) {
+    context.addIssue({code: "custom", path: ["typographyText"], message: "typographyTreatment requires typographyText"});
+  }
+  if (shot.typographyTreatment === null && shot.typographyText !== null) {
+    context.addIssue({code: "custom", path: ["typographyTreatment"], message: "typographyText requires typographyTreatment"});
+  }
+});
+
 const visualBeatSchema = z.object({
   beatId: z.string().regex(/^scene-0[1-9]-beat-[0-9]{3}$/),
   startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
@@ -202,6 +271,10 @@ const visualBeatSchema = z.object({
   primaryFunction: visualBeatFunctionSchema,
   screenState: screenStateSchema,
   visualMode: specVisualModeSchema,
+  visualTemplate: visualTemplateSchema,
+  templateConfig: visualTemplateConfigSchema,
+  sequencePolicy: sequencePolicySchema.optional(),
+  finalHoldMs: z.number().int().min(0).max(1_500).optional(),
   contentType: nonEmptyText,
   screenQuestion: nonEmptyText,
   primaryElement: nonEmptyText,
@@ -216,6 +289,7 @@ const visualBeatSchema = z.object({
   fallback: nullableText,
   entity: entityBeatSchema.nullable(),
   pictureBook: pictureBookBeatSchema.nullable(),
+  shots: z.array(shotSchema).max(4).optional(),
 }).strict();
 
 export const visualActionSchema = z.enum(["show", "hide", "highlight", "unhighlight", "set-expression"]);
@@ -227,13 +301,29 @@ const visualEventSchema = z.object({
   targetId: safeId.nullable(),
   offsetMs: z.number().int().min(0).max(10_000),
   expression: expressionSchema.nullable(),
+  motionPreset: motionPresetSchema.nullable().optional(),
+  durationMs: z.number().int().min(100).max(3_000).nullable().optional(),
+  easingPreset: easingPresetSchema.nullable().optional(),
 }).strict().superRefine((event, context) => {
   if (event.action === "set-expression") {
     if (event.expression === null) context.addIssue({code: "custom", path: ["expression"], message: "set-expression requires expression"});
     if (event.targetId !== null) context.addIssue({code: "custom", path: ["targetId"], message: "set-expression must not target an object"});
-  } else {
-    if (event.targetId === null) context.addIssue({code: "custom", path: ["targetId"], message: `${event.action} requires targetId`});
-    if (event.expression !== null) context.addIssue({code: "custom", path: ["expression"], message: `${event.action} must not specify expression`});
+    if (event.motionPreset != null || event.durationMs != null || event.easingPreset != null) {
+      context.addIssue({code: "custom", path: ["motionPreset"], message: "set-expression must not specify motion fields"});
+    }
+    return;
+  }
+  if (event.targetId === null) context.addIssue({code: "custom", path: ["targetId"], message: `${event.action} requires targetId`});
+  if (event.expression !== null) context.addIssue({code: "custom", path: ["expression"], message: `${event.action} must not specify expression`});
+  if (event.motionPreset != null) {
+    if (!isMotionPresetAllowed(event.action as MotionAction, event.motionPreset)) {
+      context.addIssue({code: "custom", path: ["motionPreset"], message: `${event.motionPreset} is not allowed for ${event.action}`});
+    }
+    if (event.durationMs == null) {
+      context.addIssue({code: "custom", path: ["durationMs"], message: "motionPreset requires durationMs"});
+    }
+  } else if (event.durationMs != null || event.easingPreset != null) {
+    context.addIssue({code: "custom", path: ["motionPreset"], message: "durationMs and easingPreset require motionPreset"});
   }
 });
 
@@ -292,7 +382,7 @@ const sceneSchema = z.object({
 }).strict();
 
 export const renderSpecSchema = z.object({
-  schemaVersion: z.literal("2.1.0"),
+  schemaVersion: z.literal("2.2.0"),
   episode: episodeSchema,
   editorial: editorialSchema,
   publishing: publishingSchema,
@@ -336,6 +426,7 @@ export const renderSpecSchema = z.object({
   uniqueAt(spec.scenes.flatMap((scene) => scene.narrationChunks.map((chunk) => chunk.chunkId)), ["scenes"]);
   uniqueAt(spec.scenes.flatMap((scene) => scene.visualBeats.map((beat) => beat.beatId)), ["scenes"]);
   uniqueAt(spec.scenes.flatMap((scene) => scene.visualEvents.map((event) => event.eventId)), ["scenes"]);
+  uniqueAt(spec.scenes.flatMap((scene) => scene.visualBeats.flatMap((beat) => (beat.shots ?? []).map((shot) => shot.shotId))), ["scenes"]);
   const expectedIds = Array.from({length: 9}, (_, index) => `scene-${String(index + 1).padStart(2, "0")}`);
   spec.scenes.forEach((scene, index) => {
     if (scene.sceneId !== expectedIds[index] || scene.sceneNumber !== index + 1) context.addIssue({code: "custom", path: ["scenes", index], message: `expected ${expectedIds[index]} with sceneNumber ${index + 1}`});

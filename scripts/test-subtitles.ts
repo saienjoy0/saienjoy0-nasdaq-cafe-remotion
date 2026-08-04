@@ -1,0 +1,31 @@
+import assert from "node:assert/strict";
+import {createSubtitleCues, getSubtitleTextAtTime} from "../src/spec/subtitle-cues";
+
+const speech = "昨夜のNasdaq Compositeは一・〇〇パーセント上昇しました。主役は、十五パーセントを超えて急騰したAmazonです。ただし、半導体のETFは終値でほぼ横ばい。Appleは大幅安でした。全部のテック株が同じ理由で上がった夜ではありません。";
+const shortSummary = "NASDAQ +1.00%";
+const cues = createSubtitleCues(speech, 0, 19_219);
+
+assert.ok(cues.length >= 3, "long narration must be split into readable subtitle pages");
+assert.equal(cues[0].startMs, 0, "first subtitle starts with the chunk audio");
+assert.equal(cues.at(-1)?.endMs, 19_219, "last subtitle ends with the chunk audio");
+assert.equal(
+  cues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  speech,
+  "subtitle pages must preserve the complete narration text",
+);
+assert.ok(cues.every((cue) => cue.text.split("\n").length <= 2), "subtitle pages must use at most two lines");
+assert.ok(cues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)), "each subtitle line must fit the public safe area");
+assert.ok(cues.every((cue, index) => index === 0 || cue.startMs === cues[index - 1].endMs), "subtitle cues must be contiguous");
+assert.ok(cues.every((cue) => cue.endMs > cue.startMs), "every subtitle cue must have positive duration");
+assert.notEqual(cues[0].text, shortSummary, "summary telop must never be used as narration subtitle");
+assert.equal(getSubtitleTextAtTime(speech, 0, 19_219, -1), null, "subtitle is hidden before audio starts");
+assert.equal(getSubtitleTextAtTime(speech, 0, 19_219, 19_219), null, "subtitle is hidden after audio ends");
+assert.equal(getSubtitleTextAtTime(speech, 0, 19_219, cues[1].startMs), cues[1].text, "subtitle changes exactly at its cue boundary");
+
+const unpunctuated = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const hardSplitCues = createSubtitleCues(unpunctuated, 500, 6_500);
+assert.equal(hardSplitCues[0].startMs, 500);
+assert.equal(hardSplitCues.at(-1)?.endMs, 6_500);
+assert.ok(hardSplitCues.every((cue) => cue.text.split("\n").length <= 2));
+
+console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);

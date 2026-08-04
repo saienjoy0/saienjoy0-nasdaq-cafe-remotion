@@ -66,6 +66,8 @@
     "episode:spec:fixtures": "tsx scripts/generate-render-spec-fixtures.ts",
     "episode:spec:golden": "tsx scripts/render-spec-golden-stills.ts",
     "episode:spec:beat-stills": "tsx scripts/render-visual-beat-stills.ts",
+    "migrate:visual-story": "node --import tsx scripts/migrate-visual-story-v2.ts",
+    "migrate:visual-story:v3": "node --import tsx scripts/migrate-visual-story-v3.ts",
     "test:spec:voicevox": "tsx scripts/test-spec-voicevox.ts",
     "test:spec:golden": "tsx scripts/test-spec-golden.ts",
     "test:spec:preview": "tsx scripts/test-expression-preview.ts",
@@ -73,7 +75,14 @@
     "test:gemini-key-pool": "node --import tsx scripts/test-gemini-api-key-pool.ts",
     "test:duration-policy": "tsx scripts/test-duration-policy.ts",
     "test:workflow-contract": "tsx scripts/test-workflow-contract.ts",
-    "test:runtime-stability": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-duration-policy.ts && tsx scripts/test-spec-inspect.ts && node --import tsx scripts/test-gemini-api-key-pool.ts",
+    "test:visual-sequence": "tsx scripts/test-visual-sequence.ts",
+    "test:visual-variety": "tsx scripts/test-visual-variety.ts",
+    "test:visual-templates": "tsx scripts/test-visual-templates.ts",
+    "test:visual-validator": "tsx scripts/test-visual-validator.ts",
+    "test:subtitles": "tsx scripts/test-subtitles.ts",
+    "test:shot-story": "tsx scripts/test-shot-story.ts",
+    "test:visual-story": "npm run test:visual-sequence && npm run test:visual-variety && npm run test:visual-templates && npm run test:visual-validator && npm run test:subtitles && npm run test:shot-story && tsx scripts/test-spec-presentation.ts",
+    "test:runtime-stability": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-duration-policy.ts && tsx scripts/test-spec-inspect.ts && node --import tsx scripts/test-gemini-api-key-pool.ts && npm run test:visual-story",
     "test:public-screen": "tsx scripts/test-public-screen.ts",
     "assets:reusable": "node scripts/generate-reusable-entity-assets.mjs",
     "test:reusable-assets": "node --import tsx scripts/test-reusable-entity-cues.ts",
@@ -87,7 +96,7 @@
     "remaining-assets:all": "npm run remaining-assets:data && npm run remaining-assets:render",
     "remaining-assets:preview": "node --import tsx scripts/render-remaining-assets-integration-preview.ts",
     "test:remaining-assets": "node --import tsx scripts/test-remaining-assets.ts",
-    "test:spec": "tsx scripts/test-render-spec.ts && tsx scripts/test-spec-inspect.ts"
+    "test:spec": "tsx scripts/test-render-spec.ts && tsx scripts/test-spec-inspect.ts && npm run test:visual-story"
   },
   "sideEffects": [
     "*.css"

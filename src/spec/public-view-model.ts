@@ -1,11 +1,25 @@
 import {resolveStrictExpressionAsset} from "../config/spec-expressions";
 import type {ProductionScene} from "./render-spec";
-import {isPlacementActive, type SceneRenderState} from "./render-state";
+import {isPlacementActive, type MotionInstruction, type SceneRenderState} from "./render-state";
+import type {SequencePolicy} from "./motion-preset-contract";
+import type {ResolvedShot} from "./shot-timeline";
 
 type PublicTone = "positive" | "negative" | "warning" | "neutral" | "emphasis";
 type PublicFit = "cover" | "contain" | "fill";
 
-export type PublicCard = {
+export type PublicMotionInstruction = MotionInstruction;
+export type PublicShot = ResolvedShot;
+
+type PublicMotion = {
+  revealAtMs: number;
+  highlightedAtMs: number | null;
+  enterMotion: PublicMotionInstruction | null;
+  exitMotion: PublicMotionInstruction | null;
+  highlightMotion: PublicMotionInstruction | null;
+  unhighlightMotion: PublicMotionInstruction | null;
+};
+
+export type PublicCard = PublicMotion & {
   key: string;
   title: string;
   lines: Array<{label: string; value: string; tone: PublicTone}>;
@@ -13,23 +27,25 @@ export type PublicCard = {
   role: "expected" | "actual" | "gap" | null;
 };
 
-export type PublicNumber = {
+export type PublicNumber = PublicMotion & {
   key: string;
   label: string;
   value: string;
+  numericValue: number | null;
+  precision: number | null;
   unit: string;
   comparison: string | null;
   tone: PublicTone;
   highlighted: boolean;
 };
 
-export type PublicNode = {
+export type PublicNode = PublicMotion & {
   key: string;
   label: string;
   highlighted: boolean;
 };
 
-export type PublicArrow = {
+export type PublicArrow = PublicMotion & {
   key: string;
   fromKey: string;
   toKey: string;
@@ -60,11 +76,30 @@ export type PublicMainContent = {
     | "entity"
     | "text";
   layout: "full" | "primary-with-entity";
+  headline: string;
+  supportingTexts: string[];
+  uncertainty: string | null;
+  screenQuestion: string;
+  primaryElement: string;
+  primaryFunction: ProductionScene["visualBeats"][number]["primaryFunction"];
+  visualTemplate: ProductionScene["visualBeats"][number]["visualTemplate"];
+  templateConfig: ProductionScene["visualBeats"][number]["templateConfig"];
+  sequencePolicy: SequencePolicy;
+  finalHoldMs: number;
+  shot: PublicShot | null;
+  previousShot: PublicShot | null;
+  nextShot: PublicShot | null;
   cards: PublicCard[];
   numbers: PublicNumber[];
   nodes: PublicNode[];
   arrows: PublicArrow[];
   texts: string[];
+  sceneTimeMs: number;
+  beatStartMs: number;
+  beatEndMs: number;
+  beatProgress: number;
+  holdProgress: number;
+  entityPresentation: "prebuilt-card" | "media" | "fallback" | null;
   entity: null | {
     subjectType: "person" | "company" | "product";
     displayName: string;
@@ -80,6 +115,8 @@ export type PublicSceneViewModel = {
   captionText: string | null;
   background: PublicPlacedAsset;
   fox: PublicPlacedAsset;
+  previousFox: PublicPlacedAsset | null;
+  foxTransitionProgress: number;
   mainAssets: PublicPlacedAsset[];
   overlays: PublicPlacedAsset[];
   mainContent: PublicMainContent | null;
@@ -89,8 +126,8 @@ const renderKindMap = {
   "conclusion-card": "conclusion",
   "number-comparison": "numbers",
   "expected-actual-gap": "expected-actual-gap",
-  "timeline": "timeline",
-  "chart": "chart",
+  timeline: "timeline",
+  chart: "chart",
   "causal-diagram": "causal",
   "stock-comparison": "stock-comparison",
   "news-media": "news",
@@ -119,7 +156,9 @@ const publicAsset = (
     src,
     slot: slotOverride ?? slotMap[placement.region],
     fit: placement.fit,
-    objectPosition: placement.focalPoint ? `${placement.focalPoint.x * 100}% ${placement.focalPoint.y * 100}%` : "50% 50%",
+    objectPosition: placement.focalPoint
+      ? `${placement.focalPoint.x * 100}% ${placement.focalPoint.y * 100}%`
+      : "50% 50%",
     opacity: placement.opacity,
   };
 };
@@ -146,8 +185,56 @@ export const toPublicSceneViewModel = (
   );
   if (!foxPlacement) throw new Error(`fox expression asset is unavailable: ${expressionAsset.assetId}`);
 
+  const previousFoxPlacement = state.previousExpression
+    ? (() => {
+        const previousAsset = resolveStrictExpressionAsset(state.previousExpression);
+        return scene.assetPlacements.find(
+          (placement) =>
+            placement.role === "fox-expression" &&
+            placement.assetId === previousAsset.assetId &&
+            isPlacementActive(scene, placement, state),
+        ) ?? null;
+      })()
+    : null;
+
   const selectedIds = new Set(beat.objectIds);
-  const cards = scene.cards
+  const beatDurationMs = Math.max(1, beat.endMs - beat.startMs);
+  const showTargets = new Set(
+    scene.visualEvents
+      .filter((event) => event.action === "show" && event.targetId && selectedIds.has(event.targetId))
+      .map((event) => event.targetId as string),
+  );
+  const inferredSequencePolicy: SequencePolicy =
+    beat.objectIds.length === 0 || beat.screenState === "News" || beat.screenState === "PictureBook"
+      ? "static"
+      : showTargets.size > 0
+        ? "explicit"
+        : "object-order-fallback";
+  const sequencePolicy = beat.sequencePolicy ?? inferredSequencePolicy;
+  const staggerMs = Math.min(900, Math.max(260, beatDurationMs * 0.11));
+  const defaultRevealAtMs = (id: string) => {
+    if (sequencePolicy === "static") return beat.startMs;
+    const index = Math.max(0, beat.objectIds.indexOf(id));
+    return beat.startMs + Math.min(index * staggerMs, beatDurationMs * 0.62);
+  };
+  const objectOrder = new Map(beat.objectIds.map((id, index) => [id, index]));
+  const sortByBeatOrder = <T extends {key: string}>(items: T[]) => items.sort(
+    (a, b) =>
+      (objectOrder.get(a.key) ?? Number.MAX_SAFE_INTEGER) -
+      (objectOrder.get(b.key) ?? Number.MAX_SAFE_INTEGER),
+  );
+  const motionFor = (id: string): PublicMotion => ({
+    revealAtMs: sequencePolicy === "explicit"
+      ? state.visibleSinceMs.get(id) ?? defaultRevealAtMs(id)
+      : Math.max(defaultRevealAtMs(id), state.visibleSinceMs.get(id) ?? 0),
+    highlightedAtMs: state.highlightedSinceMs.get(id) ?? null,
+    enterMotion: state.showMotionByTarget.get(id) ?? null,
+    exitMotion: state.hideMotionByTarget.get(id) ?? null,
+    highlightMotion: state.highlightMotionByTarget.get(id) ?? null,
+    unhighlightMotion: state.unhighlightMotionByTarget.get(id) ?? null,
+  });
+
+  const cards = sortByBeatOrder(scene.cards
     .filter((card) => selectedIds.has(card.cardId) && state.visible.has(card.cardId))
     .map((card): PublicCard => ({
       key: card.cardId,
@@ -155,26 +242,31 @@ export const toPublicSceneViewModel = (
       lines: card.lines,
       highlighted: state.highlighted.has(card.cardId),
       role: card.role,
-    }));
-  const numbers = scene.numbers
+      ...motionFor(card.cardId),
+    })));
+  const numbers = sortByBeatOrder(scene.numbers
     .filter((number) => selectedIds.has(number.numberId) && state.visible.has(number.numberId))
     .map((number): PublicNumber => ({
       key: number.numberId,
       label: number.label,
       value: number.value,
+      numericValue: number.numericValue ?? null,
+      precision: number.precision ?? null,
       unit: number.unit,
       comparison: number.comparison,
       tone: number.tone,
       highlighted: state.highlighted.has(number.numberId),
-    }));
-  const nodes = scene.nodes
+      ...motionFor(number.numberId),
+    })));
+  const nodes = sortByBeatOrder(scene.nodes
     .filter((node) => selectedIds.has(node.nodeId) && state.visible.has(node.nodeId))
     .map((node): PublicNode => ({
       key: node.nodeId,
       label: node.label,
       highlighted: state.highlighted.has(node.nodeId),
-    }));
-  const arrows = scene.arrows
+      ...motionFor(node.nodeId),
+    })));
+  const arrows = sortByBeatOrder(scene.arrows
     .filter((arrow) => selectedIds.has(arrow.arrowId) && state.visible.has(arrow.arrowId))
     .map((arrow): PublicArrow => ({
       key: arrow.arrowId,
@@ -182,12 +274,29 @@ export const toPublicSceneViewModel = (
       toKey: arrow.toNodeId,
       label: arrow.label,
       highlighted: state.highlighted.has(arrow.arrowId),
-    }));
+      ...motionFor(arrow.arrowId),
+    })));
 
   const beatPlacementIds = new Set(beat.assetPlacementIds);
-  const mainAssets = scene.assetPlacements
-    .filter((placement) => beatPlacementIds.has(placement.placementId) && isPlacementActive(scene, placement, state))
-    .map((placement) => publicAsset(placement, assets, beat.screenState === "EntityFocus" ? "focus-media" : undefined));
+  const activeBeatPlacements = scene.assetPlacements.filter(
+    (placement) => beatPlacementIds.has(placement.placementId) && isPlacementActive(scene, placement, state),
+  );
+  const entityPlacement = beat.screenState === "EntityFocus"
+    ? activeBeatPlacements.find((placement) => placement.role === "entity-card") ??
+      activeBeatPlacements.find((placement) => ["main-media", "illustration", "chart"].includes(placement.role))
+    : undefined;
+  const entityPresentation: PublicMainContent["entityPresentation"] = beat.screenState !== "EntityFocus"
+    ? null
+    : entityPlacement?.role === "entity-card"
+      ? "prebuilt-card"
+      : entityPlacement
+        ? "media"
+        : "fallback";
+  const mainAssets = activeBeatPlacements.map((placement) => publicAsset(
+    placement,
+    assets,
+    beat.screenState === "EntityFocus" ? "full" : undefined,
+  ));
   const overlays = scene.assetPlacements
     .filter((placement) => placement.role === "overlay" && isPlacementActive(scene, placement, state))
     .map((placement) => publicAsset(placement, assets));
@@ -196,6 +305,14 @@ export const toPublicSceneViewModel = (
     beat.screenState === "Chart" ||
     beat.screenState === "EntityFocus" ||
     beat.screenState === "MainWithEntity";
+  const beatProgress = Math.max(0, Math.min(1, (state.timeMs - beat.startMs) / beatDurationMs));
+  const revealTimes = [...cards, ...numbers, ...nodes, ...arrows].map((item) => item.revealAtMs);
+  const lastRevealAtMs = revealTimes.length > 0 ? Math.max(...revealTimes) : beat.startMs;
+  const finalHoldMs = beat.finalHoldMs ?? Math.min(1_100, Math.max(350, beatDurationMs * 0.12));
+  const holdStartMs = Math.min(beat.endMs - finalHoldMs, lastRevealAtMs + 650);
+  const holdProgress = finalHoldMs === 0
+    ? 1
+    : Math.max(0, Math.min(1, (state.timeMs - holdStartMs) / finalHoldMs));
 
   return {
     headline: scene.headline,
@@ -204,17 +321,38 @@ export const toPublicSceneViewModel = (
     captionText: state.captionText,
     background: publicAsset(backgroundPlacement, assets),
     fox: publicAsset(foxPlacement, assets),
+    previousFox: previousFoxPlacement ? publicAsset(previousFoxPlacement, assets) : null,
+    foxTransitionProgress: state.expressionTransitionProgress,
     mainAssets,
     overlays,
     mainContent: generatedContentVisible
       ? {
           renderKind: beat.screenState === "EntityFocus" ? "entity" : renderKindMap[beat.visualMode],
           layout: beat.screenState === "MainWithEntity" ? "primary-with-entity" : "full",
+          headline: scene.headline,
+          supportingTexts: scene.supportingTexts,
+          uncertainty: scene.uncertainty,
+          screenQuestion: beat.screenQuestion,
+          primaryElement: beat.primaryElement,
+          primaryFunction: beat.primaryFunction,
+          visualTemplate: beat.visualTemplate,
+          templateConfig: beat.templateConfig,
+          sequencePolicy,
+          finalHoldMs,
+          shot: state.activeShot,
+          previousShot: state.previousShot,
+          nextShot: state.nextShot,
           cards,
           numbers,
           nodes,
           arrows,
           texts: beat.viewerTexts,
+          sceneTimeMs: state.timeMs,
+          beatStartMs: beat.startMs,
+          beatEndMs: beat.endMs,
+          beatProgress,
+          holdProgress,
+          entityPresentation,
           entity: beat.entity ? {
             subjectType: beat.entity.subjectType,
             displayName: beat.entity.displayName,

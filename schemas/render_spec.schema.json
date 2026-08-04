@@ -4,7 +4,7 @@
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "const": "2.1.0"
+      "const": "2.2.0"
     },
     "episode": {
       "type": "object",
@@ -753,6 +753,111 @@
                     "text-focus"
                   ]
                 },
+                "visualTemplate": {
+                  "type": "string",
+                  "enum": [
+                    "opening-contradiction",
+                    "hero-number",
+                    "closing-recap",
+                    "final-assembly",
+                    "conclusion-card",
+                    "expected-actual-bullet",
+                    "expected-actual-gap-flow",
+                    "metric-comparison-board",
+                    "index-return-bars",
+                    "diverging-stock-bars",
+                    "split-comparison",
+                    "focus-matrix",
+                    "causal-lane",
+                    "tailwind-headwind",
+                    "evidence-boundary",
+                    "verification-checklist",
+                    "verification-matrix",
+                    "analogy-steps",
+                    "entity-card-full",
+                    "news-media",
+                    "text-focus"
+                  ]
+                },
+                "templateConfig": {
+                  "type": "object",
+                  "properties": {
+                    "variant": {
+                      "type": "string",
+                      "enum": [
+                        "default",
+                        "left-to-right",
+                        "zero-baseline",
+                        "center-zero",
+                        "two-lane",
+                        "confirmed-vs-unconfirmed",
+                        "strengthen-vs-weaken",
+                        "prebuilt-card"
+                      ]
+                    },
+                    "comparisonBasis": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "dataBasis": {
+                      "type": "string"
+                    },
+                    "nodeOrder": {
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "laneLabels": {
+                      "maxItems": 2,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "outcomeNodeId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "variant",
+                    "comparisonBasis",
+                    "dataBasis",
+                    "nodeOrder",
+                    "laneLabels",
+                    "outcomeNodeId"
+                  ],
+                  "additionalProperties": false
+                },
+                "sequencePolicy": {
+                  "type": "string",
+                  "enum": [
+                    "explicit",
+                    "object-order-fallback",
+                    "static"
+                  ]
+                },
+                "finalHoldMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1500
+                },
                 "contentType": {
                   "type": "string"
                 },
@@ -1000,6 +1105,225 @@
                       "type": "null"
                     }
                   ]
+                },
+                "shots": {
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "shotId": {
+                        "type": "string",
+                        "pattern": "^scene-0[1-9]-beat-[0-9]{3}-shot-[0-9]{3}$"
+                      },
+                      "shotRecipe": {
+                        "type": "string",
+                        "enum": [
+                          "hero-metric-impact",
+                          "contradiction-interrupt",
+                          "expected-anchor",
+                          "actual-crosses-expected",
+                          "gap-macro",
+                          "causal-build",
+                          "counterforce-interrupt",
+                          "entity-cutaway",
+                          "split-opposition",
+                          "focus-matrix-reveal",
+                          "verification-two-paths",
+                          "recap-assembly"
+                        ]
+                      },
+                      "startChunkId": {
+                        "type": "string",
+                        "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                      },
+                      "startProgress": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "startOffsetMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000
+                      },
+                      "endChunkId": {
+                        "type": "string",
+                        "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                      },
+                      "endProgress": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "endOffsetMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000
+                      },
+                      "endCue": {
+                        "type": "string"
+                      },
+                      "primaryTargetId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "stageLayout": {
+                        "type": "string",
+                        "enum": [
+                          "full-stage",
+                          "hero-center",
+                          "split-vertical",
+                          "split-horizontal",
+                          "macro-detail",
+                          "lane-left-right",
+                          "matrix-2x2",
+                          "entity-full",
+                          "media-full",
+                          "assembly-canvas"
+                        ]
+                      },
+                      "cameraPreset": {
+                        "type": "string",
+                        "enum": [
+                          "static",
+                          "push-in",
+                          "pull-back",
+                          "pan-left",
+                          "pan-right",
+                          "follow-path",
+                          "reframe-outcome",
+                          "macro-detail"
+                        ]
+                      },
+                      "transitionIn": {
+                        "type": "string",
+                        "enum": [
+                          "soft-reveal",
+                          "continue-from-previous",
+                          "reframe-shared-element",
+                          "carry-forward",
+                          "pin-to-corner",
+                          "collapse-to-node",
+                          "merge-to-outcome",
+                          "hard-cut",
+                          "hold-outcome"
+                        ]
+                      },
+                      "transitionOut": {
+                        "type": "string",
+                        "enum": [
+                          "soft-reveal",
+                          "continue-from-previous",
+                          "reframe-shared-element",
+                          "carry-forward",
+                          "pin-to-corner",
+                          "collapse-to-node",
+                          "merge-to-outcome",
+                          "hard-cut",
+                          "hold-outcome"
+                        ]
+                      },
+                      "continuityKey": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "typographyTreatment": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "number-roll",
+                              "word-build",
+                              "underline-draw",
+                              "cross-out-assumption",
+                              "gap-highlight",
+                              "zero-line-split",
+                              "final-phrase-lock"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "typographyText": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "soundCue": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "soft-whoosh",
+                              "soft-impact",
+                              "line-draw",
+                              "comparison-split",
+                              "resolve-chime"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "foxExpression": {
+                        "type": "string",
+                        "enum": [
+                          "通常",
+                          "分析",
+                          "ニヤリ",
+                          "軽い驚き",
+                          "困惑",
+                          "警戒",
+                          "眠そう"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "shotId",
+                      "shotRecipe",
+                      "startChunkId",
+                      "startProgress",
+                      "startOffsetMs",
+                      "endChunkId",
+                      "endProgress",
+                      "endOffsetMs",
+                      "endCue",
+                      "primaryTargetId",
+                      "stageLayout",
+                      "cameraPreset",
+                      "transitionIn",
+                      "transitionOut",
+                      "continuityKey",
+                      "typographyTreatment",
+                      "typographyText",
+                      "soundCue",
+                      "foxExpression"
+                    ],
+                    "additionalProperties": false
+                  }
                 }
               },
               "required": [
@@ -1011,6 +1335,8 @@
                 "primaryFunction",
                 "screenState",
                 "visualMode",
+                "visualTemplate",
+                "templateConfig",
                 "contentType",
                 "screenQuestion",
                 "primaryElement",
@@ -1111,6 +1437,21 @@
                 },
                 "value": {
                   "type": "string"
+                },
+                "numericValue": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "precision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
                 },
                 "unit": {
                   "type": "string"
@@ -1255,6 +1596,61 @@
                         "困惑",
                         "警戒",
                         "眠そう"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "motionPreset": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "fade-soft",
+                        "slide-soft-left",
+                        "slide-soft-right",
+                        "rise-soft",
+                        "scale-settle",
+                        "grow-from-baseline",
+                        "grow-from-center",
+                        "draw-line",
+                        "count-up",
+                        "focus-ring",
+                        "scale-focus",
+                        "dim-others",
+                        "pulse-once",
+                        "fade-out",
+                        "slide-out-soft",
+                        "collapse-to-outcome"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "durationMs": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 3000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "easingPreset": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "smooth-out",
+                        "spring-settle",
+                        "linear"
                       ]
                     },
                     {

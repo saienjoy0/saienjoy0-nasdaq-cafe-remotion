@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.1.0",
+  "schemaVersion": "2.2.0",
   "episode": {
     "id": "2026-07-31",
     "targetDate": "2026-07-31",
@@ -7,7 +7,7 @@
     "informationCutoff": "2026-08-01T15:19:46Z",
     "episodeType": "single-news",
     "durationMode": "shortened",
-    "shortenedReason": "Charon実測403.2秒で確認済みの主役因果と反対材料の説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。",
+    "shortenedReason": "Charon音声403.2秒で確認済みの主役因果と反対材料の説明が完結しており、480秒へ合わせるためのニュース・背景知識・狐ネタ追加は水増しになるため。",
     "fps": 30,
     "width": 1920,
     "height": 1080
@@ -219,12 +219,25 @@
           "primaryFunction": "Anchor",
           "screenState": "Data",
           "visualMode": "conclusion-card",
+          "visualTemplate": "opening-contradiction",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 900,
           "contentType": "数値・要点",
           "screenQuestion": "昨夜の中心は何か",
           "primaryElement": "NASDAQ方向と主役",
           "viewerTexts": [
             "NASDAQ +1.00%",
-            "Amazon +15.32%"
+            "Amazon +15.32%",
+            "SOXX +0.07%",
+            "Apple -7.35%"
           ],
           "changeCue": "NASDAQ +1.00%",
           "objectIds": [
@@ -240,7 +253,72 @@
           "expressionChange": "軽い驚き",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-01-beat-001-shot-001",
+              "shotRecipe": "hero-metric-impact",
+              "startChunkId": "scene-01-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-01-chunk-001",
+              "endProgress": 0.333333,
+              "endOffsetMs": 0,
+              "endCue": "同じ理由で上がった夜ではありません。",
+              "primaryTargetId": "s1-card-main",
+              "stageLayout": "hero-center",
+              "cameraPreset": "push-in",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "pin-to-corner",
+              "continuityKey": "scene-01-beat-001-flow",
+              "typographyTreatment": "number-roll",
+              "typographyText": "NASDAQ +1.00%",
+              "soundCue": null,
+              "foxExpression": "軽い驚き"
+            },
+            {
+              "shotId": "scene-01-beat-001-shot-002",
+              "shotRecipe": "contradiction-interrupt",
+              "startChunkId": "scene-01-chunk-001",
+              "startProgress": 0.333333,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-01-chunk-001",
+              "endProgress": 0.666667,
+              "endOffsetMs": 0,
+              "endCue": "同じ理由で上がった夜ではありません。",
+              "primaryTargetId": "s1-card-main",
+              "stageLayout": "split-vertical",
+              "cameraPreset": "pan-right",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-01-beat-001-flow",
+              "typographyTreatment": "word-build",
+              "typographyText": "Amazon +15.32%",
+              "soundCue": "comparison-split",
+              "foxExpression": "軽い驚き"
+            },
+            {
+              "shotId": "scene-01-beat-001-shot-003",
+              "shotRecipe": "contradiction-interrupt",
+              "startChunkId": "scene-01-chunk-001",
+              "startProgress": 0.666667,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-01-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "同じ理由で上がった夜ではありません。",
+              "primaryTargetId": "s1-card-main",
+              "stageLayout": "split-vertical",
+              "cameraPreset": "pan-right",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-01-beat-001-flow",
+              "typographyTreatment": "word-build",
+              "typographyText": "SOXX +0.07%",
+              "soundCue": null,
+              "foxExpression": "軽い驚き"
+            }
+          ]
         },
         {
           "beatId": "scene-01-beat-002",
@@ -251,6 +329,17 @@
           "primaryFunction": "Anchor",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "text-focus",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "市場が見た論点は何か",
           "primaryElement": "AI投資の回収証拠",
@@ -270,7 +359,51 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-01-beat-002-shot-001",
+              "shotRecipe": "hero-metric-impact",
+              "startChunkId": "scene-01-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-01-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "こまで打ち消したのかを順番に見ます。",
+              "primaryTargetId": null,
+              "stageLayout": "hero-center",
+              "cameraPreset": "push-in",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "pin-to-corner",
+              "continuityKey": "scene-01-beat-002-flow",
+              "typographyTreatment": "number-roll",
+              "typographyText": "投資額より回収",
+              "soundCue": null,
+              "foxExpression": "軽い驚き"
+            },
+            {
+              "shotId": "scene-01-beat-002-shot-002",
+              "shotRecipe": "hero-metric-impact",
+              "startChunkId": "scene-01-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-01-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "こまで打ち消したのかを順番に見ます。",
+              "primaryTargetId": null,
+              "stageLayout": "hero-center",
+              "cameraPreset": "push-in",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "pin-to-corner",
+              "continuityKey": "scene-01-beat-002-flow",
+              "typographyTreatment": "number-roll",
+              "typographyText": "金利とAppleが相殺",
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         }
       ],
       "cards": [
@@ -295,7 +428,32 @@
       "numbers": [],
       "nodes": [],
       "arrows": [],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-001",
+          "atChunkId": "scene-01-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s1-card-main",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-002",
+          "atChunkId": "scene-01-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s1-card-main",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-01-placement-background",
@@ -439,6 +597,17 @@
           "primaryFunction": "Anchor",
           "screenState": "EntityFocus",
           "visualMode": "text-focus",
+          "visualTemplate": "hero-number",
+          "templateConfig": {
+            "variant": "prebuilt-card",
+            "comparisonBasis": "主役企業と株価反応",
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "企業カード",
           "screenQuestion": "主役は誰か",
           "primaryElement": "Amazon企業カード",
@@ -447,7 +616,9 @@
             "AWSと消費の二つの柱"
           ],
           "changeCue": "Amazon",
-          "objectIds": [],
+          "objectIds": [
+            "s2-number-amzn"
+          ],
           "assetPlacementIds": [
             "scene-02-placement-amzn"
           ],
@@ -469,7 +640,51 @@
             "rightsStatus": "cleared",
             "targetDurationMs": 6000
           },
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-02-beat-001-shot-001",
+              "shotRecipe": "hero-metric-impact",
+              "startChunkId": "scene-02-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-02-chunk-001",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "の大型テック全体の空気を変えました。",
+              "primaryTargetId": "s2-number-amzn",
+              "stageLayout": "hero-center",
+              "cameraPreset": "push-in",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "pin-to-corner",
+              "continuityKey": "scene-02-beat-001-flow",
+              "typographyTreatment": "number-roll",
+              "typographyText": "Amazon",
+              "soundCue": null,
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-02-beat-001-shot-002",
+              "shotRecipe": "entity-cutaway",
+              "startChunkId": "scene-02-chunk-001",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-02-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "の大型テック全体の空気を変えました。",
+              "primaryTargetId": "s2-number-amzn",
+              "stageLayout": "entity-full",
+              "cameraPreset": "pull-back",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-02-beat-001-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-02-beat-002",
@@ -480,6 +695,17 @@
           "primaryFunction": "Compare",
           "screenState": "Data",
           "visualMode": "number-comparison",
+          "visualTemplate": "diverging-stock-bars",
+          "templateConfig": {
+            "variant": "center-zero",
+            "comparisonBasis": "上昇はどこまで広がったか",
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "上昇はどこまで広がったか",
           "primaryElement": "Amazonと半導体の差",
@@ -504,7 +730,51 @@
           "expressionChange": "困惑",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-02-beat-002-shot-001",
+              "shotRecipe": "split-opposition",
+              "startChunkId": "scene-02-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-02-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "収を示せた企業へ強く寄った動きです。",
+              "primaryTargetId": "s2-number-amzn",
+              "stageLayout": "split-vertical",
+              "cameraPreset": "reframe-outcome",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-02-beat-002-flow",
+              "typographyTreatment": "zero-line-split",
+              "typographyText": "Amazon +15.32%",
+              "soundCue": "comparison-split",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-02-beat-002-shot-002",
+              "shotRecipe": "focus-matrix-reveal",
+              "startChunkId": "scene-02-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-02-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "収を示せた企業へ強く寄った動きです。",
+              "primaryTargetId": "s2-number-soxx",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pan-right",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-02-beat-002-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         }
       ],
       "cards": [],
@@ -513,6 +783,8 @@
           "numberId": "s2-number-amzn",
           "label": "Amazon",
           "value": "+15.32",
+          "numericValue": 15.32,
+          "precision": 2,
           "unit": "%",
           "comparison": "前日比",
           "tone": "positive"
@@ -521,6 +793,8 @@
           "numberId": "s2-number-soxx",
           "label": "SOXX",
           "value": "+0.07",
+          "numericValue": 0.07,
+          "precision": 2,
           "unit": "%",
           "comparison": "前日比",
           "tone": "neutral"
@@ -529,6 +803,8 @@
           "numberId": "s2-number-amd",
           "label": "AMD",
           "value": "-1.90",
+          "numericValue": -1.9,
+          "precision": 2,
           "unit": "%",
           "comparison": "前日比",
           "tone": "negative"
@@ -536,7 +812,68 @@
       ],
       "nodes": [],
       "arrows": [],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-055",
+          "atChunkId": "scene-02-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s2-number-amzn",
+          "offsetMs": 350,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-003",
+          "atChunkId": "scene-02-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s2-number-amzn",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-004",
+          "atChunkId": "scene-02-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s2-number-soxx",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-005",
+          "atChunkId": "scene-02-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s2-number-amd",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-006",
+          "atChunkId": "scene-02-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s2-number-amd",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-02-placement-background",
@@ -692,6 +1029,17 @@
           "primaryFunction": "Evidence",
           "screenState": "Data",
           "visualMode": "number-comparison",
+          "visualTemplate": "expected-actual-bullet",
+          "templateConfig": {
+            "variant": "zero-baseline",
+            "comparisonBasis": "AWSは予想を超えたか",
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "数値・要点",
           "screenQuestion": "AWSは予想を超えたか",
           "primaryElement": "AWS売上と市場予想",
@@ -715,7 +1063,72 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-03-beat-001-shot-001",
+              "shotRecipe": "expected-anchor",
+              "startChunkId": "scene-03-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-03-chunk-001",
+              "endProgress": 0.333333,
+              "endOffsetMs": 0,
+              "endCue": "想を超える成長が確認されたことです。",
+              "primaryTargetId": "s3-number-aws",
+              "stageLayout": "full-stage",
+              "cameraPreset": "static",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-03-beat-001-flow",
+              "typographyTreatment": "underline-draw",
+              "typographyText": "422.3億ドル",
+              "soundCue": null,
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-03-beat-001-shot-002",
+              "shotRecipe": "actual-crosses-expected",
+              "startChunkId": "scene-03-chunk-001",
+              "startProgress": 0.333333,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-03-chunk-001",
+              "endProgress": 0.666667,
+              "endOffsetMs": 0,
+              "endCue": "想を超える成長が確認されたことです。",
+              "primaryTargetId": "s3-number-gap",
+              "stageLayout": "full-stage",
+              "cameraPreset": "push-in",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-03-beat-001-flow",
+              "typographyTreatment": "gap-highlight",
+              "typographyText": "予想405.7億ドル",
+              "soundCue": "soft-impact",
+              "foxExpression": "軽い驚き"
+            },
+            {
+              "shotId": "scene-03-beat-001-shot-003",
+              "shotRecipe": "gap-macro",
+              "startChunkId": "scene-03-chunk-001",
+              "startProgress": 0.666667,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-03-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "想を超える成長が確認されたことです。",
+              "primaryTargetId": "s3-number-aws",
+              "stageLayout": "macro-detail",
+              "cameraPreset": "macro-detail",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "collapse-to-node",
+              "continuityKey": "scene-03-beat-001-flow",
+              "typographyTreatment": "gap-highlight",
+              "typographyText": "AWS売上と市場予想",
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-03-beat-002",
@@ -726,6 +1139,17 @@
           "primaryFunction": "Evidence",
           "screenState": "Chart",
           "visualMode": "chart",
+          "visualTemplate": "metric-comparison-board",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "反応はAmazonだけか",
+            "dataBasis": "終値と主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "反応はAmazonだけか",
           "primaryElement": "大型クラウドの終値比較",
@@ -749,7 +1173,51 @@
           "expressionChange": "通常",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-03-beat-002-shot-001",
+              "shotRecipe": "hero-metric-impact",
+              "startChunkId": "scene-03-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-03-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "mazon決算だけで断定はしません。",
+              "primaryTargetId": "s3-number-amzn",
+              "stageLayout": "hero-center",
+              "cameraPreset": "push-in",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "pin-to-corner",
+              "continuityKey": "scene-03-beat-002-flow",
+              "typographyTreatment": "number-roll",
+              "typographyText": "Amazon +15.32%",
+              "soundCue": null,
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-03-beat-002-shot-002",
+              "shotRecipe": "split-opposition",
+              "startChunkId": "scene-03-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-03-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "mazon決算だけで断定はしません。",
+              "primaryTargetId": "s3-number-googl",
+              "stageLayout": "split-vertical",
+              "cameraPreset": "reframe-outcome",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-03-beat-002-flow",
+              "typographyTreatment": "zero-line-split",
+              "typographyText": "Alphabet +6.73%",
+              "soundCue": "comparison-split",
+              "foxExpression": "分析"
+            }
+          ]
         }
       ],
       "cards": [],
@@ -758,6 +1226,8 @@
           "numberId": "s3-number-aws",
           "label": "AWS売上",
           "value": "422.3",
+          "numericValue": 422.3,
+          "precision": 1,
           "unit": "億ドル",
           "comparison": "市場予想405.7億ドル",
           "tone": "positive"
@@ -766,6 +1236,8 @@
           "numberId": "s3-number-gap",
           "label": "予想との差",
           "value": "+16.6",
+          "numericValue": 16.6,
+          "precision": 1,
           "unit": "億ドル",
           "comparison": "市場予想比",
           "tone": "emphasis"
@@ -774,6 +1246,8 @@
           "numberId": "s3-number-amzn",
           "label": "Amazon",
           "value": "+15.32",
+          "numericValue": 15.32,
+          "precision": 2,
           "unit": "%",
           "comparison": "前日比",
           "tone": "positive"
@@ -782,6 +1256,8 @@
           "numberId": "s3-number-googl",
           "label": "Alphabet",
           "value": "+6.73",
+          "numericValue": 6.73,
+          "precision": 2,
           "unit": "%",
           "comparison": "前日比",
           "tone": "positive"
@@ -789,7 +1265,80 @@
       ],
       "nodes": [],
       "arrows": [],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-007",
+          "atChunkId": "scene-03-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s3-number-aws",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-008",
+          "atChunkId": "scene-03-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s3-number-gap",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-009",
+          "atChunkId": "scene-03-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s3-number-gap",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-010",
+          "atChunkId": "scene-03-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s3-number-amzn",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-011",
+          "atChunkId": "scene-03-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s3-number-googl",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-012",
+          "atChunkId": "scene-03-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s3-number-googl",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-03-placement-background",
@@ -940,6 +1489,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "expected-actual-gap",
+          "visualTemplate": "expected-actual-gap-flow",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要報道と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 900,
           "contentType": "数値・要点",
           "screenQuestion": "期待と結果の差は何か",
           "primaryElement": "Expected・Actual・Gap",
@@ -964,7 +1524,72 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-04-beat-001-shot-001",
+              "shotRecipe": "expected-anchor",
+              "startChunkId": "scene-04-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-001",
+              "endProgress": 0.333333,
+              "endOffsetMs": 0,
+              "endCue": "るのかが繰り返し注目されていました。",
+              "primaryTargetId": "s4-card-expected",
+              "stageLayout": "full-stage",
+              "cameraPreset": "static",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-04-beat-001-flow",
+              "typographyTreatment": "underline-draw",
+              "typographyText": "Expected｜回収できるか",
+              "soundCue": null,
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-04-beat-001-shot-002",
+              "shotRecipe": "actual-crosses-expected",
+              "startChunkId": "scene-04-chunk-001",
+              "startProgress": 0.333333,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-001",
+              "endProgress": 0.666667,
+              "endOffsetMs": 0,
+              "endCue": "るのかが繰り返し注目されていました。",
+              "primaryTargetId": "s4-card-actual",
+              "stageLayout": "full-stage",
+              "cameraPreset": "push-in",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-04-beat-001-flow",
+              "typographyTreatment": "gap-highlight",
+              "typographyText": "Actual｜AWS 422.3億ドル",
+              "soundCue": "soft-impact",
+              "foxExpression": "軽い驚き"
+            },
+            {
+              "shotId": "scene-04-beat-001-shot-003",
+              "shotRecipe": "gap-macro",
+              "startChunkId": "scene-04-chunk-001",
+              "startProgress": 0.666667,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "るのかが繰り返し注目されていました。",
+              "primaryTargetId": "s4-card-gap",
+              "stageLayout": "macro-detail",
+              "cameraPreset": "macro-detail",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "collapse-to-node",
+              "continuityKey": "scene-04-beat-001-flow",
+              "typographyTreatment": "gap-highlight",
+              "typographyText": "Gap｜回収速度へ",
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-04-beat-002",
@@ -975,6 +1600,17 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "text-focus",
+          "visualTemplate": "analogy-steps",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要報道と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "投資と成果は何が違うか",
           "primaryElement": "短いパソコンのたとえ",
@@ -994,7 +1630,51 @@
           "expressionChange": "ニヤリ",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-04-beat-002-shot-001",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-04-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "の伸びは、その成果に近い数字でした。",
+              "primaryTargetId": null,
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-04-beat-002-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-04-beat-002-shot-002",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-04-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "の伸びは、その成果に近い数字でした。",
+              "primaryTargetId": null,
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-04-beat-002-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-04-beat-003",
@@ -1005,6 +1685,22 @@
           "primaryFunction": "Explain",
           "screenState": "Data",
           "visualMode": "causal-diagram",
+          "visualTemplate": "causal-lane",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要報道と終値",
+            "nodeOrder": [
+              "s4-node-spend",
+              "s4-node-cloud",
+              "s4-node-revenue",
+              "s4-node-valuation"
+            ],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 900,
           "contentType": "因果図",
           "screenQuestion": "評価軸はどう変わったか",
           "primaryElement": "AI投資から株価評価まで",
@@ -1034,7 +1730,51 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-04-beat-003-shot-001",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-04-chunk-003",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-003",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "が、金額から回収速度へ移った、です。",
+              "primaryTargetId": "s4-node-spend",
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-04-beat-003-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-04-beat-003-shot-002",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-04-chunk-003",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-04-chunk-003",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "が、金額から回収速度へ移った、です。",
+              "primaryTargetId": "s4-node-cloud",
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-04-beat-003-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            }
+          ]
         }
       ],
       "cards": [
@@ -1119,7 +1859,152 @@
           "label": "回収証拠"
         }
       ],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-013",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-card-expected",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-014",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-card-actual",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-015",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-card-gap",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-016",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s4-card-gap",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-017",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-node-spend",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-018",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-node-cloud",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-019",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-node-revenue",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-020",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-node-valuation",
+          "offsetMs": 1860,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-021",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-arrow-1",
+          "offsetMs": 2480,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-022",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-arrow-2",
+          "offsetMs": 3100,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-023",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s4-arrow-3",
+          "offsetMs": 3720,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-024",
+          "atChunkId": "scene-04-chunk-003",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s4-arrow-3",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-04-placement-background",
@@ -1263,6 +2148,21 @@
           "primaryFunction": "Explain",
           "screenState": "Chart",
           "visualMode": "causal-diagram",
+          "visualTemplate": "causal-lane",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": null,
+            "dataBasis": "主要市場記事",
+            "nodeOrder": [
+              "s5-node-data",
+              "s5-node-yield",
+              "s5-node-growth"
+            ],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 900,
           "contentType": "因果図",
           "screenQuestion": "強い景気がなぜ重荷か",
           "primaryElement": "経済指標から成長株まで",
@@ -1289,7 +2189,51 @@
           "expressionChange": "警戒",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-05-beat-001-shot-001",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-05-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-05-chunk-001",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "ならないのが昨夜の難しいところです。",
+              "primaryTargetId": "s5-node-data",
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-05-beat-001-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-05-beat-001-shot-002",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-05-chunk-001",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-05-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "ならないのが昨夜の難しいところです。",
+              "primaryTargetId": "s5-node-yield",
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-05-beat-001-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-05-beat-002",
@@ -1300,12 +2244,26 @@
           "primaryFunction": "Evidence",
           "screenState": "Chart",
           "visualMode": "chart",
+          "visualTemplate": "tailwind-headwind",
+          "templateConfig": {
+            "variant": "two-lane",
+            "comparisonBasis": null,
+            "dataBasis": "主要市場記事",
+            "nodeOrder": [],
+            "laneLabels": [
+              "追い風",
+              "向かい風"
+            ],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "数値・要点",
           "screenQuestion": "向かい風の大きさは",
           "primaryElement": "雇用コストと米10年金利",
           "viewerTexts": [
-            "ECI 0.9%",
-            "米10年 約4.75%"
+            "追い風｜AWS予想超過→Amazon急騰",
+            "向かい風｜強い指標→金利上昇"
           ],
           "changeCue": "ECI 0.9%",
           "objectIds": [
@@ -1322,7 +2280,51 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-05-beat-002-shot-001",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-05-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-05-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "い風の中で評価されたことになります。",
+              "primaryTargetId": "s5-number-eci",
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-05-beat-002-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-05-beat-002-shot-002",
+              "shotRecipe": "counterforce-interrupt",
+              "startChunkId": "scene-05-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-05-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "い風の中で評価されたことになります。",
+              "primaryTargetId": "s5-number-yield",
+              "stageLayout": "split-horizontal",
+              "cameraPreset": "pan-left",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-05-beat-002-flow",
+              "typographyTreatment": "word-build",
+              "typographyText": "向かい風｜強い指標→金利上昇",
+              "soundCue": "soft-whoosh",
+              "foxExpression": "警戒"
+            }
+          ]
         }
       ],
       "cards": [],
@@ -1331,6 +2333,8 @@
           "numberId": "s5-number-eci",
           "label": "雇用コスト指数",
           "value": "0.9",
+          "numericValue": 0.9,
+          "precision": 1,
           "unit": "%",
           "comparison": "予想0.8%",
           "tone": "warning"
@@ -1339,6 +2343,8 @@
           "numberId": "s5-number-yield",
           "label": "米10年債利回り",
           "value": "約4.75",
+          "numericValue": 4.75,
+          "precision": 2,
           "unit": "%",
           "comparison": "市場記事の取引中水準",
           "tone": "warning"
@@ -1372,7 +2378,116 @@
           "label": "割引率"
         }
       ],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-025",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-node-data",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-026",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-node-yield",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-027",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-node-growth",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-028",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-arrow-1",
+          "offsetMs": 1860,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-029",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-arrow-2",
+          "offsetMs": 2480,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-030",
+          "atChunkId": "scene-05-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s5-arrow-2",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-031",
+          "atChunkId": "scene-05-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-number-eci",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-032",
+          "atChunkId": "scene-05-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s5-number-yield",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 680,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-033",
+          "atChunkId": "scene-05-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s5-number-yield",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-05-placement-background",
@@ -1517,6 +2632,17 @@
           "primaryFunction": "Evidence",
           "screenState": "Chart",
           "visualMode": "timeline",
+          "visualTemplate": "evidence-boundary",
+          "templateConfig": {
+            "variant": "confirmed-vs-unconfirmed",
+            "comparisonBasis": null,
+            "dataBasis": "取引区分と終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "確認できる順序はどこまでか",
           "primaryElement": "取引区分と記事の説明",
@@ -1537,7 +2663,51 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-06-beat-001-shot-001",
+              "shotRecipe": "causal-build",
+              "startChunkId": "scene-06-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-06-chunk-001",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "じ日に金利の逆風が存在したことです。",
+              "primaryTargetId": null,
+              "stageLayout": "lane-left-right",
+              "cameraPreset": "follow-path",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-06-beat-001-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": "line-draw",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-06-beat-001-shot-002",
+              "shotRecipe": "counterforce-interrupt",
+              "startChunkId": "scene-06-chunk-001",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-06-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "じ日に金利の逆風が存在したことです。",
+              "primaryTargetId": null,
+              "stageLayout": "split-horizontal",
+              "cameraPreset": "pan-left",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-06-beat-001-flow",
+              "typographyTreatment": "word-build",
+              "typographyText": "金利が上値を抑制",
+              "soundCue": "soft-whoosh",
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-06-beat-002",
@@ -1548,6 +2718,20 @@
           "primaryFunction": "Compare",
           "screenState": "Data",
           "visualMode": "number-comparison",
+          "visualTemplate": "split-comparison",
+          "templateConfig": {
+            "variant": "two-lane",
+            "comparisonBasis": "指数上昇と半導体への広がり",
+            "dataBasis": "取引区分と終値",
+            "nodeOrder": [],
+            "laneLabels": [
+              "指数",
+              "半導体"
+            ],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "数値・要点",
           "screenQuestion": "指数と半導体は同じ強さか",
           "primaryElement": "主要指数の終値差",
@@ -1573,7 +2757,51 @@
           "expressionChange": "警戒",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-06-beat-002-shot-001",
+              "shotRecipe": "split-opposition",
+              "startChunkId": "scene-06-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-06-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "金利上昇とApple安がありました。",
+              "primaryTargetId": "s6-number-comp",
+              "stageLayout": "split-vertical",
+              "cameraPreset": "reframe-outcome",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-06-beat-002-flow",
+              "typographyTreatment": "zero-line-split",
+              "typographyText": "Composite +1.00%",
+              "soundCue": "comparison-split",
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-06-beat-002-shot-002",
+              "shotRecipe": "split-opposition",
+              "startChunkId": "scene-06-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-06-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "金利上昇とApple安がありました。",
+              "primaryTargetId": "s6-number-ndx",
+              "stageLayout": "split-vertical",
+              "cameraPreset": "reframe-outcome",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-06-beat-002-flow",
+              "typographyTreatment": "zero-line-split",
+              "typographyText": "Nasdaq-100 +0.60%",
+              "soundCue": "comparison-split",
+              "foxExpression": "分析"
+            }
+          ]
         }
       ],
       "cards": [],
@@ -1582,6 +2810,8 @@
           "numberId": "s6-number-comp",
           "label": "Nasdaq Composite",
           "value": "+1.00",
+          "numericValue": 1,
+          "precision": 2,
           "unit": "%",
           "comparison": "終値",
           "tone": "positive"
@@ -1590,6 +2820,8 @@
           "numberId": "s6-number-ndx",
           "label": "Nasdaq-100",
           "value": "+0.60",
+          "numericValue": 0.6,
+          "precision": 2,
           "unit": "%",
           "comparison": "Nasdaq掲載記事",
           "tone": "positive"
@@ -1598,6 +2830,8 @@
           "numberId": "s6-number-soxx",
           "label": "SOXX",
           "value": "+0.07",
+          "numericValue": 0.07,
+          "precision": 2,
           "unit": "%",
           "comparison": "終値",
           "tone": "neutral"
@@ -1605,7 +2839,56 @@
       ],
       "nodes": [],
       "arrows": [],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-034",
+          "atChunkId": "scene-06-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-number-comp",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-035",
+          "atChunkId": "scene-06-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-number-ndx",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-036",
+          "atChunkId": "scene-06-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-number-soxx",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-037",
+          "atChunkId": "scene-06-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s6-number-soxx",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-06-placement-background",
@@ -1749,6 +3032,17 @@
           "primaryFunction": "Compare",
           "screenState": "EntityFocus",
           "visualMode": "text-focus",
+          "visualTemplate": "entity-card-full",
+          "templateConfig": {
+            "variant": "prebuilt-card",
+            "comparisonBasis": null,
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "static",
+          "finalHoldMs": 500,
           "contentType": "企業カード",
           "screenQuestion": "相殺要因の代表は誰か",
           "primaryElement": "Apple企業カード",
@@ -1779,7 +3073,51 @@
             "rightsStatus": "cleared",
             "targetDurationMs": 6000
           },
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-07-beat-001-shot-001",
+              "shotRecipe": "entity-cutaway",
+              "startChunkId": "scene-07-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-07-chunk-001",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "on一社だけへ絞ることはできません。",
+              "primaryTargetId": "scene-07-placement-aapl",
+              "stageLayout": "entity-full",
+              "cameraPreset": "pull-back",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "carry-forward",
+              "continuityKey": "scene-07-beat-001-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": null,
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-07-beat-001-shot-002",
+              "shotRecipe": "hero-metric-impact",
+              "startChunkId": "scene-07-chunk-001",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-07-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "on一社だけへ絞ることはできません。",
+              "primaryTargetId": "scene-07-placement-aapl",
+              "stageLayout": "hero-center",
+              "cameraPreset": "push-in",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "pin-to-corner",
+              "continuityKey": "scene-07-beat-001-flow",
+              "typographyTreatment": "number-roll",
+              "typographyText": "端末とサービスの生態系",
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         },
         {
           "beatId": "scene-07-beat-002",
@@ -1790,6 +3128,17 @@
           "primaryFunction": "Compare",
           "screenState": "Data",
           "visualMode": "stock-comparison",
+          "visualTemplate": "focus-matrix",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": "大型テックと半導体の波及差",
+            "dataBasis": "終値",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "数値・要点",
           "screenQuestion": "評価軸はどこへ表れたか",
           "primaryElement": "大型テックと半導体の明暗",
@@ -1816,7 +3165,51 @@
           "expressionChange": "分析",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-07-beat-002-shot-001",
+              "shotRecipe": "focus-matrix-reveal",
+              "startChunkId": "scene-07-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-07-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "えた内容の差が株価へ強く表れました。",
+              "primaryTargetId": "s7-number-amzn",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pan-right",
+              "transitionIn": "continue-from-previous",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-07-beat-002-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": null,
+              "foxExpression": "分析"
+            },
+            {
+              "shotId": "scene-07-beat-002-shot-002",
+              "shotRecipe": "focus-matrix-reveal",
+              "startChunkId": "scene-07-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-07-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "えた内容の差が株価へ強く表れました。",
+              "primaryTargetId": "s7-number-aapl",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pan-right",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-07-beat-002-flow",
+              "typographyTreatment": null,
+              "typographyText": null,
+              "soundCue": null,
+              "foxExpression": "分析"
+            }
+          ]
         }
       ],
       "cards": [],
@@ -1825,6 +3218,8 @@
           "numberId": "s7-number-aapl",
           "label": "Apple",
           "value": "-7.35",
+          "numericValue": -7.35,
+          "precision": 2,
           "unit": "%",
           "comparison": "固定ウォッチ終値",
           "tone": "negative"
@@ -1833,6 +3228,8 @@
           "numberId": "s7-number-amzn",
           "label": "Amazon",
           "value": "+15.32",
+          "numericValue": 15.32,
+          "precision": 2,
           "unit": "%",
           "comparison": "固定ウォッチ終値",
           "tone": "positive"
@@ -1841,6 +3238,8 @@
           "numberId": "s7-number-nvda",
           "label": "NVIDIA",
           "value": "+2.93",
+          "numericValue": 2.93,
+          "precision": 2,
           "unit": "%",
           "comparison": "固定ウォッチ終値",
           "tone": "positive"
@@ -1849,6 +3248,8 @@
           "numberId": "s7-number-amd",
           "label": "AMD",
           "value": "-1.90",
+          "numericValue": -1.9,
+          "precision": 2,
           "unit": "%",
           "comparison": "固定ウォッチ終値",
           "tone": "negative"
@@ -1856,7 +3257,68 @@
       ],
       "nodes": [],
       "arrows": [],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-038",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s7-number-amzn",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-039",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s7-number-aapl",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-040",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s7-number-nvda",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-041",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s7-number-amd",
+          "offsetMs": 1860,
+          "expression": null,
+          "motionPreset": "count-up",
+          "durationMs": 760,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-042",
+          "atChunkId": "scene-07-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s7-number-amd",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-07-placement-background",
@@ -2012,6 +3474,17 @@
           "primaryFunction": "Verify",
           "screenState": "Data",
           "visualMode": "verification-points",
+          "visualTemplate": "verification-checklist",
+          "templateConfig": {
+            "variant": "default",
+            "comparisonBasis": null,
+            "dataBasis": "今後の確認条件",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "今夜は何を見るか",
           "primaryElement": "三つの検証カード",
@@ -2035,7 +3508,51 @@
           "expressionChange": "通常",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-08-beat-001-shot-001",
+              "shotRecipe": "verification-two-paths",
+              "startChunkId": "scene-08-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-08-chunk-001",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "型クラウド株の上昇へ追いつくかです。",
+              "primaryTargetId": "s8-card-checks",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pull-back",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-08-beat-001-flow",
+              "typographyTreatment": "underline-draw",
+              "typographyText": "クラウド売上",
+              "soundCue": null,
+              "foxExpression": "警戒"
+            },
+            {
+              "shotId": "scene-08-beat-001-shot-002",
+              "shotRecipe": "verification-two-paths",
+              "startChunkId": "scene-08-chunk-001",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-08-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "型クラウド株の上昇へ追いつくかです。",
+              "primaryTargetId": "s8-card-checks",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pull-back",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-08-beat-001-flow",
+              "typographyTreatment": "underline-draw",
+              "typographyText": "米10年金利",
+              "soundCue": null,
+              "foxExpression": "警戒"
+            }
+          ]
         },
         {
           "beatId": "scene-08-beat-002",
@@ -2046,13 +3563,33 @@
           "primaryFunction": "Verify",
           "screenState": "Chart",
           "visualMode": "causal-diagram",
+          "visualTemplate": "verification-matrix",
+          "templateConfig": {
+            "variant": "strengthen-vs-weaken",
+            "comparisonBasis": null,
+            "dataBasis": "今後の確認条件",
+            "nodeOrder": [
+              "s8-node-cloud",
+              "s8-node-yield",
+              "s8-node-semi",
+              "s8-node-hyp"
+            ],
+            "laneLabels": [
+              "強まる",
+              "弱まる"
+            ],
+            "outcomeNodeId": "s8-node-hyp"
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 750,
           "contentType": "因果図",
           "screenQuestion": "何がそろえば仮説は強まるか",
           "primaryElement": "検証条件の因果図",
           "viewerTexts": [
-            "売上継続",
-            "金利安定",
-            "半導体波及"
+            "強まる｜クラウド売上継続",
+            "強まる｜金利安定・半導体波及",
+            "弱まる｜金利上昇継続",
+            "弱まる｜SOX・関連銘柄が弱い"
           ],
           "changeCue": "売上継続",
           "objectIds": [
@@ -2075,7 +3612,51 @@
           "expressionChange": "警戒",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-08-beat-002-shot-001",
+              "shotRecipe": "verification-two-paths",
+              "startChunkId": "scene-08-chunk-002",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-08-chunk-002",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "げるのは早い、という判断になります。",
+              "primaryTargetId": "s8-node-cloud",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pull-back",
+              "transitionIn": "soft-reveal",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-08-beat-002-flow",
+              "typographyTreatment": "underline-draw",
+              "typographyText": "強まる｜クラウド売上継続",
+              "soundCue": null,
+              "foxExpression": "警戒"
+            },
+            {
+              "shotId": "scene-08-beat-002-shot-002",
+              "shotRecipe": "verification-two-paths",
+              "startChunkId": "scene-08-chunk-002",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-08-chunk-002",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "げるのは早い、という判断になります。",
+              "primaryTargetId": "s8-node-yield",
+              "stageLayout": "matrix-2x2",
+              "cameraPreset": "pull-back",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "hold-outcome",
+              "continuityKey": "scene-08-beat-002-flow",
+              "typographyTreatment": "underline-draw",
+              "typographyText": "強まる｜金利安定・半導体波及",
+              "soundCue": null,
+              "foxExpression": "警戒"
+            }
+          ]
         }
       ],
       "cards": [
@@ -2141,7 +3722,128 @@
           "label": "波及確認"
         }
       ],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-043",
+          "atChunkId": "scene-08-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-card-checks",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-044",
+          "atChunkId": "scene-08-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s8-card-checks",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-045",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-node-cloud",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-046",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-node-yield",
+          "offsetMs": 620,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-047",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-node-semi",
+          "offsetMs": 1240,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-048",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-node-hyp",
+          "offsetMs": 1860,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 620,
+          "easingPreset": "spring-settle"
+        },
+        {
+          "eventId": "event-049",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-arrow-1",
+          "offsetMs": 2480,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-050",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-arrow-2",
+          "offsetMs": 3100,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-051",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s8-arrow-3",
+          "offsetMs": 3720,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 720,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-052",
+          "atChunkId": "scene-08-chunk-002",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s8-node-hyp",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-08-placement-background",
@@ -2278,10 +3980,24 @@
           "primaryFunction": "Anchor",
           "screenState": "Data",
           "visualMode": "conclusion-card",
+          "visualTemplate": "final-assembly",
+          "templateConfig": {
+            "variant": "left-to-right",
+            "comparisonBasis": "既出要素の再構成",
+            "dataBasis": "朝のNASDAQカフェ",
+            "nodeOrder": [],
+            "laneLabels": [],
+            "outcomeNodeId": null
+          },
+          "sequencePolicy": "explicit",
+          "finalHoldMs": 1000,
           "contentType": "数値・要点",
           "screenQuestion": "今朝の答えは何か",
-          "primaryElement": "結論カード",
+          "primaryElement": "投資額より回収",
           "viewerTexts": [
+            "AWS予想超過",
+            "金利は逆風",
+            "半導体波及は限定",
             "投資額より回収"
           ],
           "changeCue": "投資額より回収",
@@ -2298,7 +4014,51 @@
           "expressionChange": "通常",
           "fallback": null,
           "entity": null,
-          "pictureBook": null
+          "pictureBook": null,
+          "shots": [
+            {
+              "shotId": "scene-09-beat-001-shot-001",
+              "shotRecipe": "recap-assembly",
+              "startChunkId": "scene-09-chunk-001",
+              "startProgress": 0,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-09-chunk-001",
+              "endProgress": 0.5,
+              "endOffsetMs": 0,
+              "endCue": "。こちらはそろそろ、おやすみなさい。",
+              "primaryTargetId": "s9-card-close",
+              "stageLayout": "assembly-canvas",
+              "cameraPreset": "pull-back",
+              "transitionIn": "continue-from-previous",
+              "transitionOut": "merge-to-outcome",
+              "continuityKey": "scene-09-beat-001-flow",
+              "typographyTreatment": "final-phrase-lock",
+              "typographyText": "AWS予想超過",
+              "soundCue": "resolve-chime",
+              "foxExpression": "通常"
+            },
+            {
+              "shotId": "scene-09-beat-001-shot-002",
+              "shotRecipe": "recap-assembly",
+              "startChunkId": "scene-09-chunk-001",
+              "startProgress": 0.5,
+              "startOffsetMs": 0,
+              "endChunkId": "scene-09-chunk-001",
+              "endProgress": 1,
+              "endOffsetMs": 0,
+              "endCue": "。こちらはそろそろ、おやすみなさい。",
+              "primaryTargetId": "s9-card-close",
+              "stageLayout": "assembly-canvas",
+              "cameraPreset": "pull-back",
+              "transitionIn": "reframe-shared-element",
+              "transitionOut": "merge-to-outcome",
+              "continuityKey": "scene-09-beat-001-flow",
+              "typographyTreatment": "final-phrase-lock",
+              "typographyText": "金利は逆風",
+              "soundCue": "resolve-chime",
+              "foxExpression": "眠そう"
+            }
+          ]
         }
       ],
       "cards": [
@@ -2318,7 +4078,32 @@
       "numbers": [],
       "nodes": [],
       "arrows": [],
-      "visualEvents": [],
+      "visualEvents": [
+        {
+          "eventId": "event-053",
+          "atChunkId": "scene-09-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s9-card-close",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "durationMs": 560,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-054",
+          "atChunkId": "scene-09-chunk-001",
+          "timing": "chunk-end",
+          "action": "highlight",
+          "targetId": "s9-card-close",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 420,
+          "easingPreset": "smooth-out"
+        }
+      ],
       "assetPlacements": [
         {
           "placementId": "scene-09-placement-background",
