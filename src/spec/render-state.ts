@@ -1,5 +1,6 @@
 import type {Expression, ProductionScene} from "./render-spec";
 import type {EasingPreset, MotionPreset} from "./motion-preset-contract";
+import {resolveActiveShot, type ResolvedShot} from "./shot-timeline";
 import {getSubtitleTextAtTime} from "./subtitle-cues";
 
 export type MotionInstruction = {
@@ -13,9 +14,15 @@ export type SceneRenderState = {
   timeMs: number;
   activeChunkIndex: number | null;
   activeBeatIndex: number;
+  activeShotIndex: number | null;
+  activeShot: ResolvedShot | null;
+  previousShot: ResolvedShot | null;
+  nextShot: ResolvedShot | null;
   captionText: string | null;
   subtitleText: string | null;
   expression: Expression;
+  previousExpression: Expression | null;
+  expressionTransitionProgress: number;
   visible: ReadonlySet<string>;
   highlighted: ReadonlySet<string>;
   visibleSinceMs: ReadonlyMap<string, number>;
@@ -48,6 +55,8 @@ const motionInstruction = (
     }
   : null;
 
+const clamp = (value: number) => Math.max(0, Math.min(1, value));
+
 export const getSceneRenderState = (
   scene: ProductionScene,
   timeMs: number,
@@ -55,9 +64,15 @@ export const getSceneRenderState = (
   const activeChunkIndex = scene.narrationChunks.findIndex(
     (chunk) => chunk.startMs <= timeMs && timeMs < chunk.endMs,
   );
-  const activeBeatIndex = scene.visualBeats.findIndex(
+  const foundBeatIndex = scene.visualBeats.findIndex(
     (beat) => beat.startMs <= timeMs && timeMs < beat.endMs,
   );
+  const activeBeatIndex = foundBeatIndex < 0 ? Math.max(0, scene.visualBeats.length - 1) : foundBeatIndex;
+  const activeBeat = scene.visualBeats[activeBeatIndex];
+  const shotState = activeBeat
+    ? resolveActiveShot(scene, activeBeat, timeMs)
+    : {shot: null, previousShot: null, nextShot: null, shotIndex: null};
+
   const expressionChanges: Array<{timeMs: number; priority: number; order: number; expression: Expression}> = [
     {timeMs: 0, priority: 0, order: -1, expression: scene.initialExpression},
     ...scene.narrationChunks.map((chunk, index) => ({timeMs: chunk.startMs, priority: 1, order: index, expression: chunk.expression})),
@@ -67,10 +82,18 @@ export const getSceneRenderState = (
         : [],
     ),
   ];
-  const expression = expressionChanges
+  const reachedExpressionChanges = expressionChanges
     .filter((change) => change.timeMs <= timeMs)
-    .sort((a, b) => a.timeMs - b.timeMs || a.priority - b.priority || a.order - b.order)
-    .at(-1)?.expression ?? scene.initialExpression;
+    .sort((a, b) => a.timeMs - b.timeMs || a.priority - b.priority || a.order - b.order);
+  const latestBaseExpression = reachedExpressionChanges.at(-1) ?? expressionChanges[0];
+  const baseExpression = latestBaseExpression.expression;
+  const expression = shotState.shot?.foxExpression ?? baseExpression;
+  const priorExpression = shotState.previousShot?.foxExpression ?? baseExpression;
+  const previousExpression = priorExpression === expression ? null : priorExpression;
+  const expressionStartedAtMs = shotState.shot?.startMs ?? latestBaseExpression.timeMs;
+  const expressionTransitionProgress = previousExpression
+    ? clamp((timeMs - expressionStartedAtMs) / 180)
+    : 1;
 
   const visibilityEvents = scene.visualEvents.filter(
     (event) => event.action === "show" || event.action === "hide",
@@ -155,14 +178,18 @@ export const getSceneRenderState = (
   return {
     timeMs,
     activeChunkIndex: activeChunkIndex < 0 ? null : activeChunkIndex,
-    activeBeatIndex: activeBeatIndex < 0 ? Math.max(0, scene.visualBeats.length - 1) : activeBeatIndex,
-    // captionText is the existing short summary telop kept for compatibility.
+    activeBeatIndex,
+    activeShotIndex: shotState.shotIndex,
+    activeShot: shotState.shot,
+    previousShot: shotState.previousShot,
+    nextShot: shotState.nextShot,
     captionText: activeChunk?.caption.text ?? null,
-    // subtitleText is the complete narration, paged and timed inside the measured audio chunk.
     subtitleText: activeChunk
       ? getSubtitleTextAtTime(activeChunk.speechText, activeChunk.startMs, activeChunk.endMs, timeMs)
       : null,
     expression,
+    previousExpression,
+    expressionTransitionProgress,
     visible,
     highlighted,
     visibleSinceMs,
