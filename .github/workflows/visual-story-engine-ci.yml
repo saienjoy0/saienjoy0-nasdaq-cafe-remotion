@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: visual-story-engine-${{ github.event.pull_request.number || github.ref }}
@@ -198,3 +198,28 @@ jobs:
 
       - name: Bundle Remotion
         run: npm run build
+
+      - name: Commit validated measured Shot outputs to PR branch
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.head_ref == 'chore/export-measured-shot-plan-artifact'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f render-specs/2026-07-31/render_spec.json
+          test -f episode-packages/2026-07-31/episode_package_2026-07-31.md
+          test -f shot-timing-reports/2026-07-31.json
+
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/visual-story-engine-ci.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            .github/workflows/visual-story-engine-ci.yml \
+            render-specs/2026-07-31/render_spec.json \
+            episode-packages/2026-07-31/episode_package_2026-07-31.md \
+            shot-timing-reports/2026-07-31.json
+          git diff --cached --check
+          git commit -m "Apply measured 50-Shot plan for 2026-07-31"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
