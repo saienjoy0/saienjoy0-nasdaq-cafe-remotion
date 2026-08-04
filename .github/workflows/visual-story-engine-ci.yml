@@ -9,6 +9,7 @@ on:
       - "render-specs/**"
       - "episode-packages/**"
       - "shot-timing-requests/**"
+      - "shot-timing-reports/**"
       - "package.json"
       - "package-lock.json"
       - "AGENTS.md"
@@ -76,22 +77,69 @@ jobs:
             scripts/apply_measured_shot_plan.py
           python3 scripts/test_motion_preview_request_queue.py
 
-      - name: Dry-run committed measured Shot plan request
+      - name: Validate measured Shot plan history
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t REQUESTS < <(find shot-timing-requests -maxdepth 1 -type f -name '*.json' -print | sort)
-          if [[ "${#REQUESTS[@]}" -gt 1 ]]; then
-            echo "::error::CI fixture expects at most one measured Shot plan request"
+          mapfile -t SELECTION < <(python3 <<'PY'
+          import hashlib
+          import json
+          import pathlib
+
+          root = pathlib.Path.cwd()
+
+          def file_sha(path: pathlib.Path) -> str:
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          requests = sorted((root / "shot-timing-requests").glob("*.json"), reverse=True)
+          for request_path in requests:
+              value = json.loads(request_path.read_text(encoding="utf-8"))
+              episode_date = value.get("episodeDate")
+              expected_sha = value.get("expectedSpecSha256")
+              if not isinstance(episode_date, str) or not isinstance(expected_sha, str):
+                  raise SystemExit(f"invalid measured Shot request identity: {request_path}")
+              spec_path = root / "render-specs" / episode_date / "render_spec.json"
+              if spec_path.is_file() and file_sha(spec_path) == expected_sha:
+                  print("apply")
+                  print(request_path.relative_to(root).as_posix())
+                  print(episode_date)
+                  raise SystemExit(0)
+
+          reports = sorted((root / "shot-timing-reports").glob("*.json"), reverse=True)
+          for report_path in reports:
+              value = json.loads(report_path.read_text(encoding="utf-8"))
+              episode_date = value.get("episodeDate")
+              expected_sha = value.get("newRenderSpecSha256")
+              if not isinstance(episode_date, str) or not isinstance(expected_sha, str):
+                  raise SystemExit(f"invalid measured Shot report identity: {report_path}")
+              spec_path = root / "render-specs" / episode_date / "render_spec.json"
+              if spec_path.is_file() and file_sha(spec_path) == expected_sha:
+                  print("current")
+                  print("")
+                  print(episode_date)
+                  raise SystemExit(0)
+
+          print("none")
+          print("")
+          print("")
+          PY
+          )
+          MODE="${SELECTION[0]:-none}"
+          REQUEST_PATH="${SELECTION[1]:-}"
+          EPISODE_DATE="${SELECTION[2]:-}"
+
+          if [[ "$MODE" == "apply" ]]; then
+            python3 scripts/apply_measured_shot_plan.py "$REQUEST_PATH"
+          elif [[ "$MODE" != "current" && "$MODE" != "none" ]]; then
+            echo "::error::Unknown measured Shot plan CI mode: $MODE"
             exit 1
           fi
-          if [[ "${#REQUESTS[@]}" -eq 1 ]]; then
-            python3 scripts/apply_measured_shot_plan.py "${REQUESTS[0]}"
-            EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${REQUESTS[0]}")"
+
+          if [[ -n "$EPISODE_DATE" ]]; then
             npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
             npm run test:shot-story
-            git diff --check
           fi
+          git diff --check
 
       - name: Generate JSON Schema
         run: npm run episode:spec:schema
