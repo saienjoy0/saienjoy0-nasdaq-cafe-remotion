@@ -1,0 +1,36 @@
+{
+  "reportVersion": "1.0",
+  "status": "shot-plan-applied-awaiting-motion-preview",
+  "episodeDate": "2026-07-31",
+  "shotPlanVersion": "3.2.0",
+  "requestPath": "shot-timing-requests/2026-08-04T2317-2026-07-31-retry.json",
+  "changedBeatIds": [
+    "scene-03-beat-001",
+    "scene-03-beat-002",
+    "scene-04-beat-001",
+    "scene-05-beat-001",
+    "scene-05-beat-002",
+    "scene-06-beat-001",
+    "scene-06-beat-002",
+    "scene-07-beat-001",
+    "scene-07-beat-002",
+    "scene-08-beat-001",
+    "scene-08-beat-002"
+  ],
+  "shotCount": 50,
+  "localTimingAudit": {
+    "sourceProductionDurationMs": 403200,
+    "maximumShotDurationMs": 9606,
+    "maximumGapMs": 0,
+    "maximumOverlapMs": 0,
+    "maximumTailGapMs": 350
+  },
+  "oldRenderSpecSha256": "7cc40f56137cbbde0b80ff7902751a376a94bc983f93953f5371967382946fd8",
+  "newRenderSpecSha256": "d85777574d72ec184bc33dfb3a073c1b4f6f01feb68c50b41a37849ac940f9c1",
+  "oldEpisodePackageSha256": "08850070d5e19975eeda3b86b5ca4379acfc488a9966f22558e1ad85ee95d6b1",
+  "newEpisodePackageSha256": "16f2e58b394b903fb3693516983fc0538d3bd02a7698e42775aa61f515f39572",
+  "narrationChanged": false,
+  "sceneOrderChanged": false,
+  "visualBeatOrderChanged": false,
+  "ttsInputExpectedUnchanged": true
+}
