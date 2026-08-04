@@ -208,6 +208,7 @@ jobs:
           npm --version
           ffmpeg -version | head -n 1
           ffprobe -version | head -n 1
+          curl --version | head -n 1
 
       - name: Set up Node.js cache
         uses: actions/setup-node@v6
@@ -225,18 +226,27 @@ jobs:
           path: .cache/spec-tts-blocks
           key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.verify.outputs.tts_input_sha }}
 
-      - name: Require complete cache and forbid synthesis fallback
+      - name: Restore exported production TTS artifact
+        if: steps.tts_cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "Direct cache miss: Exact two-block production TTS cache was not found"
+          echo "Trying the approved portable production cache artifact"
+          python3 scripts/restore_exported_tts_cache.py \
+            --root . \
+            --tts-input-sha "${{ steps.verify.outputs.tts_input_sha }}"
+
+      - name: Require complete production audio and forbid synthesis fallback
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "${{ steps.tts_cache.outputs.cache-hit }}" != "true" ]]; then
-            echo "::error::Exact two-block production TTS cache was not found"
-            echo "::error::Motion Preview does not generate or regenerate narration"
-            exit 1
-          fi
           COUNT="$(find .cache/spec-tts-blocks -type f -name audio.wav | wc -l | tr -d ' ')"
           if [[ "$COUNT" -lt 2 ]]; then
-            echo "::error::Expected both production TTS blocks; found $COUNT"
+            echo "::error::Exact production audio was not available from cache or approved export"
+            echo "::error::Motion Preview does not generate or regenerate narration"
             exit 1
           fi
           while IFS= read -r audio; do

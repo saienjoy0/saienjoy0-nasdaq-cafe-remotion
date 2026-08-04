@@ -53,11 +53,12 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Parse Motion Preview workflow YAML
+      - name: Parse production workflow YAML
         run: |
           npx prettier --check \
             .github/workflows/nasdaq-cafe-motion-preview.yml \
             .github/workflows/nasdaq-cafe-motion-preview-request.yml \
+            .github/workflows/nasdaq-cafe-tts-cache-export.yml \
             motion-preview-requests/README.md
 
       - name: Workflow contract
@@ -67,7 +68,9 @@ jobs:
         run: |
           python3 -m py_compile \
             scripts/motion_preview_request_queue.py \
-            scripts/test_motion_preview_request_queue.py
+            scripts/test_motion_preview_request_queue.py \
+            scripts/restore_exported_tts_cache.py \
+            scripts/test_restore_exported_tts_cache.py
           python3 scripts/test_motion_preview_request_queue.py
 
       - name: Generate JSON Schema

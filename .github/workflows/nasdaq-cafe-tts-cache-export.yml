@@ -1,0 +1,234 @@
+name: Nasdaq Cafe TTS Cache Export
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tts-cache-export-requests/*.json"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-tts-cache-export
+  cancel-in-progress: false
+
+jobs:
+  export-cache:
+    name: Export an existing production TTS cache
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      episode_date: ${{ steps.verify.outputs.episode_date }}
+      spec_sha: ${{ steps.verify.outputs.spec_sha }}
+      tts_input_sha: ${{ steps.verify.outputs.tts_input_sha }}
+      artifact_name: ${{ steps.archive.outputs.artifact_name }}
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+
+    steps:
+      - name: Checkout export request
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Verify one immutable cache export request
+        id: verify
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(
+            git diff --name-status "$BEFORE_SHA" "$GITHUB_SHA" -- 'tts-cache-export-requests/*.json'
+          )
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one TTS cache export request must be added"
+            exit 1
+          fi
+          IFS=$'\t' read -r STATUS REQUEST_PATH <<< "${CHANGED[0]}"
+          if [[ "$STATUS" != "A" || ! "$REQUEST_PATH" =~ ^tts-cache-export-requests/[A-Za-z0-9._-]+\.json$ ]]; then
+            echo "::error::TTS cache export requests are append-only JSON files"
+            exit 1
+          fi
+
+          python3 - "$REQUEST_PATH" <<'PY' >> "$GITHUB_OUTPUT"
+          import hashlib
+          import json
+          import pathlib
+          import re
+          import sys
+
+          request_path = pathlib.Path(sys.argv[1])
+          value = json.loads(request_path.read_text(encoding="utf-8"))
+          required = {
+              "requestVersion",
+              "episodeDate",
+              "expectedSpecSha256",
+              "confirmation",
+          }
+          if not isinstance(value, dict) or set(value) != required:
+              raise SystemExit("cache export request fields are invalid")
+          if value["requestVersion"] != "1.0":
+              raise SystemExit("requestVersion must be 1.0")
+          if value["confirmation"] != "EXPORT_EXISTING_TTS_CACHE":
+              raise SystemExit("confirmation must be EXPORT_EXISTING_TTS_CACHE")
+          episode_date = value["episodeDate"]
+          expected_sha = value["expectedSpecSha256"]
+          if not isinstance(episode_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_date):
+              raise SystemExit("episodeDate must match YYYY-MM-DD")
+          if not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha):
+              raise SystemExit("expectedSpecSha256 must be a SHA-256")
+          expected_sha = expected_sha.lower()
+          spec_path = pathlib.Path("render-specs") / episode_date / "render_spec.json"
+          if not spec_path.is_file() or spec_path.stat().st_size == 0:
+              raise SystemExit(f"render spec not found: {spec_path}")
+          actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+          if actual_sha != expected_sha:
+              raise SystemExit(
+                  f"render_spec SHA-256 mismatch: expected={expected_sha} actual={actual_sha}"
+              )
+
+          spec = json.loads(spec_path.read_text(encoding="utf-8"))
+          blocks = []
+          for block_id, first_scene, last_scene in (
+              ("scenes-01-04", 1, 4),
+              ("scenes-05-09", 5, 9),
+          ):
+              speech = []
+              for scene in spec["scenes"]:
+                  number = scene.get("sceneNumber")
+                  if isinstance(number, int) and first_scene <= number <= last_scene:
+                      speech.extend(chunk["speechText"] for chunk in scene["narrationChunks"])
+              if not speech:
+                  raise SystemExit(f"TTS block {block_id} has no speechText")
+              blocks.append({"id": block_id, "speechText": speech})
+          identity = {
+              "synthesisVersion": "gemini-two-block-v1",
+              "model": "gemini-3.1-flash-tts-preview",
+              "voice": "Charon",
+              "voiceProfileId": spec.get("voiceProfileId"),
+              "pronunciations": spec.get("pronunciations"),
+              "blocks": blocks,
+          }
+          encoded = json.dumps(
+              identity,
+              ensure_ascii=False,
+              sort_keys=True,
+              separators=(",", ":"),
+          ).encode("utf-8")
+          tts_input_sha = hashlib.sha256(encoded).hexdigest()
+          print(f"episode_date={episode_date}")
+          print(f"spec_sha={actual_sha}")
+          print(f"tts_input_sha={tts_input_sha}")
+          PY
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Restore existing production TTS cache
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.verify.outputs.tts_input_sha }}
+          fail-on-cache-miss: true
+
+      - name: Validate and archive the existing cache
+        id: archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          COUNT="$(find .cache/spec-tts-blocks -type f -name audio.wav | wc -l | tr -d ' ')"
+          if [[ "$COUNT" -lt 2 ]]; then
+            echo "::error::Expected both production TTS blocks; found $COUNT"
+            exit 1
+          fi
+          while IFS= read -r audio; do
+            ffmpeg -v error -i "$audio" -f null -
+          done < <(find .cache/spec-tts-blocks -type f -name audio.wav -print)
+          mkdir -p build/tts-cache-export
+          PAYLOAD="build/tts-cache-export/${{ steps.verify.outputs.tts_input_sha }}.tar.gz"
+          tar -czf "$PAYLOAD" .cache/spec-tts-blocks
+          ARTIFACT_NAME="nasdaq-cafe-tts-cache-${{ steps.verify.outputs.tts_input_sha }}-${GITHUB_RUN_ID}"
+          echo "payload=$PAYLOAD" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload portable TTS cache artifact
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.archive.outputs.artifact_name }}
+          path: ${{ steps.archive.outputs.payload }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  publish-registry:
+    name: Publish the portable cache registry
+    needs: export-cache
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Commit cache artifact registry
+        shell: bash
+        env:
+          EPISODE_DATE: ${{ needs.export-cache.outputs.episode_date }}
+          SPEC_SHA: ${{ needs.export-cache.outputs.spec_sha }}
+          TTS_INPUT_SHA: ${{ needs.export-cache.outputs.tts_input_sha }}
+          ARTIFACT_NAME: ${{ needs.export-cache.outputs.artifact_name }}
+          ARTIFACT_ID: ${{ needs.export-cache.outputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          git pull --ff-only origin main
+          mkdir -p tts-cache-exports
+          python3 <<'PY'
+          import json
+          import os
+          import pathlib
+          from datetime import datetime, timezone
+
+          path = pathlib.Path("tts-cache-exports") / f"{os.environ['TTS_INPUT_SHA']}.json"
+          payload = {
+              "registryVersion": "1.0",
+              "ttsInputSha": os.environ["TTS_INPUT_SHA"],
+              "specSha256": os.environ["SPEC_SHA"],
+              "artifactId": int(os.environ["ARTIFACT_ID"]),
+              "artifactName": os.environ["ARTIFACT_NAME"],
+              "runId": int(os.environ["GITHUB_RUN_ID"]),
+              "exportedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+          }
+          path.write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "tts-cache-exports/${TTS_INPUT_SHA}.json"
+          if git diff --cached --quiet; then
+            echo "Registry is already current"
+            exit 0
+          fi
+          git commit -m "Register portable TTS cache ${TTS_INPUT_SHA}"
+          git push origin HEAD:main
