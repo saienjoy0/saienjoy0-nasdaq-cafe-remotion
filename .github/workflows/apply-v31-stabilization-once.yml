@@ -20,7 +20,7 @@ concurrency:
 jobs:
   apply-test-commit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Checkout exact branch
         uses: actions/checkout@v6
@@ -38,7 +38,7 @@ jobs:
         id: install
         run: npm ci
 
-      - name: Reassemble and verify stabilization implementation
+      - name: Reassemble and apply stabilization implementation
         id: materialize
         shell: bash
         run: |
@@ -49,121 +49,13 @@ jobs:
           echo "04df3a251adf79665fadb62b210d9f5354be41fbca6bffe6d7f3d7b77771533c  /tmp/apply-v31.b64" | sha256sum -c -
           base64 --decode /tmp/apply-v31.b64 | gzip --decompress > scripts/apply-v31-stabilization.py
           echo "5833af17e5019bf9404b20ba4cf54fa5000091cd63445d315ae2c5ff6ca6d4ff  scripts/apply-v31-stabilization.py" | sha256sum -c -
-          python - <<'PY'
-          from pathlib import Path
-          path = Path("scripts/apply-v31-stabilization.py")
-          source = path.read_text(encoding="utf-8")
-          source = source.replace("filter((id) =>", "filter((id: string) =>")
-          source = source.replace(
-              'FILES[\'src/components/spec/ShotTransitionHost.tsx\'] = \'import type {PublicMainContent, PublicShot} from "../../spec/public-view-model";',
-              'FILES[\'src/components/spec/ShotTransitionHost.tsx\'] = \'import type {PublicMainContent} from "../../spec/public-view-model";',
-          )
-          path.write_text(source, encoding="utf-8")
-          PY
+          python scripts/.v31-payload/patch-generated.py before
           python -m py_compile scripts/apply-v31-stabilization.py
           python scripts/apply-v31-stabilization.py
-          python - <<'PY'
-          from pathlib import Path
-
-          migration = Path("scripts/migrate-visual-story-v3.ts")
-          source = migration.read_text(encoding="utf-8")
-          cue_anchor = '''const cue = (value: string, edge: "start" | "end") => {
-            const chars = Array.from(normalize(value));
-            return (edge === "start" ? chars.slice(0, 12) : chars.slice(-12)).join("");
-          };
-          '''
-          boundary_function = '''const semanticBoundaries = (text: string, count: number) => {
-            const speech = normalize(text);
-            const candidates: number[] = [];
-            let cursor = 0;
-            for (const unit of unitsWithSpans(text)) {
-              cursor += normalize(unit.text).length;
-              if (cursor > 0 && cursor < speech.length) candidates.push(cursor);
-            }
-            const boundaries = [0];
-            for (let index = 1; index < count; index += 1) {
-              const target = Math.floor(index * speech.length / count);
-              const minimum = boundaries.at(-1)! + 1;
-              const maximum = speech.length - (count - index);
-              const candidate = candidates
-                .filter((value) => value >= minimum && value <= maximum)
-                .sort((a, b) => Math.abs(a - target) - Math.abs(b - target))[0];
-              boundaries.push(Math.max(minimum, Math.min(maximum, candidate ?? target)));
-            }
-            boundaries.push(speech.length);
-            return {speech, boundaries};
-          };
-          '''
-          if cue_anchor not in source:
-              raise SystemExit("migration cue anchor not found")
-          source = source.replace(cue_anchor, cue_anchor + boundary_function, 1)
-          replacements = {
-              '    const units = unitsWithSpans(chunk.speechText);': '    const {speech, boundaries} = semanticBoundaries(chunk.speechText, shots.length);',
-              '      const startUnit = Math.floor(index * units.length / shots.length);': '      const startChar = boundaries[index];',
-              '      const endUnit = Math.max(startUnit, Math.ceil((index + 1) * units.length / shots.length) - 1);': '      const endChar = boundaries[index + 1];',
-              '      const segmentStart = units[Math.min(units.length - 1, startUnit)];': '      const segmentText = speech.slice(startChar, endChar);',
-              '      const segmentEnd = units[Math.min(units.length - 1, endUnit)];': '',
-              '      shot.startProgress = Number((segmentStart.start / Math.max(1, chunk.speechText.length)).toFixed(6));': '      shot.startProgress = Number((startChar / Math.max(1, speech.length)).toFixed(6));',
-              '      shot.endProgress = Number((segmentEnd.end / Math.max(1, chunk.speechText.length)).toFixed(6));': '      shot.endProgress = Number((endChar / Math.max(1, speech.length)).toFixed(6));',
-              '      shot.startCue = cue(segmentStart.text, "start");': '      shot.startCue = cue(segmentText, "start");',
-              '      shot.endCue = cue(segmentEnd.text, "end");': '      shot.endCue = cue(segmentText, "end");',
-          }
-          for old, new in replacements.items():
-              if old not in source:
-                  raise SystemExit(f"migration replacement not found: {old}")
-              source = source.replace(old, new, 1)
-          if "segmentStart" in source or "segmentEnd" in source or "startUnit" in source or "endUnit" in source:
-              raise SystemExit("legacy overlapping boundary logic remains")
-          migration.write_text(source, encoding="utf-8")
-
-          timeline = Path("src/spec/shot-timeline.ts")
-          source = timeline.read_text(encoding="utf-8")
-          old = '''const cueProgress = (
-            speechText: string,
-            cue: string | undefined,
-            edge: "start" | "end",
-          ) => {
-            if (!cue) return null;
-            const speech = normalize(speechText);
-            const needle = normalize(cue);
-            const index = speech.indexOf(needle);
-            if (index < 0 || speech.length === 0) return null;
-            return clamp((index + (edge === "end" ? needle.length : 0)) / speech.length);
-          };'''
-          new = '''const cueProgress = (
-            speechText: string,
-            cue: string | undefined,
-            edge: "start" | "end",
-            fallbackProgress: number,
-          ) => {
-            if (!cue) return null;
-            const speech = normalize(speechText);
-            const needle = normalize(cue);
-            if (!needle || speech.length === 0) return null;
-            const occurrences: number[] = [];
-            let from = 0;
-            while (from <= speech.length - needle.length) {
-              const index = speech.indexOf(needle, from);
-              if (index < 0) break;
-              occurrences.push(index);
-              from = index + 1;
-            }
-            if (occurrences.length === 0) return null;
-            const target = clamp(fallbackProgress) * speech.length;
-            const index = occurrences.sort((a, b) => Math.abs(a - target) - Math.abs(b - target))[0];
-            return clamp((index + (edge === "end" ? needle.length : 0)) / speech.length);
-          };'''
-          if old not in source:
-              raise SystemExit("timeline cue resolver not found")
-          source = source.replace(old, new, 1)
-          call = 'const semanticProgress = cueProgress(chunk.speechText, cue, edge);'
-          if call not in source:
-              raise SystemExit("timeline cue call not found")
-          source = source.replace(call, 'const semanticProgress = cueProgress(chunk.speechText, cue, edge, progress);', 1)
-          timeline.write_text(source, encoding="utf-8")
-          PY
+          python scripts/.v31-payload/patch-generated.py after
           node --import tsx scripts/migrate-visual-story-v3.ts render-specs/2026-07-31/render_spec.json
           rm -rf scripts/.v31-payload
+          rm -f .github/workflows/patch-v31-ffmpeg-once.yml
           rm -f .github/workflows/report-v31-runs-once.yml
 
       - name: Typecheck and validate production input
@@ -171,6 +63,27 @@ jobs:
         run: |
           npm run typecheck
           npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
+
+      - name: Ensure ffmpeg is available
+        id: ffmpeg
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            for attempt in 1 2 3; do
+              if sudo apt-get update && sudo apt-get install -y ffmpeg; then
+                break
+              fi
+              if [[ "$attempt" = "3" ]]; then
+                echo "::error::ffmpeg installation failed after 3 attempts"
+                exit 1
+              fi
+              sleep $((attempt * 10))
+            done
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
 
       - name: Run full runtime and visual contracts
         id: contracts
@@ -189,7 +102,30 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A -- .github/workflows/apply-v31-stabilization-once.yml .github/workflows/report-v31-runs-once.yml scripts/.v31-payload package.json schemas/render_spec.schema.json render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md docs/14_visual_story_engine_v3_1_stabilization.md scripts/migrate-visual-story-v3.ts scripts/test-shot-stability.ts scripts/test-spec-presentation.ts src/spec/render-spec.ts src/spec/shot-contract.ts src/spec/shot-transition-contract.ts src/spec/shot-timeline.ts src/spec/validate-shot-story.ts src/components/spec/StageSafeArea.tsx src/components/spec/SafeCameraViewport.tsx src/components/spec/SharedElementLayer.tsx src/components/spec/ShotTransitionHost.tsx src/components/spec/ShotStageRenderer.tsx src/components/spec/shots/ShotRecipes.tsx
+          git add -A -- \
+            .github/workflows/apply-v31-stabilization-once.yml \
+            .github/workflows/patch-v31-ffmpeg-once.yml \
+            .github/workflows/report-v31-runs-once.yml \
+            scripts/.v31-payload \
+            package.json \
+            schemas/render_spec.schema.json \
+            render-specs/2026-07-31/render_spec.json \
+            episode-packages/2026-07-31/episode_package_2026-07-31.md \
+            docs/14_visual_story_engine_v3_1_stabilization.md \
+            scripts/migrate-visual-story-v3.ts \
+            scripts/test-shot-stability.ts \
+            scripts/test-spec-presentation.ts \
+            src/spec/render-spec.ts \
+            src/spec/shot-contract.ts \
+            src/spec/shot-transition-contract.ts \
+            src/spec/shot-timeline.ts \
+            src/spec/validate-shot-story.ts \
+            src/components/spec/StageSafeArea.tsx \
+            src/components/spec/SafeCameraViewport.tsx \
+            src/components/spec/SharedElementLayer.tsx \
+            src/components/spec/ShotTransitionHost.tsx \
+            src/components/spec/ShotStageRenderer.tsx \
+            src/components/spec/shots/ShotRecipes.tsx
           git diff --cached --check
           git diff --cached --stat
           git commit -m "Stabilize Visual Story Engine v3.1"
@@ -204,6 +140,7 @@ jobs:
           INSTALL_OUTCOME: ${{ steps.install.outcome }}
           MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
           VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
           CONTRACTS_OUTCOME: ${{ steps.contracts.outcome }}
           BUNDLE_OUTCOME: ${{ steps.bundle.outcome }}
           RESULT_SHA: ${{ steps.commit.outputs.commit_sha }}
@@ -216,6 +153,7 @@ jobs:
             echo "- Install: \`${INSTALL_OUTCOME:-unknown}\`"
             echo "- Materialize: \`${MATERIALIZE_OUTCOME:-unknown}\`"
             echo "- Typecheck / validator: \`${VALIDATE_OUTCOME:-unknown}\`"
+            echo "- ffmpeg / ffprobe: \`${FFMPEG_OUTCOME:-unknown}\`"
             echo "- Runtime / visual contracts: \`${CONTRACTS_OUTCOME:-unknown}\`"
             echo "- Remotion bundle: \`${BUNDLE_OUTCOME:-unknown}\`"
             echo "- Verified commit: \`${RESULT_SHA:-not-created}\`"
