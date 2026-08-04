@@ -7,12 +7,30 @@ import {renderSpecSchema} from "../src/spec/render-spec";
 import {validateShotStoryContract} from "../src/spec/validate-shot-story";
 
 const root = process.cwd();
-const [renderer, recipes, specSource] = await Promise.all([
+const approvedPlanPath = path.join(
+  root,
+  "shot-timing-requests/2026-08-04T2218-2026-07-31.json",
+);
+const [renderer, recipes, specSource, approvedPlanSource] = await Promise.all([
   readFile(path.join(root, "src/components/spec/ShotStageRenderer.tsx"), "utf8"),
   readFile(path.join(root, "src/components/spec/shots/ShotRecipes.tsx"), "utf8"),
   readFile(path.join(root, "render-specs/2026-07-31/render_spec.json"), "utf8"),
+  readFile(approvedPlanPath, "utf8"),
 ]);
 const spec = renderSpecSchema.parse(JSON.parse(specSource));
+const approvedPlan = JSON.parse(approvedPlanSource) as {
+  episodeDate?: unknown;
+  expectedShotCount?: unknown;
+  confirmation?: unknown;
+};
+assert.equal(approvedPlan.episodeDate, "2026-07-31");
+assert.equal(approvedPlan.confirmation, "APPLY_MEASURED_SHOT_PLAN");
+assert.ok(
+  Number.isInteger(approvedPlan.expectedShotCount) &&
+    Number(approvedPlan.expectedShotCount) > 0,
+  "approved measured Shot plan must define a positive expectedShotCount",
+);
+const expectedShotCount = Number(approvedPlan.expectedShotCount);
 validateShotStoryContract(spec, {enforceVariety: true});
 
 assert.deepEqual([...DEDICATED_SHOT_RECIPE_IDS].sort(), [...SHOT_RECIPE_IDS].sort());
@@ -34,6 +52,12 @@ for (const scene of spec.scenes) for (const beat of scene.visualBeats) for (cons
   assert.ok(shot.startCue && shot.endCue, `${shot.shotId}: semantic cues required`);
   assert.ok("secondaryTargetIds" in shot, `${shot.shotId}: semantic target set required`);
 }
-assert.equal(shotCount, 39);
+assert.equal(
+  shotCount,
+  expectedShotCount,
+  "render_spec Shot count must match the approved measured Shot plan",
+);
 assert.equal((spec.scenes[8].visualBeats[0].viewerTexts ?? []).length, 4, "Scene 9 must preserve four recap elements");
-console.log("PASS: Visual Story Engine v3.1 transition, safe camera, semantic targets, dedicated recipes, and recap assembly");
+console.log(
+  `PASS: Visual Story Engine v3.2 transition, safe camera, semantic targets, dedicated recipes, ${shotCount} approved Shots, and recap assembly`,
+);
