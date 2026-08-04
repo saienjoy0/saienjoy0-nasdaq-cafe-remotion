@@ -1,0 +1,250 @@
+name: Nasdaq Cafe Motion Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      episode_date:
+        description: "対象日（YYYY-MM-DD）"
+        required: true
+        type: string
+      expected_spec_sha256:
+        description: "確認済みrender_spec.jsonのSHA-256"
+        required: true
+        type: string
+      scene_number:
+        description: "短時間確認するScene"
+        required: true
+        default: "1"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+      offset_seconds:
+        description: "Scene先頭からの開始秒"
+        required: true
+        default: "0"
+        type: string
+      duration_seconds:
+        description: "確認秒数（最大30秒）"
+        required: true
+        default: "20"
+        type: string
+      confirmation:
+        description: "Motion Previewのみ実行"
+        required: true
+        default: MOTION
+        type: choice
+        options:
+          - MOTION
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-motion-preview-${{ inputs.episode_date }}-${{ inputs.scene_number }}
+  cancel-in-progress: true
+
+jobs:
+  render-motion-preview:
+    name: Render cache-only Scene motion preview
+    if: github.actor == github.repository_owner
+    runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
+    timeout-minutes: 20
+
+    env:
+      CI: "true"
+      EPISODE_DATE: ${{ inputs.episode_date }}
+      EXPECTED_SPEC_SHA256: ${{ inputs.expected_spec_sha256 }}
+      SCENE_NUMBER: ${{ inputs.scene_number }}
+      OFFSET_SECONDS: ${{ inputs.offset_seconds }}
+      DURATION_SECONDS: ${{ inputs.duration_seconds }}
+
+    steps:
+      - name: Checkout trusted requested revision
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Verify immutable input and motion range
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ inputs.confirmation }}" != "MOTION" ]]; then
+            echo "::error::confirmation must be MOTION"
+            exit 1
+          fi
+          if [[ ! "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::episode_date must match YYYY-MM-DD"
+            exit 1
+          fi
+          if [[ ! "$SCENE_NUMBER" =~ ^[1-9]$ ]]; then
+            echo "::error::scene_number must be 1 through 9"
+            exit 1
+          fi
+          python3 - "$OFFSET_SECONDS" "$DURATION_SECONDS" <<'PY'
+          import math
+          import sys
+
+          offset = float(sys.argv[1])
+          duration = float(sys.argv[2])
+          if not math.isfinite(offset) or offset < 0:
+              raise SystemExit("offset_seconds must be finite and non-negative")
+          if not math.isfinite(duration) or duration <= 0 or duration > 30:
+              raise SystemExit("duration_seconds must be greater than 0 and at most 30")
+          PY
+
+          SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
+          test -s "$SPEC_PATH"
+          EXPECTED="$(printf '%s' "$EXPECTED_SPEC_SHA256" | tr '[:upper:]' '[:lower:]')"
+          if [[ ! "$EXPECTED" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::expected_spec_sha256 must be a 64-character SHA-256"
+            exit 1
+          fi
+          ACTUAL="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          if [[ "$ACTUAL" != "$EXPECTED" ]]; then
+            echo "::error::render_spec SHA-256 mismatch"
+            echo "::error::expected=$EXPECTED"
+            echo "::error::actual=$ACTUAL"
+            exit 1
+          fi
+
+          TTS_INPUT_SHA="$(python3 - "$SPEC_PATH" <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+
+          with open(sys.argv[1], "r", encoding="utf-8") as handle:
+              value = json.load(handle)
+          scenes = value["scenes"]
+          blocks = []
+          for block_id, first_scene, last_scene in (
+              ("scenes-01-04", 1, 4),
+              ("scenes-05-09", 5, 9),
+          ):
+              speech = []
+              for scene in scenes:
+                  number = scene.get("sceneNumber")
+                  if isinstance(number, int) and first_scene <= number <= last_scene:
+                      speech.extend(
+                          chunk["speechText"] for chunk in scene["narrationChunks"]
+                      )
+              if not speech:
+                  raise SystemExit(f"TTS block {block_id} has no speechText")
+              blocks.append({"id": block_id, "speechText": speech})
+          payload = {
+              "synthesisVersion": "gemini-two-block-v1",
+              "model": "gemini-3.1-flash-tts-preview",
+              "voice": "Charon",
+              "voiceProfileId": value.get("voiceProfileId"),
+              "pronunciations": value.get("pronunciations"),
+              "blocks": blocks,
+          }
+          encoded = json.dumps(
+              payload,
+              ensure_ascii=False,
+              sort_keys=True,
+              separators=(",", ":"),
+          ).encode("utf-8")
+          print(hashlib.sha256(encoded).hexdigest())
+          PY
+          )"
+
+          echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$ACTUAL" >> "$GITHUB_OUTPUT"
+          echo "tts_input_sha=$TTS_INPUT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Verify persistent Codespace tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(nproc)" -ge 4
+          node --version
+          npm --version
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Set up Node.js cache
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Restore exact production TTS cache
+        id: tts_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.verify.outputs.tts_input_sha }}
+
+      - name: Require complete cache and forbid synthesis fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.tts_cache.outputs.cache-hit }}" != "true" ]]; then
+            echo "::error::Exact two-block production TTS cache was not found"
+            echo "::error::Motion Preview does not generate or regenerate narration"
+            exit 1
+          fi
+          COUNT="$(find .cache/spec-tts-blocks -type f -name audio.wav | wc -l | tr -d ' ')"
+          if [[ "$COUNT" -lt 2 ]]; then
+            echo "::error::Expected both production TTS blocks; found $COUNT"
+            exit 1
+          fi
+          while IFS= read -r audio; do
+            ffmpeg -v error -i "$audio" -f null -
+          done < <(find .cache/spec-tts-blocks -type f -name audio.wav -print)
+
+      - name: Validate code and render spec
+        run: |
+          npm run typecheck
+          npm run episode:spec:validate -- "${{ steps.verify.outputs.spec_path }}"
+
+      - name: Render selected Scene range
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --import tsx scripts/render-motion-preview.ts \
+            "${{ steps.verify.outputs.spec_path }}" \
+            "$SCENE_NUMBER" \
+            "$OFFSET_SECONDS" \
+            "$DURATION_SECONDS"
+
+      - name: Decode and inspect Motion Preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUTPUT="$(find renders/motion-preview -maxdepth 1 -type f -name '*.mp4' -print -quit)"
+          test -n "$OUTPUT"
+          test -s "$OUTPUT"
+          ffprobe -v error \
+            -select_streams v:0 \
+            -show_entries stream=codec_name,width,height,r_frame_rate \
+            -of default=noprint_wrappers=1 "$OUTPUT"
+          ffmpeg -v error -i "$OUTPUT" -f null -
+
+      - name: Upload Motion Preview artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-motion-preview-${{ inputs.episode_date }}-scene-${{ inputs.scene_number }}-${{ github.run_id }}
+          path: |
+            renders/motion-preview/*.mp4
+            build/${{ inputs.episode_date }}/motion_preview_report.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
