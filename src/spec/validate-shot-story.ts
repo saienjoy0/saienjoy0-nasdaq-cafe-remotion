@@ -5,10 +5,15 @@ const fail = (path: string, message: string): never => {
   throw new Error(`${path}: ${message}`);
 };
 
-const shotMoment = (chunkOrder: Map<string, number>, chunkId: string, offsetMs: number) => {
+const shotMoment = (
+  chunkOrder: Map<string, number>,
+  chunkId: string,
+  progress: number,
+  offsetMs: number,
+) => {
   const index = chunkOrder.get(chunkId);
   if (index == null) return Number.NaN;
-  return index * 100_000 + offsetMs;
+  return (index + progress) * 100_000 + offsetMs;
 };
 
 export const validateShotStoryContract = (
@@ -55,10 +60,10 @@ export const validateShotStoryContract = (
         if (endIndex == null) fail(`${shotPath}.endChunkId`, `unknown chunk ${shot.endChunkId}`);
         if (startIndex < beatStartIndex || startIndex > beatEndIndex) fail(`${shotPath}.startChunkId`, "Shot must start inside its Visual Beat");
         if (endIndex < beatStartIndex || endIndex > beatEndIndex) fail(`${shotPath}.endChunkId`, "Shot must end inside its Visual Beat");
-        const startMoment = shotMoment(chunkOrder, shot.startChunkId, shot.startOffsetMs);
-        const endMoment = shotMoment(chunkOrder, shot.endChunkId, shot.endOffsetMs + 99_999);
+        const startMoment = shotMoment(chunkOrder, shot.startChunkId, shot.startProgress, shot.startOffsetMs);
+        const endMoment = shotMoment(chunkOrder, shot.endChunkId, shot.endProgress, shot.endOffsetMs);
         if (endMoment <= startMoment) fail(shotPath, "Shot end must be after Shot start");
-        if (startMoment < previousEnd) fail(shotPath, "Shots must not overlap and must be ordered");
+        if (startMoment < previousEnd - 1e-6) fail(shotPath, "Shots must not overlap and must be ordered");
         previousEnd = endMoment;
 
         if (shot.primaryTargetId && !objectIds.has(shot.primaryTargetId)) {
@@ -87,13 +92,13 @@ export const validateShotStoryContract = (
       if (beatSoundCues > 2) fail(path, "one Visual Beat may use at most 2 sound cues");
     });
 
-    if (expressionChanges > 10) fail(scenePath, `fox expression changes are excessive: ${expressionChanges}`);
+    if (expressionChanges > 2) fail(scenePath, `fox expression may change at most twice in one Scene, got ${expressionChanges}`);
   });
 
   if (totalNiyari > 2) fail("$.scenes", `ニヤリ may be used at most twice, got ${totalNiyari}`);
 
   if (options.enforceVariety && totalShots > 0) {
-    if (totalShots < 24) fail("$.scenes", `v3 episode requires at least 24 Shots, got ${totalShots}`);
+    if (totalShots < 24 || totalShots > 50) fail("$.scenes", `v3 episode requires 24-50 Shots, got ${totalShots}`);
     if (new Set(recipes).size < 6) fail("$.scenes", `v3 episode requires at least 6 Shot families, got ${new Set(recipes).size}`);
     if (totalContinuities < 3) fail("$.scenes", `v3 episode requires at least 3 continuity handoffs, got ${totalContinuities}`);
     const longestRun = (values: string[]) => values.reduce((state, value) => {
