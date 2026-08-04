@@ -19,15 +19,15 @@ const config: Record<string, ShotRecipe[]> = {
   "index-return-bars": ["hero-metric-impact", "split-opposition"],
   "focus-matrix": ["focus-matrix-reveal", "focus-matrix-reveal"],
   "verification-matrix": ["verification-two-paths", "verification-two-paths"],
-  "verification-checklist": ["verification-two-paths"],
+  "verification-checklist": ["verification-two-paths", "verification-two-paths"],
   "final-assembly": ["recap-assembly", "recap-assembly"],
   "closing-recap": ["recap-assembly", "recap-assembly"],
   "metric-comparison-board": ["hero-metric-impact", "split-opposition"],
-  "conclusion-card": ["hero-metric-impact"],
+  "conclusion-card": ["hero-metric-impact", "hero-metric-impact"],
   "evidence-boundary": ["causal-build", "counterforce-interrupt"],
-  "analogy-steps": ["causal-build"],
-  "news-media": ["entity-cutaway"],
-  "text-focus": ["hero-metric-impact"],
+  "analogy-steps": ["causal-build", "causal-build"],
+  "news-media": ["entity-cutaway", "hero-metric-impact"],
+  "text-focus": ["hero-metric-impact", "hero-metric-impact"],
 };
 
 const recipeDetails: Record<ShotRecipe, {
@@ -53,30 +53,57 @@ const recipeDetails: Record<ShotRecipe, {
   "recap-assembly": {layout: "assembly-canvas", camera: "pull-back", transitionIn: "continue-from-previous", transitionOut: "merge-to-outcome", expression: "通常", typography: "final-phrase-lock", sound: "resolve-chime"},
 };
 
+type Chunk = {chunkId: string};
+const startPoint = (chunks: Chunk[], fraction: number) => {
+  const scaled = Math.max(0, Math.min(.999999, fraction)) * chunks.length;
+  const index = Math.min(chunks.length - 1, Math.floor(scaled));
+  return {chunkId: chunks[index].chunkId, progress: scaled - index};
+};
+const endPoint = (chunks: Chunk[], fraction: number) => {
+  if (fraction >= 1) return {chunkId: chunks[chunks.length - 1].chunkId, progress: 1};
+  const scaled = Math.max(0, fraction) * chunks.length;
+  const rounded = Math.round(scaled);
+  if (Math.abs(scaled - rounded) < 1e-9 && rounded > 0) {
+    return {chunkId: chunks[rounded - 1].chunkId, progress: 1};
+  }
+  const index = Math.min(chunks.length - 1, Math.floor(scaled));
+  return {chunkId: chunks[index].chunkId, progress: scaled - index};
+};
+
+const expressionFor = (sceneNumber: number, recipe: ShotRecipe, shotIndex: number, shotCount: number): Expression => {
+  if (sceneNumber === 1) return recipe === "hero-metric-impact" && shotIndex === shotCount - 1 ? "分析" : "軽い驚き";
+  if (sceneNumber === 4) return recipe === "actual-crosses-expected" ? "軽い驚き" : "分析";
+  if (sceneNumber === 5) return recipe === "counterforce-interrupt" ? "警戒" : "分析";
+  if (sceneNumber === 6) return shotIndex === 0 ? "軽い驚き" : "分析";
+  if (sceneNumber === 8) return "警戒";
+  if (sceneNumber === 9) return shotIndex === shotCount - 1 ? "眠そう" : "通常";
+  return recipeDetails[recipe].expression;
+};
+
 const data = JSON.parse(await readFile(path.resolve(input), "utf8"));
 for (const scene of data.scenes) {
-  const chunkIndex = new Map(scene.narrationChunks.map((chunk: {chunkId: string}, index: number) => [chunk.chunkId, index]));
+  const chunkIndex = new Map(scene.narrationChunks.map((chunk: Chunk, index: number) => [chunk.chunkId, index]));
   for (const beat of scene.visualBeats) {
     const start = chunkIndex.get(beat.startChunkId) as number;
     const end = chunkIndex.get(beat.endChunkId) as number;
-    const chunks = scene.narrationChunks.slice(start, end + 1);
-    const requested = config[beat.visualTemplate] ?? ["hero-metric-impact"];
-    const recipes = requested.slice(0, Math.max(1, Math.min(4, chunks.length)));
+    const chunks = scene.narrationChunks.slice(start, end + 1) as Chunk[];
+    const recipes = (config[beat.visualTemplate] ?? ["hero-metric-impact"]).slice(0, 4);
     const continuityKey = recipes.length > 1 ? `${beat.beatId}-flow` : null;
     beat.shots = recipes.map((recipe, index) => {
       const details = recipeDetails[recipe];
-      const chunk = chunks[Math.min(index, chunks.length - 1)];
-      const nextChunk = chunks[Math.min(index + 1, chunks.length - 1)];
+      const start = startPoint(chunks, index / recipes.length);
+      const end = endPoint(chunks, (index + 1) / recipes.length);
       const primaryTargetId = beat.objectIds[index % Math.max(1, beat.objectIds.length)] ?? beat.assetPlacementIds[0] ?? null;
       const sourceText = beat.viewerTexts[index] ?? beat.primaryElement ?? beat.screenQuestion;
       const typographyText = details.typography ? String(sourceText).slice(0, 22) : null;
-      const isLastSceneLastShot = scene.sceneNumber === 9 && index === recipes.length - 1;
       return {
         shotId: `${beat.beatId}-shot-${String(index + 1).padStart(3, "0")}`,
         shotRecipe: recipe,
-        startChunkId: chunk.chunkId,
+        startChunkId: start.chunkId,
+        startProgress: Number(start.progress.toFixed(6)),
         startOffsetMs: 0,
-        endChunkId: nextChunk.chunkId,
+        endChunkId: end.chunkId,
+        endProgress: Number(end.progress.toFixed(6)),
         endOffsetMs: 0,
         endCue: beat.narrationEndCue,
         primaryTargetId,
@@ -88,7 +115,7 @@ for (const scene of data.scenes) {
         typographyTreatment: details.typography,
         typographyText,
         soundCue: index < 2 ? details.sound : null,
-        foxExpression: isLastSceneLastShot ? "眠そう" : details.expression,
+        foxExpression: expressionFor(scene.sceneNumber, recipe, index, recipes.length),
       };
     });
   }
