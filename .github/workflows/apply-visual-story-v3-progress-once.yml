@@ -7,13 +7,23 @@ on:
     paths:
       - .github/workflows/apply-visual-story-v3-progress-once.yml
 
+concurrency:
+  group: visual-story-v3-progress
+  cancel-in-progress: true
+
 permissions:
   contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
+      - name: Record start
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment 26 --repo "$GITHUB_REPOSITORY" --body "Visual Story Engine v3 measured-audio synchronization started. Run ID: $GITHUB_RUN_ID."
       - uses: actions/checkout@v4
         with:
           ref: feature/visual-story-engine-v2
@@ -23,25 +33,34 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Add measured chunk progress to Shot schema
+      - name: Add measured chunk progress to Shot schema and stabilize Scene 6 fox
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('src/spec/render-spec.ts')
           text = p.read_text(encoding='utf-8')
-          old = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+          if 'startProgress: z.number().min(0).max(1)' not in text:
+              old = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
             startOffsetMs: z.number().int().min(0).max(10_000),
             endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
             endOffsetMs: z.number().int().min(0).max(10_000),'''
-          new = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+              new = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
             startProgress: z.number().min(0).max(1),
             startOffsetMs: z.number().int().min(0).max(10_000),
             endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
             endProgress: z.number().min(0).max(1),
             endOffsetMs: z.number().int().min(0).max(10_000),'''
-          if old not in text:
-              raise SystemExit('Shot progress schema anchor missing')
-          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+              if old not in text:
+                  raise SystemExit('Shot progress schema anchor missing')
+              text = text.replace(old, new, 1)
+              p.write_text(text, encoding='utf-8')
+
+          migration = Path('scripts/migrate-visual-story-v3.ts')
+          text = migration.read_text(encoding='utf-8')
+          old = '  if (sceneNumber === 6) return shotIndex === 0 ? "軽い驚き" : "分析";'
+          new = '  if (sceneNumber === 6) return "分析";'
+          if old in text:
+              migration.write_text(text.replace(old, new, 1), encoding='utf-8')
           PY
       - name: Rebuild July 31 Shot Plan
         run: npm run migrate:visual-story:v3 -- render-specs/2026-07-31/render_spec.json
@@ -88,6 +107,11 @@ jobs:
           rm .github/workflows/apply-visual-story-v3-progress-once.yml
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add src/spec/render-spec.ts schemas/render_spec.schema.json render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md .github/workflows/apply-visual-story-v3-progress-once.yml
+          git add src/spec/render-spec.ts scripts/migrate-visual-story-v3.ts schemas/render_spec.schema.json render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md .github/workflows/apply-visual-story-v3-progress-once.yml
           git commit -m "Synchronize measured-audio Visual Story v3 Shots"
           git push origin HEAD:feature/visual-story-engine-v2
+      - name: Record result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment 26 --repo "$GITHUB_REPOSITORY" --body "Visual Story Engine v3 measured-audio synchronization finished with status: ${{ job.status }}. Run ID: $GITHUB_RUN_ID."
