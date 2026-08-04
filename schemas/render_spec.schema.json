@@ -1137,6 +1137,11 @@
                         "type": "string",
                         "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
                       },
+                      "startProgress": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
                       "startOffsetMs": {
                         "type": "integer",
                         "minimum": 0,
@@ -1145,6 +1150,11 @@
                       "endChunkId": {
                         "type": "string",
                         "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                      },
+                      "endProgress": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
                       },
                       "endOffsetMs": {
                         "type": "integer",
@@ -1295,8 +1305,10 @@
                       "shotId",
                       "shotRecipe",
                       "startChunkId",
+                      "startProgress",
                       "startOffsetMs",
                       "endChunkId",
+                      "endProgress",
                       "endOffsetMs",
                       "endCue",
                       "primaryTargetId",

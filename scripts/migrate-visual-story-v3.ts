@@ -74,7 +74,7 @@ const expressionFor = (sceneNumber: number, recipe: ShotRecipe, shotIndex: numbe
   if (sceneNumber === 1) return recipe === "hero-metric-impact" && shotIndex === shotCount - 1 ? "分析" : "軽い驚き";
   if (sceneNumber === 4) return recipe === "actual-crosses-expected" ? "軽い驚き" : "分析";
   if (sceneNumber === 5) return recipe === "counterforce-interrupt" ? "警戒" : "分析";
-  if (sceneNumber === 6) return shotIndex === 0 ? "軽い驚き" : "分析";
+  if (sceneNumber === 6) return "分析";
   if (sceneNumber === 8) return "警戒";
   if (sceneNumber === 9) return shotIndex === shotCount - 1 ? "眠そう" : "通常";
   return recipeDetails[recipe].expression;

@@ -772,60 +772,83 @@
 - Motion指定イベント数：55
 - 最終採用経路：既存episode packageとrender_specに記録された採用経路を維持し、非採用経路を追加しない
 <!-- VISUAL_STORY_ENGINE_V2_END -->
+
 ## Visual Story Engine v3 Shot Plan
 
 固定背景・狐左位置・字幕領域を維持し、メイン表示領域内だけでShot、内部カメラ、前後要素の引継ぎを行う。
 
+- 総Shot数：39
 ### scene-01
 - `scene-01-beat-001` / `opening-contradiction`
-  - `scene-01-beat-001-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / continuity `none`
+  - `scene-01-beat-001-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `軽い驚き` / `scene-01-chunk-001@0.000 → scene-01-chunk-001@0.333` / continuity `scene-01-beat-001-flow`
+  - `scene-01-beat-001-shot-002`: `contradiction-interrupt` / `split-vertical` / camera `pan-right` / fox `軽い驚き` / `scene-01-chunk-001@0.333 → scene-01-chunk-001@0.667` / continuity `scene-01-beat-001-flow`
+  - `scene-01-beat-001-shot-003`: `contradiction-interrupt` / `split-vertical` / camera `pan-right` / fox `軽い驚き` / `scene-01-chunk-001@0.667 → scene-01-chunk-001@1.000` / continuity `scene-01-beat-001-flow`
 - `scene-01-beat-002` / `text-focus`
-  - `scene-01-beat-002-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / continuity `none`
+  - `scene-01-beat-002-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `軽い驚き` / `scene-01-chunk-002@0.000 → scene-01-chunk-002@0.500` / continuity `scene-01-beat-002-flow`
+  - `scene-01-beat-002-shot-002`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / `scene-01-chunk-002@0.500 → scene-01-chunk-002@1.000` / continuity `scene-01-beat-002-flow`
 
 ### scene-02
 - `scene-02-beat-001` / `hero-number`
-  - `scene-02-beat-001-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / continuity `none`
+  - `scene-02-beat-001-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / `scene-02-chunk-001@0.000 → scene-02-chunk-001@0.500` / continuity `scene-02-beat-001-flow`
+  - `scene-02-beat-001-shot-002`: `entity-cutaway` / `entity-full` / camera `pull-back` / fox `分析` / `scene-02-chunk-001@0.500 → scene-02-chunk-001@1.000` / continuity `scene-02-beat-001-flow`
 - `scene-02-beat-002` / `diverging-stock-bars`
-  - `scene-02-beat-002-shot-001`: `split-opposition` / `split-vertical` / camera `reframe-outcome` / fox `分析` / continuity `none`
+  - `scene-02-beat-002-shot-001`: `split-opposition` / `split-vertical` / camera `reframe-outcome` / fox `分析` / `scene-02-chunk-002@0.000 → scene-02-chunk-002@0.500` / continuity `scene-02-beat-002-flow`
+  - `scene-02-beat-002-shot-002`: `focus-matrix-reveal` / `matrix-2x2` / camera `pan-right` / fox `分析` / `scene-02-chunk-002@0.500 → scene-02-chunk-002@1.000` / continuity `scene-02-beat-002-flow`
 
 ### scene-03
 - `scene-03-beat-001` / `expected-actual-bullet`
-  - `scene-03-beat-001-shot-001`: `expected-anchor` / `full-stage` / camera `static` / fox `分析` / continuity `none`
+  - `scene-03-beat-001-shot-001`: `expected-anchor` / `full-stage` / camera `static` / fox `分析` / `scene-03-chunk-001@0.000 → scene-03-chunk-001@0.333` / continuity `scene-03-beat-001-flow`
+  - `scene-03-beat-001-shot-002`: `actual-crosses-expected` / `full-stage` / camera `push-in` / fox `軽い驚き` / `scene-03-chunk-001@0.333 → scene-03-chunk-001@0.667` / continuity `scene-03-beat-001-flow`
+  - `scene-03-beat-001-shot-003`: `gap-macro` / `macro-detail` / camera `macro-detail` / fox `分析` / `scene-03-chunk-001@0.667 → scene-03-chunk-001@1.000` / continuity `scene-03-beat-001-flow`
 - `scene-03-beat-002` / `metric-comparison-board`
-  - `scene-03-beat-002-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / continuity `none`
+  - `scene-03-beat-002-shot-001`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / `scene-03-chunk-002@0.000 → scene-03-chunk-002@0.500` / continuity `scene-03-beat-002-flow`
+  - `scene-03-beat-002-shot-002`: `split-opposition` / `split-vertical` / camera `reframe-outcome` / fox `分析` / `scene-03-chunk-002@0.500 → scene-03-chunk-002@1.000` / continuity `scene-03-beat-002-flow`
 
 ### scene-04
 - `scene-04-beat-001` / `expected-actual-gap-flow`
-  - `scene-04-beat-001-shot-001`: `expected-anchor` / `full-stage` / camera `static` / fox `分析` / continuity `none`
+  - `scene-04-beat-001-shot-001`: `expected-anchor` / `full-stage` / camera `static` / fox `分析` / `scene-04-chunk-001@0.000 → scene-04-chunk-001@0.333` / continuity `scene-04-beat-001-flow`
+  - `scene-04-beat-001-shot-002`: `actual-crosses-expected` / `full-stage` / camera `push-in` / fox `軽い驚き` / `scene-04-chunk-001@0.333 → scene-04-chunk-001@0.667` / continuity `scene-04-beat-001-flow`
+  - `scene-04-beat-001-shot-003`: `gap-macro` / `macro-detail` / camera `macro-detail` / fox `分析` / `scene-04-chunk-001@0.667 → scene-04-chunk-001@1.000` / continuity `scene-04-beat-001-flow`
 - `scene-04-beat-002` / `analogy-steps`
-  - `scene-04-beat-002-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / continuity `none`
+  - `scene-04-beat-002-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-04-chunk-002@0.000 → scene-04-chunk-002@0.500` / continuity `scene-04-beat-002-flow`
+  - `scene-04-beat-002-shot-002`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-04-chunk-002@0.500 → scene-04-chunk-002@1.000` / continuity `scene-04-beat-002-flow`
 - `scene-04-beat-003` / `causal-lane`
-  - `scene-04-beat-003-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / continuity `none`
+  - `scene-04-beat-003-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-04-chunk-003@0.000 → scene-04-chunk-003@0.500` / continuity `scene-04-beat-003-flow`
+  - `scene-04-beat-003-shot-002`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-04-chunk-003@0.500 → scene-04-chunk-003@1.000` / continuity `scene-04-beat-003-flow`
 
 ### scene-05
 - `scene-05-beat-001` / `causal-lane`
-  - `scene-05-beat-001-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / continuity `none`
+  - `scene-05-beat-001-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-05-chunk-001@0.000 → scene-05-chunk-001@0.500` / continuity `scene-05-beat-001-flow`
+  - `scene-05-beat-001-shot-002`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-05-chunk-001@0.500 → scene-05-chunk-001@1.000` / continuity `scene-05-beat-001-flow`
 - `scene-05-beat-002` / `tailwind-headwind`
-  - `scene-05-beat-002-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / continuity `none`
+  - `scene-05-beat-002-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-05-chunk-002@0.000 → scene-05-chunk-002@0.500` / continuity `scene-05-beat-002-flow`
+  - `scene-05-beat-002-shot-002`: `counterforce-interrupt` / `split-horizontal` / camera `pan-left` / fox `警戒` / `scene-05-chunk-002@0.500 → scene-05-chunk-002@1.000` / continuity `scene-05-beat-002-flow`
 
 ### scene-06
 - `scene-06-beat-001` / `evidence-boundary`
-  - `scene-06-beat-001-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / continuity `none`
+  - `scene-06-beat-001-shot-001`: `causal-build` / `lane-left-right` / camera `follow-path` / fox `分析` / `scene-06-chunk-001@0.000 → scene-06-chunk-001@0.500` / continuity `scene-06-beat-001-flow`
+  - `scene-06-beat-001-shot-002`: `counterforce-interrupt` / `split-horizontal` / camera `pan-left` / fox `分析` / `scene-06-chunk-001@0.500 → scene-06-chunk-001@1.000` / continuity `scene-06-beat-001-flow`
 - `scene-06-beat-002` / `split-comparison`
-  - `scene-06-beat-002-shot-001`: `split-opposition` / `split-vertical` / camera `reframe-outcome` / fox `分析` / continuity `none`
+  - `scene-06-beat-002-shot-001`: `split-opposition` / `split-vertical` / camera `reframe-outcome` / fox `分析` / `scene-06-chunk-002@0.000 → scene-06-chunk-002@0.500` / continuity `scene-06-beat-002-flow`
+  - `scene-06-beat-002-shot-002`: `split-opposition` / `split-vertical` / camera `reframe-outcome` / fox `分析` / `scene-06-chunk-002@0.500 → scene-06-chunk-002@1.000` / continuity `scene-06-beat-002-flow`
 
 ### scene-07
 - `scene-07-beat-001` / `entity-card-full`
-  - `scene-07-beat-001-shot-001`: `entity-cutaway` / `entity-full` / camera `pull-back` / fox `分析` / continuity `none`
+  - `scene-07-beat-001-shot-001`: `entity-cutaway` / `entity-full` / camera `pull-back` / fox `分析` / `scene-07-chunk-001@0.000 → scene-07-chunk-001@0.500` / continuity `scene-07-beat-001-flow`
+  - `scene-07-beat-001-shot-002`: `hero-metric-impact` / `hero-center` / camera `push-in` / fox `分析` / `scene-07-chunk-001@0.500 → scene-07-chunk-001@1.000` / continuity `scene-07-beat-001-flow`
 - `scene-07-beat-002` / `focus-matrix`
-  - `scene-07-beat-002-shot-001`: `focus-matrix-reveal` / `matrix-2x2` / camera `pan-right` / fox `分析` / continuity `none`
+  - `scene-07-beat-002-shot-001`: `focus-matrix-reveal` / `matrix-2x2` / camera `pan-right` / fox `分析` / `scene-07-chunk-002@0.000 → scene-07-chunk-002@0.500` / continuity `scene-07-beat-002-flow`
+  - `scene-07-beat-002-shot-002`: `focus-matrix-reveal` / `matrix-2x2` / camera `pan-right` / fox `分析` / `scene-07-chunk-002@0.500 → scene-07-chunk-002@1.000` / continuity `scene-07-beat-002-flow`
 
 ### scene-08
 - `scene-08-beat-001` / `verification-checklist`
-  - `scene-08-beat-001-shot-001`: `verification-two-paths` / `matrix-2x2` / camera `pull-back` / fox `警戒` / continuity `none`
+  - `scene-08-beat-001-shot-001`: `verification-two-paths` / `matrix-2x2` / camera `pull-back` / fox `警戒` / `scene-08-chunk-001@0.000 → scene-08-chunk-001@0.500` / continuity `scene-08-beat-001-flow`
+  - `scene-08-beat-001-shot-002`: `verification-two-paths` / `matrix-2x2` / camera `pull-back` / fox `警戒` / `scene-08-chunk-001@0.500 → scene-08-chunk-001@1.000` / continuity `scene-08-beat-001-flow`
 - `scene-08-beat-002` / `verification-matrix`
-  - `scene-08-beat-002-shot-001`: `verification-two-paths` / `matrix-2x2` / camera `pull-back` / fox `警戒` / continuity `none`
+  - `scene-08-beat-002-shot-001`: `verification-two-paths` / `matrix-2x2` / camera `pull-back` / fox `警戒` / `scene-08-chunk-002@0.000 → scene-08-chunk-002@0.500` / continuity `scene-08-beat-002-flow`
+  - `scene-08-beat-002-shot-002`: `verification-two-paths` / `matrix-2x2` / camera `pull-back` / fox `警戒` / `scene-08-chunk-002@0.500 → scene-08-chunk-002@1.000` / continuity `scene-08-beat-002-flow`
 
 ### scene-09
 - `scene-09-beat-001` / `final-assembly`
-  - `scene-09-beat-001-shot-001`: `recap-assembly` / `assembly-canvas` / camera `pull-back` / fox `眠そう` / continuity `none`
+  - `scene-09-beat-001-shot-001`: `recap-assembly` / `assembly-canvas` / camera `pull-back` / fox `通常` / `scene-09-chunk-001@0.000 → scene-09-chunk-001@0.500` / continuity `scene-09-beat-001-flow`
+  - `scene-09-beat-001-shot-002`: `recap-assembly` / `assembly-canvas` / camera `pull-back` / fox `眠そう` / `scene-09-chunk-001@0.500 → scene-09-chunk-001@1.000` / continuity `scene-09-beat-001-flow`
