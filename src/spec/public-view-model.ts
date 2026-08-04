@@ -2,11 +2,13 @@ import {resolveStrictExpressionAsset} from "../config/spec-expressions";
 import type {ProductionScene} from "./render-spec";
 import {isPlacementActive, type MotionInstruction, type SceneRenderState} from "./render-state";
 import type {SequencePolicy} from "./motion-preset-contract";
+import type {ResolvedShot} from "./shot-timeline";
 
 type PublicTone = "positive" | "negative" | "warning" | "neutral" | "emphasis";
 type PublicFit = "cover" | "contain" | "fill";
 
 export type PublicMotionInstruction = MotionInstruction;
+export type PublicShot = ResolvedShot;
 
 type PublicMotion = {
   revealAtMs: number;
@@ -84,6 +86,9 @@ export type PublicMainContent = {
   templateConfig: ProductionScene["visualBeats"][number]["templateConfig"];
   sequencePolicy: SequencePolicy;
   finalHoldMs: number;
+  shot: PublicShot | null;
+  previousShot: PublicShot | null;
+  nextShot: PublicShot | null;
   cards: PublicCard[];
   numbers: PublicNumber[];
   nodes: PublicNode[];
@@ -110,6 +115,8 @@ export type PublicSceneViewModel = {
   captionText: string | null;
   background: PublicPlacedAsset;
   fox: PublicPlacedAsset;
+  previousFox: PublicPlacedAsset | null;
+  foxTransitionProgress: number;
   mainAssets: PublicPlacedAsset[];
   overlays: PublicPlacedAsset[];
   mainContent: PublicMainContent | null;
@@ -177,6 +184,18 @@ export const toPublicSceneViewModel = (
       isPlacementActive(scene, placement, state),
   );
   if (!foxPlacement) throw new Error(`fox expression asset is unavailable: ${expressionAsset.assetId}`);
+
+  const previousFoxPlacement = state.previousExpression
+    ? (() => {
+        const previousAsset = resolveStrictExpressionAsset(state.previousExpression);
+        return scene.assetPlacements.find(
+          (placement) =>
+            placement.role === "fox-expression" &&
+            placement.assetId === previousAsset.assetId &&
+            isPlacementActive(scene, placement, state),
+        ) ?? null;
+      })()
+    : null;
 
   const selectedIds = new Set(beat.objectIds);
   const beatDurationMs = Math.max(1, beat.endMs - beat.startMs);
@@ -302,6 +321,8 @@ export const toPublicSceneViewModel = (
     captionText: state.captionText,
     background: publicAsset(backgroundPlacement, assets),
     fox: publicAsset(foxPlacement, assets),
+    previousFox: previousFoxPlacement ? publicAsset(previousFoxPlacement, assets) : null,
+    foxTransitionProgress: state.expressionTransitionProgress,
     mainAssets,
     overlays,
     mainContent: generatedContentVisible
@@ -318,6 +339,9 @@ export const toPublicSceneViewModel = (
           templateConfig: beat.templateConfig,
           sequencePolicy,
           finalHoldMs,
+          shot: state.activeShot,
+          previousShot: state.previousShot,
+          nextShot: state.nextShot,
           cards,
           numbers,
           nodes,
