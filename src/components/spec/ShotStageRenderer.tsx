@@ -1,5 +1,5 @@
 import {Easing, interpolate, spring} from "remotion";
-import type {PublicCard, PublicMainContent, PublicNode, PublicNumber, PublicShot} from "../../spec/public-view-model";
+import type {PublicCard, PublicMainContent, PublicNumber, PublicShot} from "../../spec/public-view-model";
 import {CAMERA_PRESET_TRANSFORMS} from "../../spec/shot-contract";
 import {VisualTemplateRenderer} from "./VisualTemplateRenderer";
 
