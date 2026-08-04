@@ -1,0 +1,238 @@
+name: Nasdaq Cafe Motion Preview Request
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "motion-preview-requests/*.json"
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: nasdaq-cafe-motion-preview-request-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch-motion-preview:
+    name: Wake Codespace and dispatch Motion Preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+
+    steps:
+      - name: Checkout request commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve and validate one immutable request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          mapfile -t REQUEST_FILES < <(
+            if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+              git show --pretty='' --name-only "$GITHUB_SHA" -- 'motion-preview-requests/*.json'
+            else
+              git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- 'motion-preview-requests/*.json'
+            fi | sort -u
+          )
+
+          if [[ "${#REQUEST_FILES[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one motion-preview request JSON must change; found ${#REQUEST_FILES[@]}"
+            if [[ "${#REQUEST_FILES[@]}" -gt 0 ]]; then
+              printf '::error::%s\n' "${REQUEST_FILES[@]}"
+            fi
+            exit 1
+          fi
+
+          REQUEST_PATH="${REQUEST_FILES[0]}"
+          if [[ ! -s "$REQUEST_PATH" ]]; then
+            echo "::error::Request must exist and be non-empty: $REQUEST_PATH"
+            exit 1
+          fi
+
+          python3 - "$REQUEST_PATH" <<'PY' >> "$GITHUB_OUTPUT"
+          import hashlib
+          import json
+          import math
+          import pathlib
+          import re
+          import sys
+
+          request_path = pathlib.Path(sys.argv[1])
+          value = json.loads(request_path.read_text(encoding="utf-8"))
+          required = {
+              "requestVersion",
+              "episodeDate",
+              "expectedSpecSha256",
+              "sceneNumber",
+              "offsetSeconds",
+              "durationSeconds",
+              "confirmation",
+          }
+          if not isinstance(value, dict) or set(value) != required:
+              raise SystemExit(
+                  f"request fields must be exactly {sorted(required)}; got {sorted(value) if isinstance(value, dict) else type(value).__name__}"
+              )
+          if value["requestVersion"] != "1.0":
+              raise SystemExit("requestVersion must be 1.0")
+          episode_date = value["episodeDate"]
+          if not isinstance(episode_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_date):
+              raise SystemExit("episodeDate must match YYYY-MM-DD")
+          expected_sha = value["expectedSpecSha256"]
+          if not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha):
+              raise SystemExit("expectedSpecSha256 must be a 64-character SHA-256")
+          scene_number = value["sceneNumber"]
+          if not isinstance(scene_number, int) or isinstance(scene_number, bool) or not 1 <= scene_number <= 9:
+              raise SystemExit("sceneNumber must be an integer from 1 through 9")
+          offset = value["offsetSeconds"]
+          duration = value["durationSeconds"]
+          if not isinstance(offset, (int, float)) or isinstance(offset, bool) or not math.isfinite(offset) or offset < 0:
+              raise SystemExit("offsetSeconds must be finite and non-negative")
+          if not isinstance(duration, (int, float)) or isinstance(duration, bool) or not math.isfinite(duration) or duration <= 0 or duration > 30:
+              raise SystemExit("durationSeconds must be greater than 0 and at most 30")
+          if value["confirmation"] != "MOTION":
+              raise SystemExit("confirmation must be MOTION")
+
+          spec_path = pathlib.Path("render-specs") / episode_date / "render_spec.json"
+          if not spec_path.is_file() or spec_path.stat().st_size == 0:
+              raise SystemExit(f"render spec not found: {spec_path}")
+          actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+          if actual_sha != expected_sha.lower():
+              raise SystemExit(
+                  f"render_spec SHA-256 mismatch: expected={expected_sha.lower()} actual={actual_sha}"
+              )
+
+          print(f"request_path={request_path.as_posix()}")
+          print(f"episode_date={episode_date}")
+          print(f"expected_spec_sha256={actual_sha}")
+          print(f"scene_number={scene_number}")
+          print(f"offset_seconds={offset}")
+          print(f"duration_seconds={duration}")
+          PY
+
+      - name: Start the most recently used repository Codespace
+        id: codespace
+        shell: bash
+        env:
+          CODESPACE_LIFECYCLE_TOKEN: ${{ secrets.CODESPACE_LIFECYCLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CODESPACE_LIFECYCLE_TOKEN:-}" ]]; then
+            echo "::error::Repository secret CODESPACE_LIFECYCLE_TOKEN is required"
+            echo "::error::Use a token that can list this user's Codespaces and start the selected Codespace"
+            exit 1
+          fi
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          api = "https://api.github.com"
+          token = os.environ["CODESPACE_LIFECYCLE_TOKEN"]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": "2026-03-10",
+              "User-Agent": "nasdaq-cafe-motion-preview-request",
+          }
+
+          def request(method, url):
+              req = urllib.request.Request(url, method=method, headers=headers)
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = response.read()
+                      return json.loads(payload) if payload else None
+              except urllib.error.HTTPError as exc:
+                  detail = exc.read().decode("utf-8", errors="replace")
+                  raise SystemExit(f"GitHub Codespaces API {method} {url} failed: HTTP {exc.code}: {detail}") from exc
+
+          listing = request("GET", f"{api}/user/codespaces?per_page=100")
+          candidates = [
+              item for item in listing.get("codespaces", [])
+              if item.get("repository", {}).get("full_name") == repository
+          ]
+          if not candidates:
+              raise SystemExit(f"No Codespace found for repository {repository}")
+          selected = max(
+              candidates,
+              key=lambda item: item.get("last_used_at") or item.get("updated_at") or "",
+          )
+          name = selected["name"]
+          state = selected.get("state", "Unknown")
+          if state != "Available":
+              start_url = selected.get("start_url") or f"{api}/user/codespaces/{name}/start"
+              try:
+                  request("POST", start_url)
+              except SystemExit as exc:
+                  if "HTTP 409" not in str(exc):
+                      raise
+
+          deadline = time.monotonic() + 420
+          while True:
+              current = request("GET", f"{api}/user/codespaces/{name}")
+              state = current.get("state", "Unknown")
+              if state == "Available":
+                  break
+              if time.monotonic() >= deadline:
+                  raise SystemExit(f"Codespace {name} did not become Available; last state={state}")
+              time.sleep(7)
+
+          print(f"name={name}")
+          print(f"state={state}")
+          PY
+
+      - name: Dispatch the Codespace Motion Preview workflow
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+          EXPECTED_SPEC_SHA256: ${{ steps.request.outputs.expected_spec_sha256 }}
+          SCENE_NUMBER: ${{ steps.request.outputs.scene_number }}
+          OFFSET_SECONDS: ${{ steps.request.outputs.offset_seconds }}
+          DURATION_SECONDS: ${{ steps.request.outputs.duration_seconds }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY' > /tmp/motion-preview-dispatch.json
+          import json
+          import os
+
+          print(json.dumps({
+              "ref": "main",
+              "inputs": {
+                  "episode_date": os.environ["EPISODE_DATE"],
+                  "expected_spec_sha256": os.environ["EXPECTED_SPEC_SHA256"],
+                  "scene_number": os.environ["SCENE_NUMBER"],
+                  "offset_seconds": os.environ["OFFSET_SECONDS"],
+                  "duration_seconds": os.environ["DURATION_SECONDS"],
+                  "confirmation": "MOTION",
+              },
+          }))
+          PY
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-motion-preview.yml/dispatches" \
+            --input /tmp/motion-preview-dispatch.json
+
+          {
+            echo "### Motion Preview request dispatched"
+            echo "- Request: \`${{ steps.request.outputs.request_path }}\`"
+            echo "- Episode: \`$EPISODE_DATE\`"
+            echo "- Scene: \`$SCENE_NUMBER\`"
+            echo "- Range: \`${OFFSET_SECONDS}s + ${DURATION_SECONDS}s\`"
+            echo "- Codespace: \`${{ steps.codespace.outputs.name }}\`"
+            echo "- Codespace state: \`${{ steps.codespace.outputs.state }}\`"
+            echo "- Runner label: \`nasdaq-cafe-codespace\`"
+          } >> "$GITHUB_STEP_SUMMARY"

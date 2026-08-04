@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {renderSpecSchema} from "../src/spec/render-spec";
-import {validateShotStoryContract} from "../src/spec/validate-shot-story";
+import {renderSpecSchema, type RenderProductionData} from "../src/spec/render-spec";
+import {
+  validateProductionShotTimingContract,
+  validateShotStoryContract,
+} from "../src/spec/validate-shot-story";
 
 const source = JSON.parse(await readFile("render-specs/2026-07-31/render_spec.json", "utf8"));
 const parsed = renderSpecSchema.parse(source);
@@ -25,6 +28,75 @@ const badExpression = structuredClone(parsed);
 const sceneOneShot = badExpression.scenes[0].visualBeats.find((beat) => (beat.shots?.length ?? 0) > 0)!.shots![0];
 sceneOneShot.foxExpression = "眠そう";
 assert.throws(() => validateShotStoryContract(badExpression), /reserved for Scene 9/);
+
+const timingShot = (
+  id: string,
+  startProgress: number,
+  endProgress: number,
+  transitionOut = "cut",
+) => ({
+  shotId: id,
+  startChunkId: "scene-01-chunk-001",
+  startProgress,
+  startOffsetMs: 0,
+  endChunkId: "scene-01-chunk-001",
+  endProgress,
+  endOffsetMs: 0,
+  transitionOut,
+});
+
+const timingData = (
+  durationMs: number,
+  timingShots: ReturnType<typeof timingShot>[],
+  sceneNumber = 1,
+) => ({
+  scenes: [{
+    sceneId: `scene-${String(sceneNumber).padStart(2, "0")}`,
+    sceneNumber,
+    durationMs,
+    narrationChunks: [{
+      chunkId: "scene-01-chunk-001",
+      speechText: "measured narration timing",
+      startMs: 0,
+      endMs: durationMs,
+    }],
+    visualBeats: [{
+      startMs: 0,
+      endMs: durationMs,
+      shots: timingShots,
+    }],
+  }],
+}) as unknown as RenderProductionData;
+
+const timingSummary = validateProductionShotTimingContract(timingData(9_000, [
+  timingShot("scene-01-beat-001-shot-001", 0, 0.5),
+  timingShot("scene-01-beat-001-shot-002", 0.5, 1),
+]));
+assert.equal(timingSummary.totalShots, 2);
+assert.equal(timingSummary.maximumShotDurationMs, 4_500);
+
+assert.throws(
+  () => validateProductionShotTimingContract(timingData(11_000, [
+    timingShot("scene-01-beat-001-shot-001", 0, 1),
+  ])),
+  /maximum is 10000ms/,
+);
+assert.throws(
+  () => validateProductionShotTimingContract(timingData(8_000, [
+    timingShot("scene-01-beat-001-shot-001", 0, 0.4),
+    timingShot("scene-01-beat-001-shot-002", 0.6, 1),
+  ])),
+  /resolved Shot gap/,
+);
+assert.throws(
+  () => validateProductionShotTimingContract(timingData(9_000, [
+    timingShot("scene-01-beat-001-shot-001", 0, 1, "hold-outcome"),
+  ])),
+  /completed outcome hold/,
+);
+validateProductionShotTimingContract(timingData(9_000, [
+  timingShot("scene-09-beat-001-shot-001", 0, 1, "hold-outcome"),
+], 9));
 
 const composition = await readFile("src/compositions/NasdaqCafeSpecEpisode.tsx", "utf8");
 assert.match(composition, /left: 416, top: 144, width: 1440, height: 648/, "Main Stage geometry must stay fixed");

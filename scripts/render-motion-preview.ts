@@ -40,6 +40,9 @@ if (!Number.isFinite(durationSeconds) || durationSeconds <= 0 || durationSeconds
 const loaded = await loadRenderSpecForProduction(input);
 const {spec, sha256} = loaded;
 const profile = resolveVoiceProfile(spec.voiceProfileId, voiceProfilesJson);
+if (profile.provider !== "gemini") {
+  throw new Error("Motion Preview requires the production Gemini voice profile");
+}
 const selectedSpecScene = spec.scenes.find(
   (scene) => scene.sceneNumber === sceneNumber,
 );
