@@ -12,7 +12,7 @@ on:
       - "package-lock.json"
       - "AGENTS.md"
       - "docs/**"
-      - ".github/workflows/visual-story-engine-ci.yml"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 permissions:
@@ -52,6 +52,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Workflow contract
+        run: npm run test:workflow-contract
 
       - name: Generate JSON Schema
         run: npm run episode:spec:schema
