@@ -4,9 +4,10 @@ import path from "node:path";
 import {renderSpecSchema} from "../src/spec/render-spec";
 
 const project = process.cwd();
-const [episodeSource, rendererSource, assetLayerSource, renderStateSource, publicViewModelSource, layoutValidatorSource, episodeSpecSource] = await Promise.all([
+const [episodeSource, rendererSource, shotRendererSource, assetLayerSource, renderStateSource, publicViewModelSource, layoutValidatorSource, episodeSpecSource] = await Promise.all([
   readFile(path.join(project, "src/compositions/NasdaqCafeSpecEpisode.tsx"), "utf8"),
   readFile(path.join(project, "src/components/spec/VisualTemplateRenderer.tsx"), "utf8"),
+  readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8"),
   readFile(path.join(project, "src/components/spec/SpecAssetLayer.tsx"), "utf8"),
   readFile(path.join(project, "src/spec/render-state.ts"), "utf8"),
   readFile(path.join(project, "src/spec/public-view-model.ts"), "utf8"),
@@ -25,6 +26,8 @@ assert.match(renderStateSource, /event\.action === "show"/);
 assert.match(renderStateSource, /event\.action === "hide"/);
 assert.match(renderStateSource, /event\.action === "highlight"/);
 assert.match(renderStateSource, /event\.action === "unhighlight"/);
+assert.match(renderStateSource, /activeShot/);
+assert.match(renderStateSource, /previousExpression/);
 
 assert.match(publicViewModelSource, /visualTemplate: beat\.visualTemplate/);
 assert.match(publicViewModelSource, /templateConfig: beat\.templateConfig/);
@@ -33,8 +36,13 @@ assert.match(publicViewModelSource, /object-order-fallback/);
 assert.match(publicViewModelSource, /showTargets/);
 assert.match(publicViewModelSource, /holdProgress/);
 assert.match(publicViewModelSource, /entityPresentation/);
+assert.match(publicViewModelSource, /shot: state\.activeShot/);
+assert.match(publicViewModelSource, /previousShot: state\.previousShot/);
 
-assert.match(episodeSource, /VisualTemplateRenderer/);
+assert.match(episodeSource, /ShotStageRenderer/);
+assert.match(episodeSource, /FoxExpressionLayer/);
+assert.match(episodeSource, /SoundCueTrack/);
+assert.match(shotRendererSource, /VisualTemplateRenderer/);
 assert.doesNotMatch(episodeSource, /<SpecVisualMode content=/);
 assert.match(episodeSource, /linear-gradient\(90deg,rgba\(4,10,23/);
 assert.match(episodeSource, /TransitionSeries/);
@@ -52,8 +60,21 @@ for (const component of [
 ]) {
   assert.match(rendererSource, new RegExp(`const ${component}`), `missing presentation component: ${component}`);
 }
+for (const component of [
+  "HeroMetric",
+  "Contradiction",
+  "ExpectedAnchor",
+  "ActualCrosses",
+  "GapMacro",
+  "KineticTypography",
+  "ContinuityBadge",
+]) {
+  assert.match(shotRendererSource, new RegExp(`const ${component}`), `missing Shot presentation component: ${component}`);
+}
 assert.match(rendererSource, /switch \(content\.visualTemplate\)/);
+assert.match(shotRendererSource, /switch \(shot\.shotRecipe\)/);
 assert.doesNotMatch(rendererSource, /componentPath|new Function|eval\(|Math\.random/);
+assert.doesNotMatch(shotRendererSource, /componentPath|new Function|eval\(|Math\.random/);
 assert.doesNotMatch(rendererSource, /const angle =|Math\.PI \* 2 \* index/, "causal diagrams must not use circular auto-layout");
 assert.match(rendererSource, /strokeDashoffset=\{1 - progress\}/, "causal arrows must draw progressively");
 assert.match(rendererSource, /AnimatedNumber/, "numbers must support count-up presentation");
@@ -63,10 +84,12 @@ assert.match(layoutValidatorSource, /causal diagram supports at most three visib
 assert.match(layoutValidatorSource, /comparison view supports at most four visible numbers/);
 assert.match(layoutValidatorSource, /verification view supports at most four items/);
 
+let shotCount = 0;
 for (const scene of episodeSpec.scenes) {
   for (const beat of scene.visualBeats) {
     assert.ok(beat.visualTemplate.length > 0, `${beat.beatId}: visualTemplate is required`);
     assert.ok(beat.templateConfig.dataBasis.trim().length > 0, `${beat.beatId}: dataBasis is required`);
+    shotCount += beat.shots?.length ?? 0;
     if (beat.visualTemplate === "causal-lane") {
       const selectedNodes = scene.nodes.filter((node) => beat.objectIds.includes(node.nodeId));
       const selectedArrows = scene.arrows.filter((arrow) => beat.objectIds.includes(arrow.arrowId));
@@ -80,5 +103,6 @@ for (const scene of episodeSpec.scenes) {
     }
   }
 }
+assert.equal(shotCount, 39, "July 31 production input should contain the approved 39-Shot plan");
 
-console.log("PASS: Visual Story presentation, template routing, and layout constraints");
+console.log("PASS: Visual Story v3 Shot presentation, v2 fallback routing, and layout constraints");
