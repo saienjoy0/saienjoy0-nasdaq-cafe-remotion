@@ -4,7 +4,7 @@
 
 This change closes two gaps found in the first Visual Story Engine v3 preview:
 
-1. ChatGPT could write the completed production inputs but could not trigger the Codespace Motion Preview through the repository alone.
+1. ChatGPT could write the completed production inputs but could not wake and trigger the Codespace Motion Preview through the repository alone.
 2. The static render-spec validator counted Shots but did not know their real duration after Gemini TTS, so a formally valid episode could still hold one composition for 12–18 seconds.
 
 The change does not move editorial judgment into GitHub Actions, Codex, Remotion, or the validator. ChatGPT still completes the market causality, narration, Scene order, Visual Beats, Shot plan, adopted asset route, and immutable render spec before any request is committed.
@@ -18,6 +18,16 @@ The Actions runner still requires a one-time repository registration. After `.ru
 - A stale PID file is discarded before launch.
 - Failure to complete the one-time registration does not make the Codespace unusable; it prints the existing manual-token instructions.
 
+## Codespace wake permission
+
+A stopped user Codespace cannot be started by the repository's ordinary `GITHUB_TOKEN`. Add one Actions repository secret named `CODESPACE_LIFECYCLE_TOKEN`.
+
+- Classic PAT: `codespace` scope.
+- Fine-grained token: permission to list the user's Codespaces plus `Codespaces lifecycle admin: write` for this repository.
+- Never store this token in the render spec, request JSON, source tree, issue, log, or chat.
+
+The request gateway uses the token only to list the authenticated user's Codespaces, select the most recently used Codespace whose repository matches `GITHUB_REPOSITORY`, start it when needed, and wait for state `Available`.
+
 ## Repository-backed Motion Preview request
 
 ChatGPT can create one immutable JSON file under `motion-preview-requests/` after the production package is complete.
@@ -28,8 +38,9 @@ The push gateway:
 2. rejects unknown or missing fields;
 3. verifies the date, Scene number, time range, confirmation token, and SHA-256;
 4. hashes `render-specs/YYYY-MM-DD/render_spec.json` from the same commit;
-5. dispatches the existing cache-only Motion Preview workflow;
-6. leaves the actual render on the self-hosted runner labeled `nasdaq-cafe-codespace`.
+5. starts the selected repository Codespace and waits for it to become available;
+6. dispatches the existing cache-only Motion Preview workflow;
+7. leaves the actual render on the self-hosted runner labeled `nasdaq-cafe-codespace`.
 
 The gateway never calls Gemini TTS and never advances to final rendering.
 
