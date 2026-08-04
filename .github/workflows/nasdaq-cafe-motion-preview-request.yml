@@ -17,15 +17,15 @@ concurrency:
 
 jobs:
   dispatch-motion-preview:
-    name: Validate request and dispatch Codespace Motion Preview
+    name: Wake Codespace and dispatch Motion Preview
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 12
 
     steps:
       - name: Checkout request commit
         uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Resolve and validate one immutable request
@@ -46,7 +46,9 @@ jobs:
 
           if [[ "${#REQUEST_FILES[@]}" -ne 1 ]]; then
             echo "::error::Exactly one motion-preview request JSON must change; found ${#REQUEST_FILES[@]}"
-            printf '::error::%s\n' "${REQUEST_FILES[@]:-none}"
+            if [[ "${#REQUEST_FILES[@]}" -gt 0 ]]; then
+              printf '::error::%s\n' "${REQUEST_FILES[@]}"
+            fi
             exit 1
           fi
 
@@ -116,6 +118,81 @@ jobs:
           print(f"duration_seconds={duration}")
           PY
 
+      - name: Start the most recently used repository Codespace
+        id: codespace
+        shell: bash
+        env:
+          CODESPACE_LIFECYCLE_TOKEN: ${{ secrets.CODESPACE_LIFECYCLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CODESPACE_LIFECYCLE_TOKEN:-}" ]]; then
+            echo "::error::Repository secret CODESPACE_LIFECYCLE_TOKEN is required"
+            echo "::error::Use a token that can list this user's Codespaces and start the selected Codespace"
+            exit 1
+          fi
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          api = "https://api.github.com"
+          token = os.environ["CODESPACE_LIFECYCLE_TOKEN"]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": "2026-03-10",
+              "User-Agent": "nasdaq-cafe-motion-preview-request",
+          }
+
+          def request(method, url):
+              req = urllib.request.Request(url, method=method, headers=headers)
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = response.read()
+                      return json.loads(payload) if payload else None
+              except urllib.error.HTTPError as exc:
+                  detail = exc.read().decode("utf-8", errors="replace")
+                  raise SystemExit(f"GitHub Codespaces API {method} {url} failed: HTTP {exc.code}: {detail}") from exc
+
+          listing = request("GET", f"{api}/user/codespaces?per_page=100")
+          candidates = [
+              item for item in listing.get("codespaces", [])
+              if item.get("repository", {}).get("full_name") == repository
+          ]
+          if not candidates:
+              raise SystemExit(f"No Codespace found for repository {repository}")
+          selected = max(
+              candidates,
+              key=lambda item: item.get("last_used_at") or item.get("updated_at") or "",
+          )
+          name = selected["name"]
+          state = selected.get("state", "Unknown")
+          if state != "Available":
+              start_url = selected.get("start_url") or f"{api}/user/codespaces/{name}/start"
+              try:
+                  request("POST", start_url)
+              except SystemExit as exc:
+                  if "HTTP 409" not in str(exc):
+                      raise
+
+          deadline = time.monotonic() + 420
+          while True:
+              current = request("GET", f"{api}/user/codespaces/{name}")
+              state = current.get("state", "Unknown")
+              if state == "Available":
+                  break
+              if time.monotonic() >= deadline:
+                  raise SystemExit(f"Codespace {name} did not become Available; last state={state}")
+              time.sleep(7)
+
+          print(f"name={name}")
+          print(f"state={state}")
+          PY
+
       - name: Dispatch the Codespace Motion Preview workflow
         shell: bash
         env:
@@ -155,5 +232,7 @@ jobs:
             echo "- Episode: \`$EPISODE_DATE\`"
             echo "- Scene: \`$SCENE_NUMBER\`"
             echo "- Range: \`${OFFSET_SECONDS}s + ${DURATION_SECONDS}s\`"
+            echo "- Codespace: \`${{ steps.codespace.outputs.name }}\`"
+            echo "- Codespace state: \`${{ steps.codespace.outputs.state }}\`"
             echo "- Runner label: \`nasdaq-cafe-codespace\`"
           } >> "$GITHUB_STEP_SUMMARY"
