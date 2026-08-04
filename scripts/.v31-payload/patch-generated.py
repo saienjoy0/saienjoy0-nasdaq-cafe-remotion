@@ -116,6 +116,16 @@ def patch_after() -> None:
     )
     timeline.write_text(source, encoding="utf-8")
 
+    host = Path("src/components/spec/ShotTransitionHost.tsx")
+    source = host.read_text(encoding="utf-8")
+    source = replace_once(
+        source,
+        "export const ShotTransitionHost",
+        "// PreviousShot and CurrentShot are rendered as simultaneous transition layers.\nexport const ShotTransitionHost",
+        "transition layer contract marker",
+    )
+    host.write_text(source, encoding="utf-8")
+
 
 mode = sys.argv[1] if len(sys.argv) > 1 else ""
 if mode == "before":
