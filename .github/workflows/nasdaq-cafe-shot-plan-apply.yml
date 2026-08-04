@@ -17,7 +17,7 @@ concurrency:
 jobs:
   apply-shot-plan:
     name: Apply one approved measured Shot plan
-    if: github.actor == github.repository_owner
+    if: github.actor == github.repository_owner || (github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.ref == 'refs/heads/main' && github.event_name == 'push')
     runs-on: ubuntu-24.04
     timeout-minutes: 25
 
