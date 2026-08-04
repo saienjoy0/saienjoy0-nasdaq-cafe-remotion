@@ -62,6 +62,7 @@ jobs:
             .github/workflows/nasdaq-cafe-motion-preview-request.yml \
             .github/workflows/nasdaq-cafe-tts-cache-export.yml \
             .github/workflows/nasdaq-cafe-shot-plan-apply.yml \
+            .github/workflows/nasdaq-cafe-shot-plan-scheduled-fallback.yml \
             motion-preview-requests/README.md
 
       - name: Workflow contract
@@ -161,6 +162,19 @@ jobs:
           mkdir -p build/visual-story-generated/schemas
           cp schemas/render_spec.schema.json build/visual-story-generated/schemas/render_spec.schema.json
           cp -R build/visual-story-migrated/render-specs build/visual-story-generated/render-specs
+
+          if [[ -f shot-timing-reports/2026-07-31.json ]]; then
+            mkdir -p \
+              build/visual-story-generated/measured-shot-plan/render-specs/2026-07-31 \
+              build/visual-story-generated/measured-shot-plan/episode-packages/2026-07-31 \
+              build/visual-story-generated/measured-shot-plan/shot-timing-reports
+            cp render-specs/2026-07-31/render_spec.json \
+              build/visual-story-generated/measured-shot-plan/render-specs/2026-07-31/render_spec.json
+            cp episode-packages/2026-07-31/episode_package_2026-07-31.md \
+              build/visual-story-generated/measured-shot-plan/episode-packages/2026-07-31/episode_package_2026-07-31.md
+            cp shot-timing-reports/2026-07-31.json \
+              build/visual-story-generated/measured-shot-plan/shot-timing-reports/2026-07-31.json
+          fi
 
       - name: Upload generated contracts
         uses: actions/upload-artifact@v6
