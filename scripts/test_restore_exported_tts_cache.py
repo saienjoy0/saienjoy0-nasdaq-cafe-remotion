@@ -35,6 +35,7 @@ def write_registry(root: pathlib.Path) -> None:
 def make_artifact(
     path: pathlib.Path,
     prefix: str = ".cache/spec-tts-blocks",
+    zip_member: str = "portable-cache.tar.gz",
 ) -> None:
     tar_bytes = io.BytesIO()
     with tarfile.open(fileobj=tar_bytes, mode="w:gz") as archive:
@@ -45,7 +46,7 @@ def make_artifact(
             info.size = len(payload)
             archive.addfile(info, io.BytesIO(payload))
     with zipfile.ZipFile(path, "w") as archive:
-        archive.writestr("portable-cache.tar.gz", tar_bytes.getvalue())
+        archive.writestr(zip_member, tar_bytes.getvalue())
 
 
 def main() -> None:
@@ -57,18 +58,31 @@ def main() -> None:
         artifact = root / "artifact.zip"
         make_artifact(artifact)
         extract_portable_cache(artifact, root)
-        assert len(validate_cache(root)) == 2
+        audio_files = validate_cache(root)
+        assert len(audio_files) == 2
+        assert all(path.read_bytes() == b"RIFF-test" for path in audio_files)
 
     with tempfile.TemporaryDirectory() as temporary:
         root = pathlib.Path(temporary)
-        artifact = root / "unsafe.zip"
+        artifact = root / "unsafe-tar.zip"
         make_artifact(artifact, "../escaped")
         try:
             extract_portable_cache(artifact, root)
         except ValueError as error:
             assert "unsafe cache archive path" in str(error)
         else:
-            raise AssertionError("unsafe archive path was accepted")
+            raise AssertionError("unsafe tar archive path was accepted")
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = pathlib.Path(temporary)
+        artifact = root / "unsafe-zip.zip"
+        make_artifact(artifact, zip_member="../portable-cache.tar.gz")
+        try:
+            extract_portable_cache(artifact, root)
+        except ValueError as error:
+            assert "unsafe artifact payload path" in str(error)
+        else:
+            raise AssertionError("unsafe ZIP payload path was accepted")
 
     print("portable TTS cache restore tests: pass")
 
