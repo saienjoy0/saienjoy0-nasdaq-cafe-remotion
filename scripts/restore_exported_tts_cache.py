@@ -6,6 +6,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import tarfile
 import tempfile
@@ -75,15 +76,41 @@ def download_artifact(repository: str, artifact_id: int, token: str, output: pat
     )
 
 
+def extract_tar_members(
+    archive: tarfile.TarFile,
+    members: list[tarfile.TarInfo],
+    root: pathlib.Path,
+) -> None:
+    for member in members:
+        relative_path = pathlib.PurePosixPath(member.name)
+        destination = root.joinpath(*relative_path.parts)
+        if member.isdir():
+            destination.mkdir(parents=True, exist_ok=True)
+            continue
+        if not member.isfile():
+            raise ValueError(f"unsupported cache archive entry: {member.name}")
+        source = archive.extractfile(member)
+        if source is None:
+            raise ValueError(f"failed to read cache archive entry: {member.name}")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with source, destination.open("wb") as output:
+            shutil.copyfileobj(source, output)
+
+
 def extract_portable_cache(artifact_zip: pathlib.Path, root: pathlib.Path) -> None:
     with tempfile.TemporaryDirectory(prefix="tts-cache-export-") as temporary:
         temporary_root = pathlib.Path(temporary)
+        tar_path = temporary_root / "portable-cache.tar.gz"
         with zipfile.ZipFile(artifact_zip) as archive:
             members = archive.namelist()
             if len(members) != 1 or not members[0].endswith(".tar.gz"):
                 raise ValueError("cache artifact must contain exactly one .tar.gz payload")
-            archive.extract(members[0], temporary_root)
-        tar_path = temporary_root / members[0]
+            zip_path = pathlib.PurePosixPath(members[0])
+            if zip_path.is_absolute() or ".." in zip_path.parts or len(zip_path.parts) != 1:
+                raise ValueError(f"unsafe artifact payload path: {members[0]}")
+            with archive.open(members[0]) as source, tar_path.open("wb") as output:
+                shutil.copyfileobj(source, output)
+
         with tarfile.open(tar_path, "r:gz") as archive:
             tar_members = archive.getmembers()
             if not tar_members:
@@ -96,7 +123,7 @@ def extract_portable_cache(artifact_zip: pathlib.Path, root: pathlib.Path) -> No
                     raise ValueError(f"cache archive escaped approved prefix: {member.name}")
                 if member.issym() or member.islnk() or member.isdev():
                     raise ValueError(f"unsupported cache archive entry: {member.name}")
-            archive.extractall(root, members=tar_members, filter="data")
+            extract_tar_members(archive, tar_members, root)
 
 
 def validate_cache(root: pathlib.Path) -> list[pathlib.Path]:
