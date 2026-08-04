@@ -126,6 +126,28 @@ def patch_after() -> None:
     )
     host.write_text(source, encoding="utf-8")
 
+    recipes = Path("src/components/spec/shots/ShotRecipes.tsx")
+    source = recipes.read_text(encoding="utf-8")
+    registry = '''
+
+// Stable registry identifiers used by contracts and production diagnostics.
+export const HeroMetricShot = "hero-metric-impact" as const;
+export const ContradictionShot = "contradiction-interrupt" as const;
+export const ExpectedAnchorShot = "expected-anchor" as const;
+export const ActualCrossesExpectedShot = "actual-crosses-expected" as const;
+export const GapMacroShot = "gap-macro" as const;
+export const CausalBuildShot = "causal-build" as const;
+export const CounterforceShot = "counterforce-interrupt" as const;
+export const EntityCutawayShot = "entity-cutaway" as const;
+export const SplitOppositionShot = "split-opposition" as const;
+export const FocusMatrixShot = "focus-matrix-reveal" as const;
+export const VerificationPathsShot = "verification-two-paths" as const;
+export const RecapAssemblyShot = "recap-assembly" as const;
+'''
+    if "export const HeroMetricShot" not in source:
+        source = source.rstrip() + registry + "\n"
+    recipes.write_text(source, encoding="utf-8")
+
 
 mode = sys.argv[1] if len(sys.argv) > 1 else ""
 if mode == "before":
