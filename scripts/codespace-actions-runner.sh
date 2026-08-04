@@ -13,6 +13,7 @@ usage() {
   cat <<'EOF'
 Usage:
   bash scripts/codespace-actions-runner.sh register
+  bash scripts/codespace-actions-runner.sh ensure
   bash scripts/codespace-actions-runner.sh start
   bash scripts/codespace-actions-runner.sh status
   bash scripts/codespace-actions-runner.sh stop
@@ -30,6 +31,11 @@ register:
     read -rsp "Runner token: " RUNNER_TOKEN; echo
     RUNNER_TOKEN="$RUNNER_TOKEN" bash scripts/codespace-actions-runner.sh register
     unset RUNNER_TOKEN
+
+ensure:
+  Performs the one-time registration when possible and starts the runner. After
+  a runner has been registered once, Codespaces calls this command automatically
+  whenever the Codespace starts or resumes.
 
 start:
   Starts the registered runner in the background for this Codespace session.
@@ -122,7 +128,7 @@ register_runner() {
 
   if [[ -f "${RUNNER_DIR}/.runner" ]]; then
     echo "Runner is already registered at ${RUNNER_DIR}."
-    exit 0
+    return 0
   fi
 
   local token
@@ -137,11 +143,11 @@ Copy only the short-lived token shown in the ./config.sh command, then run:
   RUNNER_TOKEN="$RUNNER_TOKEN" bash scripts/codespace-actions-runner.sh register
   unset RUNNER_TOKEN
 EOF
-    exit 1
+    return 1
   fi
   if [[ -z "$token" || "$token" == "null" ]]; then
     echo "The runner registration token was empty." >&2
-    exit 1
+    return 1
   fi
 
   (
@@ -163,13 +169,14 @@ start_runner() {
   require_codespace
   if [[ ! -f "${RUNNER_DIR}/.runner" ]]; then
     echo "Runner is not registered. Run the register command first." >&2
-    exit 1
+    return 1
   fi
   if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     echo "Runner is already running with PID $(cat "$PID_FILE")."
-    exit 0
+    return 0
   fi
 
+  rm -f "$PID_FILE"
   (
     cd "$RUNNER_DIR"
     nohup ./run.sh >"$LOG_FILE" 2>&1 &
@@ -179,10 +186,19 @@ start_runner() {
   if ! kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     echo "Runner failed to start. Recent log:" >&2
     tail -n 40 "$LOG_FILE" >&2 || true
-    exit 1
+    return 1
   fi
   echo "Runner started with PID $(cat "$PID_FILE")."
   tail -n 12 "$LOG_FILE" || true
+}
+
+ensure_runner() {
+  require_codespace
+  if [[ ! -f "${RUNNER_DIR}/.runner" ]]; then
+    echo "Runner is not registered yet; attempting one-time registration."
+    register_runner
+  fi
+  start_runner
 }
 
 status_runner() {
@@ -198,7 +214,7 @@ status_runner() {
 stop_runner() {
   if [[ ! -f "$PID_FILE" ]]; then
     echo "Runner is not running."
-    exit 0
+    return 0
   fi
   local pid
   pid="$(cat "$PID_FILE")"
@@ -219,12 +235,12 @@ remove_runner() {
   stop_runner
   if [[ ! -f "${RUNNER_DIR}/.runner" ]]; then
     echo "Runner is not registered."
-    exit 0
+    return 0
   fi
   local token
   if ! token="$(registration_token)"; then
     echo "A repository runner removal token is required." >&2
-    exit 1
+    return 1
   fi
   (
     cd "$RUNNER_DIR"
@@ -235,6 +251,7 @@ remove_runner() {
 
 case "${1:-}" in
   register) register_runner ;;
+  ensure) ensure_runner ;;
   start) start_runner ;;
   status) status_runner ;;
   stop) stop_runner ;;
