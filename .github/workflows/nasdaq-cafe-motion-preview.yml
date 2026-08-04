@@ -250,7 +250,7 @@ jobs:
             exit 1
           fi
           while IFS= read -r audio; do
-            ffmpeg -v error -i "$audio" -f null -
+            ffmpeg -nostdin -v error -i "$audio" -f null -
           done < <(find .cache/spec-tts-blocks -type f -name audio.wav -print)
 
       - name: Validate code and render spec
@@ -279,7 +279,7 @@ jobs:
             -select_streams v:0 \
             -show_entries stream=codec_name,width,height,r_frame_rate \
             -of default=noprint_wrappers=1 "$OUTPUT"
-          ffmpeg -v error -i "$OUTPUT" -f null -
+          ffmpeg -nostdin -v error -i "$OUTPUT" -f null -
 
       - name: Upload Motion Preview artifact
         uses: actions/upload-artifact@v6
