@@ -1105,6 +1105,213 @@
                       "type": "null"
                     }
                   ]
+                },
+                "shots": {
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "shotId": {
+                        "type": "string",
+                        "pattern": "^scene-0[1-9]-beat-[0-9]{3}-shot-[0-9]{3}$"
+                      },
+                      "shotRecipe": {
+                        "type": "string",
+                        "enum": [
+                          "hero-metric-impact",
+                          "contradiction-interrupt",
+                          "expected-anchor",
+                          "actual-crosses-expected",
+                          "gap-macro",
+                          "causal-build",
+                          "counterforce-interrupt",
+                          "entity-cutaway",
+                          "split-opposition",
+                          "focus-matrix-reveal",
+                          "verification-two-paths",
+                          "recap-assembly"
+                        ]
+                      },
+                      "startChunkId": {
+                        "type": "string",
+                        "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                      },
+                      "startOffsetMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000
+                      },
+                      "endChunkId": {
+                        "type": "string",
+                        "pattern": "^scene-0[1-9]-chunk-[0-9]{3}$"
+                      },
+                      "endOffsetMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000
+                      },
+                      "endCue": {
+                        "type": "string"
+                      },
+                      "primaryTargetId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "stageLayout": {
+                        "type": "string",
+                        "enum": [
+                          "full-stage",
+                          "hero-center",
+                          "split-vertical",
+                          "split-horizontal",
+                          "macro-detail",
+                          "lane-left-right",
+                          "matrix-2x2",
+                          "entity-full",
+                          "media-full",
+                          "assembly-canvas"
+                        ]
+                      },
+                      "cameraPreset": {
+                        "type": "string",
+                        "enum": [
+                          "static",
+                          "push-in",
+                          "pull-back",
+                          "pan-left",
+                          "pan-right",
+                          "follow-path",
+                          "reframe-outcome",
+                          "macro-detail"
+                        ]
+                      },
+                      "transitionIn": {
+                        "type": "string",
+                        "enum": [
+                          "soft-reveal",
+                          "continue-from-previous",
+                          "reframe-shared-element",
+                          "carry-forward",
+                          "pin-to-corner",
+                          "collapse-to-node",
+                          "merge-to-outcome",
+                          "hard-cut",
+                          "hold-outcome"
+                        ]
+                      },
+                      "transitionOut": {
+                        "type": "string",
+                        "enum": [
+                          "soft-reveal",
+                          "continue-from-previous",
+                          "reframe-shared-element",
+                          "carry-forward",
+                          "pin-to-corner",
+                          "collapse-to-node",
+                          "merge-to-outcome",
+                          "hard-cut",
+                          "hold-outcome"
+                        ]
+                      },
+                      "continuityKey": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "typographyTreatment": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "number-roll",
+                              "word-build",
+                              "underline-draw",
+                              "cross-out-assumption",
+                              "gap-highlight",
+                              "zero-line-split",
+                              "final-phrase-lock"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "typographyText": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "soundCue": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "soft-whoosh",
+                              "soft-impact",
+                              "line-draw",
+                              "comparison-split",
+                              "resolve-chime"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "foxExpression": {
+                        "type": "string",
+                        "enum": [
+                          "通常",
+                          "分析",
+                          "ニヤリ",
+                          "軽い驚き",
+                          "困惑",
+                          "警戒",
+                          "眠そう"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "shotId",
+                      "shotRecipe",
+                      "startChunkId",
+                      "startOffsetMs",
+                      "endChunkId",
+                      "endOffsetMs",
+                      "endCue",
+                      "primaryTargetId",
+                      "stageLayout",
+                      "cameraPreset",
+                      "transitionIn",
+                      "transitionOut",
+                      "continuityKey",
+                      "typographyTreatment",
+                      "typographyText",
+                      "soundCue",
+                      "foxExpression"
+                    ],
+                    "additionalProperties": false
+                  }
                 }
               },
               "required": [

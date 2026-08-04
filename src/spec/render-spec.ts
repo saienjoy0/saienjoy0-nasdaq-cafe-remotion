@@ -10,6 +10,14 @@ import {
   VISUAL_TEMPLATE_IDS,
   VISUAL_TEMPLATE_VARIANT_IDS,
 } from "./visual-template-contract";
+import {
+  CAMERA_PRESET_IDS,
+  SHOT_RECIPE_IDS,
+  SHOT_TRANSITION_IDS,
+  SOUND_CUE_IDS,
+  STAGE_LAYOUT_IDS,
+  TYPOGRAPHY_TREATMENT_IDS,
+} from "./shot-contract";
 
 const nonEmptyText = z.string().refine((value) => value.trim().length > 0, "must not be empty");
 const nullableText = nonEmptyText.nullable();
@@ -29,6 +37,12 @@ export const visualTemplateVariantSchema = z.enum(VISUAL_TEMPLATE_VARIANT_IDS);
 export const sequencePolicySchema = z.enum(SEQUENCE_POLICY_IDS);
 export const motionPresetSchema = z.enum(MOTION_PRESET_IDS);
 export const easingPresetSchema = z.enum(EASING_PRESET_IDS);
+export const shotRecipeSchema = z.enum(SHOT_RECIPE_IDS);
+export const stageLayoutSchema = z.enum(STAGE_LAYOUT_IDS);
+export const cameraPresetSchema = z.enum(CAMERA_PRESET_IDS);
+export const shotTransitionSchema = z.enum(SHOT_TRANSITION_IDS);
+export const typographyTreatmentSchema = z.enum(TYPOGRAPHY_TREATMENT_IDS);
+export const soundCueSchema = z.enum(SOUND_CUE_IDS);
 const visualTemplateConfigSchema = z.object({
   variant: visualTemplateVariantSchema,
   comparisonBasis: nullableText,
@@ -219,6 +233,33 @@ const pictureBookBeatSchema = z.object({
   noBakedTextCheck: z.literal("pass"),
 }).strict();
 
+const shotSchema = z.object({
+  shotId: z.string().regex(/^scene-0[1-9]-beat-[0-9]{3}-shot-[0-9]{3}$/),
+  shotRecipe: shotRecipeSchema,
+  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+  startOffsetMs: z.number().int().min(0).max(10_000),
+  endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+  endOffsetMs: z.number().int().min(0).max(10_000),
+  endCue: nonEmptyText,
+  primaryTargetId: safeId.nullable(),
+  stageLayout: stageLayoutSchema,
+  cameraPreset: cameraPresetSchema,
+  transitionIn: shotTransitionSchema,
+  transitionOut: shotTransitionSchema,
+  continuityKey: safeId.nullable(),
+  typographyTreatment: typographyTreatmentSchema.nullable(),
+  typographyText: nullableText,
+  soundCue: soundCueSchema.nullable(),
+  foxExpression: expressionSchema,
+}).strict().superRefine((shot, context) => {
+  if (shot.typographyTreatment !== null && shot.typographyText === null) {
+    context.addIssue({code: "custom", path: ["typographyText"], message: "typographyTreatment requires typographyText"});
+  }
+  if (shot.typographyTreatment === null && shot.typographyText !== null) {
+    context.addIssue({code: "custom", path: ["typographyTreatment"], message: "typographyText requires typographyTreatment"});
+  }
+});
+
 const visualBeatSchema = z.object({
   beatId: z.string().regex(/^scene-0[1-9]-beat-[0-9]{3}$/),
   startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
@@ -246,6 +287,7 @@ const visualBeatSchema = z.object({
   fallback: nullableText,
   entity: entityBeatSchema.nullable(),
   pictureBook: pictureBookBeatSchema.nullable(),
+  shots: z.array(shotSchema).max(4).optional(),
 }).strict();
 
 export const visualActionSchema = z.enum(["show", "hide", "highlight", "unhighlight", "set-expression"]);
@@ -382,6 +424,7 @@ export const renderSpecSchema = z.object({
   uniqueAt(spec.scenes.flatMap((scene) => scene.narrationChunks.map((chunk) => chunk.chunkId)), ["scenes"]);
   uniqueAt(spec.scenes.flatMap((scene) => scene.visualBeats.map((beat) => beat.beatId)), ["scenes"]);
   uniqueAt(spec.scenes.flatMap((scene) => scene.visualEvents.map((event) => event.eventId)), ["scenes"]);
+  uniqueAt(spec.scenes.flatMap((scene) => scene.visualBeats.flatMap((beat) => (beat.shots ?? []).map((shot) => shot.shotId))), ["scenes"]);
   const expectedIds = Array.from({length: 9}, (_, index) => `scene-${String(index + 1).padStart(2, "0")}`);
   spec.scenes.forEach((scene, index) => {
     if (scene.sceneId !== expectedIds[index] || scene.sceneNumber !== index + 1) context.addIssue({code: "custom", path: ["scenes", index], message: `expected ${expectedIds[index]} with sceneNumber ${index + 1}`});
