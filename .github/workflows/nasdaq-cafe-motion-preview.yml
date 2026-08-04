@@ -203,6 +203,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          bash scripts/ensure-remotion-browser-deps.sh
           test "$(nproc)" -ge 4
           node --version
           npm --version
