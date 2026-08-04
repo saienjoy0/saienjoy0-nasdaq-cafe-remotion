@@ -1,0 +1,19 @@
+{
+  "outcomeVersion": "1.0",
+  "status": "failed",
+  "stage": "render-motion-preview",
+  "requestPath": "motion-preview-requests/2026-08-04T2349-scene-06-50shot.json",
+  "requestFingerprint": "3f6018a2723acfee1be24a31a18a88c8a396eb3dccfe4bb3a5673d9eaff57f84",
+  "requestValid": true,
+  "validationError": null,
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "d85777574d72ec184bc33dfb3a073c1b4f6f01feb68c50b41a37849ac940f9c1",
+  "sceneNumber": 6,
+  "offsetSeconds": 0.0,
+  "durationSeconds": 20.0,
+  "wakeResult": "success",
+  "renderResult": "failure",
+  "workflow": "Nasdaq Cafe Motion Preview Request",
+  "runId": "30920951665",
+  "recordedAt": "2026-08-04T14:50:46.737744Z"
+}
