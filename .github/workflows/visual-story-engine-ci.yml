@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: visual-story-engine-${{ github.event.pull_request.number || github.ref }}
@@ -62,7 +62,6 @@ jobs:
             .github/workflows/nasdaq-cafe-motion-preview-request.yml \
             .github/workflows/nasdaq-cafe-tts-cache-export.yml \
             .github/workflows/nasdaq-cafe-shot-plan-apply.yml \
-            .github/workflows/nasdaq-cafe-shot-plan-scheduled-fallback.yml \
             motion-preview-requests/README.md
 
       - name: Workflow contract
@@ -163,19 +162,6 @@ jobs:
           cp schemas/render_spec.schema.json build/visual-story-generated/schemas/render_spec.schema.json
           cp -R build/visual-story-migrated/render-specs build/visual-story-generated/render-specs
 
-          if [[ -f shot-timing-reports/2026-07-31.json ]]; then
-            mkdir -p \
-              build/visual-story-generated/measured-shot-plan/render-specs/2026-07-31 \
-              build/visual-story-generated/measured-shot-plan/episode-packages/2026-07-31 \
-              build/visual-story-generated/measured-shot-plan/shot-timing-reports
-            cp render-specs/2026-07-31/render_spec.json \
-              build/visual-story-generated/measured-shot-plan/render-specs/2026-07-31/render_spec.json
-            cp episode-packages/2026-07-31/episode_package_2026-07-31.md \
-              build/visual-story-generated/measured-shot-plan/episode-packages/2026-07-31/episode_package_2026-07-31.md
-            cp shot-timing-reports/2026-07-31.json \
-              build/visual-story-generated/measured-shot-plan/shot-timing-reports/2026-07-31.json
-          fi
-
       - name: Upload generated contracts
         uses: actions/upload-artifact@v6
         with:
@@ -198,50 +184,3 @@ jobs:
 
       - name: Bundle Remotion
         run: npm run build
-
-      - name: Commit validated measured Shot outputs to PR branch
-        if: >-
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository &&
-          github.head_ref == 'chore/export-measured-shot-plan-artifact'
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f render-specs/2026-07-31/render_spec.json
-          test -f episode-packages/2026-07-31/episode_package_2026-07-31.md
-          test -f shot-timing-reports/2026-07-31.json
-
-          OUTPUT_ROOT="$RUNNER_TEMP/measured-shot-plan"
-          rm -rf "$OUTPUT_ROOT"
-          mkdir -p \
-            "$OUTPUT_ROOT/render-specs/2026-07-31" \
-            "$OUTPUT_ROOT/episode-packages/2026-07-31" \
-            "$OUTPUT_ROOT/shot-timing-reports"
-          cp render-specs/2026-07-31/render_spec.json \
-            "$OUTPUT_ROOT/render-specs/2026-07-31/render_spec.json"
-          cp episode-packages/2026-07-31/episode_package_2026-07-31.md \
-            "$OUTPUT_ROOT/episode-packages/2026-07-31/episode_package_2026-07-31.md"
-          cp shot-timing-reports/2026-07-31.json \
-            "$OUTPUT_ROOT/shot-timing-reports/2026-07-31.json"
-
-          git fetch origin "$GITHUB_HEAD_REF" main
-          git checkout -B "$GITHUB_HEAD_REF" "origin/$GITHUB_HEAD_REF"
-          cp "$OUTPUT_ROOT/render-specs/2026-07-31/render_spec.json" \
-            render-specs/2026-07-31/render_spec.json
-          cp "$OUTPUT_ROOT/episode-packages/2026-07-31/episode_package_2026-07-31.md" \
-            episode-packages/2026-07-31/episode_package_2026-07-31.md
-          mkdir -p shot-timing-reports
-          cp "$OUTPUT_ROOT/shot-timing-reports/2026-07-31.json" \
-            shot-timing-reports/2026-07-31.json
-          git checkout origin/main -- .github/workflows/visual-story-engine-ci.yml
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
-            .github/workflows/visual-story-engine-ci.yml \
-            render-specs/2026-07-31/render_spec.json \
-            episode-packages/2026-07-31/episode_package_2026-07-31.md \
-            shot-timing-reports/2026-07-31.json
-          git diff --cached --check
-          git commit -m "Apply measured 50-Shot plan for 2026-07-31"
-          git push origin "$GITHUB_HEAD_REF"
