@@ -149,7 +149,8 @@ assert(
   `${motionRequestName}: REST workflow dispatch is forbidden`,
 );
 assert(
-  motionRequest.includes("motion-preview-state/processed"),
+  motionRequest.includes('root / "motion-preview-state" / "processed"') &&
+    motionRequest.includes("marker_path"),
   `${motionRequestName}: durable repository markers are required`,
 );
 assert(
