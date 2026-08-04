@@ -1,0 +1,93 @@
+name: Apply Visual Story v3 Progress Once
+
+on:
+  push:
+    branches:
+      - feature/visual-story-engine-v2
+    paths:
+      - .github/workflows/apply-visual-story-v3-progress-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/visual-story-engine-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Add measured chunk progress to Shot schema
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/spec/render-spec.ts')
+          text = p.read_text(encoding='utf-8')
+          old = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            startOffsetMs: z.number().int().min(0).max(10_000),
+            endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            endOffsetMs: z.number().int().min(0).max(10_000),'''
+          new = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            startProgress: z.number().min(0).max(1),
+            startOffsetMs: z.number().int().min(0).max(10_000),
+            endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            endProgress: z.number().min(0).max(1),
+            endOffsetMs: z.number().int().min(0).max(10_000),'''
+          if old not in text:
+              raise SystemExit('Shot progress schema anchor missing')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Rebuild July 31 Shot Plan
+        run: npm run migrate:visual-story:v3 -- render-specs/2026-07-31/render_spec.json
+      - name: Regenerate JSON Schema
+        run: npm run episode:spec:schema
+      - name: Resynchronize episode package
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          spec = json.loads(Path('render-specs/2026-07-31/render_spec.json').read_text(encoding='utf-8'))
+          lines = ['## Visual Story Engine v3 Shot Plan', '', '固定背景・狐左位置・字幕領域を維持し、メイン表示領域内だけでShot、内部カメラ、前後要素の引継ぎを行う。', '']
+          count = 0
+          for scene in spec['scenes']:
+              lines.append(f"### {scene['sceneId']}")
+              for beat in scene['visualBeats']:
+                  shots = beat.get('shots', [])
+                  count += len(shots)
+                  if not shots:
+                      continue
+                  lines.append(f"- `{beat['beatId']}` / `{beat['visualTemplate']}`")
+                  for shot in shots:
+                      interval = f"{shot['startChunkId']}@{shot['startProgress']:.3f} → {shot['endChunkId']}@{shot['endProgress']:.3f}"
+                      lines.append(f"  - `{shot['shotId']}`: `{shot['shotRecipe']}` / `{shot['stageLayout']}` / camera `{shot['cameraPreset']}` / fox `{shot['foxExpression']}` / `{interval}` / continuity `{shot['continuityKey'] or 'none'}`")
+              lines.append('')
+          lines.insert(4, f'- 総Shot数：{count}')
+          path = Path('episode-packages/2026-07-31/episode_package_2026-07-31.md')
+          text = path.read_text(encoding='utf-8')
+          marker = '## Visual Story Engine v3 Shot Plan'
+          if marker in text:
+              text = text.split(marker, 1)[0].rstrip() + '\n\n'
+          path.write_text(text + '\n'.join(lines).rstrip() + '\n', encoding='utf-8')
+          PY
+      - name: Validate before committing
+        run: |
+          npm run typecheck
+          npm run test:shot-story
+          npm run test:visual-story
+          npm run test:public-screen
+          rm -rf dist/remotion
+          npm run build
+      - name: Commit synchronized v3 sources
+        run: |
+          rm .github/workflows/apply-visual-story-v3-progress-once.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/spec/render-spec.ts schemas/render_spec.schema.json render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md .github/workflows/apply-visual-story-v3-progress-once.yml
+          git commit -m "Synchronize measured-audio Visual Story v3 Shots"
+          git push origin HEAD:feature/visual-story-engine-v2
