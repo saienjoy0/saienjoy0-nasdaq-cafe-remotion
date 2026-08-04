@@ -2,9 +2,11 @@ import {Fragment} from "react";
 import {Audio} from "@remotion/media";
 import {TransitionSeries, linearTiming} from "@remotion/transitions";
 import {fade} from "@remotion/transitions/fade";
-import {AbsoluteFill, Img, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
+import {AbsoluteFill, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {SpecAssetLayer} from "../components/spec/SpecAssetLayer";
-import {VisualTemplateRenderer} from "../components/spec/VisualTemplateRenderer";
+import {FoxExpressionLayer} from "../components/spec/FoxExpressionLayer";
+import {ShotStageRenderer} from "../components/spec/ShotStageRenderer";
+import {SoundCueTrack} from "../components/spec/SoundCueTrack";
 import type {RenderProductionData, RenderSpecScene} from "../spec/render-spec";
 import {getSceneRenderState, getSpecDurationInFrames, getTransitionDurationInFrames} from "../spec/render-state";
 import {toPublicSceneViewModel} from "../spec/public-view-model";
@@ -29,12 +31,12 @@ export const SpecSceneFrame: React.FC<{
   const view = toPublicSceneViewModel(scene, state, assets);
   return <AbsoluteFill style={sceneStyle}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
-    <div style={{position: "absolute", left: 416, top: 144, width: 1440, height: 648, zIndex: 10}}>
+    <div style={{position: "absolute", left: 416, top: 144, width: 1440, height: 648, zIndex: 10, overflow: "hidden", borderRadius: 30}}>
       <SpecAssetLayer assets={view.mainAssets} zIndex={10}/>
-      {view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><VisualTemplateRenderer content={view.mainContent}/></div> : null}
+      {view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><ShotStageRenderer content={view.mainContent}/></div> : null}
     </div>
     <div style={{position: "absolute", left: 64, top: 176, width: 320, height: 720, zIndex: 30, opacity: view.fox.opacity, overflow: "visible"}}>
-      <Img src={staticFile(view.fox.src)} style={{width: "100%", height: "100%", objectFit: view.fox.fit, filter: "drop-shadow(0 14px 18px rgba(0,0,0,.32))"}}/>
+      <FoxExpressionLayer fox={view.fox} previousFox={view.previousFox} transitionProgress={view.foxTransitionProgress}/>
     </div>
     <SpecAssetLayer assets={view.overlays} zIndex={40}/>
     <div style={{position: "absolute", left: 400, top: 42, width: 1472, height: 92, zIndex: 50, display: "flex", alignItems: "center", padding: "8px 20px", boxSizing: "border-box", overflow: "hidden", whiteSpace: "nowrap", borderRadius: 18, background: "linear-gradient(90deg,rgba(4,10,23,.88),rgba(4,10,23,.58),rgba(4,10,23,0))", fontSize: 52, lineHeight: "72px", fontWeight: 950, textShadow: "0 4px 14px rgba(0,0,0,.9)"}}>{view.headline}</div>
@@ -52,6 +54,7 @@ export const NasdaqCafeSpecEpisode: React.FC<{data: RenderProductionData}> = ({d
       <TransitionSeries.Sequence durationInFrames={scene.durationInFrames} premountFor={data.episode.fps}>
         <SpecSceneFrame scene={scene} assets={data.assets}/>
         {scene.narrationChunks.map((chunk) => <Sequence key={chunk.chunkId} from={chunk.startFrame} durationInFrames={Math.max(1, chunk.endFrame - chunk.startFrame + 1)} premountFor={data.episode.fps}><Audio src={staticFile(chunk.audioSrc)}/></Sequence>)}
+        <SoundCueTrack scene={scene} fps={data.episode.fps}/>
       </TransitionSeries.Sequence>
       {index < data.scenes.length - 1 && scene.transition.type === "fade" ? <TransitionSeries.Transition presentation={fade()} timing={linearTiming({durationInFrames: transitionFrames})}/> : null}
     </Fragment>;
