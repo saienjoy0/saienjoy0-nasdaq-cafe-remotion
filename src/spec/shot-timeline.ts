@@ -12,8 +12,10 @@ export type ProductionShot = {
   shotId: string;
   shotRecipe: ShotRecipe;
   startChunkId: string;
+  startProgress: number;
   startOffsetMs: number;
   endChunkId: string;
+  endProgress: number;
   endOffsetMs: number;
   endCue: string;
   primaryTargetId: string | null;
@@ -49,6 +51,12 @@ const chunkById = (scene: ProductionScene, chunkId: string) => {
   return chunk;
 };
 
+const pointInsideChunk = (
+  chunk: ProductionScene["narrationChunks"][number],
+  progress: number,
+  offsetMs: number,
+) => chunk.startMs + (chunk.endMs - chunk.startMs) * clamp(progress) + offsetMs;
+
 export const resolveShotRange = (
   scene: ProductionScene,
   beat: ProductionVisualBeat,
@@ -56,8 +64,8 @@ export const resolveShotRange = (
 ): Omit<ResolvedShot, "progress"> => {
   const startChunk = chunkById(scene, shot.startChunkId);
   const endChunk = chunkById(scene, shot.endChunkId);
-  const startMs = Math.max(beat.startMs, startChunk.startMs + shot.startOffsetMs);
-  const endMs = Math.min(beat.endMs, endChunk.endMs + shot.endOffsetMs);
+  const startMs = Math.max(beat.startMs, Math.min(beat.endMs - 1, pointInsideChunk(startChunk, shot.startProgress, shot.startOffsetMs)));
+  const endMs = Math.min(beat.endMs, Math.max(beat.startMs + 1, pointInsideChunk(endChunk, shot.endProgress, shot.endOffsetMs)));
   if (endMs <= startMs) {
     throw new Error(`$.scenes[${scene.sceneNumber - 1}].visualBeats.shots.${shot.shotId}: end must be after start`);
   }
