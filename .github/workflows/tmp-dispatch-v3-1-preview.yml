@@ -1,0 +1,51 @@
+name: Temporary v3.1 Preview Dispatcher
+
+on:
+  push:
+    paths:
+      - ".github/workflows/tmp-dispatch-v3-1-preview.yml"
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Dispatch canonical preview
+        id: dispatch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: "2026-07-31"
+        shell: bash
+        run: |
+          set -euo pipefail
+          SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
+          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          BEFORE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          gh workflow run nasdaq-cafe-preview.yml \
+            --ref main \
+            -f episode_date="$EPISODE_DATE" \
+            -f expected_spec_sha256="$SPEC_SHA" \
+            -f confirmation=PREVIEW
+          sleep 12
+          RUN_ID="$(gh run list --workflow nasdaq-cafe-preview.yml --branch main --event workflow_dispatch --limit 10 --json databaseId,createdAt --jq '[.[] | select(.createdAt >= "'"$BEFORE"'")] | sort_by(.createdAt) | last | .databaseId')"
+          if [[ -z "$RUN_ID" || "$RUN_ID" == "null" ]]; then
+            echo "::error::Could not resolve canonical preview run ID"
+            exit 1
+          fi
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Record canonical run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.dispatch.outputs.run_id }}
+          SPEC_SHA: ${{ steps.dispatch.outputs.spec_sha }}
+        run: |
+          gh pr comment 26 --body "v3.1正式previewをmainから起動しました。Run ID: \`${RUN_ID}\` / render_spec SHA-256: \`${SPEC_SHA}\` / final=false"
