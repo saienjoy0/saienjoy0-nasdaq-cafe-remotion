@@ -26,15 +26,18 @@ One-time repository setup:
 Queue behavior:
 
 - Request files are append-only. Do not edit, rename, or delete an old request to trigger a new render.
-- A push must add exactly one request JSON. Scheduled and manual queue checks select the oldest unprocessed request by file name.
+- A push must add exactly one request JSON. Scheduled and manual queue checks select the oldest request without a terminal outcome.
 - Every request is schema-checked, range-checked, and matched against the exact `render_spec.json` SHA-256 before the Codespace is started.
-- Semantically identical JSON requests share one canonical SHA-256 fingerprint, even if whitespace or key order differs.
-- After the Motion Preview artifact uploads successfully, the workflow commits one durable marker at `motion-preview-state/processed/<request-fingerprint>.json`.
-- A failed or cancelled preview does not create a marker, so the same request remains pending for a later retry.
+- The request path and canonical JSON jointly form the SHA-256 fingerprint. Whitespace and key order do not change one file's identity, while a newly named file is an explicit retry.
+- Every selected request reaches one terminal state: `succeeded`, `failed`, or `rejected`.
+- The workflow commits the terminal record to `motion-preview-state/outcomes/<request-fingerprint>.json`. Success is recorded only after the Motion Preview artifact upload succeeds.
+- A failed, rejected, or cancelled request is not run again automatically. Create one new request file to retry it deliberately.
 - Queue runs share one non-cancelling concurrency group. This prevents push and schedule runs from processing the same request at the same time.
+- Invalid JSON is rejected and recorded without waking the Codespace, so one malformed file cannot block the queue forever.
 
 Production boundaries:
 
 - Commit a request only after the episode package, adopted asset route, render spec, validator, and consistency check are complete.
 - The gateway selects the most recently used Codespace whose repository matches `GITHUB_REPOSITORY` and waits until its state is `Available` before calling the reusable Motion Preview workflow.
+- Only the repository owner may manually dispatch either Motion Preview workflow. The reusable renderer accepts automatic calls only from `Nasdaq Cafe Motion Preview Request` in this repository.
 - Motion Preview is cache-only. It never calls Gemini TTS, never regenerates narration, and never advances to final rendering.
