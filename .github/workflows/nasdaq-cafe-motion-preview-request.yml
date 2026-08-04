@@ -6,118 +6,234 @@ on:
       - main
     paths:
       - "motion-preview-requests/*.json"
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 permissions:
-  contents: read
-  actions: write
+  contents: write
+  actions: read
 
 concurrency:
-  group: nasdaq-cafe-motion-preview-request-${{ github.sha }}
+  group: nasdaq-cafe-motion-preview-request-queue
   cancel-in-progress: false
 
 jobs:
-  dispatch-motion-preview:
-    name: Wake Codespace and dispatch Motion Preview
+  resolve-request:
+    name: Resolve one immutable pending request
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 5
+    outputs:
+      has_request: ${{ steps.request.outputs.has_request }}
+      request_path: ${{ steps.request.outputs.request_path }}
+      request_fingerprint: ${{ steps.request.outputs.request_fingerprint }}
+      marker_path: ${{ steps.request.outputs.marker_path }}
+      episode_date: ${{ steps.request.outputs.episode_date }}
+      expected_spec_sha256: ${{ steps.request.outputs.expected_spec_sha256 }}
+      scene_number: ${{ steps.request.outputs.scene_number }}
+      offset_seconds: ${{ steps.request.outputs.offset_seconds }}
+      duration_seconds: ${{ steps.request.outputs.duration_seconds }}
 
     steps:
-      - name: Checkout request commit
+      - name: Checkout current main queue
         uses: actions/checkout@v6
         with:
+          ref: main
           fetch-depth: 0
           persist-credentials: false
+          clean: true
 
       - name: Resolve and validate one immutable request
         id: request
         shell: bash
         env:
+          EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-
-          mapfile -t REQUEST_FILES < <(
-            if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
-              git show --pretty='' --name-only "$GITHUB_SHA" -- 'motion-preview-requests/*.json'
-            else
-              git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- 'motion-preview-requests/*.json'
-            fi | sort -u
-          )
-
-          if [[ "${#REQUEST_FILES[@]}" -ne 1 ]]; then
-            echo "::error::Exactly one motion-preview request JSON must change; found ${#REQUEST_FILES[@]}"
-            if [[ "${#REQUEST_FILES[@]}" -gt 0 ]]; then
-              printf '::error::%s\n' "${REQUEST_FILES[@]}"
-            fi
-            exit 1
-          fi
-
-          REQUEST_PATH="${REQUEST_FILES[0]}"
-          if [[ ! -s "$REQUEST_PATH" ]]; then
-            echo "::error::Request must exist and be non-empty: $REQUEST_PATH"
-            exit 1
-          fi
-
-          python3 - "$REQUEST_PATH" <<'PY' >> "$GITHUB_OUTPUT"
+          python3 <<'PY'
           import hashlib
           import json
           import math
+          import os
           import pathlib
           import re
-          import sys
+          import subprocess
 
-          request_path = pathlib.Path(sys.argv[1])
-          value = json.loads(request_path.read_text(encoding="utf-8"))
-          required = {
-              "requestVersion",
-              "episodeDate",
-              "expectedSpecSha256",
-              "sceneNumber",
-              "offsetSeconds",
-              "durationSeconds",
-              "confirmation",
-          }
-          if not isinstance(value, dict) or set(value) != required:
-              raise SystemExit(
-                  f"request fields must be exactly {sorted(required)}; got {sorted(value) if isinstance(value, dict) else type(value).__name__}"
+          root = pathlib.Path.cwd()
+          request_dir = root / "motion-preview-requests"
+          marker_dir = root / "motion-preview-state" / "processed"
+          output_path = pathlib.Path(os.environ["GITHUB_OUTPUT"])
+          event_name = os.environ["EVENT_NAME"]
+          before_sha = os.environ.get("BEFORE_SHA", "")
+          trigger_sha = os.environ.get("TRIGGER_SHA", "")
+          allowed_path = re.compile(r"^motion-preview-requests/[A-Za-z0-9._-]+\.json$")
+
+          def git_lines(*args: str) -> list[str]:
+              result = subprocess.run(
+                  ["git", *args],
+                  check=True,
+                  text=True,
+                  stdout=subprocess.PIPE,
               )
-          if value["requestVersion"] != "1.0":
-              raise SystemExit("requestVersion must be 1.0")
-          episode_date = value["episodeDate"]
-          if not isinstance(episode_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_date):
-              raise SystemExit("episodeDate must match YYYY-MM-DD")
-          expected_sha = value["expectedSpecSha256"]
-          if not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha):
-              raise SystemExit("expectedSpecSha256 must be a 64-character SHA-256")
-          scene_number = value["sceneNumber"]
-          if not isinstance(scene_number, int) or isinstance(scene_number, bool) or not 1 <= scene_number <= 9:
-              raise SystemExit("sceneNumber must be an integer from 1 through 9")
-          offset = value["offsetSeconds"]
-          duration = value["durationSeconds"]
-          if not isinstance(offset, (int, float)) or isinstance(offset, bool) or not math.isfinite(offset) or offset < 0:
-              raise SystemExit("offsetSeconds must be finite and non-negative")
-          if not isinstance(duration, (int, float)) or isinstance(duration, bool) or not math.isfinite(duration) or duration <= 0 or duration > 30:
-              raise SystemExit("durationSeconds must be greater than 0 and at most 30")
-          if value["confirmation"] != "MOTION":
-              raise SystemExit("confirmation must be MOTION")
+              return [line for line in result.stdout.splitlines() if line.strip()]
 
-          spec_path = pathlib.Path("render-specs") / episode_date / "render_spec.json"
-          if not spec_path.is_file() or spec_path.stat().st_size == 0:
-              raise SystemExit(f"render spec not found: {spec_path}")
-          actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
-          if actual_sha != expected_sha.lower():
-              raise SystemExit(
-                  f"render_spec SHA-256 mismatch: expected={expected_sha.lower()} actual={actual_sha}"
-              )
+          def validate_request(relative_path: str):
+              if not allowed_path.fullmatch(relative_path):
+                  raise SystemExit(f"invalid request path: {relative_path}")
+              request_path = root / relative_path
+              if request_path.is_symlink() or not request_path.is_file() or request_path.stat().st_size == 0:
+                  raise SystemExit(f"request must be a non-empty regular file: {relative_path}")
 
-          print(f"request_path={request_path.as_posix()}")
-          print(f"episode_date={episode_date}")
-          print(f"expected_spec_sha256={actual_sha}")
-          print(f"scene_number={scene_number}")
-          print(f"offset_seconds={offset}")
-          print(f"duration_seconds={duration}")
+              value = json.loads(request_path.read_text(encoding="utf-8"))
+              required = {
+                  "requestVersion",
+                  "episodeDate",
+                  "expectedSpecSha256",
+                  "sceneNumber",
+                  "offsetSeconds",
+                  "durationSeconds",
+                  "confirmation",
+              }
+              if not isinstance(value, dict) or set(value) != required:
+                  actual = sorted(value) if isinstance(value, dict) else type(value).__name__
+                  raise SystemExit(
+                      f"request fields must be exactly {sorted(required)}; got {actual}"
+                  )
+              if value["requestVersion"] != "1.0":
+                  raise SystemExit("requestVersion must be 1.0")
+
+              episode_date = value["episodeDate"]
+              if not isinstance(episode_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_date):
+                  raise SystemExit("episodeDate must match YYYY-MM-DD")
+
+              expected_sha = value["expectedSpecSha256"]
+              if not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha):
+                  raise SystemExit("expectedSpecSha256 must be a 64-character SHA-256")
+              expected_sha = expected_sha.lower()
+
+              scene_number = value["sceneNumber"]
+              if not isinstance(scene_number, int) or isinstance(scene_number, bool) or not 1 <= scene_number <= 9:
+                  raise SystemExit("sceneNumber must be an integer from 1 through 9")
+
+              offset = value["offsetSeconds"]
+              duration = value["durationSeconds"]
+              if not isinstance(offset, (int, float)) or isinstance(offset, bool) or not math.isfinite(offset) or offset < 0:
+                  raise SystemExit("offsetSeconds must be finite and non-negative")
+              if not isinstance(duration, (int, float)) or isinstance(duration, bool) or not math.isfinite(duration) or duration <= 0 or duration > 30:
+                  raise SystemExit("durationSeconds must be greater than 0 and at most 30")
+              if value["confirmation"] != "MOTION":
+                  raise SystemExit("confirmation must be MOTION")
+
+              spec_path = root / "render-specs" / episode_date / "render_spec.json"
+              if not spec_path.is_file() or spec_path.stat().st_size == 0:
+                  raise SystemExit(f"render spec not found: {spec_path.relative_to(root)}")
+              actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+              if actual_sha != expected_sha:
+                  raise SystemExit(
+                      f"render_spec SHA-256 mismatch: expected={expected_sha} actual={actual_sha}"
+                  )
+
+              canonical = json.dumps(
+                  value,
+                  ensure_ascii=False,
+                  sort_keys=True,
+                  separators=(",", ":"),
+              ).encode("utf-8")
+              fingerprint = hashlib.sha256(canonical).hexdigest()
+              marker_path = marker_dir / f"{fingerprint}.json"
+              return {
+                  "request_path": relative_path,
+                  "request_fingerprint": fingerprint,
+                  "marker_path": marker_path.relative_to(root).as_posix(),
+                  "episode_date": episode_date,
+                  "expected_spec_sha256": actual_sha,
+                  "scene_number": str(scene_number),
+                  "offset_seconds": str(offset),
+                  "duration_seconds": str(duration),
+              }, marker_path
+
+          candidates: list[str]
+          if event_name == "push":
+              if before_sha and re.fullmatch(r"0+", before_sha):
+                  changed = git_lines(
+                      "show",
+                      "--format=",
+                      "--name-status",
+                      trigger_sha,
+                      "--",
+                      "motion-preview-requests/*.json",
+                  )
+              else:
+                  changed = git_lines(
+                      "diff",
+                      "--name-status",
+                      before_sha,
+                      trigger_sha,
+                      "--",
+                      "motion-preview-requests/*.json",
+                  )
+              if len(changed) != 1:
+                  raise SystemExit(
+                      f"push must add exactly one motion-preview request; found {len(changed)} changes"
+                  )
+              parts = changed[0].split("\t")
+              if len(parts) != 2 or parts[0] != "A":
+                  raise SystemExit(
+                      f"motion-preview requests are append-only; expected one added file, got: {changed[0]}"
+                  )
+              candidates = [parts[1]]
+          else:
+              candidates = [
+                  path.relative_to(root).as_posix()
+                  for path in sorted(request_dir.glob("*.json"))
+              ]
+
+          selected = None
+          for relative_path in candidates:
+              request, marker_path = validate_request(relative_path)
+              if marker_path.exists():
+                  continue
+              selected = request
+              break
+
+          with output_path.open("a", encoding="utf-8") as output:
+              if selected is None:
+                  output.write("has_request=false\n")
+              else:
+                  output.write("has_request=true\n")
+                  for key, value in selected.items():
+                      output.write(f"{key}={value}\n")
           PY
 
+      - name: Summarize queue decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.request.outputs.has_request }}" == "true" ]]; then
+            {
+              echo "### Pending Motion Preview request"
+              echo "- Request: \`${{ steps.request.outputs.request_path }}\`"
+              echo "- Fingerprint: \`${{ steps.request.outputs.request_fingerprint }}\`"
+              echo "- Episode: \`${{ steps.request.outputs.episode_date }}\`"
+              echo "- Scene: \`${{ steps.request.outputs.scene_number }}\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### No pending Motion Preview request" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  wake-codespace:
+    name: Wake the registered Codespace runner
+    needs: resolve-request
+    if: needs.resolve-request.outputs.has_request == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    outputs:
+      name: ${{ steps.codespace.outputs.name }}
+      state: ${{ steps.codespace.outputs.state }}
+
+    steps:
       - name: Start the most recently used repository Codespace
         id: codespace
         shell: bash
@@ -127,7 +243,6 @@ jobs:
           set -euo pipefail
           if [[ -z "${CODESPACE_LIFECYCLE_TOKEN:-}" ]]; then
             echo "::error::Repository secret CODESPACE_LIFECYCLE_TOKEN is required"
-            echo "::error::Use a token that can list this user's Codespaces and start the selected Codespace"
             exit 1
           fi
 
@@ -144,7 +259,7 @@ jobs:
           headers = {
               "Accept": "application/vnd.github+json",
               "Authorization": f"Bearer {token}",
-              "X-GitHub-Api-Version": "2026-03-10",
+              "X-GitHub-Api-Version": "2022-11-28",
               "User-Agent": "nasdaq-cafe-motion-preview-request",
           }
 
@@ -156,7 +271,9 @@ jobs:
                       return json.loads(payload) if payload else None
               except urllib.error.HTTPError as exc:
                   detail = exc.read().decode("utf-8", errors="replace")
-                  raise SystemExit(f"GitHub Codespaces API {method} {url} failed: HTTP {exc.code}: {detail}") from exc
+                  raise SystemExit(
+                      f"GitHub Codespaces API {method} {url} failed: HTTP {exc.code}: {detail}"
+                  ) from exc
 
           listing = request("GET", f"{api}/user/codespaces?per_page=100")
           candidates = [
@@ -186,53 +303,98 @@ jobs:
               if state == "Available":
                   break
               if time.monotonic() >= deadline:
-                  raise SystemExit(f"Codespace {name} did not become Available; last state={state}")
+                  raise SystemExit(
+                      f"Codespace {name} did not become Available; last state={state}"
+                  )
               time.sleep(7)
 
           print(f"name={name}")
           print(f"state={state}")
           PY
 
-      - name: Dispatch the Codespace Motion Preview workflow
+  render-motion-preview:
+    name: Run the cache-only Motion Preview
+    needs:
+      - resolve-request
+      - wake-codespace
+    if: needs.resolve-request.outputs.has_request == 'true'
+    uses: ./.github/workflows/nasdaq-cafe-motion-preview.yml
+    with:
+      episode_date: ${{ needs.resolve-request.outputs.episode_date }}
+      expected_spec_sha256: ${{ needs.resolve-request.outputs.expected_spec_sha256 }}
+      scene_number: ${{ needs.resolve-request.outputs.scene_number }}
+      offset_seconds: ${{ needs.resolve-request.outputs.offset_seconds }}
+      duration_seconds: ${{ needs.resolve-request.outputs.duration_seconds }}
+      confirmation: MOTION
+
+  mark-processed:
+    name: Persist successful request marker
+    needs:
+      - resolve-request
+      - render-motion-preview
+    if: >-
+      needs.resolve-request.outputs.has_request == 'true' &&
+      needs.render-motion-preview.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout latest main for the marker commit
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Commit one durable processed marker
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
-          EXPECTED_SPEC_SHA256: ${{ steps.request.outputs.expected_spec_sha256 }}
-          SCENE_NUMBER: ${{ steps.request.outputs.scene_number }}
-          OFFSET_SECONDS: ${{ steps.request.outputs.offset_seconds }}
-          DURATION_SECONDS: ${{ steps.request.outputs.duration_seconds }}
+          MARKER_PATH: ${{ needs.resolve-request.outputs.marker_path }}
+          REQUEST_PATH: ${{ needs.resolve-request.outputs.request_path }}
+          REQUEST_FINGERPRINT: ${{ needs.resolve-request.outputs.request_fingerprint }}
+          EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+          EXPECTED_SPEC_SHA256: ${{ needs.resolve-request.outputs.expected_spec_sha256 }}
+          SCENE_NUMBER: ${{ needs.resolve-request.outputs.scene_number }}
+          OFFSET_SECONDS: ${{ needs.resolve-request.outputs.offset_seconds }}
+          DURATION_SECONDS: ${{ needs.resolve-request.outputs.duration_seconds }}
         run: |
           set -euo pipefail
-          python3 <<'PY' > /tmp/motion-preview-dispatch.json
+          git pull --ff-only origin main
+          if [[ -f "$MARKER_PATH" ]]; then
+            echo "Marker already exists: $MARKER_PATH"
+            exit 0
+          fi
+
+          mkdir -p "$(dirname "$MARKER_PATH")"
+          python3 <<'PY'
           import json
           import os
+          import pathlib
+          from datetime import datetime, timezone
 
-          print(json.dumps({
-              "ref": "main",
-              "inputs": {
-                  "episode_date": os.environ["EPISODE_DATE"],
-                  "expected_spec_sha256": os.environ["EXPECTED_SPEC_SHA256"],
-                  "scene_number": os.environ["SCENE_NUMBER"],
-                  "offset_seconds": os.environ["OFFSET_SECONDS"],
-                  "duration_seconds": os.environ["DURATION_SECONDS"],
-                  "confirmation": "MOTION",
-              },
-          }))
+          marker_path = pathlib.Path(os.environ["MARKER_PATH"])
+          payload = {
+              "markerVersion": "1.0",
+              "requestPath": os.environ["REQUEST_PATH"],
+              "requestFingerprint": os.environ["REQUEST_FINGERPRINT"],
+              "episodeDate": os.environ["EPISODE_DATE"],
+              "expectedSpecSha256": os.environ["EXPECTED_SPEC_SHA256"],
+              "sceneNumber": int(os.environ["SCENE_NUMBER"]),
+              "offsetSeconds": float(os.environ["OFFSET_SECONDS"]),
+              "durationSeconds": float(os.environ["DURATION_SECONDS"]),
+              "workflow": os.environ["GITHUB_WORKFLOW"],
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "processedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+          }
+          marker_path.write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
           PY
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-motion-preview.yml/dispatches" \
-            --input /tmp/motion-preview-dispatch.json
 
-          {
-            echo "### Motion Preview request dispatched"
-            echo "- Request: \`${{ steps.request.outputs.request_path }}\`"
-            echo "- Episode: \`$EPISODE_DATE\`"
-            echo "- Scene: \`$SCENE_NUMBER\`"
-            echo "- Range: \`${OFFSET_SECONDS}s + ${DURATION_SECONDS}s\`"
-            echo "- Codespace: \`${{ steps.codespace.outputs.name }}\`"
-            echo "- Codespace state: \`${{ steps.codespace.outputs.state }}\`"
-            echo "- Runner label: \`nasdaq-cafe-codespace\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$MARKER_PATH"
+          git commit -m "Mark Motion Preview request ${REQUEST_FINGERPRINT} processed"
+          git push origin HEAD:main
