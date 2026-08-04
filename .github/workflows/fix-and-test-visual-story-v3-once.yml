@@ -1,0 +1,154 @@
+name: Fix and Test Visual Story v3 Once
+
+on:
+  push:
+    branches:
+      - feature/visual-story-engine-v2
+    paths:
+      - .github/workflows/fix-and-test-visual-story-v3-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/visual-story-engine-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ensure ffmpeg
+        run: command -v ffmpeg >/dev/null || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Apply v3 contract fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/components/spec/ShotStageRenderer.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('PublicCard, PublicMainContent, PublicNode, PublicNumber, PublicShot', 'PublicCard, PublicMainContent, PublicNumber, PublicShot')
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('src/spec/validate-shot-story.ts')
+          text = p.read_text(encoding='utf-8')
+          old = '''        const startIndex = chunkOrder.get(shot.startChunkId);
+            const endIndex = chunkOrder.get(shot.endChunkId);
+            if (startIndex == null) fail(`${shotPath}.startChunkId`, `unknown chunk ${shot.startChunkId}`);
+            if (endIndex == null) fail(`${shotPath}.endChunkId`, `unknown chunk ${shot.endChunkId}`);
+            if (startIndex < beatStartIndex || startIndex > beatEndIndex) fail(`${shotPath}.startChunkId`, "Shot must start inside its Visual Beat");
+            if (endIndex < beatStartIndex || endIndex > beatEndIndex) fail(`${shotPath}.endChunkId`, "Shot must end inside its Visual Beat");'''
+          new = '''        const startIndex = chunkOrder.get(shot.startChunkId) ?? fail(`${shotPath}.startChunkId`, `unknown chunk ${shot.startChunkId}`);
+            const endIndex = chunkOrder.get(shot.endChunkId) ?? fail(`${shotPath}.endChunkId`, `unknown chunk ${shot.endChunkId}`);
+            if (startIndex < beatStartIndex || startIndex > beatEndIndex) fail(`${shotPath}.startChunkId`, "Shot must start inside its Visual Beat");
+            if (endIndex < beatStartIndex || endIndex > beatEndIndex) fail(`${shotPath}.endChunkId`, "Shot must end inside its Visual Beat");'''
+          if old not in text:
+              raise SystemExit('validator narrowing anchor missing')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          p = Path('scripts/migrate-visual-story-v3.ts')
+          text = p.read_text(encoding='utf-8')
+          old = '''      const details = recipeDetails[recipe];
+            const start = startPoint(chunks, index / recipes.length);'''
+          new = '''      const details = recipeDetails[recipe];
+            const alternateCausal = recipe === "causal-build" && index % 2 === 1;
+            const alternateVerification = recipe === "verification-two-paths" && index % 2 === 1;
+            const stageLayout: StageLayout = alternateCausal
+              ? "full-stage"
+              : alternateVerification
+                ? "split-horizontal"
+                : details.layout;
+            const cameraPreset: CameraPreset = alternateCausal
+              ? "reframe-outcome"
+              : alternateVerification
+                ? "pan-left"
+                : details.camera;
+            const start = startPoint(chunks, index / recipes.length);'''
+          if old not in text:
+              raise SystemExit('migration layout anchor missing')
+          text = text.replace(old, new, 1)
+          text = text.replace('        stageLayout: details.layout,\n        cameraPreset: details.camera,', '        stageLayout,\n        cameraPreset,', 1)
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('scripts/test-visual-templates.ts')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+              'const renderer = await readFile(path.join(project, "src/components/spec/VisualTemplateRenderer.tsx"), "utf8");',
+              'const renderer = await readFile(path.join(project, "src/components/spec/VisualTemplateRenderer.tsx"), "utf8");\nconst shotRenderer = await readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8");',
+          )
+          text = text.replace(
+              'assert.match(composition, /VisualTemplateRenderer/);',
+              'assert.match(composition, /ShotStageRenderer/);\nassert.match(shotRenderer, /VisualTemplateRenderer/);',
+          )
+          p.write_text(text, encoding='utf-8')
+          PY
+      - name: Rebuild Shot Plan and package register
+        run: |
+          npm run migrate:visual-story:v3 -- render-specs/2026-07-31/render_spec.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          spec = json.loads(Path('render-specs/2026-07-31/render_spec.json').read_text(encoding='utf-8'))
+          lines = ['## Visual Story Engine v3 Shot Plan', '', '固定背景・狐左位置・字幕領域を維持し、メイン表示領域内だけでShot、内部カメラ、前後要素の引継ぎを行う。', '']
+          count = 0
+          for scene in spec['scenes']:
+              lines.append(f"### {scene['sceneId']}")
+              for beat in scene['visualBeats']:
+                  shots = beat.get('shots', [])
+                  count += len(shots)
+                  if not shots: continue
+                  lines.append(f"- `{beat['beatId']}` / `{beat['visualTemplate']}`")
+                  for shot in shots:
+                      interval = f"{shot['startChunkId']}@{shot['startProgress']:.3f} → {shot['endChunkId']}@{shot['endProgress']:.3f}"
+                      lines.append(f"  - `{shot['shotId']}`: `{shot['shotRecipe']}` / `{shot['stageLayout']}` / camera `{shot['cameraPreset']}` / fox `{shot['foxExpression']}` / `{interval}` / continuity `{shot['continuityKey'] or 'none'}`")
+              lines.append('')
+          lines.insert(4, f'- 総Shot数：{count}')
+          p = Path('episode-packages/2026-07-31/episode_package_2026-07-31.md')
+          text = p.read_text(encoding='utf-8')
+          marker = '## Visual Story Engine v3 Shot Plan'
+          if marker in text: text = text.split(marker, 1)[0].rstrip() + '\n\n'
+          p.write_text(text + '\n'.join(lines).rstrip() + '\n', encoding='utf-8')
+          PY
+      - name: Run complete v3 verification
+        run: |
+          set +e
+          mkdir -p docs
+          {
+            echo '=== TYPECHECK ==='
+            npm run typecheck
+            echo '=== SHOT CONTRACT ==='
+            npm run test:shot-story
+            echo '=== VISUAL STORY ==='
+            npm run test:visual-story
+            echo '=== PUBLIC SCREEN ==='
+            npm run test:public-screen
+            echo '=== RENDER SPEC ==='
+            npm run test:spec
+            echo '=== BUNDLE ==='
+            rm -rf build dist/remotion
+            npm run build
+          } > /tmp/v3-test-full.log 2>&1
+          status=$?
+          {
+            echo '# Visual Story Engine v3 Test Result'
+            echo
+            echo "- Run ID: $GITHUB_RUN_ID"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Exit status: $status"
+            echo
+            echo '```text'
+            tail -n 500 /tmp/v3-test-full.log
+            echo '```'
+          } > docs/visual-story-v3-test-result.md
+          rm .github/workflows/fix-and-test-visual-story-v3-once.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/components/spec/ShotStageRenderer.tsx src/spec/validate-shot-story.ts scripts/migrate-visual-story-v3.ts scripts/test-visual-templates.ts render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md docs/visual-story-v3-test-result.md .github/workflows/fix-and-test-visual-story-v3-once.yml
+          git commit -m "Fix Visual Story Engine v3 contract tests"
+          git push origin HEAD:feature/visual-story-engine-v2
+          exit "$status"
