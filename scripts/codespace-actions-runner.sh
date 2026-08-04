@@ -20,8 +20,16 @@ Usage:
 
 register:
   Downloads the official GitHub Actions runner, verifies its release digest when
-  available, obtains a one-hour repository registration token through `gh`, and
-  registers this Codespace with the custom label nasdaq-cafe-codespace.
+  available, and registers this Codespace with the custom label
+  nasdaq-cafe-codespace.
+
+  Codespaces' injected GITHUB_TOKEN may not have repository Administration
+  permission. In that case, obtain the one-hour token from repository
+  Settings -> Actions -> Runners -> New self-hosted runner and run:
+
+    read -rsp "Runner token: " RUNNER_TOKEN; echo
+    RUNNER_TOKEN="$RUNNER_TOKEN" bash scripts/codespace-actions-runner.sh register
+    unset RUNNER_TOKEN
 
 start:
   Starts the registered runner in the background for this Codespace session.
@@ -49,13 +57,22 @@ require_command() {
 registration_token() {
   if [[ -n "${RUNNER_TOKEN:-}" ]]; then
     printf '%s\n' "$RUNNER_TOKEN"
-    return
+    return 0
   fi
-  gh api \
-    --method POST \
-    -H "Accept: application/vnd.github+json" \
-    "repos/${REPOSITORY}/actions/runners/registration-token" \
-    --jq .token
+
+  local token
+  if ! token="$(
+    gh api \
+      --method POST \
+      -H "Accept: application/vnd.github+json" \
+      "repos/${REPOSITORY}/actions/runners/registration-token" \
+      --jq .token
+  )"; then
+    echo "Could not obtain a runner registration token with the current gh credential." >&2
+    echo "Codespaces' injected GITHUB_TOKEN commonly lacks repository Administration write permission." >&2
+    return 1
+  fi
+  printf '%s\n' "$token"
 }
 
 download_runner() {
@@ -109,11 +126,21 @@ register_runner() {
   fi
 
   local token
-  token="$(registration_token)"
+  if ! token="$(registration_token)"; then
+    cat >&2 <<'EOF'
+
+Open this repository in GitHub, then go to:
+  Settings -> Actions -> Runners -> New self-hosted runner -> Linux -> x64
+
+Copy only the short-lived token shown in the ./config.sh command, then run:
+  read -rsp "Runner token: " RUNNER_TOKEN; echo
+  RUNNER_TOKEN="$RUNNER_TOKEN" bash scripts/codespace-actions-runner.sh register
+  unset RUNNER_TOKEN
+EOF
+    exit 1
+  fi
   if [[ -z "$token" || "$token" == "null" ]]; then
-    echo "Could not obtain a runner registration token." >&2
-    echo "Open repository Settings → Actions → Runners → New self-hosted runner," >&2
-    echo "then rerun with RUNNER_TOKEN=<shown-token>." >&2
+    echo "The runner registration token was empty." >&2
     exit 1
   fi
 
@@ -195,7 +222,10 @@ remove_runner() {
     exit 0
   fi
   local token
-  token="$(registration_token)"
+  if ! token="$(registration_token)"; then
+    echo "A repository runner removal token is required." >&2
+    exit 1
+  fi
   (
     cd "$RUNNER_DIR"
     ./config.sh remove --unattended --token "$token"
