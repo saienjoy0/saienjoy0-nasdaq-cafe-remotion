@@ -55,6 +55,17 @@ jobs:
           echo "04df3a251adf79665fadb62b210d9f5354be41fbca6bffe6d7f3d7b77771533c  /tmp/apply-v31.b64" | sha256sum -c -
           base64 --decode /tmp/apply-v31.b64 | gzip --decompress > scripts/apply-v31-stabilization.py
           echo "5833af17e5019bf9404b20ba4cf54fa5000091cd63445d315ae2c5ff6ca6d4ff  scripts/apply-v31-stabilization.py" | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/apply-v31-stabilization.py")
+          source = path.read_text(encoding="utf-8")
+          source = source.replace("filter((id) =>", "filter((id: string) =>")
+          source = source.replace(
+              'FILES[\'src/components/spec/ShotTransitionHost.tsx\'] = \'import type {PublicMainContent, PublicShot} from "../../spec/public-view-model";',
+              'FILES[\'src/components/spec/ShotTransitionHost.tsx\'] = \'import type {PublicMainContent} from "../../spec/public-view-model";',
+          )
+          path.write_text(source, encoding="utf-8")
+          PY
           python -m py_compile scripts/apply-v31-stabilization.py
           python scripts/apply-v31-stabilization.py
           rm -rf scripts/.v31-payload
