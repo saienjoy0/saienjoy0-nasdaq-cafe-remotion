@@ -1,0 +1,93 @@
+name: Force Sync Visual Story v3 Once
+
+on:
+  push:
+    branches:
+      - feature/visual-story-engine-v2
+    paths:
+      - .github/workflows/force-sync-visual-story-v3-once.yml
+
+concurrency:
+  group: visual-story-v3-progress
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/visual-story-engine-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Synchronize schema and migration source
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          schema = Path('src/spec/render-spec.ts')
+          text = schema.read_text(encoding='utf-8')
+          if 'startProgress: z.number().min(0).max(1)' not in text:
+              old = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            startOffsetMs: z.number().int().min(0).max(10_000),
+            endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            endOffsetMs: z.number().int().min(0).max(10_000),'''
+              new = '''  startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            startProgress: z.number().min(0).max(1),
+            startOffsetMs: z.number().int().min(0).max(10_000),
+            endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
+            endProgress: z.number().min(0).max(1),
+            endOffsetMs: z.number().int().min(0).max(10_000),'''
+              if old not in text:
+                  raise SystemExit('Shot progress schema anchor missing')
+              schema.write_text(text.replace(old, new, 1), encoding='utf-8')
+          migration = Path('scripts/migrate-visual-story-v3.ts')
+          text = migration.read_text(encoding='utf-8')
+          text = text.replace('  if (sceneNumber === 6) return shotIndex === 0 ? "軽い驚き" : "分析";', '  if (sceneNumber === 6) return "分析";')
+          migration.write_text(text, encoding='utf-8')
+          PY
+      - run: npm run migrate:visual-story:v3 -- render-specs/2026-07-31/render_spec.json
+      - run: npm run episode:spec:schema
+      - name: Synchronize episode package
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          spec = json.loads(Path('render-specs/2026-07-31/render_spec.json').read_text(encoding='utf-8'))
+          lines = ['## Visual Story Engine v3 Shot Plan', '', '固定背景・狐左位置・字幕領域を維持し、メイン表示領域内だけでShot、内部カメラ、前後要素の引継ぎを行う。', '']
+          count = 0
+          for scene in spec['scenes']:
+              lines.append(f"### {scene['sceneId']}")
+              for beat in scene['visualBeats']:
+                  shots = beat.get('shots', [])
+                  count += len(shots)
+                  if not shots:
+                      continue
+                  lines.append(f"- `{beat['beatId']}` / `{beat['visualTemplate']}`")
+                  for shot in shots:
+                      interval = f"{shot['startChunkId']}@{shot['startProgress']:.3f} → {shot['endChunkId']}@{shot['endProgress']:.3f}"
+                      lines.append(f"  - `{shot['shotId']}`: `{shot['shotRecipe']}` / `{shot['stageLayout']}` / camera `{shot['cameraPreset']}` / fox `{shot['foxExpression']}` / `{interval}` / continuity `{shot['continuityKey'] or 'none'}`")
+              lines.append('')
+          lines.insert(4, f'- 総Shot数：{count}')
+          path = Path('episode-packages/2026-07-31/episode_package_2026-07-31.md')
+          text = path.read_text(encoding='utf-8')
+          marker = '## Visual Story Engine v3 Shot Plan'
+          if marker in text:
+              text = text.split(marker, 1)[0].rstrip() + '\n\n'
+          path.write_text(text + '\n'.join(lines).rstrip() + '\n', encoding='utf-8')
+          PY
+      - name: Commit synchronized sources and remove temporary workflows
+        run: |
+          rm -f .github/workflows/force-sync-visual-story-v3-once.yml
+          rm -f .github/workflows/apply-visual-story-v3-progress-once.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/spec/render-spec.ts scripts/migrate-visual-story-v3.ts schemas/render_spec.schema.json render-specs/2026-07-31/render_spec.json episode-packages/2026-07-31/episode_package_2026-07-31.md .github/workflows
+          git commit -m "Synchronize measured-audio Visual Story v3 Shots"
+          git push origin HEAD:feature/visual-story-engine-v2
