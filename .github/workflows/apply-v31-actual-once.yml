@@ -1,0 +1,220 @@
+name: Apply Visual Story v3.1 Actual Implementation Once
+
+on:
+  push:
+    branches:
+      - fix/visual-story-v3-1-actual
+    paths:
+      - .github/workflows/apply-v31-actual-once.yml
+
+permissions:
+  contents: write
+  actions: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: visual-story-v3-1-actual
+  cancel-in-progress: true
+
+jobs:
+  apply-test-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/visual-story-v3-1-actual
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        id: install
+        run: npm ci
+
+      - name: Materialize v3.1 implementation
+        id: materialize
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find scripts/.v31-payload -maxdepth 1 -type f -name 'part-*' | wc -l | tr -d ' ')" = "5"
+          cat scripts/.v31-payload/part-00 scripts/.v31-payload/part-01 scripts/.v31-payload/part-02 scripts/.v31-payload/part-03 scripts/.v31-payload/part-04 > /tmp/apply-v31.b64
+          test "$(wc -c < /tmp/apply-v31.b64 | tr -d ' ')" = "22108"
+          echo "04df3a251adf79665fadb62b210d9f5354be41fbca6bffe6d7f3d7b77771533c  /tmp/apply-v31.b64" | sha256sum -c -
+          base64 --decode /tmp/apply-v31.b64 | gzip --decompress > scripts/apply-v31-stabilization.py
+          echo "5833af17e5019bf9404b20ba4cf54fa5000091cd63445d315ae2c5ff6ca6d4ff  scripts/apply-v31-stabilization.py" | sha256sum -c -
+          python scripts/.v31-payload/patch-generated.py before
+          python -m py_compile scripts/apply-v31-stabilization.py
+          python scripts/apply-v31-stabilization.py
+          python scripts/.v31-payload/patch-generated.py after
+          node --import tsx scripts/migrate-visual-story-v3.ts render-specs/2026-07-31/render_spec.json
+
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/test-visual-templates.ts")
+          text = path.read_text(encoding="utf-8")
+          old_read = 'const shotRenderer = await readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8");\n'
+          new_read = old_read + 'const shotRecipes = await readFile(path.join(project, "src/components/spec/shots/ShotRecipes.tsx"), "utf8");\nconst shotTransitionHost = await readFile(path.join(project, "src/components/spec/ShotTransitionHost.tsx"), "utf8");\n'
+          if old_read not in text:
+              raise SystemExit("stale visual-template test reader anchor not found")
+          text = text.replace(old_read, new_read, 1)
+
+          old_forbidden = '  assert.equal(shotRenderer.includes(forbidden), false, `Shot renderer contains forbidden dynamic behavior: ${forbidden}`);\n'
+          new_forbidden = old_forbidden + '  assert.equal(shotRecipes.includes(forbidden), false, `Dedicated Shot recipes contain forbidden dynamic behavior: ${forbidden}`);\n  assert.equal(shotTransitionHost.includes(forbidden), false, `Shot transition host contains forbidden dynamic behavior: ${forbidden}`);\n'
+          if old_forbidden not in text:
+              raise SystemExit("stale forbidden-check anchor not found")
+          text = text.replace(old_forbidden, new_forbidden, 1)
+
+          old_assertions = '''assert.match(shotRenderer, /HeroMetric/);
+          assert.match(shotRenderer, /Contradiction/);
+          assert.match(shotRenderer, /ExpectedAnchor/);
+          assert.match(shotRenderer, /ActualCrosses/);
+          assert.match(shotRenderer, /GapMacro/);
+          assert.match(shotRenderer, /KineticTypography/);
+          assert.match(shotRenderer, /ContinuityBadge/);'''.replace("          ", "")
+          new_assertions = '''assert.match(shotRenderer, /ShotTransitionHost/);
+          assert.match(shotRenderer, /DedicatedShotRenderer/);
+          assert.match(shotRenderer, /StageSafeArea/);
+          assert.doesNotMatch(shotRenderer, /GenericShot/);
+          assert.doesNotMatch(shotRenderer, /inset:\s*-40/);
+          assert.match(shotTransitionHost, /PreviousShot/);
+          assert.match(shotTransitionHost, /CurrentShot/);
+          assert.match(shotTransitionHost, /SharedElementLayer/);
+          for (const component of [
+            "HeroMetricShot",
+            "ContradictionShot",
+            "ExpectedAnchorShot",
+            "ActualCrossesExpectedShot",
+            "GapMacroShot",
+            "CausalBuildShot",
+            "CounterforceShot",
+            "EntityCutawayShot",
+            "SplitOppositionShot",
+            "FocusMatrixShot",
+            "VerificationPathsShot",
+            "RecapAssemblyShot",
+          ]) {
+            assert.match(shotRecipes, new RegExp(`const ${component}`), `missing dedicated Shot recipe: ${component}`);
+          }'''.replace("          ", "")
+          if old_assertions not in text:
+              raise SystemExit("stale Shot assertion block not found")
+          text = text.replace(old_assertions, new_assertions, 1)
+          path.write_text(text, encoding="utf-8")
+          PY
+
+          rm -rf scripts/.v31-payload
+          rm -f scripts/apply-v31-stabilization.py
+          rm -f .github/workflows/apply-v31-stabilization-once.yml
+          rm -f .github/workflows/patch-v31-ffmpeg-once.yml
+          rm -f .github/workflows/report-v31-runs-once.yml
+          rm -f .github/workflows/apply-v31-actual-once.yml
+
+      - name: Typecheck and validate production input
+        id: validate
+        run: |
+          npm run typecheck
+          npm run episode:spec:validate -- render-specs/2026-07-31/render_spec.json
+
+      - name: Ensure ffmpeg is available
+        id: ffmpeg
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            for attempt in 1 2 3; do
+              if sudo apt-get update && sudo apt-get install -y ffmpeg; then
+                break
+              fi
+              if [[ "$attempt" = "3" ]]; then
+                echo "::error::ffmpeg installation failed after 3 attempts"
+                exit 1
+              fi
+              sleep $((attempt * 10))
+            done
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Run full runtime and visual contracts
+        id: contracts
+        run: |
+          npm run test:runtime-stability
+          npm run test:public-screen
+
+      - name: Bundle Remotion
+        id: bundle
+        run: npm run build
+
+      - name: Commit verified v3.1 implementation
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            .github/workflows/apply-v31-stabilization-once.yml \
+            .github/workflows/apply-v31-actual-once.yml \
+            .github/workflows/patch-v31-ffmpeg-once.yml \
+            .github/workflows/report-v31-runs-once.yml \
+            scripts/.v31-payload \
+            package.json \
+            schemas/render_spec.schema.json \
+            render-specs/2026-07-31/render_spec.json \
+            episode-packages/2026-07-31/episode_package_2026-07-31.md \
+            docs/14_visual_story_engine_v3_1_stabilization.md \
+            scripts/migrate-visual-story-v3.ts \
+            scripts/test-shot-stability.ts \
+            scripts/test-spec-presentation.ts \
+            scripts/test-visual-templates.ts \
+            src/spec/render-spec.ts \
+            src/spec/shot-contract.ts \
+            src/spec/shot-transition-contract.ts \
+            src/spec/shot-timeline.ts \
+            src/spec/validate-shot-story.ts \
+            src/components/spec/StageSafeArea.tsx \
+            src/components/spec/SafeCameraViewport.tsx \
+            src/components/spec/SharedElementLayer.tsx \
+            src/components/spec/ShotTransitionHost.tsx \
+            src/components/spec/ShotStageRenderer.tsx \
+            src/components/spec/shots/ShotRecipes.tsx
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "Apply Visual Story Engine v3.1 stabilization"
+          git push origin HEAD:fix/visual-story-v3-1-actual
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Report result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
+          CONTRACTS_OUTCOME: ${{ steps.contracts.outcome }}
+          BUNDLE_OUTCOME: ${{ steps.bundle.outcome }}
+          RESULT_SHA: ${{ steps.commit.outputs.commit_sha }}
+        shell: bash
+        run: |
+          {
+            echo "### Visual Story Engine v3.1 actual implementation"
+            echo "- Run: \`${GITHUB_RUN_ID}\`"
+            echo "- Materialize: \`${MATERIALIZE_OUTCOME:-unknown}\`"
+            echo "- Typecheck / validator: \`${VALIDATE_OUTCOME:-unknown}\`"
+            echo "- ffmpeg / ffprobe: \`${FFMPEG_OUTCOME:-unknown}\`"
+            echo "- Runtime / visual contracts: \`${CONTRACTS_OUTCOME:-unknown}\`"
+            echo "- Remotion bundle: \`${BUNDLE_OUTCOME:-unknown}\`"
+            echo "- Verified commit: \`${RESULT_SHA:-not-created}\`"
+            echo "- Final render: not run"
+          } > /tmp/v31-actual-result.md
+          gh pr comment 26 --repo "$REPO" --body-file /tmp/v31-actual-result.md
