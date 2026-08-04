@@ -46,18 +46,16 @@ export const validateShotStoryContract = (
       const path = `${scenePath}.visualBeats[${beatIndex}].shots`;
       if (shots.length > 4) fail(path, `one Visual Beat may contain at most 4 Shots, got ${shots.length}`);
       totalShots += shots.length;
-      const beatStartIndex = chunkOrder.get(beat.startChunkId)!;
-      const beatEndIndex = chunkOrder.get(beat.endChunkId)!;
+      const beatStartIndex = chunkOrder.get(beat.startChunkId) ?? fail(`${path}.startChunkId`, `unknown chunk ${beat.startChunkId}`);
+      const beatEndIndex = chunkOrder.get(beat.endChunkId) ?? fail(`${path}.endChunkId`, `unknown chunk ${beat.endChunkId}`);
       let previousEnd = -1;
       let previousShot: typeof shots[number] | null = null;
       let beatSoundCues = 0;
 
       shots.forEach((shot, shotIndex) => {
         const shotPath = `${path}[${shotIndex}]`;
-        const startIndex = chunkOrder.get(shot.startChunkId);
-        const endIndex = chunkOrder.get(shot.endChunkId);
-        if (startIndex == null) fail(`${shotPath}.startChunkId`, `unknown chunk ${shot.startChunkId}`);
-        if (endIndex == null) fail(`${shotPath}.endChunkId`, `unknown chunk ${shot.endChunkId}`);
+        const startIndex = chunkOrder.get(shot.startChunkId) ?? fail(`${shotPath}.startChunkId`, `unknown chunk ${shot.startChunkId}`);
+        const endIndex = chunkOrder.get(shot.endChunkId) ?? fail(`${shotPath}.endChunkId`, `unknown chunk ${shot.endChunkId}`);
         if (startIndex < beatStartIndex || startIndex > beatEndIndex) fail(`${shotPath}.startChunkId`, "Shot must start inside its Visual Beat");
         if (endIndex < beatStartIndex || endIndex > beatEndIndex) fail(`${shotPath}.endChunkId`, "Shot must end inside its Visual Beat");
         const startMoment = shotMoment(chunkOrder, shot.startChunkId, shot.startProgress, shot.startOffsetMs);
