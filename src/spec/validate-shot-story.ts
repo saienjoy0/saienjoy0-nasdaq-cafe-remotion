@@ -1,4 +1,5 @@
-import type {RenderSpec} from "./render-spec";
+import type {RenderProductionData, RenderSpec} from "./render-spec";
+import {resolveBeatShots} from "./shot-timeline";
 import {DEDICATED_SHOT_RECIPE_IDS, SHOT_RECIPE_FAMILIES} from "./shot-contract";
 
 const fail = (path: string, message: string): never => {throw new Error(`${path}: ${message}`);};
@@ -86,4 +87,122 @@ export const validateShotStoryContract = (spec: RenderSpec, options: {enforceVar
     if (new Set(recipes).size < 6) fail("$.scenes", `v3 episode requires at least 6 Shot families, got ${new Set(recipes).size}`);
     if (totalContinuities < 3) fail("$.scenes", `v3 episode requires at least 3 continuity handoffs, got ${totalContinuities}`);
   }
+};
+
+export const DEFAULT_MAX_SHOT_DURATION_MS = 10_000;
+export const DEFAULT_MAX_OUTCOME_HOLD_MS = 8_000;
+export const DEFAULT_MAX_SHOT_GAP_MS = 500;
+export const DEFAULT_MAX_SHOT_OVERLAP_MS = 250;
+
+export type ProductionShotTimingSummary = {
+  totalShots: number;
+  maximumShotDurationMs: number;
+  scenes: Array<{
+    sceneId: string;
+    durationMs: number;
+    shotCount: number;
+    maximumShotDurationMs: number;
+  }>;
+};
+
+export const validateProductionShotTimingContract = (
+  data: RenderProductionData,
+  options: {
+    maxShotDurationMs?: number;
+    maxOutcomeHoldMs?: number;
+    maxGapMs?: number;
+    maxOverlapMs?: number;
+  } = {},
+): ProductionShotTimingSummary => {
+  const maxShotDurationMs = options.maxShotDurationMs ?? DEFAULT_MAX_SHOT_DURATION_MS;
+  const maxOutcomeHoldMs = options.maxOutcomeHoldMs ?? DEFAULT_MAX_OUTCOME_HOLD_MS;
+  const maxGapMs = options.maxGapMs ?? DEFAULT_MAX_SHOT_GAP_MS;
+  const maxOverlapMs = options.maxOverlapMs ?? DEFAULT_MAX_SHOT_OVERLAP_MS;
+  const episodeUsesShots = data.scenes.some((scene) =>
+    scene.visualBeats.some((beat) => (beat.shots?.length ?? 0) > 0),
+  );
+  let totalShots = 0;
+  let maximumShotDurationMs = 0;
+  const scenes: ProductionShotTimingSummary["scenes"] = [];
+
+  for (const [sceneIndex, scene] of data.scenes.entries()) {
+    let sceneShotCount = 0;
+    let sceneMaximumShotDurationMs = 0;
+
+    for (const [beatIndex, beat] of scene.visualBeats.entries()) {
+      const beatPath = `$.scenes[${sceneIndex}].visualBeats[${beatIndex}]`;
+      const beatDurationMs = beat.endMs - beat.startMs;
+      const declaredShots = beat.shots ?? [];
+      if (declaredShots.length === 0) {
+        if (episodeUsesShots && beatDurationMs > maxShotDurationMs) {
+          fail(
+            `${beatPath}.shots`,
+            `v3 Visual Beat has no Shots for ${Math.round(beatDurationMs)}ms; add an explicit Shot plan before preview`,
+          );
+        }
+        continue;
+      }
+
+      const resolvedShots = resolveBeatShots(scene, beat);
+      let previousEndMs = beat.startMs;
+      for (const [shotIndex, shot] of resolvedShots.entries()) {
+        const shotPath = `${beatPath}.shots[${shotIndex}]`;
+        const gapMs = shot.startMs - previousEndMs;
+        if (gapMs > maxGapMs) {
+          fail(
+            `${shotPath}.startCue`,
+            `resolved Shot gap is ${Math.round(gapMs)}ms; maximum is ${maxGapMs}ms`,
+          );
+        }
+        const overlapMs = previousEndMs - shot.startMs;
+        if (overlapMs > maxOverlapMs) {
+          fail(
+            `${shotPath}.startCue`,
+            `resolved Shot overlap is ${Math.round(overlapMs)}ms; maximum is ${maxOverlapMs}ms`,
+          );
+        }
+
+        const durationMs = shot.endMs - shot.startMs;
+        if (durationMs > maxShotDurationMs) {
+          fail(
+            shotPath,
+            `resolved Shot lasts ${Math.round(durationMs)}ms; maximum is ${maxShotDurationMs}ms`,
+          );
+        }
+        if (
+          scene.sceneNumber !== 9 &&
+          shot.transitionOut === "hold-outcome" &&
+          durationMs > maxOutcomeHoldMs
+        ) {
+          fail(
+            `${shotPath}.transitionOut`,
+            `completed outcome hold lasts ${Math.round(durationMs)}ms outside Scene 9; maximum is ${maxOutcomeHoldMs}ms`,
+          );
+        }
+
+        totalShots += 1;
+        sceneShotCount += 1;
+        maximumShotDurationMs = Math.max(maximumShotDurationMs, durationMs);
+        sceneMaximumShotDurationMs = Math.max(sceneMaximumShotDurationMs, durationMs);
+        previousEndMs = shot.endMs;
+      }
+
+      const tailGapMs = beat.endMs - previousEndMs;
+      if (tailGapMs > maxGapMs) {
+        fail(
+          `${beatPath}.shots`,
+          `resolved Shot plan ends ${Math.round(tailGapMs)}ms before the Visual Beat; maximum tail gap is ${maxGapMs}ms`,
+        );
+      }
+    }
+
+    scenes.push({
+      sceneId: scene.sceneId,
+      durationMs: scene.durationMs,
+      shotCount: sceneShotCount,
+      maximumShotDurationMs: sceneMaximumShotDurationMs,
+    });
+  }
+
+  return {totalShots, maximumShotDurationMs, scenes};
 };
