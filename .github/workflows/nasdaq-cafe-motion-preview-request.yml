@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 concurrency:
@@ -24,8 +24,11 @@ jobs:
     if: >-
       github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
       (
-        github.event_name != 'workflow_dispatch' ||
-        github.actor == github.repository_owner
+        github.event_name == 'schedule' ||
+        (
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+          github.actor == github.repository_owner
+        )
       )
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -60,225 +63,13 @@ jobs:
           TRIGGER_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          python3 <<'PY'
-          import base64
-          import hashlib
-          import json
-          import math
-          import os
-          import pathlib
-          import re
-          import subprocess
-
-          root = pathlib.Path.cwd()
-          request_dir = root / "motion-preview-requests"
-          outcome_dir = root / "motion-preview-state" / "outcomes"
-          output_path = pathlib.Path(os.environ["GITHUB_OUTPUT"])
-          event_name = os.environ["EVENT_NAME"]
-          before_sha = os.environ.get("BEFORE_SHA", "")
-          trigger_sha = os.environ.get("TRIGGER_SHA", "")
-          allowed_path = re.compile(r"^motion-preview-requests/[A-Za-z0-9._-]+\.json$")
-
-          def git_lines(*args: str) -> list[str]:
-              result = subprocess.run(
-                  ["git", *args],
-                  check=True,
-                  text=True,
-                  stdout=subprocess.PIPE,
-              )
-              return [line for line in result.stdout.splitlines() if line.strip()]
-
-          def encode_error(message: str) -> str:
-              return base64.urlsafe_b64encode(message.encode("utf-8")).decode("ascii")
-
-          def path_fingerprint(relative_path: str, payload: bytes) -> str:
-              digest = hashlib.sha256()
-              digest.update(relative_path.encode("utf-8"))
-              digest.update(b"\0")
-              digest.update(payload)
-              return digest.hexdigest()
-
-          def rejected(relative_path: str, raw_bytes: bytes, error: Exception | str):
-              fingerprint = path_fingerprint(relative_path, raw_bytes)
-              outcome_path = outcome_dir / f"{fingerprint}.json"
-              if outcome_path.exists():
-                  return None, outcome_path
-              message = str(error)
-              return {
-                  "request_valid": "false",
-                  "request_path": relative_path,
-                  "request_fingerprint": fingerprint,
-                  "outcome_path": outcome_path.relative_to(root).as_posix(),
-                  "validation_error_b64": encode_error(message),
-              }, outcome_path
-
-          def inspect_request(relative_path: str):
-              if not allowed_path.fullmatch(relative_path):
-                  return rejected(relative_path, relative_path.encode("utf-8"), "invalid request path")
-
-              request_path = root / relative_path
-              if request_path.is_symlink() or not request_path.is_file():
-                  return rejected(
-                      relative_path,
-                      relative_path.encode("utf-8"),
-                      "request must be a regular file",
-                  )
-
-              raw_bytes = request_path.read_bytes()
-              if not raw_bytes:
-                  return rejected(relative_path, raw_bytes, "request must be non-empty")
-
-              try:
-                  value = json.loads(raw_bytes.decode("utf-8"))
-                  required = {
-                      "requestVersion",
-                      "episodeDate",
-                      "expectedSpecSha256",
-                      "sceneNumber",
-                      "offsetSeconds",
-                      "durationSeconds",
-                      "confirmation",
-                  }
-                  if not isinstance(value, dict) or set(value) != required:
-                      actual = sorted(value) if isinstance(value, dict) else type(value).__name__
-                      raise ValueError(
-                          f"request fields must be exactly {sorted(required)}; got {actual}"
-                      )
-                  if value["requestVersion"] != "1.0":
-                      raise ValueError("requestVersion must be 1.0")
-
-                  episode_date = value["episodeDate"]
-                  if not isinstance(episode_date, str) or not re.fullmatch(
-                      r"\d{4}-\d{2}-\d{2}", episode_date
-                  ):
-                      raise ValueError("episodeDate must match YYYY-MM-DD")
-
-                  expected_sha = value["expectedSpecSha256"]
-                  if not isinstance(expected_sha, str) or not re.fullmatch(
-                      r"[0-9a-fA-F]{64}", expected_sha
-                  ):
-                      raise ValueError("expectedSpecSha256 must be a 64-character SHA-256")
-                  expected_sha = expected_sha.lower()
-
-                  scene_number = value["sceneNumber"]
-                  if (
-                      not isinstance(scene_number, int)
-                      or isinstance(scene_number, bool)
-                      or not 1 <= scene_number <= 9
-                  ):
-                      raise ValueError("sceneNumber must be an integer from 1 through 9")
-
-                  offset = value["offsetSeconds"]
-                  duration = value["durationSeconds"]
-                  if (
-                      not isinstance(offset, (int, float))
-                      or isinstance(offset, bool)
-                      or not math.isfinite(offset)
-                      or offset < 0
-                  ):
-                      raise ValueError("offsetSeconds must be finite and non-negative")
-                  if (
-                      not isinstance(duration, (int, float))
-                      or isinstance(duration, bool)
-                      or not math.isfinite(duration)
-                      or duration <= 0
-                      or duration > 30
-                  ):
-                      raise ValueError(
-                          "durationSeconds must be greater than 0 and at most 30"
-                      )
-                  if value["confirmation"] != "MOTION":
-                      raise ValueError("confirmation must be MOTION")
-
-                  canonical = json.dumps(
-                      value,
-                      ensure_ascii=False,
-                      sort_keys=True,
-                      separators=(",", ":"),
-                  ).encode("utf-8")
-                  fingerprint = path_fingerprint(relative_path, canonical)
-                  outcome_path = outcome_dir / f"{fingerprint}.json"
-                  if outcome_path.exists():
-                      return None, outcome_path
-
-                  spec_path = root / "render-specs" / episode_date / "render_spec.json"
-                  if not spec_path.is_file() or spec_path.stat().st_size == 0:
-                      raise ValueError(
-                          f"render spec not found: {spec_path.relative_to(root)}"
-                      )
-                  actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
-                  if actual_sha != expected_sha:
-                      raise ValueError(
-                          f"render_spec SHA-256 mismatch: expected={expected_sha} actual={actual_sha}"
-                      )
-              except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
-                  return rejected(relative_path, raw_bytes, error)
-
-              return {
-                  "request_valid": "true",
-                  "request_path": relative_path,
-                  "request_fingerprint": fingerprint,
-                  "outcome_path": outcome_path.relative_to(root).as_posix(),
-                  "validation_error_b64": "",
-                  "episode_date": episode_date,
-                  "expected_spec_sha256": actual_sha,
-                  "scene_number": str(scene_number),
-                  "offset_seconds": str(offset),
-                  "duration_seconds": str(duration),
-              }, outcome_path
-
-          candidates: list[str]
-          if event_name == "push":
-              if before_sha and re.fullmatch(r"0+", before_sha):
-                  changed = git_lines(
-                      "show",
-                      "--format=",
-                      "--name-status",
-                      trigger_sha,
-                      "--",
-                      "motion-preview-requests/*.json",
-                  )
-              else:
-                  changed = git_lines(
-                      "diff",
-                      "--name-status",
-                      before_sha,
-                      trigger_sha,
-                      "--",
-                      "motion-preview-requests/*.json",
-                  )
-              if len(changed) != 1:
-                  raise SystemExit(
-                      f"push must add exactly one motion-preview request; found {len(changed)} changes"
-                  )
-              parts = changed[0].split("\t")
-              if len(parts) != 2 or parts[0] != "A":
-                  raise SystemExit(
-                      f"motion-preview requests are append-only; expected one added file, got: {changed[0]}"
-                  )
-              candidates = [parts[1]]
-          else:
-              candidates = [
-                  path.relative_to(root).as_posix()
-                  for path in sorted(request_dir.glob("*.json"))
-              ]
-
-          selected = None
-          for relative_path in candidates:
-              request, _ = inspect_request(relative_path)
-              if request is None:
-                  continue
-              selected = request
-              break
-
-          with output_path.open("a", encoding="utf-8") as output:
-              if selected is None:
-                  output.write("has_request=false\n")
-              else:
-                  output.write("has_request=true\n")
-                  for key, value in selected.items():
-                      output.write(f"{key}={value}\n")
-          PY
+          python3 scripts/motion_preview_request_queue.py \
+            --root "$GITHUB_WORKSPACE" \
+            resolve \
+            --event-name "$EVENT_NAME" \
+            --before-sha "$BEFORE_SHA" \
+            --trigger-sha "$TRIGGER_SHA" \
+            --output "$GITHUB_OUTPUT"
 
       - name: Summarize queue decision
         shell: bash
@@ -402,6 +193,9 @@ jobs:
       needs.resolve-request.outputs.has_request == 'true' &&
       needs.resolve-request.outputs.request_valid == 'true' &&
       needs.wake-codespace.result == 'success'
+    permissions:
+      contents: read
+      actions: read
     uses: ./.github/workflows/nasdaq-cafe-motion-preview.yml
     with:
       episode_date: ${{ needs.resolve-request.outputs.episode_date }}
@@ -421,6 +215,8 @@ jobs:
       always() &&
       needs.resolve-request.result == 'success' &&
       needs.resolve-request.outputs.has_request == 'true'
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -456,65 +252,25 @@ jobs:
             exit 0
           fi
 
-          if [[ "$REQUEST_VALID" != "true" ]]; then
-            OUTCOME_STATUS="rejected"
-            OUTCOME_STAGE="validation"
-          elif [[ "$WAKE_RESULT" != "success" ]]; then
-            OUTCOME_STATUS="failed"
-            OUTCOME_STAGE="wake-codespace"
-          elif [[ "$RENDER_RESULT" == "success" ]]; then
-            OUTCOME_STATUS="succeeded"
-            OUTCOME_STAGE="complete"
-          else
-            OUTCOME_STATUS="failed"
-            OUTCOME_STAGE="render-motion-preview"
-          fi
-          export OUTCOME_STATUS OUTCOME_STAGE
-
-          mkdir -p "$(dirname "$OUTCOME_PATH")"
-          python3 <<'PY'
-          import base64
-          import json
-          import os
-          import pathlib
-          from datetime import datetime, timezone
-
-          outcome_path = pathlib.Path(os.environ["OUTCOME_PATH"])
-          encoded_error = os.environ.get("VALIDATION_ERROR_B64", "")
-          validation_error = ""
-          if encoded_error:
-              validation_error = base64.urlsafe_b64decode(encoded_error).decode("utf-8")
-
-          payload = {
-              "outcomeVersion": "1.0",
-              "status": os.environ["OUTCOME_STATUS"],
-              "stage": os.environ["OUTCOME_STAGE"],
-              "requestPath": os.environ["REQUEST_PATH"],
-              "requestFingerprint": os.environ["REQUEST_FINGERPRINT"],
-              "requestValid": os.environ["REQUEST_VALID"] == "true",
-              "validationError": validation_error or None,
-              "episodeDate": os.environ.get("EPISODE_DATE") or None,
-              "expectedSpecSha256": os.environ.get("EXPECTED_SPEC_SHA256") or None,
-              "sceneNumber": int(os.environ["SCENE_NUMBER"])
-              if os.environ.get("SCENE_NUMBER")
-              else None,
-              "offsetSeconds": float(os.environ["OFFSET_SECONDS"])
-              if os.environ.get("OFFSET_SECONDS")
-              else None,
-              "durationSeconds": float(os.environ["DURATION_SECONDS"])
-              if os.environ.get("DURATION_SECONDS")
-              else None,
-              "wakeResult": os.environ.get("WAKE_RESULT") or None,
-              "renderResult": os.environ.get("RENDER_RESULT") or None,
-              "workflow": os.environ["GITHUB_WORKFLOW"],
-              "runId": os.environ["GITHUB_RUN_ID"],
-              "recordedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-          }
-          outcome_path.write_text(
-              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8",
-          )
-          PY
+          OUTCOME_STATUS="$(
+            python3 scripts/motion_preview_request_queue.py \
+              --root "$GITHUB_WORKSPACE" \
+              record \
+              --outcome-path "$OUTCOME_PATH" \
+              --request-valid "$REQUEST_VALID" \
+              --validation-error-b64 "$VALIDATION_ERROR_B64" \
+              --request-path "$REQUEST_PATH" \
+              --request-fingerprint "$REQUEST_FINGERPRINT" \
+              --episode-date "$EPISODE_DATE" \
+              --expected-spec-sha256 "$EXPECTED_SPEC_SHA256" \
+              --scene-number "$SCENE_NUMBER" \
+              --offset-seconds "$OFFSET_SECONDS" \
+              --duration-seconds "$DURATION_SECONDS" \
+              --wake-result "$WAKE_RESULT" \
+              --render-result "$RENDER_RESULT" \
+              --workflow "$GITHUB_WORKFLOW" \
+              --run-id "$GITHUB_RUN_ID"
+          )"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
