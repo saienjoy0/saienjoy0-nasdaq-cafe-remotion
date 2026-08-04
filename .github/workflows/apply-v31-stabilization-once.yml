@@ -67,12 +67,12 @@ jobs:
 
           migration = Path("scripts/migrate-visual-story-v3.ts")
           source = migration.read_text(encoding="utf-8")
-          anchor = '''const cue = (value: string, edge: "start" | "end") => {
+          cue_anchor = '''const cue = (value: string, edge: "start" | "end") => {
             const chars = Array.from(normalize(value));
             return (edge === "start" ? chars.slice(0, 12) : chars.slice(-12)).join("");
           };
           '''
-          addition = anchor + '''const semanticBoundaries = (text: string, count: number) => {
+          boundary_function = '''const semanticBoundaries = (text: string, count: number) => {
             const speech = normalize(text);
             const candidates: number[] = [];
             let cursor = 0;
@@ -94,47 +94,31 @@ jobs:
             return {speech, boundaries};
           };
           '''
-          if anchor not in source:
+          if cue_anchor not in source:
               raise SystemExit("migration cue anchor not found")
-          source = source.replace(anchor, addition, 1)
-          old_setup = '''    const units = unitsWithSpans(chunk.speechText);
-            const continuityKey = shots.length > 1 ? `${beat.beatId}-flow` : null;
-            shots.forEach((shot: any, index: number) => {
-              const startUnit = Math.floor(index * units.length / shots.length);
-              const endUnit = Math.max(startUnit, Math.ceil((index + 1) * units.length / shots.length) - 1);
-              const segmentStart = units[Math.min(units.length - 1, startUnit)];
-              const segmentEnd = units[Math.min(units.length - 1, endUnit)];
-          '''
-          new_setup = '''    const {speech, boundaries} = semanticBoundaries(chunk.speechText, shots.length);
-            const continuityKey = shots.length > 1 ? `${beat.beatId}-flow` : null;
-            shots.forEach((shot: any, index: number) => {
-              const startChar = boundaries[index];
-              const endChar = boundaries[index + 1];
-              const segmentText = speech.slice(startChar, endChar);
-          '''
-          if old_setup not in source:
-              raise SystemExit("migration boundary setup not found")
-          source = source.replace(old_setup, new_setup, 1)
-          source = source.replace(
-              '''      shot.startProgress = Number((segmentStart.start / Math.max(1, chunk.speechText.length)).toFixed(6));
-                shot.endProgress = Number((segmentEnd.end / Math.max(1, chunk.speechText.length)).toFixed(6));''',
-              '''      shot.startProgress = Number((startChar / Math.max(1, speech.length)).toFixed(6));
-                shot.endProgress = Number((endChar / Math.max(1, speech.length)).toFixed(6));''',
-              1,
-          )
-          source = source.replace(
-              '''      shot.startCue = cue(segmentStart.text, "start");
-                shot.endCue = cue(segmentEnd.text, "end");''',
-              '''      shot.startCue = cue(segmentText, "start");
-                shot.endCue = cue(segmentText, "end");''',
-              1,
-          )
+          source = source.replace(cue_anchor, cue_anchor + boundary_function, 1)
+          replacements = {
+              '    const units = unitsWithSpans(chunk.speechText);': '    const {speech, boundaries} = semanticBoundaries(chunk.speechText, shots.length);',
+              '      const startUnit = Math.floor(index * units.length / shots.length);': '      const startChar = boundaries[index];',
+              '      const endUnit = Math.max(startUnit, Math.ceil((index + 1) * units.length / shots.length) - 1);': '      const endChar = boundaries[index + 1];',
+              '      const segmentStart = units[Math.min(units.length - 1, startUnit)];': '      const segmentText = speech.slice(startChar, endChar);',
+              '      const segmentEnd = units[Math.min(units.length - 1, endUnit)];': '',
+              '      shot.startProgress = Number((segmentStart.start / Math.max(1, chunk.speechText.length)).toFixed(6));': '      shot.startProgress = Number((startChar / Math.max(1, speech.length)).toFixed(6));',
+              '      shot.endProgress = Number((segmentEnd.end / Math.max(1, chunk.speechText.length)).toFixed(6));': '      shot.endProgress = Number((endChar / Math.max(1, speech.length)).toFixed(6));',
+              '      shot.startCue = cue(segmentStart.text, "start");': '      shot.startCue = cue(segmentText, "start");',
+              '      shot.endCue = cue(segmentEnd.text, "end");': '      shot.endCue = cue(segmentText, "end");',
+          }
+          for old, new in replacements.items():
+              if old not in source:
+                  raise SystemExit(f"migration replacement not found: {old}")
+              source = source.replace(old, new, 1)
+          if "segmentStart" in source or "segmentEnd" in source or "startUnit" in source or "endUnit" in source:
+              raise SystemExit("legacy overlapping boundary logic remains")
           migration.write_text(source, encoding="utf-8")
 
           timeline = Path("src/spec/shot-timeline.ts")
           source = timeline.read_text(encoding="utf-8")
-          source = source.replace(
-              '''const cueProgress = (
+          old = '''const cueProgress = (
             speechText: string,
             cue: string | undefined,
             edge: "start" | "end",
@@ -145,8 +129,8 @@ jobs:
             const index = speech.indexOf(needle);
             if (index < 0 || speech.length === 0) return null;
             return clamp((index + (edge === "end" ? needle.length : 0)) / speech.length);
-          };''',
-              '''const cueProgress = (
+          };'''
+          new = '''const cueProgress = (
             speechText: string,
             cue: string | undefined,
             edge: "start" | "end",
@@ -168,14 +152,14 @@ jobs:
             const target = clamp(fallbackProgress) * speech.length;
             const index = occurrences.sort((a, b) => Math.abs(a - target) - Math.abs(b - target))[0];
             return clamp((index + (edge === "end" ? needle.length : 0)) / speech.length);
-          };''',
-              1,
-          )
-          source = source.replace(
-              'const semanticProgress = cueProgress(chunk.speechText, cue, edge);',
-              'const semanticProgress = cueProgress(chunk.speechText, cue, edge, progress);',
-              1,
-          )
+          };'''
+          if old not in source:
+              raise SystemExit("timeline cue resolver not found")
+          source = source.replace(old, new, 1)
+          call = 'const semanticProgress = cueProgress(chunk.speechText, cue, edge);'
+          if call not in source:
+              raise SystemExit("timeline cue call not found")
+          source = source.replace(call, 'const semanticProgress = cueProgress(chunk.speechText, cue, edge, progress);', 1)
           timeline.write_text(source, encoding="utf-8")
           PY
           node --import tsx scripts/migrate-visual-story-v3.ts render-specs/2026-07-31/render_spec.json
