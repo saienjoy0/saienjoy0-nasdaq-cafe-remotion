@@ -852,3 +852,13 @@
 - `scene-09-beat-001` / `final-assembly`
   - `scene-09-beat-001-shot-001`: `recap-assembly` / `assembly-canvas` / camera `pull-back` / fox `通常` / `scene-09-chunk-001@0.000 → scene-09-chunk-001@0.500` / continuity `scene-09-beat-001-flow`
   - `scene-09-beat-001-shot-002`: `recap-assembly` / `assembly-canvas` / camera `pull-back` / fox `眠そう` / `scene-09-chunk-001@0.500 → scene-09-chunk-001@1.000` / continuity `scene-09-beat-001-flow`
+
+
+## Visual Story Engine v3.1 stabilization
+
+- 39 Shotを維持し、全12 Recipeを専用Rendererへ接続。
+- Shot切替は前後二層Crossfadeとし、空白フレームを禁止。
+- CameraはMain Stage全体ではなく意味対象だけへ適用。
+- startCue / endCueとsemantic targetsを正本化。
+- Scene 9は4要素を保持して最終結論へ再集合。
+- ナレーション、字幕、数字、市場因果、Scene順、狐7表情アセット、TTS identityは変更なし。
