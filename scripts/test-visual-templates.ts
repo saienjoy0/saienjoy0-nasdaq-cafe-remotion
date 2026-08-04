@@ -7,6 +7,8 @@ import {VISUAL_TEMPLATE_CONTRACTS, VISUAL_TEMPLATE_IDS} from "../src/spec/visual
 const project = process.cwd();
 const renderer = await readFile(path.join(project, "src/components/spec/VisualTemplateRenderer.tsx"), "utf8");
 const shotRenderer = await readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8");
+const shotRecipes = await readFile(path.join(project, "src/components/spec/shots/ShotRecipes.tsx"), "utf8");
+const shotTransitionHost = await readFile(path.join(project, "src/components/spec/ShotTransitionHost.tsx"), "utf8");
 const viewModel = await readFile(path.join(project, "src/spec/public-view-model.ts"), "utf8");
 const composition = await readFile(path.join(project, "src/compositions/NasdaqCafeSpecEpisode.tsx"), "utf8");
 const schema = await readFile(path.join(project, "src/spec/render-spec.ts"), "utf8");
@@ -41,6 +43,8 @@ for (const forbidden of [
 ]) {
   assert.equal(renderer.includes(forbidden), false, `renderer contains forbidden dynamic behavior: ${forbidden}`);
   assert.equal(shotRenderer.includes(forbidden), false, `Shot renderer contains forbidden dynamic behavior: ${forbidden}`);
+  assert.equal(shotRecipes.includes(forbidden), false, `Dedicated Shot recipes contain forbidden dynamic behavior: ${forbidden}`);
+  assert.equal(shotTransitionHost.includes(forbidden), false, `Shot transition host contains forbidden dynamic behavior: ${forbidden}`);
 }
 
 assert.match(viewModel, /visualTemplate:/);
@@ -65,12 +69,29 @@ assert.match(renderer, /draw-line/);
 assert.match(renderer, /count-up/);
 assert.match(renderer, /dim-others/);
 assert.match(renderer, /collapse-to-outcome/);
-assert.match(shotRenderer, /HeroMetric/);
-assert.match(shotRenderer, /Contradiction/);
-assert.match(shotRenderer, /ExpectedAnchor/);
-assert.match(shotRenderer, /ActualCrosses/);
-assert.match(shotRenderer, /GapMacro/);
-assert.match(shotRenderer, /KineticTypography/);
-assert.match(shotRenderer, /ContinuityBadge/);
+assert.match(shotRenderer, /ShotTransitionHost/);
+assert.match(shotRenderer, /DedicatedShotRenderer/);
+assert.match(shotRenderer, /StageSafeArea/);
+assert.doesNotMatch(shotRenderer, /GenericShot/);
+assert.doesNotMatch(shotRenderer, /inset:\s*-40/);
+assert.match(shotTransitionHost, /PreviousShot/);
+assert.match(shotTransitionHost, /CurrentShot/);
+assert.match(shotTransitionHost, /SharedElementLayer/);
+for (const component of [
+  "HeroMetricShot",
+  "ContradictionShot",
+  "ExpectedAnchorShot",
+  "ActualCrossesExpectedShot",
+  "GapMacroShot",
+  "CausalBuildShot",
+  "CounterforceShot",
+  "EntityCutawayShot",
+  "SplitOppositionShot",
+  "FocusMatrixShot",
+  "VerificationPathsShot",
+  "RecapAssemblyShot",
+]) {
+  assert.match(shotRecipes, new RegExp(`const ${component}`), `missing dedicated Shot recipe: ${component}`);
+}
 
 console.log("PASS: visual template, Shot renderer, and motion preset registry contract");
