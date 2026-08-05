@@ -1,12 +1,12 @@
 {
   "reportVersion": "1.0",
-  "status": "causal-motion-applied-awaiting-motion-preview",
+  "status": "causal-motion-sequence-corrected-awaiting-motion-preview",
   "episodeDate": "2026-07-31",
   "sceneId": "scene-06",
   "beatId": "scene-06-beat-001",
   "requestPath": "causal-motion-requests/2026-08-05T0725-scene-06-pr4b-apply.json",
   "oldRenderSpecSha256": "d85777574d72ec184bc33dfb3a073c1b4f6f01feb68c50b41a37849ac940f9c1",
-  "newRenderSpecSha256": "8aa37f773c6f2f13d368bac5fac7dd9570033f96563bce764890f889f1068572",
+  "newRenderSpecSha256": "5975904438e0480a4a2e533b1aa2aa6d695499b0e47cf900a417fa8fca24ffb4",
   "oldEpisodePackageSha256": "16f2e58b394b903fb3693516983fc0538d3bd02a7698e42775aa61f515f39572",
   "newEpisodePackageSha256": "66cbdc6398c95cd485598654eccdb8ba12bce4980a3ba9a12d2b2debb3f055da",
   "narrationChanged": false,
@@ -32,5 +32,14 @@
     "event-907",
     "event-908"
   ],
-  "finalRenderRequested": false
+  "finalRenderRequested": false,
+  "sequenceFixRequestPath": "causal-motion-fix-requests/2026-08-05-scene-06-explicit-sequence.json",
+  "preSequenceFixRenderSpecSha256": "8aa37f773c6f2f13d368bac5fac7dd9570033f96563bce764890f889f1068572",
+  "sequencePolicyBefore": "object-order-fallback",
+  "sequencePolicyAfter": "explicit",
+  "addedNodeShowEventIds": [
+    "event-909",
+    "event-910",
+    "event-911"
+  ]
 }
