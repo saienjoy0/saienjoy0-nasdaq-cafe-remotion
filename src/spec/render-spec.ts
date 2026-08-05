@@ -11,6 +11,12 @@ import {
   VISUAL_TEMPLATE_VARIANT_IDS,
 } from "./visual-template-contract";
 import {
+  financialVisualRootContractSchema,
+  financialVisualTraceSchema,
+  isFinancialRecipeTemplatePairAllowed,
+  isFinancialVisualTemplate,
+} from "./financial-visual-contract";
+import {
   CAMERA_PRESET_IDS,
   SHOT_RECIPE_IDS,
   SHOT_TRANSITION_IDS,
@@ -45,11 +51,15 @@ export const typographyTreatmentSchema = z.enum(TYPOGRAPHY_TREATMENT_IDS);
 export const soundCueSchema = z.enum(SOUND_CUE_IDS);
 const visualTemplateConfigSchema = z.object({
   variant: visualTemplateVariantSchema,
-  comparisonBasis: nullableText,
-  dataBasis: nonEmptyText,
-  nodeOrder: z.array(safeId).max(4),
-  laneLabels: z.array(nonEmptyText).max(2),
-  outcomeNodeId: safeId.nullable(),
+  comparisonBasis: nullableText.default(null),
+  dataBasis: nonEmptyText.default("render-spec"),
+  nodeOrder: z.array(safeId).max(4).default([]),
+  laneLabels: z.array(nonEmptyText).max(2).default([]),
+  outcomeNodeId: safeId.nullable().default(null),
+  displayOrder: z.array(safeId).max(10).default([]),
+  metricIds: z.array(safeId).max(6).default([]),
+  causalStepIds: z.array(safeId).max(4).default([]),
+  highlightObjectIds: z.array(safeId).max(4).default([]),
 }).strict();
 export const visualBeatFunctionSchema = z.enum([
   "Anchor", "Evidence", "Compare", "Explain", "Verify",
@@ -268,7 +278,7 @@ const shotSchema = z.object({
 });
 
 const visualBeatSchema = z.object({
-  beatId: z.string().regex(/^scene-0[1-9]-beat-[0-9]{3}$/),
+  beatId: z.string().regex(/^(?:scene-0[1-9]-beat-[0-9]{3}|vb-0[1-9]-[0-9]{2})$/),
   startChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
   endChunkId: z.string().regex(/^scene-0[1-9]-chunk-[0-9]{3}$/),
   narrationStartCue: nonEmptyText,
@@ -277,6 +287,7 @@ const visualBeatSchema = z.object({
   screenState: screenStateSchema,
   visualMode: specVisualModeSchema,
   visualTemplate: visualTemplateSchema,
+  templateVariant: visualTemplateVariantSchema.optional(),
   templateConfig: visualTemplateConfigSchema,
   sequencePolicy: sequencePolicySchema.optional(),
   finalHoldMs: z.number().int().min(0).max(1_500).optional(),
@@ -292,6 +303,8 @@ const visualBeatSchema = z.object({
   evidenceSourceIds: z.array(sourceIdSchema),
   expressionChange: expressionSchema.nullable(),
   fallback: nullableText,
+  financialReturnTarget: nonEmptyText.optional(),
+  financialVisualTrace: financialVisualTraceSchema.optional(),
   entity: entityBeatSchema.nullable(),
   pictureBook: pictureBookBeatSchema.nullable(),
   shots: z.array(shotSchema).max(4).optional(),
@@ -387,7 +400,8 @@ const sceneSchema = z.object({
 }).strict();
 
 export const renderSpecSchema = z.object({
-  schemaVersion: z.literal("2.2.0"),
+  schemaVersion: z.union([z.literal("2.2.0"), z.literal("2.3.0")]),
+  financialVisualContract: financialVisualRootContractSchema.optional(),
   episode: episodeSchema,
   editorial: editorialSchema,
   publishing: publishingSchema,
@@ -438,6 +452,55 @@ export const renderSpecSchema = z.object({
     const expectedRole = index === 0 ? "opening-hook-market-direction-greeting-conclusion" : index === 8 ? "closing-recap-sendoff-goodnight" : "editorial-body";
     if (scene.sceneRole !== expectedRole) context.addIssue({code: "custom", path: ["scenes", index, "sceneRole"], message: `Scene ${index + 1} requires role ${expectedRole}`});
   });
+
+  const arraysEqual = (left: readonly string[], right: readonly string[]) =>
+    left.length === right.length && left.every((value, index) => value === right[index]);
+  const financialTraceBeats = spec.scenes.flatMap((scene, sceneIndex) =>
+    scene.visualBeats.flatMap((beat, beatIndex) =>
+      beat.financialVisualTrace ? [{sceneIndex, beatIndex, beat, trace: beat.financialVisualTrace}] : [],
+    ),
+  );
+  const newFinancialTemplates = spec.scenes.flatMap((scene, sceneIndex) =>
+    scene.visualBeats.flatMap((beat, beatIndex) =>
+      isFinancialVisualTemplate(beat.visualTemplate) ? [{sceneIndex, beatIndex, beat}] : [],
+    ),
+  );
+  if (spec.schemaVersion === "2.2.0") {
+    if (spec.financialVisualContract !== undefined) context.addIssue({code: "custom", path: ["financialVisualContract"], message: "render_spec 2.2.0 must not contain the financial root contract"});
+    if (financialTraceBeats.length > 0 || newFinancialTemplates.length > 0) context.addIssue({code: "custom", path: ["scenes"], message: "financial Visual Beats require render_spec 2.3.0"});
+  } else {
+    if (newFinancialTemplates.some(({beat}) => beat.financialVisualTrace === undefined)) {
+      context.addIssue({code: "custom", path: ["scenes"], message: "new financial Visual Templates require financialVisualTrace"});
+    }
+    if (financialTraceBeats.length > 0 && spec.financialVisualContract === undefined) {
+      context.addIssue({code: "custom", path: ["financialVisualContract"], message: "financial Visual Beats require the root financialVisualContract"});
+    }
+    if (spec.financialVisualContract !== undefined) {
+      if (spec.financialVisualContract.selectionCount !== financialTraceBeats.length) context.addIssue({code: "custom", path: ["financialVisualContract", "selectionCount"], message: `selectionCount must equal traced Beat count ${financialTraceBeats.length}`});
+      const seenIntents = new Set<string>();
+      const seenPlans = new Set<string>();
+      financialTraceBeats.forEach(({sceneIndex, beatIndex, beat, trace}) => {
+        const path = ["scenes", sceneIndex, "visualBeats", beatIndex] as const;
+        if (seenIntents.has(trace.intentId)) context.addIssue({code: "custom", path: [...path, "financialVisualTrace", "intentId"], message: `duplicate financial intent: ${trace.intentId}`});
+        if (seenPlans.has(trace.selectedPlanId)) context.addIssue({code: "custom", path: [...path, "financialVisualTrace", "selectedPlanId"], message: `duplicate selected financial plan: ${trace.selectedPlanId}`});
+        seenIntents.add(trace.intentId);
+        seenPlans.add(trace.selectedPlanId);
+        if (trace.recipePlanSha256 !== spec.financialVisualContract?.recipePlanSha256) context.addIssue({code: "custom", path: [...path, "financialVisualTrace", "recipePlanSha256"], message: "trace Recipe Plan SHA must match root contract"});
+        if (!isFinancialRecipeTemplatePairAllowed(trace.recipeId, beat.visualTemplate, trace.selectedPath)) context.addIssue({code: "custom", path: [...path, "visualTemplate"], message: `${trace.recipeId} is not allowed to select ${beat.visualTemplate} as ${trace.selectedPath}`});
+        if (beat.templateVariant === undefined) context.addIssue({code: "custom", path: [...path, "templateVariant"], message: "financial Visual Beat requires templateVariant"});
+        if (beat.templateVariant !== beat.templateConfig.variant) context.addIssue({code: "custom", path: [...path, "templateVariant"], message: "templateVariant must match templateConfig.variant"});
+        if (!arraysEqual(beat.objectIds, trace.displayOrder)) context.addIssue({code: "custom", path: [...path, "objectIds"], message: "objectIds must equal selected displayOrder"});
+        if (!arraysEqual(beat.evidenceSourceIds, trace.sourceIds)) context.addIssue({code: "custom", path: [...path, "evidenceSourceIds"], message: "evidenceSourceIds must equal selected sourceIds"});
+        if (!arraysEqual(beat.templateConfig.displayOrder, trace.displayOrder)) context.addIssue({code: "custom", path: [...path, "templateConfig", "displayOrder"], message: "templateConfig.displayOrder must match trace"});
+        if (!arraysEqual(beat.templateConfig.metricIds, trace.metricIds)) context.addIssue({code: "custom", path: [...path, "templateConfig", "metricIds"], message: "templateConfig.metricIds must match trace"});
+        if (!arraysEqual(beat.templateConfig.causalStepIds, trace.causalStepIds)) context.addIssue({code: "custom", path: [...path, "templateConfig", "causalStepIds"], message: "templateConfig.causalStepIds must match trace"});
+        if (beat.templateConfig.comparisonBasis !== trace.comparisonBasis) context.addIssue({code: "custom", path: [...path, "templateConfig", "comparisonBasis"], message: "comparison basis must match trace"});
+        if (beat.financialReturnTarget === undefined) context.addIssue({code: "custom", path: [...path, "financialReturnTarget"], message: "financial Visual Beat requires a return target"});
+        if (trace.selectedPath === "preferred" && trace.reasonCodes.length !== 0) context.addIssue({code: "custom", path: [...path, "financialVisualTrace", "reasonCodes"], message: "preferred selection must not contain fallback reason codes"});
+        if (trace.selectedPath === "fallback" && trace.reasonCodes.length === 0) context.addIssue({code: "custom", path: [...path, "financialVisualTrace", "reasonCodes"], message: "fallback selection requires at least one reason code"});
+      });
+    }
+  }
 });
 
 export type RenderSpec = z.infer<typeof renderSpecSchema>;
