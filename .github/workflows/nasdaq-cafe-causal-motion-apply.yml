@@ -1,0 +1,116 @@
+name: Nasdaq Cafe Causal Motion Apply
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "causal-motion-requests/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasdaq-cafe-causal-motion-apply
+  cancel-in-progress: false
+
+jobs:
+  apply-causal-motion:
+    name: Apply one approved causal motion request
+    if: github.actor == github.repository_owner || (github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.ref == 'refs/heads/main' && github.event_name == 'push')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout request commit
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Resolve one append-only request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(
+            git diff --name-status "$BEFORE_SHA" "$GITHUB_SHA" -- 'causal-motion-requests/*.json'
+          )
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one causal motion request must be added"
+            exit 1
+          fi
+          IFS=$'\t' read -r STATUS REQUEST_PATH <<< "${CHANGED[0]}"
+          if [[ "$STATUS" != "A" || ! "$REQUEST_PATH" =~ ^causal-motion-requests/[A-Za-z0-9._-]+\.json$ ]]; then
+            echo "::error::Causal motion requests are append-only JSON files"
+            exit 1
+          fi
+          test -s "$REQUEST_PATH"
+          echo "request_path=$REQUEST_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Test and apply the approved causal motion request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/apply_causal_motion_request.py scripts/test_causal_motion_request.py
+          PYTHONPATH=scripts python3 scripts/test_causal_motion_request.py
+          python3 scripts/apply_causal_motion_request.py "${{ steps.request.outputs.request_path }}"
+
+      - name: Validate generated render input
+        shell: bash
+        run: |
+          set -euo pipefail
+          EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${{ steps.request.outputs.request_path }}")"
+          npm run episode:spec:validate -- "render-specs/${EPISODE_DATE}/render_spec.json"
+          npm run test:visual-story
+          npm run test:public-screen
+          git diff --check
+
+      - name: Restrict generated changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${{ steps.request.outputs.request_path }}")"
+          mapfile -t CHANGED < <(git diff --name-only)
+          EXPECTED=(
+            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+            "render-specs/${EPISODE_DATE}/render_spec.json"
+            "causal-motion-reports/${EPISODE_DATE}.json"
+          )
+          if [[ "${#CHANGED[@]}" -ne 3 ]]; then
+            printf '::error::Unexpected generated change: %s\n' "${CHANGED[@]}"
+            exit 1
+          fi
+          for expected in "${EXPECTED[@]}"; do
+            printf '%s\n' "${CHANGED[@]}" | grep -Fx -- "$expected" >/dev/null || {
+              echo "::error::Missing expected generated file: $expected"
+              exit 1
+            }
+          done
+
+      - name: Commit generated causal motion outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          EPISODE_DATE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["episodeDate"])' "${{ steps.request.outputs.request_path }}")"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            "render-specs/${EPISODE_DATE}/render_spec.json" \
+            "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md" \
+            "causal-motion-reports/${EPISODE_DATE}.json"
+          git commit -m "Apply causal motion for ${EPISODE_DATE}"
+          git push origin HEAD:main

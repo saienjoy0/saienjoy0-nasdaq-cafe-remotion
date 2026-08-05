@@ -74,7 +74,7 @@
     "test:gemini-tts": "tsx scripts/test-gemini-tts.ts",
     "test:gemini-key-pool": "node --import tsx scripts/test-gemini-api-key-pool.ts",
     "test:duration-policy": "tsx scripts/test-duration-policy.ts",
-    "test:workflow-contract": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-tts-cache-export-contract.ts && python3 scripts/test_restore_exported_tts_cache.py",
+    "test:workflow-contract": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-tts-cache-export-contract.ts && python3 scripts/test_restore_exported_tts_cache.py && PYTHONPATH=scripts python3 scripts/test_causal_motion_request.py",
     "test:visual-sequence": "tsx scripts/test-visual-sequence.ts",
     "test:visual-variety": "tsx scripts/test-visual-variety.ts",
     "test:visual-templates": "tsx scripts/test-visual-templates.ts",
