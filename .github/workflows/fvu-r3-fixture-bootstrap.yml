@@ -1,0 +1,42 @@
+name: FVU R3 Fixture Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - "scripts/generate-financial-handoff-fixture.py"
+      - ".github/workflows/fvu-r3-fixture-bootstrap.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/fvu-r3-shared-handoff-fixture'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Generate shared fixture twice
+        run: |
+          python3 scripts/generate-financial-handoff-fixture.py > /tmp/fixture-1.json
+          sha256sum shared-fixtures/financial-visual-2.3/* > /tmp/files-1
+          python3 scripts/generate-financial-handoff-fixture.py > /tmp/fixture-2.json
+          sha256sum shared-fixtures/financial-visual-2.3/* > /tmp/files-2
+          diff -u /tmp/fixture-1.json /tmp/fixture-2.json
+          diff -u /tmp/files-1 /tmp/files-2
+      - name: Commit generated shared fixture
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git add -- shared-fixtures/financial-visual-2.3
+          if git diff --cached --quiet; then
+            echo "No fixture changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Generate shared financial render_spec 2.3 fixture"
+          git push origin "HEAD:${HEAD_REF}"
