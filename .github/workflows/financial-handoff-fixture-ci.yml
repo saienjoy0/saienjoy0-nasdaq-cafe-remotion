@@ -24,7 +24,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 21
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,6 +47,8 @@ jobs:
           diff -u /tmp/files-1 /tmp/files-2
       - name: Run shared fixture acceptance
         run: npx tsx scripts/test-financial-handoff-fixture.ts
+      - name: Run official production validator
+        run: npm run episode:spec:validate -- shared-fixtures/financial-visual-2.3/render_spec.json
       - name: Run render spec contract regression
         run: npx tsx scripts/test-render-spec.ts
       - name: Typecheck
