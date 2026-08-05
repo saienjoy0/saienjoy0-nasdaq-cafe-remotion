@@ -1,0 +1,14 @@
+{
+  "outcomeVersion": "1.0",
+  "status": "succeeded",
+  "stage": "complete",
+  "requestPath": "final-render-requests/2026-08-05T1115-2026-07-31-retry.json",
+  "requestFingerprint": "eddda1eea63560716e0b874cd214193bf90857c6f9e68bc103c16d3745fefba5",
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "5975904438e0480a4a2e533b1aa2aa6d695499b0e47cf900a417fa8fca24ffb4",
+  "wakeResult": "success",
+  "finalResult": "success",
+  "workflow": "Nasdaq Cafe Final Request",
+  "runId": "31000650667",
+  "recordedAt": "2026-08-05T11:32:26.067638+00:00"
+}
