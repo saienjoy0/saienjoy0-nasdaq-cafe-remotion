@@ -1,0 +1,39 @@
+name: FVU R2 Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - "scripts/apply-financial-template-components.py"
+      - "src/components/spec/FinancialVisualTemplates.tsx"
+      - ".github/workflows/fvu-r2-bootstrap.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/fvu-r2-financial-templates'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply deterministic component patch
+        run: python3 scripts/apply-financial-template-components.py
+      - name: Commit renderer and layout wiring
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git add -- \
+            src/components/spec/VisualTemplateRenderer.tsx \
+            src/spec/validate-render-layout.ts
+          if git diff --cached --quiet; then
+            echo "No patch required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Wire fixed financial template components"
+          git push origin "HEAD:${HEAD_REF}"
