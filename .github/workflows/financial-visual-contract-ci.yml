@@ -1,0 +1,55 @@
+name: Financial Visual Contract CI
+
+on:
+  pull_request:
+    paths:
+      - "src/spec/financial-visual-contract.ts"
+      - "src/spec/visual-template-contract.ts"
+      - "src/spec/render-spec.ts"
+      - "contracts/financial_visual_compatibility.json"
+      - "schemas/render_spec.schema.json"
+      - "scripts/apply-financial-render-contract.py"
+      - "scripts/generate-render-spec-schema.ts"
+      - "scripts/test-financial-visual-contract.ts"
+      - "docs/13_financial_visual_contract.md"
+      - ".github/workflows/financial-visual-contract-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/spec/financial-visual-contract.ts"
+      - "src/spec/visual-template-contract.ts"
+      - "src/spec/render-spec.ts"
+      - "contracts/financial_visual_compatibility.json"
+      - "schemas/render_spec.schema.json"
+      - "scripts/apply-financial-render-contract.py"
+      - "scripts/generate-render-spec-schema.ts"
+      - "scripts/test-financial-visual-contract.ts"
+      - "docs/13_financial_visual_contract.md"
+      - ".github/workflows/financial-visual-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Confirm deterministic source patch is applied
+        run: python3 scripts/apply-financial-render-contract.py --check
+      - name: Regenerate render spec schema
+        run: npm run episode:spec:schema
+      - name: Confirm generated schema is committed
+        run: git diff --exit-code -- schemas/render_spec.schema.json
+      - name: Run financial renderer contract tests
+        run: npx tsx scripts/test-financial-visual-contract.ts
+      - name: Typecheck
+        run: npm run typecheck
