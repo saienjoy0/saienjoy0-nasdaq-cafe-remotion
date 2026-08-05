@@ -4,7 +4,9 @@ import path from "node:path";
 import {
   MIN_SHOT_FINAL_HOLD_MS,
   SHOT_INTRO_DURATION_MS,
+  getShotFinalHoldMs,
   getShotIntroDurationInFrames,
+  getShotIntroDurationMs,
   getShotIntroFrame,
   getShotIntroLinearProgress,
   type ShotMotionTiming,
@@ -33,8 +35,8 @@ assert.match(
 );
 assert.match(
   motionHelperSource,
-  /getShotIntroDurationInFrames\(fps\)/u,
-  "Shot intro duration must be derived from fps",
+  /getShotIntroDurationInFrames\(shot, fps\)/u,
+  "Shot intro duration must be derived from Shot duration and fps",
 );
 
 const shotAt = (elapsedMs: number, durationMs = 5_000): ShotMotionTiming => ({
@@ -44,7 +46,8 @@ const shotAt = (elapsedMs: number, durationMs = 5_000): ShotMotionTiming => ({
 });
 
 const sampleActiveFrames = (fps: number) => {
-  const durationFrames = getShotIntroDurationInFrames(fps);
+  const referenceShot = shotAt(0);
+  const durationFrames = getShotIntroDurationInFrames(referenceShot, fps);
   return Array.from({length: durationFrames + 1}, (_, frame) =>
     getShotIntroFrame(shotAt((frame / fps) * 1000), fps),
   );
@@ -68,20 +71,34 @@ for (const fps of [30, 60]) {
   );
   assert.equal(
     getShotIntroFrame(shotAt(3_000), fps),
-    getShotIntroDurationInFrames(fps),
+    getShotIntroDurationInFrames(shotAt(3_000), fps),
     `${fps}fps intro motion must settle into a stable hold`,
   );
 }
 
-assert.equal(getShotIntroDurationInFrames(30), 24);
-assert.equal(getShotIntroDurationInFrames(60), 48);
+assert.equal(getShotIntroDurationInFrames(shotAt(0), 30), 24);
+assert.equal(getShotIntroDurationInFrames(shotAt(0), 60), 48);
 assert.equal(getShotIntroLinearProgress(shotAt(0)), 0);
 assert.equal(getShotIntroLinearProgress(shotAt(SHOT_INTRO_DURATION_MS)), 1);
 assert.equal(getShotIntroLinearProgress(shotAt(4_000)), 1);
-assert.ok(MIN_SHOT_FINAL_HOLD_MS >= 350, "minimum readable Shot hold must remain at least 350ms");
+
+const shortShot = shotAt(0, 900);
+assert.equal(getShotIntroDurationMs(shortShot), 550);
+assert.equal(getShotFinalHoldMs(shortShot), MIN_SHOT_FINAL_HOLD_MS);
+for (const fps of [30, 60]) {
+  const renderedIntroMs = (getShotIntroDurationInFrames(shortShot, fps) / fps) * 1000;
+  assert.ok(
+    shortShot.endMs - shortShot.startMs - renderedIntroMs >= MIN_SHOT_FINAL_HOLD_MS,
+    `${fps}fps shortened the readable final hold below ${MIN_SHOT_FINAL_HOLD_MS}ms`,
+  );
+}
+
 assert.throws(() => getShotIntroFrame(shotAt(0), 0), /fps must be a positive finite number/u);
-assert.throws(() => getShotIntroDurationInFrames(Number.NaN), /fps must be a positive finite number/u);
+assert.throws(
+  () => getShotIntroDurationInFrames(shotAt(0), Number.NaN),
+  /fps must be a positive finite number/u,
+);
 
 console.log(
-  "PASS: Shot intro motion is elapsed-time based, updates every output frame, preserves duration across 30/60fps, and settles into a readable hold",
+  "PASS: Shot intro motion is elapsed-time based, updates every output frame, preserves duration across 30/60fps, and reserves a readable final hold",
 );
