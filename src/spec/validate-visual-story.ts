@@ -1,4 +1,5 @@
 import type {RenderSpec} from "./render-spec";
+import {collectCausalVisualEventIssues} from "./causal-visual-event-contract";
 import {VISUAL_TEMPLATE_CONTRACTS} from "./visual-template-contract";
 
 const fail = (path: string, message: string): never => {
@@ -78,11 +79,42 @@ export const validateVisualStoryContract = (
 
       const startIndex = chunkOrder.get(beat.startChunkId)!;
       const endIndex = chunkOrder.get(beat.endChunkId)!;
-      const beatEvents = scene.visualEvents.filter((event) => {
-        if (!event.targetId || !beat.objectIds.includes(event.targetId)) return false;
-        const eventChunkIndex = chunkOrder.get(event.atChunkId);
-        return eventChunkIndex !== undefined && startIndex <= eventChunkIndex && eventChunkIndex <= endIndex;
-      });
+      const beatEventRecords = scene.visualEvents
+        .map((event, eventIndex) => ({
+          event,
+          eventIndex,
+          chunkIndex: chunkOrder.get(event.atChunkId),
+        }))
+        .filter((record) => {
+          if (!record.event.targetId || !beat.objectIds.includes(record.event.targetId)) return false;
+          return record.chunkIndex !== undefined && startIndex <= record.chunkIndex && record.chunkIndex <= endIndex;
+        })
+        .sort((a, b) =>
+          (a.chunkIndex ?? 0) - (b.chunkIndex ?? 0) ||
+          (a.event.timing === "chunk-start" ? 0 : 1) - (b.event.timing === "chunk-start" ? 0 : 1) ||
+          a.event.offsetMs - b.event.offsetMs ||
+          a.eventIndex - b.eventIndex,
+        );
+      const beatEvents = beatEventRecords.map((record) => record.event);
+
+      if ((beat.shots ?? []).some((shot) => shot.shotRecipe === "causal-build")) {
+        const issues = collectCausalVisualEventIssues(
+          beatEventRecords.map(({event, eventIndex}) => ({
+            eventIndex,
+            action: event.action,
+            targetId: event.targetId,
+            motionPreset: event.motionPreset,
+          })),
+          objectType,
+        );
+        issues.forEach((issue) => fail(
+          issue.eventIndex === null
+            ? `${path}.shots`
+            : `${scenePath}.visualEvents[${issue.eventIndex}]`,
+          issue.message,
+        ));
+      }
+
       const policy = beat.sequencePolicy ?? (beat.objectIds.length === 0 ? "static" : "object-order-fallback");
       const showTargets = new Set(
         beatEvents
