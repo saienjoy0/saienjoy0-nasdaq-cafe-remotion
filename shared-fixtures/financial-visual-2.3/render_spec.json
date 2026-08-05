@@ -347,6 +347,15 @@
           "motionPreset": "focus-ring",
           "durationMs": 420,
           "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-046",
+          "atChunkId": "scene-01-chunk-003",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "scene-01-card-001",
+          "offsetMs": 0,
+          "expression": null
         }
       ],
       "assetPlacements": [
@@ -1200,6 +1209,33 @@
           "motionPreset": "focus-ring",
           "durationMs": 420,
           "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-047",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "fvu-aws-expected",
+          "offsetMs": 0,
+          "expression": null
+        },
+        {
+          "eventId": "event-048",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "fvu-aws-actual",
+          "offsetMs": 120,
+          "expression": null
+        },
+        {
+          "eventId": "event-049",
+          "atChunkId": "scene-04-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "fvu-aws-gap",
+          "offsetMs": 240,
+          "expression": null
         }
       ],
       "assetPlacements": [
