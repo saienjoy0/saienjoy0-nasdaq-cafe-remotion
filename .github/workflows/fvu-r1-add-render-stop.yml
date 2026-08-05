@@ -1,0 +1,36 @@
+name: FVU R1 Add Render Stop
+
+on:
+  pull_request:
+    paths:
+      - "scripts/fvu-r1-add-render-stop.py"
+      - ".github/workflows/fvu-r1-add-render-stop.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/fvu-r1-financial-render-contract'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply explicit render stop
+        run: python3 scripts/fvu-r1-add-render-stop.py
+      - name: Commit renderer stop gate
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git add -- src/components/spec/VisualTemplateRenderer.tsx
+          if git diff --cached --quiet; then
+            echo "No patch required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Add explicit stop for unimplemented financial templates"
+          git push origin "HEAD:${HEAD_REF}"
