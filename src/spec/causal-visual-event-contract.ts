@@ -18,7 +18,7 @@ export const collectCausalVisualEventIssues = (
 ): CausalVisualEventIssue[] => {
   const issues: CausalVisualEventIssue[] = [];
   const highlighted = new Set<string>();
-  let sawHighlight = false;
+  let sawNodeHighlight = false;
 
   for (const event of events) {
     if (event.action === "show" && event.motionPreset === "draw-line") {
@@ -31,16 +31,10 @@ export const collectCausalVisualEventIssues = (
     }
 
     if (event.action !== "highlight" && event.action !== "unhighlight") continue;
-    if (!event.targetId || objectType.get(event.targetId) !== "node") {
-      issues.push({
-        eventIndex: event.eventIndex,
-        message: `${event.action} in causal-build may only target a node`,
-      });
-      continue;
-    }
+    if (!event.targetId || objectType.get(event.targetId) !== "node") continue;
 
     if (event.action === "highlight") {
-      sawHighlight = true;
+      sawNodeHighlight = true;
       highlighted.add(event.targetId);
       if (highlighted.size > 1) {
         issues.push({
@@ -53,7 +47,7 @@ export const collectCausalVisualEventIssues = (
     }
   }
 
-  if (sawHighlight && highlighted.size > 0) {
+  if (sawNodeHighlight && highlighted.size > 0) {
     issues.push({
       eventIndex: null,
       message: `causal-build focus must settle before the Beat ends; still highlighted: ${[...highlighted].join(", ")}`,
