@@ -1037,7 +1037,7 @@
           "endChunkId": "scene-04-chunk-002",
           "narrationStartCue": "TEST SCENE 4 SPEECH 1。",
           "narrationEndCue": "TEST SCENE 4 SPEECH 2。",
-          "primaryFunction": "Show expected, actual, and gap",
+          "primaryFunction": "Compare",
           "screenState": "Chart",
           "visualMode": "expected-actual-gap",
           "visualTemplate": "earnings-surprise",

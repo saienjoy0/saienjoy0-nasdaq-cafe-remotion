@@ -69,7 +69,7 @@ def generate() -> tuple[str, str]:
     ])
 
     beat["beatId"] = "vb-04-02"
-    beat["primaryFunction"] = "Show expected, actual, and gap"
+    beat["primaryFunction"] = "Compare"
     beat["screenState"] = "Chart"
     beat["visualMode"] = "expected-actual-gap"
     beat["visualTemplate"] = "earnings-surprise"
