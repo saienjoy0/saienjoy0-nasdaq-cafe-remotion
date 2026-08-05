@@ -12,6 +12,8 @@ export type CausalVisualEventIssue = {
   message: string;
 };
 
+const CAUSAL_FOCUS_PRESETS = new Set(["focus-ring", "dim-others"]);
+
 export const collectCausalVisualEventIssues = (
   events: OrderedCausalVisualEvent[],
   objectType: ReadonlyMap<string, CausalObjectType>,
@@ -32,6 +34,11 @@ export const collectCausalVisualEventIssues = (
 
     if (event.action !== "highlight" && event.action !== "unhighlight") continue;
     if (!event.targetId || objectType.get(event.targetId) !== "node") continue;
+
+    const participatesInCausalFocus = event.action === "unhighlight"
+      ? highlighted.has(event.targetId)
+      : event.motionPreset != null && CAUSAL_FOCUS_PRESETS.has(event.motionPreset);
+    if (!participatesInCausalFocus) continue;
 
     if (event.action === "highlight") {
       sawNodeHighlight = true;
