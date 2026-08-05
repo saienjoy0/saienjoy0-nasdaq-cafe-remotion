@@ -1,0 +1,19 @@
+{
+  "outcomeVersion": "1.0",
+  "status": "succeeded",
+  "stage": "complete",
+  "requestPath": "motion-preview-requests/2026-08-05T0200-scene-06-semantic-transition-pr3.json",
+  "requestFingerprint": "7f84a18fe2d634fae6596ddf7900092b7b6b7db09561fa53e5760d25148f0733",
+  "requestValid": true,
+  "validationError": null,
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "d85777574d72ec184bc33dfb3a073c1b4f6f01feb68c50b41a37849ac940f9c1",
+  "sceneNumber": 6,
+  "offsetSeconds": 0.0,
+  "durationSeconds": 20.0,
+  "wakeResult": "success",
+  "renderResult": "success",
+  "workflow": "Nasdaq Cafe Motion Preview Request",
+  "runId": "30967998921",
+  "recordedAt": "2026-08-05T02:01:23.693998Z"
+}
