@@ -1,4 +1,5 @@
 import type {PublicMainContent} from "../../spec/public-view-model";
+import {resolveSemanticShotTransition} from "../../spec/shot-semantic-transition-contract";
 import {getShotTransitionOpacities} from "../../spec/shot-transition-contract";
 import {SharedElementLayer} from "./SharedElementLayer";
 
@@ -11,17 +12,18 @@ export const ShotTransitionHost: React.FC<{
   if (!shot) return null;
   const previousShot = content.previousShot;
   const elapsedMs = Math.max(0, content.sceneTimeMs - shot.startMs);
+  const effectiveTransition = resolveSemanticShotTransition(content, previousShot, shot);
   const transition = getShotTransitionOpacities(
     elapsedMs,
     previousShot !== null,
-    shot.transitionIn,
+    effectiveTransition,
   );
   const previousContent = previousShot
     ? {...content, shot: {...previousShot, progress: 1}, previousShot: null, nextShot: shot}
     : null;
-  return <div style={{position: "absolute", inset: 0, overflow: "hidden", borderRadius: 30}}>
+  return <div data-effective-transition={effectiveTransition} style={{position: "absolute", inset: 0, overflow: "hidden", borderRadius: 30}}>
     {previousContent && transition.previous > 0 ? <div data-shot-layer="previous" style={{position: "absolute", inset: 0, opacity: transition.previous}}>{renderShot(previousContent)}</div> : null}
     <div data-shot-layer="current" style={{position: "absolute", inset: 0, opacity: transition.current}}>{renderShot(content)}</div>
-    {previousShot ? <SharedElementLayer content={content} previousShot={previousShot} currentShot={shot} progress={transition.sharedProgress}/> : null}
+    {previousShot && effectiveTransition === "reframe-shared-element" ? <SharedElementLayer content={content} previousShot={previousShot} currentShot={shot} progress={transition.sharedProgress}/> : null}
   </div>;
 };
