@@ -1,0 +1,19 @@
+{
+  "outcomeVersion": "1.0",
+  "status": "succeeded",
+  "stage": "complete",
+  "requestPath": "motion-preview-requests/2026-08-05T0744-scene-06-pr4b-causal-focus-explicit.json",
+  "requestFingerprint": "71c050e8dba398ed20a12794e20588b5287d29e0d1a3ea79919549d3a699c3e0",
+  "requestValid": true,
+  "validationError": null,
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "5975904438e0480a4a2e533b1aa2aa6d695499b0e47cf900a417fa8fca24ffb4",
+  "sceneNumber": 6,
+  "offsetSeconds": 0.0,
+  "durationSeconds": 20.0,
+  "wakeResult": "success",
+  "renderResult": "success",
+  "workflow": "Nasdaq Cafe Motion Preview Request",
+  "runId": "30986124608",
+  "recordedAt": "2026-08-05T07:45:12.305776Z"
+}
