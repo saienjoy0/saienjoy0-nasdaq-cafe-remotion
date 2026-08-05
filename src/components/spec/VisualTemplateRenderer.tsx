@@ -15,6 +15,13 @@ import {
   HeroNumberTemplate,
   SplitComparisonTemplate,
 } from "./AdditionalVisualTemplates";
+import {
+  DualAssetSplitTemplate,
+  EarningsSurpriseTemplate,
+  MacroPressureTemplate,
+  MarketPulseGridTemplate,
+  SourceReceiptTemplate,
+} from "./FinancialVisualTemplates";
 
 const FPS = 30;
 const color = {
@@ -308,18 +315,13 @@ const FinalAssembly: React.FC<{content: PublicMainContent}> = ({content}) => {
 };
 
 
-const FinancialTemplateImplementationPending: React.FC<{templateId: string}> = ({templateId}) => {
-  throw new Error(`Financial Visual Template implementation is not available yet: ${templateId}`);
-};
-
 export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
   switch (content.visualTemplate) {
-    case "market-pulse-grid":
-    case "earnings-surprise":
-    case "dual-asset-split":
-    case "macro-pressure":
-    case "source-receipt":
-      return <FinancialTemplateImplementationPending templateId={content.visualTemplate}/>;
+    case "market-pulse-grid": return <MarketPulseGridTemplate content={content}/>;
+    case "earnings-surprise": return <EarningsSurpriseTemplate content={content}/>;
+    case "dual-asset-split": return <DualAssetSplitTemplate content={content}/>;
+    case "macro-pressure": return <MacroPressureTemplate content={content}/>;
+    case "source-receipt": return <SourceReceiptTemplate content={content}/>;
     case "hero-number": return <HeroNumberTemplate content={content}/>;
     case "split-comparison": return <SplitComparisonTemplate content={content}/>;
     case "focus-matrix": return <FocusMatrixTemplate content={content}/>;

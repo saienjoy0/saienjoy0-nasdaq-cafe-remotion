@@ -98,8 +98,9 @@ export const assertSpecLayoutFits = (data: RenderProductionData) => {
           visibleNodeIds.has(arrow.toNodeId),
       );
 
-      if (["number-comparison", "chart", "stock-comparison"].includes(beat.visualMode) && visibleNumbers.length > 4) {
-        throw new Error(`${path}.objectIds: comparison view supports at most four visible numbers`);
+      const comparisonLimit = beat.visualTemplate === "market-pulse-grid" ? 6 : 4;
+      if (["number-comparison", "chart", "stock-comparison"].includes(beat.visualMode) && visibleNumbers.length > comparisonLimit) {
+        throw new Error(`${path}.objectIds: comparison view supports at most ${comparisonLimit} visible numbers`);
       }
       if (beat.visualMode === "verification-points") {
         const itemCount = visibleCards.reduce((total, card) => total + card.lines.length, 0);
@@ -137,6 +138,21 @@ export const assertSpecLayoutFits = (data: RenderProductionData) => {
     if (template === "verification-checklist") {
       const itemCount = visibleCards.reduce((total, card) => total + card.lines.length, 0) || beat.viewerTexts.length;
       if (itemCount < 2 || itemCount > 4) throw new Error(`${path}: verification-checklist requires two to four items`);
+    }
+    if (template === "market-pulse-grid" && (visibleNumbers.length < 3 || visibleNumbers.length > 6)) throw new Error(`${path}.objectIds: market-pulse-grid requires three to six visible numbers`);
+    if (template === "earnings-surprise" && visibleNumbers.length !== 3) throw new Error(`${path}.objectIds: earnings-surprise requires exactly three visible numbers`);
+    if (template === "dual-asset-split" && visibleNumbers.length !== 2) throw new Error(`${path}.objectIds: dual-asset-split requires exactly two visible numbers`);
+    if (template === "macro-pressure") {
+      assertCausalShape(visibleNodes.map((node) => node.nodeId), visibleArrows, `${path}.objectIds`);
+      if (visibleNodes.length < 2 || visibleNodes.length > 4) throw new Error(`${path}.objectIds: macro-pressure requires two to four visible nodes`);
+      if (visibleArrows.length < 1 || visibleArrows.length > 3) throw new Error(`${path}.objectIds: macro-pressure requires one to three visible arrows`);
+      const order = beat.templateConfig.nodeOrder;
+      if (order.length !== visibleNodes.length) throw new Error(`${path}.templateConfig.nodeOrder: macro-pressure requires the complete visible node order`);
+      for (let index = 0; index < order.length - 1; index += 1) if (!visibleArrows.some((arrow) => arrow.fromNodeId === order[index] && arrow.toNodeId === order[index + 1])) throw new Error(`${path}.templateConfig.nodeOrder: missing sequential arrow ${order[index]} -> ${order[index + 1]}`);
+    }
+    if (template === "source-receipt") {
+      const evidenceCount = visibleCards.reduce((total, card) => total + Math.max(1, card.lines.length), 0) + visibleNumbers.length + beat.viewerTexts.length;
+      if (evidenceCount < 1 || evidenceCount > 6) throw new Error(`${path}: source-receipt requires one to six visible evidence items`);
     }
     if (template === "entity-card-full" && (beat.screenState !== "EntityFocus" || !beat.entity)) throw new Error(`${path}: entity-card-full requires EntityFocus and entity metadata`);
     if (template === "opening-contradiction" && scene.sceneNumber !== 1) throw new Error(`${path}: opening-contradiction is reserved for Scene 1`);
