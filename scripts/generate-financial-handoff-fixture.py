@@ -60,14 +60,6 @@ def generate() -> tuple[str, str]:
 
     scene = next(item for item in spec["scenes"] if item["sceneId"] == "scene-04")
     beat = scene["visualBeats"][0]
-    role_card_ids = [
-        card["cardId"]
-        for card in scene["cards"]
-        if card.get("role") in {"expected", "actual", "gap"}
-    ]
-    if len(role_card_ids) != 3:
-        raise SystemExit("scene-04 must retain exactly one Expected, Actual, and Gap card")
-
     number_ids = ["fvu-aws-expected", "fvu-aws-actual", "fvu-aws-gap"]
     scene["numbers"] = [item for item in scene["numbers"] if item["numberId"] not in number_ids]
     scene["numbers"].extend([
@@ -76,10 +68,11 @@ def generate() -> tuple[str, str]:
         make_number(number_ids[2], "GAP", "+$0.7B", 0.7, "emphasis"),
     ])
 
+    scene["visualMode"] = "number-comparison"
     beat["beatId"] = "vb-04-02"
     beat["primaryFunction"] = "Compare"
     beat["screenState"] = "Chart"
-    beat["visualMode"] = "expected-actual-gap"
+    beat["visualMode"] = "number-comparison"
     beat["visualTemplate"] = "earnings-surprise"
     beat["templateVariant"] = "zero-baseline"
     beat["templateConfig"] = {
@@ -101,7 +94,7 @@ def generate() -> tuple[str, str]:
     beat["primaryElement"] = "AWS revenue gap"
     beat["viewerTexts"] = ["Expected $42.3B", "Actual $43.0B", "Gap +$0.7B"]
     beat["changeCue"] = beat["narrationStartCue"]
-    beat["objectIds"] = role_card_ids + number_ids
+    beat["objectIds"] = number_ids
     beat["assetPlacementIds"] = []
     beat["assetState"] = "not-required"
     beat["returnScreenState"] = None
