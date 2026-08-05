@@ -1,0 +1,49 @@
+name: Financial Visual Templates CI
+
+on:
+  pull_request:
+    paths:
+      - "src/components/spec/FinancialVisualTemplates.tsx"
+      - "src/components/spec/VisualTemplateRenderer.tsx"
+      - "src/spec/validate-render-layout.ts"
+      - "scripts/apply-financial-template-components.py"
+      - "scripts/test-financial-visual-templates.tsx"
+      - "docs/14_financial_visual_templates.md"
+      - ".github/workflows/financial-visual-templates-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/components/spec/FinancialVisualTemplates.tsx"
+      - "src/components/spec/VisualTemplateRenderer.tsx"
+      - "src/spec/validate-render-layout.ts"
+      - "scripts/apply-financial-template-components.py"
+      - "scripts/test-financial-visual-templates.tsx"
+      - "docs/14_financial_visual_templates.md"
+      - ".github/workflows/financial-visual-templates-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Confirm deterministic component patch is applied
+        run: python3 scripts/apply-financial-template-components.py --check
+      - name: Run financial component tests
+        run: npx tsx scripts/test-financial-visual-templates.tsx
+      - name: Run existing visual template coverage
+        run: npx tsx scripts/test-visual-templates.ts
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Bundle Remotion
+        run: npm run build
