@@ -11,7 +11,7 @@ export const useShotMotion = (shot: PublicShot) => {
   const introProgress = spring({
     fps,
     frame: getShotIntroFrame(shot, fps),
-    durationInFrames: getShotIntroDurationInFrames(fps),
+    durationInFrames: getShotIntroDurationInFrames(shot, fps),
     config: {
       damping: 24,
       stiffness: 150,
