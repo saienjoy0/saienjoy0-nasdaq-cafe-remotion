@@ -1,0 +1,55 @@
+name: Financial Handoff Fixture CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/generate-financial-handoff-fixture.py"
+      - "scripts/test-financial-handoff-fixture.ts"
+      - "shared-fixtures/financial-visual-2.3/**"
+      - "contracts/financial_visual_compatibility.json"
+      - ".github/workflows/financial-handoff-fixture-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/generate-financial-handoff-fixture.py"
+      - "scripts/test-financial-handoff-fixture.ts"
+      - "shared-fixtures/financial-visual-2.3/**"
+      - "contracts/financial_visual_compatibility.json"
+      - ".github/workflows/financial-handoff-fixture-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Regenerate fixture twice and compare committed bytes
+        run: |
+          cp shared-fixtures/financial-visual-2.3/render_spec.json /tmp/render-spec.committed.json
+          cp shared-fixtures/financial-visual-2.3/fixture_manifest.json /tmp/manifest.committed.json
+          python3 scripts/generate-financial-handoff-fixture.py > /tmp/generation-1.json
+          cmp /tmp/render-spec.committed.json shared-fixtures/financial-visual-2.3/render_spec.json
+          cmp /tmp/manifest.committed.json shared-fixtures/financial-visual-2.3/fixture_manifest.json
+          sha256sum shared-fixtures/financial-visual-2.3/* > /tmp/files-1
+          python3 scripts/generate-financial-handoff-fixture.py > /tmp/generation-2.json
+          sha256sum shared-fixtures/financial-visual-2.3/* > /tmp/files-2
+          diff -u /tmp/generation-1.json /tmp/generation-2.json
+          diff -u /tmp/files-1 /tmp/files-2
+      - name: Run shared fixture acceptance
+        run: npx tsx scripts/test-financial-handoff-fixture.ts
+      - name: Run render spec contract regression
+        run: npx tsx scripts/test-render-spec.ts
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Bundle Remotion
+        run: npm run build
