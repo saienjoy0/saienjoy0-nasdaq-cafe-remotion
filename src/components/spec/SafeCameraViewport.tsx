@@ -1,6 +1,7 @@
 import {interpolate} from "remotion";
 import type {PublicShot} from "../../spec/public-view-model";
 import {CAMERA_PRESET_TRANSFORMS} from "../../spec/shot-contract";
+import {getShotCameraProgress} from "../../spec/shot-motion-contract";
 
 export const SafeCameraViewport: React.FC<{
   shot: PublicShot;
@@ -9,7 +10,7 @@ export const SafeCameraViewport: React.FC<{
   style?: React.CSSProperties;
 }> = ({shot, children, origin = "50% 50%", style}) => {
   const preset = CAMERA_PRESET_TRANSFORMS[shot.cameraPreset];
-  const progress = Math.max(0, Math.min(1, shot.progress));
+  const progress = getShotCameraProgress(shot);
   return <div data-camera-target={shot.cameraTargetId ?? shot.primaryTargetId ?? "content"} style={{
     position: "relative",
     width: "100%",

@@ -4,9 +4,8 @@ import {SafeCameraViewport} from "../SafeCameraViewport";
 import {palette, SafeContent, safeFontSize, StageEyebrow, StageShell} from "../StageSafeArea";
 import {useShotMotion} from "./useShotMotion";
 
-const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const toneColor = (tone: PublicNumber["tone"]) => palette[tone];
-const useProgressFor = (shot: PublicShot) => useShotMotion(shot).introProgress;
+const useMotionFor = (shot: PublicShot) => useShotMotion(shot);
 const numberById = (content: PublicMainContent, id: string | null | undefined) => id ? content.numbers.find((item) => item.key === id) ?? null : null;
 const cardById = (content: PublicMainContent, id: string | null | undefined) => id ? content.cards.find((item) => item.key === id) ?? null : null;
 const nodeById = (content: PublicMainContent, id: string | null | undefined) => id ? content.nodes.find((item) => item.key === id) ?? null : null;
@@ -27,12 +26,12 @@ const HeroMetric: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = numberById(content, shot.primaryTargetId);
   const card = cardById(content, shot.primaryTargetId);
   const text = targetText(content, shot);
-  const p = useProgressFor(shot);
+  const {introProgress: p, introOpacity} = useMotionFor(shot);
   return <StageShell accent={number ? toneColor(number.tone) : palette.emphasis}>
     <SafeContent reserveTypography={Boolean(shot.typographyTreatment)} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
       <SafeCameraViewport shot={shot} style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}}>
         <StageEyebrow tone={palette.neutral}>{number?.label ?? card?.title ?? content.screenQuestion}</StageEyebrow>
-        <div style={{marginTop: 22, opacity: p, transform: `translateY(${interpolate(p, [0, 1], [24, 0])}px) scale(${interpolate(p, [0, 1], [.84, 1])})`}}>
+        <div style={{marginTop: 22, opacity: introOpacity, transform: `translateY(${interpolate(p, [0, 1], [24, 0])}px) scale(${interpolate(p, [0, 1], [.84, 1])})`}}>
           {number ? <Metric number={number}/> : card ? <div style={{width: 930}}><CardValue card={card}/></div> : <div style={{maxWidth: 1080, fontSize: safeFontSize(text, 78, 42), lineHeight: 1.13, color: palette.emphasis, fontWeight: 950, overflowWrap: "anywhere"}}>{text}</div>}
         </div>
       </SafeCameraViewport>
@@ -45,7 +44,7 @@ const Contradiction: React.FC<{content: PublicMainContent}> = ({content}) => {
   const ids = [shot.primaryTargetId, ...(shot.secondaryTargetIds ?? [])].filter(Boolean) as string[];
   const items = ids.map((id) => numberById(content, id) ?? cardById(content, id)).filter(Boolean).slice(0, 2);
   const texts = content.texts.length >= 2 ? content.texts : [content.primaryElement, content.screenQuestion];
-  const p = useProgressFor(shot);
+  const {introProgress: p, introOpacity} = useMotionFor(shot);
   return <StageShell accent={palette.warning}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "minmax(0,1fr) 92px minmax(0,1fr)", gap: 22, alignItems: "center"}}>
       {[0, 1].map((index) => {
@@ -53,7 +52,7 @@ const Contradiction: React.FC<{content: PublicMainContent}> = ({content}) => {
         const number = item && "value" in item && "unit" in item ? item as PublicNumber : null;
         const card = item && "lines" in item ? item as PublicCard : null;
         const text = texts[index] ?? "反対材料";
-        return <div key={index} style={{opacity: p, transform: `translateX(${interpolate(p, [0, 1], [index === 0 ? -44 : 44, 0])}px)`, minWidth: 0}}>{number ? <div style={{padding: 25, borderRadius: 23, border: `3px solid ${toneColor(number.tone)}`, background: `${toneColor(number.tone)}13`, textAlign: "center"}}><div style={{fontSize: 29, fontWeight: 950}}>{number.label}</div><div style={{marginTop: 15}}><Metric number={number} size={73}/></div></div> : card ? <CardValue card={card} accent={index === 0 ? palette.positive : palette.warning}/> : <div style={{padding: 28, borderRadius: 23, border: `3px solid ${index === 0 ? palette.positive : palette.warning}`, background: "rgba(143,183,209,.09)", textAlign: "center", fontSize: safeFontSize(text, 42, 28, 500), lineHeight: 1.18, fontWeight: 950}}>{text}</div>}</div>;
+        return <div key={index} style={{opacity: introOpacity, transform: `translateX(${interpolate(p, [0, 1], [index === 0 ? -44 : 44, 0])}px)`, minWidth: 0}}>{number ? <div style={{padding: 25, borderRadius: 23, border: `3px solid ${toneColor(number.tone)}`, background: `${toneColor(number.tone)}13`, textAlign: "center"}}><div style={{fontSize: 29, fontWeight: 950}}>{number.label}</div><div style={{marginTop: 15}}><Metric number={number} size={73}/></div></div> : card ? <CardValue card={card} accent={index === 0 ? palette.positive : palette.warning}/> : <div style={{padding: 28, borderRadius: 23, border: `3px solid ${index === 0 ? palette.positive : palette.warning}`, background: "rgba(143,183,209,.09)", textAlign: "center", fontSize: safeFontSize(text, 42, 28, 500), lineHeight: 1.18, fontWeight: 950}}>{text}</div>}</div>;
       })}
       <div style={{gridColumn: 2, gridRow: 1, fontSize: 58, color: palette.warning, textAlign: "center", fontWeight: 950, transform: `scale(${interpolate(p, [0, 1], [.6, 1])})`}}>≠</div>
     </SafeContent>
@@ -65,7 +64,7 @@ const ExpectedAnchor: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = numberById(content, shot.primaryTargetId);
   const card = cardById(content, shot.primaryTargetId);
   const label = number ? `${number.value}${number.unit}` : card?.lines[0]?.value ?? targetText(content, shot);
-  const p = useProgressFor(shot);
+  const {introProgress: p} = useMotionFor(shot);
   return <StageShell accent={palette.neutral}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
       <StageEyebrow>EXPECTED｜市場が置いていた基準</StageEyebrow>
@@ -86,7 +85,7 @@ const ActualCrosses: React.FC<{content: PublicMainContent}> = ({content}) => {
   const expectedCard = cardById(content, shot.referenceTargetId);
   const actualLabel = actualNumber ? `${actualNumber.value}${actualNumber.unit}` : actualCard?.lines[0]?.value ?? targetText(content, shot);
   const expectedLabel = expectedCard?.lines[0]?.value ?? actualNumber?.comparison ?? "EXPECTED";
-  const p = useProgressFor(shot);
+  const {introProgress: p} = useMotionFor(shot);
   return <StageShell accent={palette.positive}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 18}}>
       <div style={{display: "flex", justifyContent: "space-between", gap: 26, alignItems: "center"}}><StageEyebrow tone={palette.positive}>ACTUAL｜実際に出た結果</StageEyebrow><div style={{fontSize: safeFontSize(actualLabel, 48, 30, 590), color: palette.positive, fontWeight: 950, whiteSpace: "nowrap"}}>{actualLabel}</div></div>
@@ -105,7 +104,7 @@ const GapMacro: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = numberById(content, shot.primaryTargetId);
   const card = cardById(content, shot.primaryTargetId);
   const value = number ? `${number.value}${number.unit}` : card?.lines[0]?.value ?? targetText(content, shot);
-  const p = useProgressFor(shot);
+  const {introProgress: p} = useMotionFor(shot);
   return <StageShell accent={palette.emphasis}>
     <SafeContent reserveTypography style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
       <SafeCameraViewport shot={shot}>
@@ -124,12 +123,12 @@ const CausalBuild: React.FC<{content: PublicMainContent}> = ({content}) => {
   const nodes = orderedIds.map((id) => nodeById(content, id)).filter(Boolean).slice(0, 4) as NonNullable<ReturnType<typeof nodeById>>[];
   const fallbackTexts = content.texts.length > 1 ? content.texts : ["材料", "経路", "結果"];
   const labels = nodes.length > 0 ? nodes.map((item) => item.label) : fallbackTexts.slice(0, 4);
-  const p = clamp(shot.progress);
+  const {staggerProgress} = useMotionFor(shot);
   return <StageShell accent={palette.cyan}>
     <SafeContent style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
       <SafeCameraViewport shot={shot}>
         <div style={{position: "absolute", inset: 0, display: "grid", gridTemplateColumns: `repeat(${Math.max(1, labels.length)},minmax(0,1fr))`, gap: 42, alignItems: "center"}}>{labels.map((label, index) => {
-          const reveal = clamp((p * labels.length - index) * 1.45);
+          const reveal = staggerProgress(index, labels.length);
           return <div key={`${label}-${index}`} style={{position: "relative", opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [30, 0])}px)`, minWidth: 0}}>
             <div style={{minHeight: 142, display: "flex", alignItems: "center", justifyContent: "center", padding: 22, borderRadius: 22, background: "rgba(41,215,240,.10)", border: `3px solid ${index === labels.length - 1 ? palette.emphasis : palette.cyan}`, textAlign: "center", fontSize: safeFontSize(label, 34, 25, 260), lineHeight: 1.17, fontWeight: 950, overflowWrap: "anywhere"}}>{label}</div>
             {index < labels.length - 1 ? <div style={{position: "absolute", left: "100%", top: "50%", width: 42, height: 4, background: palette.cyan, transform: `scaleX(${reveal})`, transformOrigin: "0 50%"}}><div style={{position: "absolute", right: -1, top: -7, width: 0, height: 0, borderTop: "9px solid transparent", borderBottom: "9px solid transparent", borderLeft: `14px solid ${palette.cyan}`}}/></div> : null}
@@ -147,10 +146,10 @@ const Counterforce: React.FC<{content: PublicMainContent}> = ({content}) => {
   const texts = content.texts;
   const tailwind = reference ? `${reference.label} ${reference.value}${reference.unit}` : texts[0] ?? "追い風｜AWS予想超過";
   const headwind = primary ? `${primary.label} ${primary.value}${primary.unit}` : texts[1] ?? targetText(content, shot);
-  const p = useProgressFor(shot);
+  const {introProgress: p, introOpacity} = useMotionFor(shot);
   return <StageShell accent={palette.warning}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "1fr 1fr", gap: 22, alignContent: "center"}}>
-      {[{tag: "追い風", text: tailwind, color: palette.positive, x: -34}, {tag: "向かい風", text: headwind, color: palette.warning, x: 34}].map((item, index) => <div key={item.tag} style={{display: "grid", gridTemplateColumns: "190px minmax(0,1fr)", gap: 24, alignItems: "center", padding: "23px 30px", borderRadius: 23, background: `${item.color}12`, border: `3px solid ${item.color}`, opacity: index === 0 ? 1 : p, transform: `translateX(${index === 0 ? 0 : interpolate(p, [0, 1], [item.x, 0])}px)`}}><div style={{fontSize: 31, color: item.color, fontWeight: 950}}>{item.tag}</div><div style={{fontSize: safeFontSize(item.text, 40, 27, 900), lineHeight: 1.12, fontWeight: 950, overflowWrap: "anywhere"}}>{item.text}</div></div>)}
+      {[{tag: "追い風", text: tailwind, color: palette.positive, x: -34}, {tag: "向かい風", text: headwind, color: palette.warning, x: 34}].map((item, index) => <div key={item.tag} style={{display: "grid", gridTemplateColumns: "190px minmax(0,1fr)", gap: 24, alignItems: "center", padding: "23px 30px", borderRadius: 23, background: `${item.color}12`, border: `3px solid ${item.color}`, opacity: index === 0 ? 1 : introOpacity, transform: `translateX(${index === 0 ? 0 : interpolate(p, [0, 1], [item.x, 0])}px)`}}><div style={{fontSize: 31, color: item.color, fontWeight: 950}}>{item.tag}</div><div style={{fontSize: safeFontSize(item.text, 40, 27, 900), lineHeight: 1.12, fontWeight: 950, overflowWrap: "anywhere"}}>{item.text}</div></div>)}
     </SafeContent>
   </StageShell>;
 };
@@ -172,8 +171,8 @@ const SplitOpposition: React.FC<{content: PublicMainContent}> = ({content}) => {
   const primary = numberById(content, shot.primaryTargetId);
   const secondaries = (shot.secondaryTargetIds ?? []).map((id) => numberById(content, id)).filter(Boolean) as PublicNumber[];
   const secondary = secondaries[0] ?? content.numbers.find((item) => item.key !== primary?.key) ?? null;
-  const p = useProgressFor(shot);
-  const renderSide = (item: PublicNumber | null, label: string, color: string) => <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: 0, opacity: p}}><div style={{fontSize: 31, color, fontWeight: 950}}>{item?.label ?? label}</div>{item ? <div style={{marginTop: 18}}><Metric number={item} size={82}/></div> : <div style={{marginTop: 18, fontSize: 38, fontWeight: 950}}>{label}</div>}</div>;
+  const {introProgress: p, introOpacity} = useMotionFor(shot);
+  const renderSide = (item: PublicNumber | null, label: string, color: string) => <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: 0, opacity: introOpacity}}><div style={{fontSize: 31, color, fontWeight: 950}}>{item?.label ?? label}</div>{item ? <div style={{marginTop: 18}}><Metric number={item} size={82}/></div> : <div style={{marginTop: 18, fontSize: 38, fontWeight: 950}}>{label}</div>}</div>;
   return <StageShell accent={palette.emphasis}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "1fr 5px 1fr", gap: 28, alignItems: "stretch"}}>
       {renderSide(primary, content.texts[0] ?? "主役", primary ? toneColor(primary.tone) : palette.positive)}
@@ -188,8 +187,9 @@ const FocusMatrix: React.FC<{content: PublicMainContent}> = ({content}) => {
   const ids = [shot.primaryTargetId, ...(shot.secondaryTargetIds ?? [])].filter(Boolean) as string[];
   const numbers = ids.map((id) => numberById(content, id)).filter(Boolean) as PublicNumber[];
   const items = numbers.length > 0 ? numbers.slice(0, 4) : content.numbers.slice(0, 4);
+  const {staggerProgress} = useMotionFor(shot);
   return <StageShell accent={palette.cyan}>
-    <SafeContent style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 20}}>{items.map((item, index) => {const reveal = clamp((shot.progress * items.length - index) * 1.5); return <div key={item.key} style={{display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, padding: "22px 27px", borderRadius: 22, background: `${toneColor(item.tone)}11`, border: `3px solid ${toneColor(item.tone)}`, opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [24, 0])}px)`}}><div style={{fontSize: safeFontSize(item.label, 33, 24, 420), fontWeight: 950, overflowWrap: "anywhere"}}>{item.label}</div><Metric number={item} size={58}/></div>;})}</SafeContent>
+    <SafeContent style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 20}}>{items.map((item, index) => {const reveal = staggerProgress(index, items.length); return <div key={item.key} style={{display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, padding: "22px 27px", borderRadius: 22, background: `${toneColor(item.tone)}11`, border: `3px solid ${toneColor(item.tone)}`, opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [24, 0])}px)`}}><div style={{fontSize: safeFontSize(item.label, 33, 24, 420), fontWeight: 950, overflowWrap: "anywhere"}}>{item.label}</div><Metric number={item} size={58}/></div>;})}</SafeContent>
   </StageShell>;
 };
 
@@ -198,8 +198,9 @@ const VerificationPaths: React.FC<{content: PublicMainContent}> = ({content}) =>
   const card = cardById(content, shot.primaryTargetId);
   const values = card ? card.lines.map((line) => line.value) : content.texts;
   const items = values.slice(0, 4);
+  const {staggerProgress} = useMotionFor(shot);
   return <StageShell accent={palette.warning}>
-    <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 22}}>{items.map((text, index) => {const strengthen = /強まる|継続|安定|波及/u.test(text) && !/弱まる|上昇継続|弱い/u.test(text); const color = strengthen ? palette.positive : index % 2 === 0 ? palette.cyan : palette.warning; const reveal = clamp((shot.progress * items.length - index) * 1.45); return <div key={`${text}-${index}`} style={{padding: "22px 25px", borderRadius: 22, background: `${color}10`, border: `3px solid ${color}`, opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [22, 0])}px)`}}><div style={{fontSize: 23, color, fontWeight: 900}}>{strengthen ? "強まる条件" : "確認条件"}</div><div style={{marginTop: 12, fontSize: safeFontSize(text, 35, 25, 550), lineHeight: 1.17, fontWeight: 950, overflowWrap: "anywhere"}}>{text.replace(/^強まる｜|^弱まる｜/u, "")}</div></div>;})}</SafeContent>
+    <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 22}}>{items.map((text, index) => {const strengthen = /強まる|継続|安定|波及/u.test(text) && !/弱まる|上昇継続|弱い/u.test(text); const color = strengthen ? palette.positive : index % 2 === 0 ? palette.cyan : palette.warning; const reveal = staggerProgress(index, items.length); return <div key={`${text}-${index}`} style={{padding: "22px 25px", borderRadius: 22, background: `${color}10`, border: `3px solid ${color}`, opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [22, 0])}px)`}}><div style={{fontSize: 23, color, fontWeight: 900}}>{strengthen ? "強まる条件" : "確認条件"}</div><div style={{marginTop: 12, fontSize: safeFontSize(text, 35, 25, 550), lineHeight: 1.17, fontWeight: 950, overflowWrap: "anywhere"}}>{text.replace(/^強まる｜|^弱まる｜/u, "")}</div></div>;})}</SafeContent>
   </StageShell>;
 };
 
@@ -208,9 +209,9 @@ const RecapAssembly: React.FC<{content: PublicMainContent}> = ({content}) => {
   const items = content.texts.slice(0, 4);
   const shotIndex = Number(shot.shotId.match(/shot-(\d+)$/u)?.[1] ?? "1");
   const baseVisible = shotIndex <= 1 ? Math.max(1, Math.ceil(items.length / 2)) : items.length;
-  const visible = Math.min(items.length, Math.max(baseVisible, Math.ceil(shot.progress * items.length)));
+  const {staggerProgress} = useMotionFor(shot);
   return <StageShell accent={palette.emphasis}>
-    <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 20, alignContent: "center"}}>{items.map((text, index) => <div key={`${text}-${index}`} style={{minHeight: 105, display: "flex", alignItems: "center", justifyContent: "center", padding: "18px 24px", borderRadius: 22, background: index === items.length - 1 ? "rgba(183,140,255,.18)" : "rgba(41,215,240,.09)", border: `3px solid ${index === items.length - 1 ? palette.emphasis : palette.cyan}`, opacity: index < visible ? 1 : .12, transform: `translateY(${index < visible ? 0 : 18}px)`, textAlign: "center", fontSize: safeFontSize(text, 35, 25, 560), lineHeight: 1.15, fontWeight: 950}}>{text}</div>)}</SafeContent>
+    <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 20, alignContent: "center"}}>{items.map((text, index) => {const reveal = index < baseVisible ? 1 : staggerProgress(index - baseVisible, Math.max(1, items.length - baseVisible)); return <div key={`${text}-${index}`} style={{minHeight: 105, display: "flex", alignItems: "center", justifyContent: "center", padding: "18px 24px", borderRadius: 22, background: index === items.length - 1 ? "rgba(183,140,255,.18)" : "rgba(41,215,240,.09)", border: `3px solid ${index === items.length - 1 ? palette.emphasis : palette.cyan}`, opacity: .12 + reveal * .88, transform: `translateY(${interpolate(reveal, [0, 1], [18, 0])}px)`, textAlign: "center", fontSize: safeFontSize(text, 35, 25, 560), lineHeight: 1.15, fontWeight: 950}}>{text}</div>;})}</SafeContent>
     <div style={{position: "absolute", left: 64, right: 64, bottom: 24, height: 76, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 18, background: "rgba(5,12,28,.92)", border: `2px solid ${palette.warning}`, color: palette.warning, fontSize: safeFontSize(content.primaryElement, 48, 34, 1120), fontWeight: 950}}>{content.primaryElement}</div>
   </StageShell>;
 };
