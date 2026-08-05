@@ -1063,7 +1063,7 @@
               "fvu-aws-gap"
             ]
           },
-          "sequencePolicy": "object-order-fallback",
+          "sequencePolicy": "explicit",
           "finalHoldMs": 900,
           "contentType": "financial-data",
           "screenQuestion": "予想を上回っても、市場が見た差は何か",
