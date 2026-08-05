@@ -55,6 +55,10 @@ const financialSpec = ({
   beat.templateConfig = {
     variant,
     comparisonBasis: "same session and unit",
+    dataBasis: "financial-recipe-plan",
+    nodeOrder: [],
+    laneLabels: [],
+    outcomeNodeId: null,
     displayOrder: ["metric-a"],
     metricIds: ["metric-a"],
     causalStepIds: [],

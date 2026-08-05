@@ -84,15 +84,15 @@ def patch_render_spec(text: str) -> str:
 }).strict();'''
     new_config = '''const visualTemplateConfigSchema = z.object({
   variant: visualTemplateVariantSchema,
-  comparisonBasis: nullableText.default(null),
-  dataBasis: nonEmptyText.default("render-spec"),
-  nodeOrder: z.array(safeId).max(4).default([]),
-  laneLabels: z.array(nonEmptyText).max(2).default([]),
-  outcomeNodeId: safeId.nullable().default(null),
-  displayOrder: z.array(safeId).max(10).default([]),
-  metricIds: z.array(safeId).max(6).default([]),
-  causalStepIds: z.array(safeId).max(4).default([]),
-  highlightObjectIds: z.array(safeId).max(4).default([]),
+  comparisonBasis: nullableText,
+  dataBasis: nonEmptyText,
+  nodeOrder: z.array(safeId).max(4),
+  laneLabels: z.array(nonEmptyText).max(2),
+  outcomeNodeId: safeId.nullable(),
+  displayOrder: z.array(safeId).max(10).optional(),
+  metricIds: z.array(safeId).max(6).optional(),
+  causalStepIds: z.array(safeId).max(4).optional(),
+  highlightObjectIds: z.array(safeId).max(4).optional(),
 }).strict();'''
     if "highlightObjectIds: z.array(safeId)" not in text:
         text = replace_once(text, old_config, new_config, "financial template config")
@@ -178,9 +178,9 @@ def patch_render_spec(text: str) -> str:
         if (beat.templateVariant !== beat.templateConfig.variant) context.addIssue({code: "custom", path: [...path, "templateVariant"], message: "templateVariant must match templateConfig.variant"});
         if (!arraysEqual(beat.objectIds, trace.displayOrder)) context.addIssue({code: "custom", path: [...path, "objectIds"], message: "objectIds must equal selected displayOrder"});
         if (!arraysEqual(beat.evidenceSourceIds, trace.sourceIds)) context.addIssue({code: "custom", path: [...path, "evidenceSourceIds"], message: "evidenceSourceIds must equal selected sourceIds"});
-        if (!arraysEqual(beat.templateConfig.displayOrder, trace.displayOrder)) context.addIssue({code: "custom", path: [...path, "templateConfig", "displayOrder"], message: "templateConfig.displayOrder must match trace"});
-        if (!arraysEqual(beat.templateConfig.metricIds, trace.metricIds)) context.addIssue({code: "custom", path: [...path, "templateConfig", "metricIds"], message: "templateConfig.metricIds must match trace"});
-        if (!arraysEqual(beat.templateConfig.causalStepIds, trace.causalStepIds)) context.addIssue({code: "custom", path: [...path, "templateConfig", "causalStepIds"], message: "templateConfig.causalStepIds must match trace"});
+        if (!arraysEqual(beat.templateConfig.displayOrder ?? [], trace.displayOrder)) context.addIssue({code: "custom", path: [...path, "templateConfig", "displayOrder"], message: "templateConfig.displayOrder must match trace"});
+        if (!arraysEqual(beat.templateConfig.metricIds ?? [], trace.metricIds)) context.addIssue({code: "custom", path: [...path, "templateConfig", "metricIds"], message: "templateConfig.metricIds must match trace"});
+        if (!arraysEqual(beat.templateConfig.causalStepIds ?? [], trace.causalStepIds)) context.addIssue({code: "custom", path: [...path, "templateConfig", "causalStepIds"], message: "templateConfig.causalStepIds must match trace"});
         if (beat.templateConfig.comparisonBasis !== trace.comparisonBasis) context.addIssue({code: "custom", path: [...path, "templateConfig", "comparisonBasis"], message: "comparison basis must match trace"});
         if (beat.financialReturnTarget === undefined) context.addIssue({code: "custom", path: [...path, "financialReturnTarget"], message: "financial Visual Beat requires a return target"});
         if (trace.selectedPath === "preferred" && trace.reasonCodes.length !== 0) context.addIssue({code: "custom", path: [...path, "financialVisualTrace", "reasonCodes"], message: "preferred selection must not contain fallback reason codes"});

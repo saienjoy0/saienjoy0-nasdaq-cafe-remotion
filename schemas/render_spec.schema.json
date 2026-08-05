@@ -872,7 +872,6 @@
                       ]
                     },
                     "comparisonBasis": {
-                      "default": null,
                       "anyOf": [
                         {
                           "type": "string"
@@ -883,11 +882,9 @@
                       ]
                     },
                     "dataBasis": {
-                      "default": "render-spec",
                       "type": "string"
                     },
                     "nodeOrder": {
-                      "default": [],
                       "maxItems": 4,
                       "type": "array",
                       "items": {
@@ -896,7 +893,6 @@
                       }
                     },
                     "laneLabels": {
-                      "default": [],
                       "maxItems": 2,
                       "type": "array",
                       "items": {
@@ -904,7 +900,6 @@
                       }
                     },
                     "outcomeNodeId": {
-                      "default": null,
                       "anyOf": [
                         {
                           "type": "string",
@@ -916,7 +911,6 @@
                       ]
                     },
                     "displayOrder": {
-                      "default": [],
                       "maxItems": 10,
                       "type": "array",
                       "items": {
@@ -925,7 +919,6 @@
                       }
                     },
                     "metricIds": {
-                      "default": [],
                       "maxItems": 6,
                       "type": "array",
                       "items": {
@@ -934,7 +927,6 @@
                       }
                     },
                     "causalStepIds": {
-                      "default": [],
                       "maxItems": 4,
                       "type": "array",
                       "items": {
@@ -943,7 +935,6 @@
                       }
                     },
                     "highlightObjectIds": {
-                      "default": [],
                       "maxItems": 4,
                       "type": "array",
                       "items": {
@@ -953,7 +944,12 @@
                     }
                   },
                   "required": [
-                    "variant"
+                    "variant",
+                    "comparisonBasis",
+                    "dataBasis",
+                    "nodeOrder",
+                    "laneLabels",
+                    "outcomeNodeId"
                   ],
                   "additionalProperties": false
                 },
