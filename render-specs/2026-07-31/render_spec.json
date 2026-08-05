@@ -2918,7 +2918,7 @@
             "laneLabels": [],
             "outcomeNodeId": "s6-node-rates"
           },
-          "sequencePolicy": "object-order-fallback",
+          "sequencePolicy": "explicit",
           "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "確認できる順序はどこまでか",
@@ -3399,6 +3399,42 @@
           "expression": null,
           "motionPreset": "scale-settle",
           "durationMs": 3000,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-909",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-node-report",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "fade-soft",
+          "durationMs": 300,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-910",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-node-support",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "fade-soft",
+          "durationMs": 300,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-911",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-node-rates",
+          "offsetMs": 0,
+          "expression": null,
+          "motionPreset": "fade-soft",
+          "durationMs": 300,
           "easingPreset": "smooth-out"
         }
       ],
