@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import path from "node:path";
+import type {PublicMainContent, PublicShot} from "../src/spec/public-view-model";
 import {
   CAMERA_SETTLE_BEFORE_END_MS,
   MAX_SHOT_BUILD_MS,
@@ -13,9 +14,14 @@ import {
   getShotIntroDurationMs,
   getShotIntroFrame,
   getShotIntroLinearProgress,
+  getShotNarrationFocusIndex,
   getShotStaggerProgress,
   type ShotMotionTiming,
 } from "../src/spec/shot-motion-contract";
+import {
+  getSharedSemanticTargetId,
+  resolveSemanticShotTransition,
+} from "../src/spec/shot-semantic-transition-contract";
 import {
   SHOT_REFRAME_FADE_MS,
   SHOT_SHARED_REFRAME_MS,
@@ -24,10 +30,11 @@ import {
 } from "../src/spec/shot-transition-contract";
 
 const root = process.cwd();
-const [recipesSource, motionHelperSource, transitionHostSource, cameraSource] = await Promise.all([
+const [recipesSource, motionHelperSource, transitionHostSource, sharedLayerSource, cameraSource] = await Promise.all([
   readFile(path.join(root, "src/components/spec/shots/ShotRecipes.tsx"), "utf8"),
   readFile(path.join(root, "src/components/spec/shots/useShotMotion.ts"), "utf8"),
   readFile(path.join(root, "src/components/spec/ShotTransitionHost.tsx"), "utf8"),
+  readFile(path.join(root, "src/components/spec/SharedElementLayer.tsx"), "utf8"),
   readFile(path.join(root, "src/components/spec/SafeCameraViewport.tsx"), "utf8"),
 ]);
 
@@ -48,8 +55,15 @@ assert.match(
   /introOpacity:\s*shotTransitionUsesLayerFade/u,
   "outer layer fades must suppress duplicate full-content opacity fades",
 );
-assert.match(transitionHostSource, /shot\.transitionIn/u);
+assert.match(transitionHostSource, /resolveSemanticShotTransition/u);
+assert.match(transitionHostSource, /data-effective-transition/u);
 assert.match(transitionHostSource, /transition\.sharedProgress/u);
+assert.doesNotMatch(
+  sharedLayerSource,
+  /shot\.typographyText/u,
+  "typography text alone must never become a flying shared element",
+);
+assert.match(sharedLayerSource, /getSharedSemanticTargetId/u);
 assert.match(cameraSource, /getShotCameraProgress\(shot\)/u);
 
 const shotAt = (elapsedMs: number, durationMs = 5_000): ShotMotionTiming => ({
@@ -98,6 +112,9 @@ for (const fps of [30, 60]) {
 }
 
 const causalProfile = SHOT_MOTION_PROFILES["causal-build"];
+assert.ok(causalProfile.buildMs >= 1_800 && causalProfile.buildMs <= 2_400);
+assert.equal(getShotStaggerProgress(shotAt(0), 0, 2, causalProfile), 0);
+assert.equal(getShotStaggerProgress(shotAt(1_000), 1, 2, causalProfile), 0);
 for (let index = 0; index < 4; index += 1) {
   assert.equal(
     getShotStaggerProgress(shotAt(causalProfile.buildMs), index, 4, causalProfile),
@@ -105,6 +122,8 @@ for (let index = 0; index < 4; index += 1) {
     `causal-build item ${index} did not finish within ${causalProfile.buildMs}ms`,
   );
 }
+assert.equal(getShotNarrationFocusIndex(shotAt(causalProfile.buildMs), 3, causalProfile), 0);
+assert.equal(getShotNarrationFocusIndex(shotAt(4_900), 3, causalProfile), 2);
 
 const shortShot = shotAt(0, 900);
 const shortProfile = SHOT_MOTION_PROFILES["contradiction-interrupt"];
@@ -127,7 +146,7 @@ assert.deepEqual({previous: softEnd.previous, current: softEnd.current}, {previo
 assert.deepEqual(
   getShotTransitionOpacities(0, true, "carry-forward"),
   {previous: 0, current: 1, progress: 1, sharedProgress: 1},
-  "carry-forward must not fade the complete screen again",
+  "the low-level carry-forward contract remains fade-free after semantic eligibility",
 );
 const reframeFadeEnd = getShotTransitionOpacities(SHOT_REFRAME_FADE_MS, true, "reframe-shared-element");
 assert.equal(reframeFadeEnd.current, 1);
@@ -137,8 +156,43 @@ assert.equal(
   1,
 );
 
+const semanticContent = {
+  numbers: [{key: "shared-number"}],
+  cards: [],
+  nodes: [],
+} as unknown as PublicMainContent;
+const semanticShot = (overrides: Partial<PublicShot> = {}) => ({
+  continuityKey: "scene-flow",
+  transitionIn: "reframe-shared-element",
+  primaryTargetId: null,
+  outcomeTargetId: null,
+  referenceTargetId: null,
+  secondaryTargetIds: [],
+  typographyText: "文字だけの見出し",
+  ...overrides,
+}) as unknown as PublicShot;
+const typographyOnlyPrevious = semanticShot();
+const typographyOnlyCurrent = semanticShot();
+assert.equal(getSharedSemanticTargetId(semanticContent, typographyOnlyPrevious, typographyOnlyCurrent), null);
+assert.equal(
+  resolveSemanticShotTransition(semanticContent, typographyOnlyPrevious, typographyOnlyCurrent),
+  "soft-reveal",
+);
+assert.equal(
+  resolveSemanticShotTransition(
+    semanticContent,
+    semanticShot({transitionIn: "carry-forward"}),
+    semanticShot({transitionIn: "carry-forward"}),
+  ),
+  "soft-reveal",
+);
+const sharedPrevious = semanticShot({primaryTargetId: "shared-number"});
+const sharedCurrent = semanticShot({primaryTargetId: "shared-number"});
+assert.equal(getSharedSemanticTargetId(semanticContent, sharedPrevious, sharedCurrent), "shared-number");
+assert.equal(resolveSemanticShotTransition(semanticContent, sharedPrevious, sharedCurrent), "reframe-shared-element");
+
 assert.throws(() => getShotIntroFrame(shotAt(0), 0), /fps must be a positive finite number/u);
 
 console.log(
-  "PASS: Shot motion uses calibrated Recipe timing, completes builds within one second, avoids duplicate layer fades, settles camera motion, and preserves readable holds",
+  "PASS: Shot motion uses narration-paced builds, rejects typography-only shared elements, downgrades ineligible carry/reframe transitions, settles camera motion, and preserves readable holds",
 );
