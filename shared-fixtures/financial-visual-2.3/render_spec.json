@@ -1007,7 +1007,7 @@
       "uncertainty": "TEST UNCERTAINTY",
       "timelineBasis": "TEST TIMELINE BASIS",
       "expectedBasisType": "major-reporting",
-      "visualMode": "timeline",
+      "visualMode": "number-comparison",
       "initialExpression": "警戒",
       "headline": "TEST HEADLINE 4",
       "supportingTexts": [
@@ -1039,7 +1039,7 @@
           "narrationEndCue": "TEST SCENE 4 SPEECH 2。",
           "primaryFunction": "Compare",
           "screenState": "Chart",
-          "visualMode": "expected-actual-gap",
+          "visualMode": "number-comparison",
           "visualTemplate": "earnings-surprise",
           "templateConfig": {
             "variant": "zero-baseline",
