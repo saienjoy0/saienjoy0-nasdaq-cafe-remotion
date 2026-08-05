@@ -1,0 +1,40 @@
+name: FVU R3 Fixture Correct
+
+on:
+  pull_request:
+    paths:
+      - "scripts/fix-financial-handoff-primary-function.py"
+      - ".github/workflows/fvu-r3-fixture-correct.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  correct:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/fvu-r3-shared-handoff-fixture'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Correct generator
+        run: python3 scripts/fix-financial-handoff-primary-function.py
+      - name: Regenerate deterministic fixture
+        run: python3 scripts/generate-financial-handoff-fixture.py
+      - name: Commit corrected generator and fixture
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git add -- \
+            scripts/generate-financial-handoff-fixture.py \
+            shared-fixtures/financial-visual-2.3
+          if git diff --cached --quiet; then
+            echo "No correction required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Correct shared financial fixture primary function"
+          git push origin "HEAD:${HEAD_REF}"
