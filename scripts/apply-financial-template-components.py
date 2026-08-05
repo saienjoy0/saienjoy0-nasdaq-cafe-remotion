@@ -64,10 +64,10 @@ def patch_renderer(text: str) -> str:
     case "macro-pressure": return <MacroPressureTemplate content={content}/>;
     case "source-receipt": return <SourceReceiptTemplate content={content}/>;
 '''
-    if "FinancialTemplateImplementationPending" in text:
-        raise PatchError("pending component block was not removed")
     if 'case "market-pulse-grid": return <MarketPulseGridTemplate' not in text:
         text = replace_once(text, old_cases, new_cases, "financial renderer switch")
+    if "FinancialTemplateImplementationPending" in text:
+        raise PatchError("pending component references remain after renderer patch")
     return text
 
 
