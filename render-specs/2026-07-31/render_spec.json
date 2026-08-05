@@ -2905,26 +2905,37 @@
           "primaryFunction": "Evidence",
           "screenState": "Chart",
           "visualMode": "timeline",
-          "visualTemplate": "evidence-boundary",
+          "visualTemplate": "causal-lane",
           "templateConfig": {
-            "variant": "confirmed-vs-unconfirmed",
-            "comparisonBasis": null,
+            "variant": "left-to-right",
+            "comparisonBasis": "市場記事内の支援材料と相殺材料",
             "dataBasis": "取引区分と終値",
-            "nodeOrder": [],
+            "nodeOrder": [
+              "s6-node-report",
+              "s6-node-support",
+              "s6-node-rates"
+            ],
             "laneLabels": [],
-            "outcomeNodeId": null
+            "outcomeNodeId": "s6-node-rates"
           },
-          "sequencePolicy": "static",
+          "sequencePolicy": "object-order-fallback",
           "finalHoldMs": 500,
           "contentType": "数値・要点",
           "screenQuestion": "確認できる順序はどこまでか",
           "primaryElement": "取引区分と記事の説明",
           "viewerTexts": [
-            "Amazon・半導体が支援",
-            "金利が上値を抑制"
+            "市場記事の説明",
+            "記事ではAmazonと半導体株が支援",
+            "金利上昇が上値を抑制"
           ],
-          "changeCue": "Amazon・半導体が支援",
-          "objectIds": [],
+          "changeCue": "市場記事の説明",
+          "objectIds": [
+            "s6-node-report",
+            "s6-node-support",
+            "s6-node-rates",
+            "s6-arrow-report-support",
+            "s6-arrow-support-rates"
+          ],
           "assetPlacementIds": [],
           "assetState": "not-required",
           "returnScreenState": null,
@@ -3217,8 +3228,34 @@
           "tone": "neutral"
         }
       ],
-      "nodes": [],
-      "arrows": [],
+      "nodes": [
+        {
+          "nodeId": "s6-node-report",
+          "label": "市場記事の説明"
+        },
+        {
+          "nodeId": "s6-node-support",
+          "label": "Amazonと半導体株が支援"
+        },
+        {
+          "nodeId": "s6-node-rates",
+          "label": "金利上昇が上値を抑制"
+        }
+      ],
+      "arrows": [
+        {
+          "arrowId": "s6-arrow-report-support",
+          "fromNodeId": "s6-node-report",
+          "toNodeId": "s6-node-support",
+          "label": "記事内の説明"
+        },
+        {
+          "arrowId": "s6-arrow-support-rates",
+          "fromNodeId": "s6-node-support",
+          "toNodeId": "s6-node-rates",
+          "label": "一方"
+        }
+      ],
       "visualEvents": [
         {
           "eventId": "event-034",
@@ -3266,6 +3303,102 @@
           "expression": null,
           "motionPreset": "focus-ring",
           "durationMs": 420,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-901",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "highlight",
+          "targetId": "s6-node-report",
+          "offsetMs": 7400,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 200,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-902",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "unhighlight",
+          "targetId": "s6-node-report",
+          "offsetMs": 8350,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 180,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-903",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "highlight",
+          "targetId": "s6-node-support",
+          "offsetMs": 8350,
+          "expression": null,
+          "motionPreset": "focus-ring",
+          "durationMs": 200,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-904",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-arrow-report-support",
+          "offsetMs": 8500,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 900,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-905",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "unhighlight",
+          "targetId": "s6-node-support",
+          "offsetMs": 9350,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 180,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-906",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "highlight",
+          "targetId": "s6-node-rates",
+          "offsetMs": 9350,
+          "expression": null,
+          "motionPreset": "dim-others",
+          "durationMs": 200,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-907",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "show",
+          "targetId": "s6-arrow-support-rates",
+          "offsetMs": 9500,
+          "expression": null,
+          "motionPreset": "draw-line",
+          "durationMs": 3000,
+          "easingPreset": "smooth-out"
+        },
+        {
+          "eventId": "event-908",
+          "atChunkId": "scene-06-chunk-001",
+          "timing": "chunk-start",
+          "action": "unhighlight",
+          "targetId": "s6-node-rates",
+          "offsetMs": 10000,
+          "expression": null,
+          "motionPreset": "scale-settle",
+          "durationMs": 3000,
           "easingPreset": "smooth-out"
         }
       ],

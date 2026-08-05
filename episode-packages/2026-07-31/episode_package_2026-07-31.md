@@ -865,3 +865,11 @@
 - startCue / endCueとsemantic targetsを正本化。
 - Scene 9は4要素を保持して最終結論へ再集合。
 - ナレーション、字幕、数字、市場因果、Scene順、狐7表情アセット、TTS identityは変更なし。
+
+## PR4B Scene 6 causal motion
+
+- 対象：`scene-06` / `scene-06-beat-001`
+- 既存ナレーション、字幕、Shot順、Shot時刻、TTSは変更しない。
+- 市場記事の説明範囲を、記事内の支援材料と金利の相殺へ順番に焦点移動する。
+- 同時focusは一つ。矢印は一度だけtraceし、Shot終端前に通常状態へ戻す。
+- 最終採用経路：既存Remotion図解（当日固有画像なし）。
