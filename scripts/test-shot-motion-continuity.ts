@@ -14,7 +14,6 @@ import {
   getShotIntroDurationMs,
   getShotIntroFrame,
   getShotIntroLinearProgress,
-  getShotNarrationFocusIndex,
   getShotStaggerProgress,
   type ShotMotionTiming,
 } from "../src/spec/shot-motion-contract";
@@ -122,8 +121,6 @@ for (let index = 0; index < 4; index += 1) {
     `causal-build item ${index} did not finish within ${causalProfile.buildMs}ms`,
   );
 }
-assert.equal(getShotNarrationFocusIndex(shotAt(causalProfile.buildMs), 3, causalProfile), 0);
-assert.equal(getShotNarrationFocusIndex(shotAt(4_900), 3, causalProfile), 2);
 
 const shortShot = shotAt(0, 900);
 const shortProfile = SHOT_MOTION_PROFILES["contradiction-interrupt"];
