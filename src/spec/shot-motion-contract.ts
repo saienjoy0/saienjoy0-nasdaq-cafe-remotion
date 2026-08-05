@@ -13,33 +13,56 @@ export const getShotDurationMs = (shot: ShotMotionTiming) =>
 export const getShotElapsedMs = (shot: ShotMotionTiming) =>
   clampUnit(shot.progress) * getShotDurationMs(shot);
 
-export const getShotIntroElapsedMs = (
+export const getShotIntroDurationMs = (
   shot: ShotMotionTiming,
-  introDurationMs = SHOT_INTRO_DURATION_MS,
-) => Math.min(Math.max(0, introDurationMs), getShotElapsedMs(shot));
+  requestedIntroMs = SHOT_INTRO_DURATION_MS,
+  minimumHoldMs = MIN_SHOT_FINAL_HOLD_MS,
+) => {
+  const shotDurationMs = getShotDurationMs(shot);
+  const availableBeforeHoldMs = Math.max(1, shotDurationMs - Math.max(0, minimumHoldMs));
+  return Math.min(Math.max(1, requestedIntroMs), availableBeforeHoldMs);
+};
+
+export const getShotFinalHoldMs = (
+  shot: ShotMotionTiming,
+  requestedIntroMs = SHOT_INTRO_DURATION_MS,
+  minimumHoldMs = MIN_SHOT_FINAL_HOLD_MS,
+) => getShotDurationMs(shot) - getShotIntroDurationMs(shot, requestedIntroMs, minimumHoldMs);
+
+export const getShotIntroDurationInFrames = (
+  shot: ShotMotionTiming,
+  fps: number,
+  requestedIntroMs = SHOT_INTRO_DURATION_MS,
+  minimumHoldMs = MIN_SHOT_FINAL_HOLD_MS,
+) => {
+  if (!Number.isFinite(fps) || fps <= 0) {
+    throw new Error("fps must be a positive finite number");
+  }
+  const durationMs = getShotIntroDurationMs(shot, requestedIntroMs, minimumHoldMs);
+  return Math.max(1, Math.floor((durationMs / 1000) * fps));
+};
 
 export const getShotIntroFrame = (
   shot: ShotMotionTiming,
   fps: number,
-  introDurationMs = SHOT_INTRO_DURATION_MS,
+  requestedIntroMs = SHOT_INTRO_DURATION_MS,
+  minimumHoldMs = MIN_SHOT_FINAL_HOLD_MS,
 ) => {
   if (!Number.isFinite(fps) || fps <= 0) {
     throw new Error("fps must be a positive finite number");
   }
-  return (getShotIntroElapsedMs(shot, introDurationMs) / 1000) * fps;
-};
-
-export const getShotIntroDurationInFrames = (
-  fps: number,
-  introDurationMs = SHOT_INTRO_DURATION_MS,
-) => {
-  if (!Number.isFinite(fps) || fps <= 0) {
-    throw new Error("fps must be a positive finite number");
-  }
-  return Math.max(1, Math.round((Math.max(1, introDurationMs) / 1000) * fps));
+  const elapsedFrame = (getShotElapsedMs(shot) / 1000) * fps;
+  return Math.min(
+    getShotIntroDurationInFrames(shot, fps, requestedIntroMs, minimumHoldMs),
+    elapsedFrame,
+  );
 };
 
 export const getShotIntroLinearProgress = (
   shot: ShotMotionTiming,
-  introDurationMs = SHOT_INTRO_DURATION_MS,
-) => clampUnit(getShotElapsedMs(shot) / Math.max(1, introDurationMs));
+  requestedIntroMs = SHOT_INTRO_DURATION_MS,
+  minimumHoldMs = MIN_SHOT_FINAL_HOLD_MS,
+) => clampUnit(
+  getShotElapsedMs(shot) /
+  getShotIntroDurationMs(shot, requestedIntroMs, minimumHoldMs),
+);
