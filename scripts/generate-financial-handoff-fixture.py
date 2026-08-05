@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,7 @@ OUT_MANIFEST = OUT_DIR / "fixture_manifest.json"
 SHA_A = "a" * 64
 SHA_B = "b" * 64
 SHA_C = "c" * 64
+EVENT_ID = re.compile(r"^event-(\d{3})$")
 
 
 def sha256(path: Path) -> str:
@@ -39,6 +41,55 @@ def make_number(number_id: str, label: str, value: str, numeric: float, tone: st
         "comparison": "AWS revenue, 2026 Q2",
         "tone": tone,
     }
+
+
+def resolve_explicit_show_events(spec: dict[str, Any]) -> None:
+    """Make every explicit Beat executable without changing its object order."""
+    used_numbers: set[int] = set()
+    for scene in spec.get("scenes", []):
+        for event in scene.get("visualEvents", []):
+            match = EVENT_ID.fullmatch(str(event.get("eventId", "")))
+            if match:
+                used_numbers.add(int(match.group(1)))
+    next_number = max(used_numbers, default=0) + 1
+
+    for scene in spec.get("scenes", []):
+        chunks = scene.get("narrationChunks", [])
+        chunk_index = {chunk["chunkId"]: index for index, chunk in enumerate(chunks)}
+        events = scene.setdefault("visualEvents", [])
+        for beat in scene.get("visualBeats", []):
+            if beat.get("sequencePolicy") != "explicit":
+                continue
+            start_index = chunk_index[beat["startChunkId"]]
+            end_index = chunk_index[beat["endChunkId"]]
+            shown = {
+                event.get("targetId")
+                for event in events
+                if event.get("action") == "show"
+                and event.get("targetId")
+                and event.get("atChunkId") in chunk_index
+                and start_index <= chunk_index[event["atChunkId"]] <= end_index
+            }
+            for order, object_id in enumerate(beat.get("objectIds", [])):
+                if object_id in shown:
+                    continue
+                while next_number in used_numbers:
+                    next_number += 1
+                if next_number > 999:
+                    raise SystemExit("event ID space exhausted while resolving explicit sequence")
+                events.append(
+                    {
+                        "eventId": f"event-{next_number:03d}",
+                        "atChunkId": beat["startChunkId"],
+                        "timing": "chunk-start",
+                        "action": "show",
+                        "targetId": object_id,
+                        "offsetMs": min(order * 120, 9_000),
+                        "expression": None,
+                    }
+                )
+                used_numbers.add(next_number)
+                next_number += 1
 
 
 def generate() -> tuple[str, str]:
@@ -118,6 +169,7 @@ def generate() -> tuple[str, str]:
     }
     beat.pop("shots", None)
 
+    resolve_explicit_show_events(spec)
     write_json(OUT_SPEC, spec)
     spec_sha = sha256(OUT_SPEC)
     matrix_sha = sha256(MATRIX)
