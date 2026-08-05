@@ -1,0 +1,49 @@
+{
+  "requestVersion": "1.0",
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "8aa37f773c6f2f13d368bac5fac7dd9570033f96563bce764890f889f1068572",
+  "expectedReportSha256": "e28a9b48dda6ff25b30a8add0b031cfdc026e4117c5fa7183479e74786905d0d",
+  "sceneId": "scene-06",
+  "beatId": "scene-06-beat-001",
+  "expectedSequencePolicy": "object-order-fallback",
+  "sequencePolicy": "explicit",
+  "nodeShowEvents": [
+    {
+      "eventId": "event-909",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "show",
+      "targetId": "s6-node-report",
+      "offsetMs": 0,
+      "expression": null,
+      "motionPreset": "fade-soft",
+      "durationMs": 300,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-910",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "show",
+      "targetId": "s6-node-support",
+      "offsetMs": 0,
+      "expression": null,
+      "motionPreset": "fade-soft",
+      "durationMs": 300,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-911",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "show",
+      "targetId": "s6-node-rates",
+      "offsetMs": 0,
+      "expression": null,
+      "motionPreset": "fade-soft",
+      "durationMs": 300,
+      "easingPreset": "smooth-out"
+    }
+  ],
+  "confirmation": "FIX_CAUSAL_SEQUENCE"
+}
