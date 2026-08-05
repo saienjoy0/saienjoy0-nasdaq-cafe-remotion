@@ -1,16 +1,14 @@
 import {interpolate} from "remotion";
 import type {PublicMainContent, PublicShot} from "../../spec/public-view-model";
+import {getSharedSemanticTargetId} from "../../spec/shot-semantic-transition-contract";
 import {palette, safeFontSize} from "./StageSafeArea";
 
-const labelFor = (content: PublicMainContent, shot: PublicShot) => {
-  const id = shot.outcomeTargetId ?? shot.primaryTargetId;
-  if (!id) return shot.typographyText;
+const labelForTarget = (content: PublicMainContent, id: string) => {
   const number = content.numbers.find((item) => item.key === id);
   if (number) return `${number.label} ${number.value}${number.unit}`;
   const card = content.cards.find((item) => item.key === id);
   if (card) return `${card.title} ${card.lines[0]?.value ?? ""}`.trim();
-  const node = content.nodes.find((item) => item.key === id);
-  return node?.label ?? shot.typographyText;
+  return content.nodes.find((item) => item.key === id)?.label ?? null;
 };
 
 export const SharedElementLayer: React.FC<{
@@ -19,11 +17,13 @@ export const SharedElementLayer: React.FC<{
   currentShot: PublicShot;
   progress: number;
 }> = ({content, previousShot, currentShot, progress}) => {
-  if (!previousShot.continuityKey || previousShot.continuityKey !== currentShot.continuityKey) return null;
-  const label = labelFor(content, previousShot);
+  if (currentShot.transitionIn !== "reframe-shared-element") return null;
+  const sharedTargetId = getSharedSemanticTargetId(content, previousShot, currentShot);
+  if (!sharedTargetId) return null;
+  const label = labelForTarget(content, sharedTargetId);
   if (!label) return null;
   const fade = Math.sin(Math.max(0, Math.min(1, progress)) * Math.PI);
-  return <div data-shared-element={currentShot.continuityKey} style={{
+  return <div data-shared-element={sharedTargetId} style={{
     position: "absolute",
     zIndex: 60,
     left: interpolate(progress, [0, 1], [720, 1165]),
