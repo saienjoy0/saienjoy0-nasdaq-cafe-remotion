@@ -19,24 +19,21 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - name: Materialize officially valid technical input
+      - name: Verify input and remove one-time dispatcher
         env:
           HEAD_REF: ${{ github.head_ref }}
           EXPECTED_SHA: 6833aec3c6606c0a23b5b20a0bdb0bc9845a36234842d55e8178d71e75b19315
         run: |
           set -euo pipefail
-          mkdir -p render-specs/2099-02-02
-          cp shared-fixtures/financial-visual-2.3/render_spec.json render-specs/2099-02-02/render_spec.json
+          test -s render-specs/2099-02-02/render_spec.json
           actual="$(sha256sum render-specs/2099-02-02/render_spec.json | awk '{print $1}')"
           test "$actual" = "$EXPECTED_SHA"
-          git add -- render-specs/2099-02-02/render_spec.json
-          if ! git diff --cached --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Materialize officially valid FVU R3 preview input"
-            git push origin "HEAD:${HEAD_REF}"
-          fi
-      - name: Dispatch standard Nasdaq Cafe Preview
+          git rm .github/workflows/fvu-r3-technical-preview-v2-dispatch.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Remove one-time FVU R3 preview dispatcher"
+          git push origin "HEAD:${HEAD_REF}"
+      - name: Dispatch standard Nasdaq Cafe Preview from clean branch
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_REF: ${{ github.head_ref }}
@@ -61,7 +58,7 @@ jobs:
             run_id="$(python3 -c 'import json,sys; runs=json.load(sys.stdin).get("workflow_runs", []); print(runs[0]["id"] if runs else "")' <<< "$payload")"
             if [[ -n "$run_id" ]]; then
               echo "Preview run ID: $run_id"
-              echo "### Corrected technical preview dispatched" >> "$GITHUB_STEP_SUMMARY"
+              echo "### Standard technical preview dispatched from clean branch" >> "$GITHUB_STEP_SUMMARY"
               echo "- Run ID: \`$run_id\`" >> "$GITHUB_STEP_SUMMARY"
               echo "- Spec SHA: \`${EXPECTED_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
               exit 0
