@@ -1,5 +1,10 @@
 export const VISUAL_TEMPLATE_IDS = [
   "opening-contradiction",
+  "market-pulse-grid",
+  "earnings-surprise",
+  "dual-asset-split",
+  "macro-pressure",
+  "source-receipt",
   "hero-number",
   "closing-recap",
   "final-assembly",
@@ -31,6 +36,9 @@ export const VISUAL_TEMPLATE_VARIANT_IDS = [
   "confirmed-vs-unconfirmed",
   "strengthen-vs-weaken",
   "prebuilt-card",
+  "grid",
+  "receipt",
+  "pressure-lane",
 ] as const;
 
 export type VisualTemplateId = typeof VISUAL_TEMPLATE_IDS[number];
@@ -53,6 +61,11 @@ const range = (min: number, max: number): CountRange => ({min, max});
 
 export const VISUAL_TEMPLATE_CONTRACTS: Record<VisualTemplateId, VisualTemplateContract> = {
   "opening-contradiction": {family: "opening", supportedScreenStates: ["Data", "Chart"], variants: ["default"], cards: range(0, 1), numbers: range(0, 4), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
+  "market-pulse-grid": {family: "financial-market", supportedScreenStates: ["Data", "Chart"], variants: ["grid", "default"], cards: range(0, 0), numbers: range(3, 6), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: true},
+  "earnings-surprise": {family: "financial-gap", supportedScreenStates: ["Data", "Chart"], variants: ["zero-baseline", "default"], cards: range(0, 3), numbers: range(3, 3), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: true},
+  "dual-asset-split": {family: "financial-divergence", supportedScreenStates: ["Data", "Chart", "MainWithEntity"], variants: ["center-zero", "two-lane"], cards: range(0, 2), numbers: range(2, 2), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: true},
+  "macro-pressure": {family: "financial-macro", supportedScreenStates: ["Data", "Chart", "MainWithEntity"], variants: ["pressure-lane", "left-to-right"], cards: range(0, 0), numbers: range(0, 1), nodes: range(2, 4), arrows: range(1, 3), requiresNumericValue: false},
+  "source-receipt": {family: "financial-source", supportedScreenStates: ["Data", "News"], variants: ["receipt", "default"], cards: range(0, 1), numbers: range(0, 2), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
   "hero-number": {family: "hero", supportedScreenStates: ["Data", "Chart", "EntityFocus", "MainWithEntity"], variants: ["default", "prebuilt-card"], cards: range(0, 1), numbers: range(0, 1), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
   "closing-recap": {family: "closing", supportedScreenStates: ["Data"], variants: ["default"], cards: range(0, 1), numbers: range(0, 3), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
   "final-assembly": {family: "closing", supportedScreenStates: ["Data"], variants: ["default", "left-to-right"], cards: range(1, 1), numbers: range(0, 3), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},

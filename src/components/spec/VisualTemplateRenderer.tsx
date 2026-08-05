@@ -307,8 +307,19 @@ const FinalAssembly: React.FC<{content: PublicMainContent}> = ({content}) => {
   return <Surface accent={color.emphasis} style={{padding: "40px 52px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}}><div style={timedStyle(content, content.beatStartMs)}><Tag tone="emphasis">今朝の結論</Tag></div><div style={{display: "flex", gap: 15, marginTop: 26, width: "100%", justifyContent: "center"}}>{chips.map((chip, index) => <div key={`${index}-${chip}`} style={{...timedStyle(content, content.beatStartMs + (index + 1) * 520), flex: 1, maxWidth: 315, padding: "15px 17px", borderRadius: 17, background: "rgba(82,118,145,.10)", border: "2px solid rgba(82,118,145,.30)", fontSize: 26, lineHeight: 1.22, fontWeight: 900}}>{chip}</div>)}</div><div style={{...timedStyle(content, content.beatStartMs + Math.min(2600, (content.beatEndMs - content.beatStartMs) * 0.58)), marginTop: 32, fontSize: 70, lineHeight: 1.14, color: color.emphasis, fontWeight: 950}}>{content.primaryElement || content.headline}</div><div style={{marginTop: 30, width: `${62 + content.holdProgress * 18}%`, height: 7, borderRadius: 99, background: `linear-gradient(90deg,transparent,${color.cyan},transparent)`}}/></Surface>;
 };
 
+
+const FinancialTemplateImplementationPending: React.FC<{templateId: string}> = ({templateId}) => {
+  throw new Error(`Financial Visual Template implementation is not available yet: ${templateId}`);
+};
+
 export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
   switch (content.visualTemplate) {
+    case "market-pulse-grid":
+    case "earnings-surprise":
+    case "dual-asset-split":
+    case "macro-pressure":
+    case "source-receipt":
+      return <FinancialTemplateImplementationPending templateId={content.visualTemplate}/>;
     case "hero-number": return <HeroNumberTemplate content={content}/>;
     case "split-comparison": return <SplitComparisonTemplate content={content}/>;
     case "focus-matrix": return <FocusMatrixTemplate content={content}/>;

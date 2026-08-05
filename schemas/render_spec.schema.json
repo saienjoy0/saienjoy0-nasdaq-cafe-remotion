@@ -3,8 +3,60 @@
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "type": "string",
-      "const": "2.2.0"
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "2.2.0"
+        },
+        {
+          "type": "string",
+          "const": "2.3.0"
+        }
+      ]
+    },
+    "financialVisualContract": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "intentVersion": {
+          "type": "string",
+          "const": "1.1.0"
+        },
+        "recipePlanVersion": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "recipeRegistryVersion": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "finalEpisodeContractVersion": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "recipePlanSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "selectionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "contractVersion",
+        "intentVersion",
+        "recipePlanVersion",
+        "recipeRegistryVersion",
+        "finalEpisodeContractVersion",
+        "recipePlanSha256",
+        "selectionCount"
+      ],
+      "additionalProperties": false
     },
     "episode": {
       "type": "object",
@@ -701,7 +753,7 @@
               "properties": {
                 "beatId": {
                   "type": "string",
-                  "pattern": "^scene-0[1-9]-beat-[0-9]{3}$"
+                  "pattern": "^(?:scene-0[1-9]-beat-[0-9]{3}|vb-0[1-9]-[0-9]{2})$"
                 },
                 "startChunkId": {
                   "type": "string",
@@ -757,6 +809,11 @@
                   "type": "string",
                   "enum": [
                     "opening-contradiction",
+                    "market-pulse-grid",
+                    "earnings-surprise",
+                    "dual-asset-split",
+                    "macro-pressure",
+                    "source-receipt",
                     "hero-number",
                     "closing-recap",
                     "final-assembly",
@@ -779,6 +836,22 @@
                     "text-focus"
                   ]
                 },
+                "templateVariant": {
+                  "type": "string",
+                  "enum": [
+                    "default",
+                    "left-to-right",
+                    "zero-baseline",
+                    "center-zero",
+                    "two-lane",
+                    "confirmed-vs-unconfirmed",
+                    "strengthen-vs-weaken",
+                    "prebuilt-card",
+                    "grid",
+                    "receipt",
+                    "pressure-lane"
+                  ]
+                },
                 "templateConfig": {
                   "type": "object",
                   "properties": {
@@ -792,7 +865,10 @@
                         "two-lane",
                         "confirmed-vs-unconfirmed",
                         "strengthen-vs-weaken",
-                        "prebuilt-card"
+                        "prebuilt-card",
+                        "grid",
+                        "receipt",
+                        "pressure-lane"
                       ]
                     },
                     "comparisonBasis": {
@@ -833,6 +909,38 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "displayOrder": {
+                      "maxItems": 10,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "metricIds": {
+                      "maxItems": 6,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "causalStepIds": {
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "highlightObjectIds": {
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
                     }
                   },
                   "required": [
@@ -954,6 +1062,120 @@
                       "type": "null"
                     }
                   ]
+                },
+                "financialReturnTarget": {
+                  "type": "string"
+                },
+                "financialVisualTrace": {
+                  "type": "object",
+                  "properties": {
+                    "contractVersion": {
+                      "type": "string",
+                      "const": "1.0.0"
+                    },
+                    "intentId": {
+                      "type": "string",
+                      "pattern": "^fvi-[a-z0-9][a-z0-9._-]{2,80}$"
+                    },
+                    "selectedPlanId": {
+                      "type": "string",
+                      "pattern": "^fvp-[a-z0-9][a-z0-9._-]{2,100}$"
+                    },
+                    "selectedPlanSha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "selectedPath": {
+                      "type": "string",
+                      "enum": [
+                        "preferred",
+                        "fallback"
+                      ]
+                    },
+                    "recipeId": {
+                      "type": "string",
+                      "enum": [
+                        "market-pulse-grid",
+                        "opening-contradiction",
+                        "earnings-surprise",
+                        "expected-anchor",
+                        "dual-asset-split",
+                        "split-opposition",
+                        "macro-pressure",
+                        "causal-build",
+                        "source-receipt",
+                        "news-media"
+                      ]
+                    },
+                    "recipePlanSha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "finalEpisodeContractSha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sourceIds": {
+                      "maxItems": 8,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^source-[0-9]{3}$"
+                      }
+                    },
+                    "metricIds": {
+                      "maxItems": 6,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "causalStepIds": {
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "displayOrder": {
+                      "minItems": 1,
+                      "maxItems": 10,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                      }
+                    },
+                    "comparisonBasis": {
+                      "type": "string"
+                    },
+                    "reasonCodes": {
+                      "maxItems": 24,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "contractVersion",
+                    "intentId",
+                    "selectedPlanId",
+                    "selectedPlanSha256",
+                    "selectedPath",
+                    "recipeId",
+                    "recipePlanSha256",
+                    "finalEpisodeContractSha256",
+                    "sourceIds",
+                    "metricIds",
+                    "causalStepIds",
+                    "displayOrder",
+                    "comparisonBasis",
+                    "reasonCodes"
+                  ],
+                  "additionalProperties": false
                 },
                 "entity": {
                   "anyOf": [
@@ -1897,6 +2119,6 @@
   ],
   "additionalProperties": false,
   "$id": "schemas/render_spec.schema.json",
-  "title": "NASDAQ Cafe render_spec 2.1.0",
+  "title": "NASDAQ Cafe render_spec 2.3.0",
   "description": "Generated from src/spec/render-spec.ts. Do not edit by hand."
 }
