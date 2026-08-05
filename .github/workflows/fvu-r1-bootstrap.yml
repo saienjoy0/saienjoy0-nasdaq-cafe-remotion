@@ -1,0 +1,49 @@
+name: FVU R1 Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - "scripts/apply-financial-render-contract.py"
+      - "src/spec/financial-visual-contract.ts"
+      - ".github/workflows/fvu-r1-bootstrap.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/fvu-r1-financial-render-contract'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Apply deterministic contract patch
+        run: python3 scripts/apply-financial-render-contract.py
+      - name: Regenerate JSON schema
+        run: npm run episode:spec:schema
+      - name: Commit generated contract changes
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git add -- \
+            src/spec/render-spec.ts \
+            src/spec/visual-template-contract.ts \
+            scripts/generate-render-spec-schema.ts \
+            schemas/render_spec.schema.json
+          if git diff --cached --quiet; then
+            echo "No bootstrap changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Apply financial render contract and regenerate schema"
+          git push origin "HEAD:${HEAD_REF}"
