@@ -4,9 +4,9 @@ import type {ResolvedShot} from "./shot-timeline";
 export const SHOT_INTRO_DURATION_MS = 320;
 export const MIN_SHOT_FINAL_HOLD_MS = 450;
 export const MAX_SHOT_ENTER_MS = 400;
-export const MAX_SHOT_BUILD_MS = 1_000;
+export const MAX_SHOT_BUILD_MS = 2_400;
 export const CAMERA_SETTLE_BEFORE_END_MS = 200;
-export const DEFAULT_STAGGER_ITEM_MS = 280;
+export const NARRATION_ITEM_REVEAL_MS = 420;
 
 export type ShotMotionProfile = {
   enterMs: number;
@@ -21,13 +21,13 @@ export const SHOT_MOTION_PROFILES: Record<ShotRecipe, ShotMotionProfile> = {
   "expected-anchor": {enterMs: 320, buildMs: 360, staggerMs: 0, holdMinMs: 600},
   "actual-crosses-expected": {enterMs: 340, buildMs: 420, staggerMs: 0, holdMinMs: 600},
   "gap-macro": {enterMs: 320, buildMs: 360, staggerMs: 0, holdMinMs: 600},
-  "causal-build": {enterMs: 220, buildMs: 900, staggerMs: 120, holdMinMs: 600},
+  "causal-build": {enterMs: 220, buildMs: 2_200, staggerMs: 420, holdMinMs: 700},
   "counterforce-interrupt": {enterMs: 240, buildMs: 280, staggerMs: 0, holdMinMs: 550},
   "entity-cutaway": {enterMs: 300, buildMs: 320, staggerMs: 0, holdMinMs: 600},
   "split-opposition": {enterMs: 300, buildMs: 420, staggerMs: 0, holdMinMs: 600},
-  "focus-matrix-reveal": {enterMs: 260, buildMs: 850, staggerMs: 110, holdMinMs: 650},
-  "verification-two-paths": {enterMs: 260, buildMs: 850, staggerMs: 110, holdMinMs: 700},
-  "recap-assembly": {enterMs: 240, buildMs: 950, staggerMs: 120, holdMinMs: 800},
+  "focus-matrix-reveal": {enterMs: 260, buildMs: 1_800, staggerMs: 380, holdMinMs: 700},
+  "verification-two-paths": {enterMs: 260, buildMs: 2_000, staggerMs: 400, holdMinMs: 750},
+  "recap-assembly": {enterMs: 240, buildMs: 2_200, staggerMs: 420, holdMinMs: 850},
 };
 
 const clampUnit = (value: number) => Math.max(0, Math.min(1, value));
@@ -133,9 +133,12 @@ export const getShotStaggerProgress = (
   const count = Math.max(1, itemCount);
   const safeIndex = Math.max(0, Math.min(count - 1, index));
   const buildMs = getShotBuildDurationMs(shot, profile.buildMs, profile.holdMinMs);
-  const startMs = Math.min(buildMs - 1, safeIndex * profile.staggerMs);
-  const remainingMs = Math.max(1, buildMs - startMs);
-  const itemMs = Math.min(DEFAULT_STAGGER_ITEM_MS, remainingMs);
+  const itemMs = Math.min(
+    Math.max(NARRATION_ITEM_REVEAL_MS, profile.staggerMs),
+    buildMs,
+  );
+  const lastStartMs = Math.max(0, buildMs - itemMs);
+  const startMs = count <= 1 ? 0 : (safeIndex / (count - 1)) * lastStartMs;
   return smoothstep((getShotElapsedMs(shot) - startMs) / itemMs);
 };
 
