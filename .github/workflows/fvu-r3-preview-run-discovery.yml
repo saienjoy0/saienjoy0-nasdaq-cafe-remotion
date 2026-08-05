@@ -1,0 +1,60 @@
+name: FVU R3 Preview Run Discovery
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fvu-r3-preview-run-discovery.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  discover:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'tech/fvu-r3-preview-v2-2099-02-02'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Find the corrected standard Preview run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+          PREVIOUS_RUN_ID: "31057745132"
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${REPOSITORY}"
+          run_id=""
+          for attempt in $(seq 1 30); do
+            payload="$(curl -fsS \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${api}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${HEAD_REF}&event=workflow_dispatch&per_page=20")"
+            run_id="$(PREVIOUS_RUN_ID="$PREVIOUS_RUN_ID" python3 -c 'import json,os,sys; old=int(os.environ["PREVIOUS_RUN_ID"]); runs=json.load(sys.stdin).get("workflow_runs", []); candidates=[r for r in runs if int(r["id"]) != old]; print(candidates[0]["id"] if candidates else "")' <<< "$payload")"
+            if [[ -n "$run_id" ]]; then
+              break
+            fi
+            sleep 2
+          done
+          if [[ -z "$run_id" ]]; then
+            echo "::error::Corrected Preview run was not found"
+            exit 1
+          fi
+          printf '%s\n' "$run_id" > technical-preview-run-id.txt
+          echo "Corrected Preview run ID: $run_id"
+      - name: Persist run ID and remove discovery workflow
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/fvu-r3-preview-run-discovery.yml
+          git add technical-preview-run-id.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Record corrected FVU R3 Preview run"
+          git push origin "HEAD:${HEAD_REF}"
