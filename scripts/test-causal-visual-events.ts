@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   causalFocusProgress,
   causalTraceProgress,
+  isCausalFocusNode,
   motionProgressAt,
 } from "../src/components/spec/shots/CausalVisualEventOverlay";
 import {collectCausalVisualEventIssues} from "../src/spec/causal-visual-event-contract";
@@ -23,7 +24,7 @@ const [stageSource, overlaySource, validatorSource] = await Promise.all([
 assert.match(stageSource, /<CausalVisualEventOverlay content=\{content\}\/>/u);
 assert.match(overlaySource, /data-causal-visual-event-overlay/u);
 assert.match(overlaySource, /preset === "draw-line"/u);
-assert.match(overlaySource, /highlightedAtMs/u);
+assert.match(overlaySource, /CAUSAL_FOCUS_PRESETS/u);
 assert.match(validatorSource, /collectCausalVisualEventIssues/u);
 
 assert.equal(motionProgressAt(0, null, 0, 200), 0);
@@ -51,8 +52,16 @@ const node = {
   highlightMotion: smoothInstruction,
   unhighlightMotion: null,
 } as PublicNode;
+assert.equal(isCausalFocusNode(node), true);
 assert.equal(causalFocusProgress(100, node), 0);
 assert.equal(causalFocusProgress(300, node), 1);
+
+const legacyNode = {
+  ...node,
+  highlightMotion: {...smoothInstruction, preset: "pulse-once"},
+} as PublicNode;
+assert.equal(isCausalFocusNode(legacyNode), false);
+assert.equal(causalFocusProgress(300, legacyNode), 0);
 
 const arrowInstruction: PublicMotionInstruction = {
   preset: "draw-line",
@@ -77,6 +86,7 @@ assert.equal(causalTraceProgress(100, arrow), 0);
 assert.equal(causalTraceProgress(580, arrow), 1);
 
 const objectType = new Map([
+  ["card-a", "card"],
   ["node-a", "node"],
   ["node-b", "node"],
   ["arrow-a-b", "arrow"],
@@ -86,17 +96,26 @@ assert.deepEqual(
   collectCausalVisualEventIssues([
     {eventIndex: 0, action: "highlight", targetId: "node-a", motionPreset: "focus-ring"},
     {eventIndex: 1, action: "unhighlight", targetId: "node-a", motionPreset: "scale-settle"},
-    {eventIndex: 2, action: "highlight", targetId: "node-b", motionPreset: "focus-ring"},
+    {eventIndex: 2, action: "highlight", targetId: "node-b", motionPreset: "dim-others"},
     {eventIndex: 3, action: "unhighlight", targetId: "node-b", motionPreset: "scale-settle"},
     {eventIndex: 4, action: "show", targetId: "arrow-a-b", motionPreset: "draw-line"},
   ], objectType),
   [],
 );
 
+assert.deepEqual(
+  collectCausalVisualEventIssues([
+    {eventIndex: 0, action: "highlight", targetId: "card-a", motionPreset: "focus-ring"},
+    {eventIndex: 1, action: "highlight", targetId: "node-a", motionPreset: "pulse-once"},
+  ], objectType),
+  [],
+  "legacy non-node and non-causal node highlights must remain unaffected",
+);
+
 assert.match(
   collectCausalVisualEventIssues([
     {eventIndex: 0, action: "highlight", targetId: "node-a", motionPreset: "focus-ring"},
-    {eventIndex: 1, action: "highlight", targetId: "node-b", motionPreset: "focus-ring"},
+    {eventIndex: 1, action: "highlight", targetId: "node-b", motionPreset: "dim-others"},
   ], objectType)[0]?.message ?? "",
   /only one node/u,
 );
@@ -113,4 +132,4 @@ assert.match(
   /settle/u,
 );
 
-console.log("PASS: causal-build reuses explicit visualEvents for one-at-a-time focus and one-shot arrow traces while preserving the legacy Recipe underneath");
+console.log("PASS: causal-build opts into explicit focus-ring or dim-others events and one-shot arrow traces without changing unrelated legacy highlights or the underlying Recipe");
