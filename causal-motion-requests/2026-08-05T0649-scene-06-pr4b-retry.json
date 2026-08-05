@@ -1,0 +1,156 @@
+{
+  "requestVersion": "1.0",
+  "episodeDate": "2026-07-31",
+  "expectedSpecSha256": "d85777574d72ec184bc33dfb3a073c1b4f6f01feb68c50b41a37849ac940f9c1",
+  "expectedEpisodePackageBlobSha": "10c61ad26eacb74e56b9ce4d60945e747e61e422",
+  "sceneId": "scene-06",
+  "beatId": "scene-06-beat-001",
+  "expectedVisualTemplate": "evidence-boundary",
+  "visualTemplate": "causal-lane",
+  "templateConfig": {
+    "variant": "left-to-right",
+    "comparisonBasis": "市場記事内の支援材料と相殺材料",
+    "dataBasis": "取引区分と終値",
+    "nodeOrder": [
+      "s6-node-report",
+      "s6-node-support",
+      "s6-node-rates"
+    ],
+    "laneLabels": [],
+    "outcomeNodeId": "s6-node-rates"
+  },
+  "sequencePolicy": "object-order-fallback",
+  "viewerTexts": [
+    "市場記事の説明",
+    "記事ではAmazonと半導体株が支援",
+    "金利上昇が上値を抑制"
+  ],
+  "changeCue": "市場記事の説明",
+  "nodes": [
+    {
+      "nodeId": "s6-node-report",
+      "label": "市場記事の説明"
+    },
+    {
+      "nodeId": "s6-node-support",
+      "label": "Amazonと半導体株が支援"
+    },
+    {
+      "nodeId": "s6-node-rates",
+      "label": "金利上昇が上値を抑制"
+    }
+  ],
+  "arrows": [
+    {
+      "arrowId": "s6-arrow-report-support",
+      "fromNodeId": "s6-node-report",
+      "toNodeId": "s6-node-support",
+      "label": "記事内の説明"
+    },
+    {
+      "arrowId": "s6-arrow-support-rates",
+      "fromNodeId": "s6-node-support",
+      "toNodeId": "s6-node-rates",
+      "label": "一方"
+    }
+  ],
+  "visualEvents": [
+    {
+      "eventId": "event-901",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "highlight",
+      "targetId": "s6-node-report",
+      "offsetMs": 7400,
+      "expression": null,
+      "motionPreset": "focus-ring",
+      "durationMs": 200,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-902",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "unhighlight",
+      "targetId": "s6-node-report",
+      "offsetMs": 8350,
+      "expression": null,
+      "motionPreset": "scale-settle",
+      "durationMs": 180,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-903",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "highlight",
+      "targetId": "s6-node-support",
+      "offsetMs": 8350,
+      "expression": null,
+      "motionPreset": "focus-ring",
+      "durationMs": 200,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-904",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "show",
+      "targetId": "s6-arrow-report-support",
+      "offsetMs": 8500,
+      "expression": null,
+      "motionPreset": "draw-line",
+      "durationMs": 900,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-905",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "unhighlight",
+      "targetId": "s6-node-support",
+      "offsetMs": 9350,
+      "expression": null,
+      "motionPreset": "scale-settle",
+      "durationMs": 180,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-906",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "highlight",
+      "targetId": "s6-node-rates",
+      "offsetMs": 9350,
+      "expression": null,
+      "motionPreset": "dim-others",
+      "durationMs": 200,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-907",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "show",
+      "targetId": "s6-arrow-support-rates",
+      "offsetMs": 9500,
+      "expression": null,
+      "motionPreset": "draw-line",
+      "durationMs": 3000,
+      "easingPreset": "smooth-out"
+    },
+    {
+      "eventId": "event-908",
+      "atChunkId": "scene-06-chunk-001",
+      "timing": "chunk-start",
+      "action": "unhighlight",
+      "targetId": "s6-node-rates",
+      "offsetMs": 10000,
+      "expression": null,
+      "motionPreset": "scale-settle",
+      "durationMs": 3000,
+      "easingPreset": "smooth-out"
+    }
+  ],
+  "confirmation": "APPLY_CAUSAL_MOTION"
+}
