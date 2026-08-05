@@ -1,17 +1,12 @@
-import {interpolate, spring} from "remotion";
+import {interpolate} from "remotion";
 import type {PublicCard, PublicMainContent, PublicNumber, PublicShot} from "../../../spec/public-view-model";
 import {SafeCameraViewport} from "../SafeCameraViewport";
 import {palette, SafeContent, safeFontSize, StageEyebrow, StageShell} from "../StageSafeArea";
+import {useShotMotion} from "./useShotMotion";
 
-const FPS = 30;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const toneColor = (tone: PublicNumber["tone"]) => palette[tone];
-const progressFor = (shot: PublicShot) => spring({
-  fps: FPS,
-  frame: Math.max(0, Math.round(shot.progress * 24)),
-  config: {damping: 24, stiffness: 150, mass: .78},
-  durationInFrames: 24,
-});
+const useProgressFor = (shot: PublicShot) => useShotMotion(shot).introProgress;
 const numberById = (content: PublicMainContent, id: string | null | undefined) => id ? content.numbers.find((item) => item.key === id) ?? null : null;
 const cardById = (content: PublicMainContent, id: string | null | undefined) => id ? content.cards.find((item) => item.key === id) ?? null : null;
 const nodeById = (content: PublicMainContent, id: string | null | undefined) => id ? content.nodes.find((item) => item.key === id) ?? null : null;
@@ -32,7 +27,7 @@ const HeroMetric: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = numberById(content, shot.primaryTargetId);
   const card = cardById(content, shot.primaryTargetId);
   const text = targetText(content, shot);
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   return <StageShell accent={number ? toneColor(number.tone) : palette.emphasis}>
     <SafeContent reserveTypography={Boolean(shot.typographyTreatment)} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
       <SafeCameraViewport shot={shot} style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}}>
@@ -50,7 +45,7 @@ const Contradiction: React.FC<{content: PublicMainContent}> = ({content}) => {
   const ids = [shot.primaryTargetId, ...(shot.secondaryTargetIds ?? [])].filter(Boolean) as string[];
   const items = ids.map((id) => numberById(content, id) ?? cardById(content, id)).filter(Boolean).slice(0, 2);
   const texts = content.texts.length >= 2 ? content.texts : [content.primaryElement, content.screenQuestion];
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   return <StageShell accent={palette.warning}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "minmax(0,1fr) 92px minmax(0,1fr)", gap: 22, alignItems: "center"}}>
       {[0, 1].map((index) => {
@@ -70,7 +65,7 @@ const ExpectedAnchor: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = numberById(content, shot.primaryTargetId);
   const card = cardById(content, shot.primaryTargetId);
   const label = number ? `${number.value}${number.unit}` : card?.lines[0]?.value ?? targetText(content, shot);
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   return <StageShell accent={palette.neutral}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
       <StageEyebrow>EXPECTED｜市場が置いていた基準</StageEyebrow>
@@ -91,7 +86,7 @@ const ActualCrosses: React.FC<{content: PublicMainContent}> = ({content}) => {
   const expectedCard = cardById(content, shot.referenceTargetId);
   const actualLabel = actualNumber ? `${actualNumber.value}${actualNumber.unit}` : actualCard?.lines[0]?.value ?? targetText(content, shot);
   const expectedLabel = expectedCard?.lines[0]?.value ?? actualNumber?.comparison ?? "EXPECTED";
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   return <StageShell accent={palette.positive}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 18}}>
       <div style={{display: "flex", justifyContent: "space-between", gap: 26, alignItems: "center"}}><StageEyebrow tone={palette.positive}>ACTUAL｜実際に出た結果</StageEyebrow><div style={{fontSize: safeFontSize(actualLabel, 48, 30, 590), color: palette.positive, fontWeight: 950, whiteSpace: "nowrap"}}>{actualLabel}</div></div>
@@ -110,7 +105,7 @@ const GapMacro: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = numberById(content, shot.primaryTargetId);
   const card = cardById(content, shot.primaryTargetId);
   const value = number ? `${number.value}${number.unit}` : card?.lines[0]?.value ?? targetText(content, shot);
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   return <StageShell accent={palette.emphasis}>
     <SafeContent reserveTypography style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
       <SafeCameraViewport shot={shot}>
@@ -152,7 +147,7 @@ const Counterforce: React.FC<{content: PublicMainContent}> = ({content}) => {
   const texts = content.texts;
   const tailwind = reference ? `${reference.label} ${reference.value}${reference.unit}` : texts[0] ?? "追い風｜AWS予想超過";
   const headwind = primary ? `${primary.label} ${primary.value}${primary.unit}` : texts[1] ?? targetText(content, shot);
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   return <StageShell accent={palette.warning}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "1fr 1fr", gap: 22, alignContent: "center"}}>
       {[{tag: "追い風", text: tailwind, color: palette.positive, x: -34}, {tag: "向かい風", text: headwind, color: palette.warning, x: 34}].map((item, index) => <div key={item.tag} style={{display: "grid", gridTemplateColumns: "190px minmax(0,1fr)", gap: 24, alignItems: "center", padding: "23px 30px", borderRadius: 23, background: `${item.color}12`, border: `3px solid ${item.color}`, opacity: index === 0 ? 1 : p, transform: `translateX(${index === 0 ? 0 : interpolate(p, [0, 1], [item.x, 0])}px)`}}><div style={{fontSize: 31, color: item.color, fontWeight: 950}}>{item.tag}</div><div style={{fontSize: safeFontSize(item.text, 40, 27, 900), lineHeight: 1.12, fontWeight: 950, overflowWrap: "anywhere"}}>{item.text}</div></div>)}
@@ -177,7 +172,7 @@ const SplitOpposition: React.FC<{content: PublicMainContent}> = ({content}) => {
   const primary = numberById(content, shot.primaryTargetId);
   const secondaries = (shot.secondaryTargetIds ?? []).map((id) => numberById(content, id)).filter(Boolean) as PublicNumber[];
   const secondary = secondaries[0] ?? content.numbers.find((item) => item.key !== primary?.key) ?? null;
-  const p = progressFor(shot);
+  const p = useProgressFor(shot);
   const renderSide = (item: PublicNumber | null, label: string, color: string) => <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: 0, opacity: p}}><div style={{fontSize: 31, color, fontWeight: 950}}>{item?.label ?? label}</div>{item ? <div style={{marginTop: 18}}><Metric number={item} size={82}/></div> : <div style={{marginTop: 18, fontSize: 38, fontWeight: 950}}>{label}</div>}</div>;
   return <StageShell accent={palette.emphasis}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "1fr 5px 1fr", gap: 28, alignItems: "stretch"}}>
