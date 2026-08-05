@@ -87,7 +87,7 @@ def generate() -> tuple[str, str]:
         "causalStepIds": [],
         "highlightObjectIds": [number_ids[2]],
     }
-    beat["sequencePolicy"] = "object-order-fallback"
+    beat["sequencePolicy"] = "explicit"
     beat["finalHoldMs"] = 900
     beat["contentType"] = "financial-data"
     beat["screenQuestion"] = "予想を上回っても、市場が見た差は何か"
