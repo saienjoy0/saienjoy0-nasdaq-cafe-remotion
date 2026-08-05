@@ -1,0 +1,275 @@
+name: Nasdaq Cafe Final
+
+on:
+  workflow_dispatch:
+    inputs:
+      episode_date:
+        description: "対象日（YYYY-MM-DD）"
+        required: true
+        type: string
+      expected_spec_sha256:
+        description: "確定済みrender_spec.jsonのSHA-256"
+        required: true
+        type: string
+      confirmation:
+        description: "ユーザーがfinalを明示承認済みなら FINAL"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      episode_date:
+        required: true
+        type: string
+      expected_spec_sha256:
+        required: true
+        type: string
+      confirmation:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-final-${{ inputs.episode_date }}
+  cancel-in-progress: false
+
+jobs:
+  render-final:
+    name: Render cache-only final
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner) ||
+      (github.event_name == 'workflow_call' && github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.workflow == 'Nasdaq Cafe Final Request')
+    runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
+    timeout-minutes: 120
+
+    env:
+      CI: "true"
+      EPISODE_DATE: ${{ inputs.episode_date }}
+      EXPECTED_SPEC_SHA256: ${{ inputs.expected_spec_sha256 }}
+      SPEC_TTS_CACHE_ONLY: "1"
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+
+    steps:
+      - name: Checkout immutable final input
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Verify explicit final request and immutable spec
+        id: preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ inputs.confirmation }}" != "FINAL" ]]; then
+            echo "::error::confirmation must be exactly FINAL"
+            exit 1
+          fi
+          if [[ ! "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::episode_date must match YYYY-MM-DD"
+            exit 1
+          fi
+          SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
+          test -s "$SPEC_PATH"
+          EXPECTED="$(printf '%s' "$EXPECTED_SPEC_SHA256" | tr '[:upper:]' '[:lower:]')"
+          if [[ ! "$EXPECTED" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::expected_spec_sha256 must be a SHA-256"
+            exit 1
+          fi
+          ACTUAL="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          if [[ "$ACTUAL" != "$EXPECTED" ]]; then
+            echo "::error::render_spec SHA-256 mismatch"
+            echo "::error::expected=$EXPECTED actual=$ACTUAL"
+            exit 1
+          fi
+          TTS_INPUT_SHA="$(python3 - "$SPEC_PATH" <<'PY'
+          import hashlib
+          import json
+          import sys
+
+          value = json.load(open(sys.argv[1], encoding="utf-8"))
+          scenes = value["scenes"]
+          blocks = []
+          for block_id, first_scene, last_scene in (
+              ("scenes-01-04", 1, 4),
+              ("scenes-05-09", 5, 9),
+          ):
+              speech = []
+              for scene in scenes:
+                  number = scene.get("sceneNumber")
+                  if isinstance(number, int) and first_scene <= number <= last_scene:
+                      speech.extend(chunk["speechText"] for chunk in scene["narrationChunks"])
+              if not speech:
+                  raise SystemExit(f"TTS block {block_id} has no speechText")
+              blocks.append({"id": block_id, "speechText": speech})
+          payload = {
+              "synthesisVersion": "gemini-two-block-v1",
+              "model": "gemini-3.1-flash-tts-preview",
+              "voice": "Charon",
+              "voiceProfileId": value.get("voiceProfileId"),
+              "pronunciations": value.get("pronunciations"),
+              "blocks": blocks,
+          }
+          encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+          print(hashlib.sha256(encoded).hexdigest())
+          PY
+          )"
+          echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$ACTUAL" >> "$GITHUB_OUTPUT"
+          echo "tts_input_sha=$TTS_INPUT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Verify persistent Codespace tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/ensure-remotion-browser-deps.sh
+          test "$(nproc)" -ge 4
+          node --version
+          npm --version
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Set up Node.js cache
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Restore exact production TTS cache
+        id: tts_cache
+        continue-on-error: true
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.preflight.outputs.tts_input_sha }}
+
+      - name: Restore approved exported TTS cache
+        if: steps.tts_cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/restore_exported_tts_cache.py \
+            --root . \
+            --tts-input-sha "${{ steps.preflight.outputs.tts_input_sha }}"
+
+      - name: Require complete cached narration and forbid synthesis
+        shell: bash
+        run: |
+          set -euo pipefail
+          COUNT="$(find .cache/spec-tts-blocks -type f -name audio.wav | wc -l | tr -d ' ')"
+          if [[ "$COUNT" -lt 2 ]]; then
+            echo "::error::Exact two-block production TTS cache is incomplete"
+            echo "::error::Final rendering is cache-only and will not synthesize narration"
+            exit 1
+          fi
+          while IFS= read -r audio; do
+            ffmpeg -nostdin -v error -i "$audio" -f null -
+          done < <(find .cache/spec-tts-blocks -type f -name audio.wav -print)
+
+      - name: Validate final input and runtime contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run episode:spec:validate -- "${{ steps.preflight.outputs.spec_path }}"
+          npm run test:runtime-stability
+
+      - name: Render full-resolution final
+        id: render
+        timeout-minutes: 90
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run episode:spec:final -- "${{ steps.preflight.outputs.spec_path }}"
+
+      - name: Decode and inspect final MP4
+        id: inspect
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          MP4="renders/final/${EPISODE_DATE}_nasdaq-cafe-spec.mp4"
+          REPORT="build/${EPISODE_DATE}/technical_report.json"
+          DATA="build/${EPISODE_DATE}/render_data.production.json"
+          INSPECTION="build/${EPISODE_DATE}/final_inspection.json"
+          test -s "$MP4"
+          test -s "$REPORT"
+          test -s "$DATA"
+          ffmpeg -nostdin -v error -i "$MP4" -f null -
+          ffprobe -v error -show_streams -show_format -of json "$MP4" > /tmp/final-probe.json
+          python3 - "$MP4" "$REPORT" "$DATA" /tmp/final-probe.json "$INSPECTION" "${{ steps.preflight.outputs.spec_sha }}" <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+          from datetime import datetime, timezone
+
+          mp4, report_path, data_path, probe_path, inspection_path, expected_sha = sys.argv[1:]
+          report = json.load(open(report_path, encoding="utf-8"))
+          data = json.load(open(data_path, encoding="utf-8"))
+          probe = json.load(open(probe_path, encoding="utf-8"))
+          if report.get("status") != "final-generated":
+              raise SystemExit(f"technical report status is not final-generated: {report.get('status')}")
+          if report.get("inputSpecSha256") != expected_sha:
+              raise SystemExit("technical report render_spec SHA mismatch")
+          streams = probe.get("streams", [])
+          video = next((item for item in streams if item.get("codec_type") == "video"), None)
+          audio = next((item for item in streams if item.get("codec_type") == "audio"), None)
+          if video is None or audio is None:
+              raise SystemExit("final MP4 must contain video and audio")
+          episode = data["episode"]
+          if video.get("codec_name") != "h264":
+              raise SystemExit(f"unexpected video codec: {video.get('codec_name')}")
+          if int(video.get("width", 0)) != int(episode["width"]) or int(video.get("height", 0)) != int(episode["height"]):
+              raise SystemExit("final resolution mismatch")
+          if audio.get("codec_name") != "aac" or int(audio.get("sample_rate", 0)) != 48000 or int(audio.get("channels", 0)) != 2:
+              raise SystemExit("final audio contract mismatch")
+          expected_seconds = data["timeline"]["totalDurationInFrames"] / episode["fps"]
+          actual_seconds = float(probe.get("format", {}).get("duration", 0))
+          if abs(actual_seconds - expected_seconds) > 0.20:
+              raise SystemExit(f"final duration mismatch: expected={expected_seconds} actual={actual_seconds}")
+          payload = pathlib.Path(mp4).read_bytes()
+          inspection = {
+              "status": "valid",
+              "inspectedAt": datetime.now(timezone.utc).isoformat(),
+              "episodeDate": episode["id"],
+              "renderSpecSha256": expected_sha,
+              "path": mp4,
+              "sha256": hashlib.sha256(payload).hexdigest(),
+              "bytes": len(payload),
+              "width": int(video["width"]),
+              "height": int(video["height"]),
+              "durationSeconds": actual_seconds,
+              "videoCodec": video["codec_name"],
+              "audioCodec": audio["codec_name"],
+              "audioSampleRate": int(audio["sample_rate"]),
+              "audioChannels": int(audio["channels"]),
+              "fullDecode": "pass",
+          }
+          pathlib.Path(inspection_path).write_text(json.dumps(inspection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(inspection, ensure_ascii=False))
+          PY
+
+      - name: Upload final delivery artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-final-${{ inputs.episode_date }}-${{ github.run_id }}
+          path: |
+            renders/final/${{ inputs.episode_date }}_nasdaq-cafe-spec.mp4
+            build/${{ inputs.episode_date }}/technical_report.json
+            build/${{ inputs.episode_date }}/render_data.production.json
+            build/${{ inputs.episode_date }}/final_inspection.json
+            public/spec-audio/${{ inputs.episode_date }}/tts-block-state.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
