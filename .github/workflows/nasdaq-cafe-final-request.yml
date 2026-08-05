@@ -1,0 +1,291 @@
+name: Nasdaq Cafe Final Request
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "final-render-requests/*.json"
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-final-request-queue
+  cancel-in-progress: false
+
+jobs:
+  resolve-request:
+    name: Resolve one explicit final request
+    if: >-
+      github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
+      (github.event_name == 'schedule' || github.actor == github.repository_owner)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      has_request: ${{ steps.resolve.outputs.has_request }}
+      request_path: ${{ steps.resolve.outputs.request_path }}
+      request_fingerprint: ${{ steps.resolve.outputs.request_fingerprint }}
+      outcome_path: ${{ steps.resolve.outputs.outcome_path }}
+      episode_date: ${{ steps.resolve.outputs.episode_date }}
+      expected_spec_sha256: ${{ steps.resolve.outputs.expected_spec_sha256 }}
+
+    steps:
+      - name: Checkout current main queue
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Resolve and validate one immutable final request
+        id: resolve
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - "$GITHUB_OUTPUT" <<'PY'
+          import hashlib
+          import json
+          import math
+          import os
+          import pathlib
+          import re
+          import subprocess
+          import sys
+
+          root = pathlib.Path.cwd()
+          output = pathlib.Path(sys.argv[1])
+          event_name = os.environ["EVENT_NAME"]
+          before_sha = os.environ.get("BEFORE_SHA", "")
+          trigger_sha = os.environ.get("TRIGGER_SHA", "")
+
+          def git_lines(*args):
+              result = subprocess.run(["git", *args], cwd=root, check=True, text=True, stdout=subprocess.PIPE)
+              return [line for line in result.stdout.splitlines() if line.strip()]
+
+          if event_name == "push":
+              if not before_sha:
+                  raise SystemExit("push before SHA is required")
+              changed = git_lines("diff", "--name-status", before_sha, trigger_sha, "--", "final-render-requests/*.json")
+              if len(changed) != 1:
+                  raise SystemExit(f"push must add exactly one final request; found {len(changed)}")
+              parts = changed[0].split("\t")
+              if len(parts) != 2 or parts[0] != "A":
+                  raise SystemExit("final requests are append-only")
+              candidates = [parts[1]]
+          else:
+              request_dir = root / "final-render-requests"
+              candidates = [path.relative_to(root).as_posix() for path in sorted(request_dir.glob("*.json"), reverse=True)] if request_dir.is_dir() else []
+
+          selected = None
+          for relative_path in candidates:
+              if not re.fullmatch(r"final-render-requests/[A-Za-z0-9._-]+\.json", relative_path):
+                  continue
+              path = root / relative_path
+              raw = path.read_bytes()
+              try:
+                  value = json.loads(raw.decode("utf-8"))
+              except Exception:
+                  continue
+              required = {"requestVersion", "episodeDate", "expectedSpecSha256", "confirmation"}
+              if not isinstance(value, dict) or set(value) != required:
+                  continue
+              if value["requestVersion"] != "1.0" or value["confirmation"] != "FINAL_RENDER":
+                  continue
+              episode_date = value["episodeDate"]
+              expected_sha = value["expectedSpecSha256"]
+              if not isinstance(episode_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_date):
+                  continue
+              if not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_sha):
+                  continue
+              canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+              digest = hashlib.sha256()
+              digest.update(relative_path.encode("utf-8"))
+              digest.update(b"\0")
+              digest.update(canonical)
+              fingerprint = digest.hexdigest()
+              outcome_path = root / "final-render-state" / "outcomes" / f"{fingerprint}.json"
+              if outcome_path.exists():
+                  continue
+              spec_path = root / "render-specs" / episode_date / "render_spec.json"
+              if not spec_path.is_file():
+                  continue
+              actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+              if actual_sha != expected_sha:
+                  continue
+              selected = {
+                  "request_path": relative_path,
+                  "request_fingerprint": fingerprint,
+                  "outcome_path": outcome_path.relative_to(root).as_posix(),
+                  "episode_date": episode_date,
+                  "expected_spec_sha256": actual_sha,
+              }
+              break
+
+          values = {"has_request": "true", **selected} if selected else {"has_request": "false"}
+          with output.open("a", encoding="utf-8") as handle:
+              for key, value in values.items():
+                  handle.write(f"{key}={value}\n")
+          PY
+
+      - name: Summarize request decision
+        shell: bash
+        run: |
+          if [[ "${{ steps.resolve.outputs.has_request }}" == "true" ]]; then
+            echo "Final request accepted: ${{ steps.resolve.outputs.request_path }}"
+          else
+            echo "No pending final request"
+          fi
+
+  wake-codespace:
+    name: Wake the registered Codespace runner
+    needs: resolve-request
+    if: needs.resolve-request.outputs.has_request == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    outputs:
+      codespace_name: ${{ steps.wake.outputs.name }}
+
+    steps:
+      - name: Start the most recently used repository Codespace
+        id: wake
+        shell: bash
+        env:
+          CODESPACE_LIFECYCLE_TOKEN: ${{ secrets.CODESPACE_LIFECYCLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CODESPACE_LIFECYCLE_TOKEN:-}" ]]; then
+            echo "::error::CODESPACE_LIFECYCLE_TOKEN is required"
+            exit 1
+          fi
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          api = "https://api.github.com"
+          token = os.environ["CODESPACE_LIFECYCLE_TOKEN"]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": "2022-11-28",
+              "User-Agent": "nasdaq-cafe-final-request",
+          }
+
+          def request(method, url):
+              req = urllib.request.Request(url, method=method, headers=headers)
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = response.read()
+                      return json.loads(payload) if payload else None
+              except urllib.error.HTTPError as exc:
+                  detail = exc.read().decode("utf-8", errors="replace")
+                  raise SystemExit(f"GitHub Codespaces API failed: HTTP {exc.code}: {detail}") from exc
+
+          listing = request("GET", f"{api}/user/codespaces?per_page=100")
+          candidates = [item for item in listing.get("codespaces", []) if item.get("repository", {}).get("full_name") == repository]
+          if not candidates:
+              raise SystemExit(f"No Codespace found for {repository}")
+          selected = max(candidates, key=lambda item: item.get("last_used_at") or item.get("updated_at") or "")
+          name = selected["name"]
+          if selected.get("state") != "Available":
+              start_url = selected.get("start_url") or f"{api}/user/codespaces/{name}/start"
+              try:
+                  request("POST", start_url)
+              except SystemExit as exc:
+                  if "HTTP 409" not in str(exc):
+                      raise
+          deadline = time.monotonic() + 420
+          while True:
+              current = request("GET", f"{api}/user/codespaces/{name}")
+              if current.get("state") == "Available":
+                  break
+              if time.monotonic() >= deadline:
+                  raise SystemExit(f"Codespace {name} did not become Available")
+              time.sleep(7)
+          print(f"name={name}")
+          PY
+
+  render-final:
+    name: Execute explicit final render
+    needs: [resolve-request, wake-codespace]
+    if: needs.resolve-request.outputs.has_request == 'true'
+    uses: ./.github/workflows/nasdaq-cafe-final.yml
+    with:
+      episode_date: ${{ needs.resolve-request.outputs.episode_date }}
+      expected_spec_sha256: ${{ needs.resolve-request.outputs.expected_spec_sha256 }}
+      confirmation: FINAL
+    secrets: inherit
+
+  persist-outcome:
+    name: Persist terminal final outcome
+    needs: [resolve-request, wake-codespace, render-final]
+    if: always() && needs.resolve-request.outputs.has_request == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Record succeeded or failed outcome
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ needs.resolve-request.outputs.request_path }}
+          REQUEST_FINGERPRINT: ${{ needs.resolve-request.outputs.request_fingerprint }}
+          OUTCOME_PATH: ${{ needs.resolve-request.outputs.outcome_path }}
+          EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+          SPEC_SHA: ${{ needs.resolve-request.outputs.expected_spec_sha256 }}
+          WAKE_RESULT: ${{ needs.wake-codespace.result }}
+          FINAL_RESULT: ${{ needs.render-final.result }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTCOME_PATH")"
+          python3 <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+
+          status = "succeeded" if os.environ["FINAL_RESULT"] == "success" else "failed"
+          value = {
+              "outcomeVersion": "1.0",
+              "status": status,
+              "stage": "complete" if status == "succeeded" else "render-final",
+              "requestPath": os.environ["REQUEST_PATH"],
+              "requestFingerprint": os.environ["REQUEST_FINGERPRINT"],
+              "episodeDate": os.environ["EPISODE_DATE"],
+              "expectedSpecSha256": os.environ["SPEC_SHA"],
+              "wakeResult": os.environ["WAKE_RESULT"],
+              "finalResult": os.environ["FINAL_RESULT"],
+              "workflow": "Nasdaq Cafe Final Request",
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "recordedAt": datetime.now(timezone.utc).isoformat(),
+          }
+          with open(os.environ["OUTCOME_PATH"], "w", encoding="utf-8") as handle:
+              json.dump(value, handle, ensure_ascii=False, indent=2)
+              handle.write("\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$OUTCOME_PATH"
+          git commit -m "Record final render outcome ${REQUEST_FINGERPRINT}"
+          git push origin HEAD:main
