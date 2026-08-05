@@ -95,7 +95,10 @@ export class GeminiTtsProvider implements TtsProvider {
   ) {}
 
   public async selectVoice(): Promise<SelectedVoice> {
-    if (collectGeminiApiKeys().length === 0) {
+    if (
+      collectGeminiApiKeys().length === 0 &&
+      process.env.SPEC_TTS_CACHE_ONLY !== "1"
+    ) {
       throw new Error(
         "Gemini APIキーが設定されていません。資格情報ファイルを確認してください。",
       );
@@ -110,6 +113,11 @@ export class GeminiTtsProvider implements TtsProvider {
   }
 
   public async synthesize(request: TtsRequest, voice: SelectedVoice) {
+    if (process.env.SPEC_TTS_CACHE_ONLY === "1") {
+      throw new Error(
+        "SPEC_TTS_CACHE_ONLY=1: exact production TTS cache is missing; synthesis is forbidden",
+      );
+    }
     const interaction = await getApiKeyPool().run(async (apiKey) => {
       const client = new GoogleGenAI({apiKey});
       return client.interactions.create({
