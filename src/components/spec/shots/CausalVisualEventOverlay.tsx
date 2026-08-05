@@ -8,6 +8,7 @@ import {SafeCameraViewport} from "../SafeCameraViewport";
 import {palette, SafeContent} from "../StageSafeArea";
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
+const CAUSAL_FOCUS_PRESETS = new Set(["focus-ring", "dim-others"]);
 
 export const motionProgressAt = (
   sceneTimeMs: number,
@@ -23,11 +24,16 @@ export const motionProgressAt = (
   return progress * progress * (3 - 2 * progress);
 };
 
+export const isCausalFocusNode = (node: PublicNode) =>
+  node.highlighted &&
+  node.highlightMotion !== null &&
+  CAUSAL_FOCUS_PRESETS.has(node.highlightMotion.preset);
+
 export const causalFocusProgress = (
   sceneTimeMs: number,
   node: PublicNode,
 ) => {
-  if (!node.highlighted) return 0;
+  if (!isCausalFocusNode(node)) return 0;
   if (node.unhighlightMotion) {
     return 1 - motionProgressAt(
       sceneTimeMs,
@@ -52,7 +58,7 @@ export const causalTraceProgress = (
   : 0;
 
 const latestFocusedNode = (nodes: PublicNode[]) => [...nodes]
-  .filter((node) => node.highlighted)
+  .filter(isCausalFocusNode)
   .sort((a, b) => (b.highlightedAtMs ?? 0) - (a.highlightedAtMs ?? 0))[0] ?? null;
 
 export const CausalVisualEventOverlay: React.FC<{content: PublicMainContent}> = ({content}) => {
@@ -69,7 +75,9 @@ export const CausalVisualEventOverlay: React.FC<{content: PublicMainContent}> = 
     ? causalFocusProgress(content.sceneTimeMs, focusedNode)
     : 0;
   const hasTrace = content.arrows.some((arrow) => causalTraceProgress(content.sceneTimeMs, arrow) > 0);
-  if (!focusedNode && !hasTrace) return null;
+  if (focusProgress <= 0 && !hasTrace) return null;
+
+  const dimsOthers = focusedNode?.highlightMotion?.preset === "dim-others";
 
   return <div
     data-causal-visual-event-overlay="true"
@@ -103,7 +111,9 @@ export const CausalVisualEventOverlay: React.FC<{content: PublicMainContent}> = 
                 border: `4px solid ${palette.warning}`,
                 opacity: focusProgress,
                 transform: `scale(${0.985 + focusProgress * 0.03})`,
-                boxShadow: `0 0 0 9999px rgba(5,12,28,${0.16 * focusProgress}), 0 0 ${Math.round(24 * focusProgress)}px rgba(255,199,74,.44)`,
+                boxShadow: dimsOthers
+                  ? `0 0 0 9999px rgba(5,12,28,${0.16 * focusProgress}), 0 0 ${Math.round(24 * focusProgress)}px rgba(255,199,74,.44)`
+                  : `0 0 ${Math.round(24 * focusProgress)}px rgba(255,199,74,.44)`,
               }}/> : null}
               {arrow && traceProgress > 0 ? <div style={{
                 position: "absolute",
