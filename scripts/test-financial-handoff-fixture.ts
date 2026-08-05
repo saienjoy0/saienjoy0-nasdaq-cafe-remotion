@@ -30,7 +30,6 @@ const spec = renderSpecSchema.parse(raw);
 assert.equal(spec.schemaVersion, "2.3.0");
 assert.equal(spec.financialVisualContract?.selectionCount, 1);
 validateRenderSpecReferences(spec, productionAssetManifest, voiceProfilesJson);
-assertSpecLayoutFits(spec);
 
 const scene = spec.scenes.find((item) => item.sceneId === manifest.selectedSceneId);
 assert.ok(scene, "selected Scene must exist");
@@ -63,6 +62,7 @@ const production = await compileRenderSpec(
   assetPaths,
   {inputSpecSha256: manifest.renderSpecSha256},
 );
+assertSpecLayoutFits(production);
 assert.equal(production.inputSpecSha256, manifest.renderSpecSha256);
 const productionScene = production.scenes.find((item) => item.sceneId === manifest.selectedSceneId);
 assert.ok(productionScene);
