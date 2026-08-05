@@ -2,6 +2,7 @@ import type {PublicMainContent, PublicShot} from "../../spec/public-view-model";
 import {VisualTemplateRenderer} from "./VisualTemplateRenderer";
 import {ShotTransitionHost} from "./ShotTransitionHost";
 import {palette, safeFontSize} from "./StageSafeArea";
+import {CausalVisualEventOverlay} from "./shots/CausalVisualEventOverlay";
 import {DedicatedShotRenderer} from "./shots/ShotRecipes";
 
 const typographyStyle = (shot: PublicShot): React.CSSProperties => ({
@@ -34,6 +35,7 @@ const ShotTypography: React.FC<{shot: PublicShot}> = ({shot}) => shot.typography
 
 const renderShot = (content: PublicMainContent) => <>
   <DedicatedShotRenderer content={content}/>
+  <CausalVisualEventOverlay content={content}/>
   <ShotTypography shot={content.shot!}/>
 </>;
 
