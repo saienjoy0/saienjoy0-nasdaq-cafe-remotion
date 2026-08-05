@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import copy
-
 from apply_causal_motion_request import validate_request
 
 
@@ -61,9 +59,13 @@ def expect_failure(mutator, expected: str) -> None:
     raise AssertionError(f"expected failure containing {expected!r}")
 
 
+def duplicate_event_id(request: dict) -> None:
+    request["visualEvents"][1]["eventId"] = request["visualEvents"][0]["eventId"]
+
+
 validate_request(valid_request())
 expect_failure(lambda request: request.update(sequencePolicy="explicit"), "object-order-fallback")
-expect_failure(lambda request: request["visualEvents"].__setitem__(2, copy.deepcopy(request["visualEvents"][0])), "event IDs")
+expect_failure(duplicate_event_id, "event IDs")
 expect_failure(lambda request: request["visualEvents"][2].update(offsetMs=8200), "ordered by offsetMs")
 expect_failure(lambda request: request["visualEvents"][3].update(targetId="s6-node-report"), "draw-line")
 expect_failure(lambda request: request["visualEvents"].pop(), "settle")
