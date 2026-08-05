@@ -142,26 +142,6 @@ export const getShotStaggerProgress = (
   return smoothstep((getShotElapsedMs(shot) - startMs) / itemMs);
 };
 
-export const getShotNarrationFocusIndex = (
-  shot: ShotMotionTiming,
-  itemCount: number,
-  profile: ShotMotionProfile,
-) => {
-  const count = Math.max(1, itemCount);
-  if (count === 1) return 0;
-  const elapsedMs = getShotElapsedMs(shot);
-  const buildMs = getShotBuildDurationMs(shot, profile.buildMs, profile.holdMinMs);
-  if (elapsedMs < buildMs) {
-    return Math.min(count - 1, Math.floor((elapsedMs / Math.max(1, buildMs)) * count));
-  }
-  const focusEndMs = Math.max(
-    buildMs + 1,
-    getShotDurationMs(shot) - CAMERA_SETTLE_BEFORE_END_MS,
-  );
-  const focusProgress = clampUnit((elapsedMs - buildMs) / (focusEndMs - buildMs));
-  return Math.min(count - 1, Math.floor(focusProgress * count));
-};
-
 export const getShotCameraProgress = (
   shot: ShotMotionTiming,
   settleBeforeEndMs = CAMERA_SETTLE_BEFORE_END_MS,
