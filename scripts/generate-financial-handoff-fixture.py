@@ -60,6 +60,14 @@ def generate() -> tuple[str, str]:
 
     scene = next(item for item in spec["scenes"] if item["sceneId"] == "scene-04")
     beat = scene["visualBeats"][0]
+    role_card_ids = [
+        card["cardId"]
+        for card in scene["cards"]
+        if card.get("role") in {"expected", "actual", "gap"}
+    ]
+    if len(role_card_ids) != 3:
+        raise SystemExit("scene-04 must retain exactly one Expected, Actual, and Gap card")
+
     number_ids = ["fvu-aws-expected", "fvu-aws-actual", "fvu-aws-gap"]
     scene["numbers"] = [item for item in scene["numbers"] if item["numberId"] not in number_ids]
     scene["numbers"].extend([
@@ -93,7 +101,7 @@ def generate() -> tuple[str, str]:
     beat["primaryElement"] = "AWS revenue gap"
     beat["viewerTexts"] = ["Expected $42.3B", "Actual $43.0B", "Gap +$0.7B"]
     beat["changeCue"] = beat["narrationStartCue"]
-    beat["objectIds"] = number_ids
+    beat["objectIds"] = role_card_ids + number_ids
     beat["assetPlacementIds"] = []
     beat["assetState"] = "not-required"
     beat["returnScreenState"] = None
