@@ -7,6 +7,7 @@ import {
   getShotIntroFrame,
   getShotIntroLinearProgress,
   getShotMotionProfile,
+  getShotNarrationFocusIndex,
   getShotStaggerProgress,
 } from "../../../spec/shot-motion-contract";
 import {shotTransitionUsesLayerFade} from "../../../spec/shot-transition-contract";
@@ -40,5 +41,7 @@ export const useShotMotion = (shot: PublicShot) => {
     cameraProgress: getShotCameraProgress(shot),
     staggerProgress: (index: number, itemCount: number) =>
       getShotStaggerProgress(shot, index, itemCount, profile),
+    narrationFocusIndex: (itemCount: number) =>
+      getShotNarrationFocusIndex(shot, itemCount, profile),
   };
 };
