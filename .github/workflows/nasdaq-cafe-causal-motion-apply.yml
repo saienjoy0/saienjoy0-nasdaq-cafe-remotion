@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "causal-motion-requests/*.json"
+  schedule:
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
@@ -17,12 +19,12 @@ concurrency:
 jobs:
   apply-causal-motion:
     name: Apply one approved causal motion request
-    if: github.actor == github.repository_owner || (github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.ref == 'refs/heads/main' && github.event_name == 'push')
+    if: github.event_name == 'schedule' || github.actor == github.repository_owner || (github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.ref == 'refs/heads/main' && github.event_name == 'push')
     runs-on: ubuntu-24.04
     timeout-minutes: 25
 
     steps:
-      - name: Checkout request commit
+      - name: Checkout main
         uses: actions/checkout@v6
         with:
           ref: main
@@ -37,31 +39,79 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
-          mapfile -t CHANGED < <(
-            git diff --name-status "$BEFORE_SHA" "$GITHUB_SHA" -- 'causal-motion-requests/*.json'
-          )
-          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
-            echo "::error::Exactly one causal motion request must be added"
-            exit 1
+          REQUEST_PATH=""
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            mapfile -t CHANGED < <(
+              git diff --name-status "$BEFORE_SHA" "$GITHUB_SHA" -- 'causal-motion-requests/*.json'
+            )
+            if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+              echo "::error::Exactly one causal motion request must be added"
+              exit 1
+            fi
+            IFS=$'\t' read -r STATUS REQUEST_PATH <<< "${CHANGED[0]}"
+            if [[ "$STATUS" != "A" || ! "$REQUEST_PATH" =~ ^causal-motion-requests/[A-Za-z0-9._-]+\.json$ ]]; then
+              echo "::error::Causal motion requests are append-only JSON files"
+              exit 1
+            fi
+          else
+            REQUEST_PATH="$(python3 <<'PY'
+          import hashlib
+          import json
+          import pathlib
+
+          root = pathlib.Path.cwd()
+
+          def sha256(path: pathlib.Path) -> str:
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def blob_sha(path: pathlib.Path) -> str:
+              data = path.read_bytes()
+              return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+
+          for request_path in sorted((root / "causal-motion-requests").glob("*.json"), reverse=True):
+              try:
+                  request = json.loads(request_path.read_text(encoding="utf-8"))
+                  episode_date = request["episodeDate"]
+                  expected_spec = request["expectedSpecSha256"]
+                  expected_package = request["expectedEpisodePackageBlobSha"]
+              except (KeyError, TypeError, json.JSONDecodeError):
+                  continue
+              spec_path = root / "render-specs" / episode_date / "render_spec.json"
+              package_path = root / "episode-packages" / episode_date / f"episode_package_{episode_date}.md"
+              if not spec_path.is_file() or not package_path.is_file():
+                  continue
+              if sha256(spec_path) != expected_spec or blob_sha(package_path) != expected_package:
+                  continue
+              print(request_path.relative_to(root).as_posix())
+              break
+          PY
+            )"
           fi
-          IFS=$'\t' read -r STATUS REQUEST_PATH <<< "${CHANGED[0]}"
-          if [[ "$STATUS" != "A" || ! "$REQUEST_PATH" =~ ^causal-motion-requests/[A-Za-z0-9._-]+\.json$ ]]; then
-            echo "::error::Causal motion requests are append-only JSON files"
-            exit 1
+
+          if [[ -z "$REQUEST_PATH" ]]; then
+            echo "No pending causal motion request matches the current immutable inputs"
+            echo "has_request=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
           test -s "$REQUEST_PATH"
+          echo "has_request=true" >> "$GITHUB_OUTPUT"
           echo "request_path=$REQUEST_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
+        if: steps.request.outputs.has_request == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
 
       - name: Install locked dependencies
+        if: steps.request.outputs.has_request == 'true'
         run: npm ci
 
       - name: Test and apply the approved causal motion request
+        if: steps.request.outputs.has_request == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -70,6 +120,7 @@ jobs:
           python3 scripts/apply_causal_motion_request.py "${{ steps.request.outputs.request_path }}"
 
       - name: Validate generated render input
+        if: steps.request.outputs.has_request == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -80,6 +131,7 @@ jobs:
           git diff --check
 
       - name: Restrict generated changes
+        if: steps.request.outputs.has_request == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -102,6 +154,7 @@ jobs:
           done
 
       - name: Commit generated causal motion outputs
+        if: steps.request.outputs.has_request == 'true'
         shell: bash
         run: |
           set -euo pipefail
