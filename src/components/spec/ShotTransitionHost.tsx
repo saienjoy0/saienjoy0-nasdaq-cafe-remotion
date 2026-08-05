@@ -14,7 +14,7 @@ export const ShotTransitionHost: React.FC<{
   const transition = getShotTransitionOpacities(
     elapsedMs,
     previousShot !== null,
-    shot.transitionIn === "hard-cut",
+    shot.transitionIn,
   );
   const previousContent = previousShot
     ? {...content, shot: {...previousShot, progress: 1}, previousShot: null, nextShot: shot}
@@ -22,6 +22,6 @@ export const ShotTransitionHost: React.FC<{
   return <div style={{position: "absolute", inset: 0, overflow: "hidden", borderRadius: 30}}>
     {previousContent && transition.previous > 0 ? <div data-shot-layer="previous" style={{position: "absolute", inset: 0, opacity: transition.previous}}>{renderShot(previousContent)}</div> : null}
     <div data-shot-layer="current" style={{position: "absolute", inset: 0, opacity: transition.current}}>{renderShot(content)}</div>
-    {previousShot ? <SharedElementLayer content={content} previousShot={previousShot} currentShot={shot} progress={transition.progress}/> : null}
+    {previousShot ? <SharedElementLayer content={content} previousShot={previousShot} currentShot={shot} progress={transition.sharedProgress}/> : null}
   </div>;
 };
