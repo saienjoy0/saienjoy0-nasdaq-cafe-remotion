@@ -15,6 +15,7 @@
     {"beatId": "scene-04-beat-002", "visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "transitionRole": "continuation"},
     {"beatId": "scene-04-beat-003", "visualTemplate": "causal-lane", "visualGrammarId": "causal", "transitionRole": "continuation"},
     {"beatId": "scene-05-beat-001", "visualTemplate": "causal-lane", "visualGrammarId": "causal", "transitionRole": "continuation"},
+    {"beatId": "scene-05-beat-002", "visualTemplate": "tailwind-headwind", "visualGrammarId": "evidence", "transitionRole": "continuation"},
     {"beatId": "scene-06-beat-001", "visualTemplate": "causal-lane", "visualGrammarId": "causal", "transitionRole": "continuation"},
     {"beatId": "scene-06-beat-002", "visualTemplate": "split-comparison", "visualGrammarId": "comparison", "transitionRole": "continuation"},
     {"beatId": "scene-07-beat-001", "visualTemplate": "entity-card-full", "visualGrammarId": "entity", "transitionRole": "continuation"},
