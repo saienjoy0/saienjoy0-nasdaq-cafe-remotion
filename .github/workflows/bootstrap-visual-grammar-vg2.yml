@@ -7,6 +7,15 @@ on:
     paths:
       - "scripts/bootstrap-visual-grammar-vg2.mjs"
       - ".github/workflows/bootstrap-visual-grammar-vg2.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/bootstrap-visual-grammar-vg2.mjs"
+      - ".github/workflows/bootstrap-visual-grammar-vg2.yml"
+      - "contracts/visual_grammar_renderer_compatibility.json"
+      - "src/spec/visual-grammar-contract.ts"
+      - "src/spec/validate-visual-grammar.ts"
 
 permissions:
   contents: write
