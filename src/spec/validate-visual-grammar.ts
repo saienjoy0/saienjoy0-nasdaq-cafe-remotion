@@ -54,16 +54,23 @@ export const validateVisualGrammarContract = (spec: RenderSpec) => {
 
   let previousAppearance: ReturnType<typeof getVisualGrammarAppearance> | null = null;
   beats.forEach(({beat, path}) => {
-    const grammarId = beat.visualGrammarId;
-    const transitionRole = beat.transitionRole;
-    if (grammarId === undefined || transitionRole === undefined) {
+    if (beat.visualGrammarId === undefined) {
       fail({
         code: "VG_ROOT_CONTRACT_MISSING",
-        path,
-        message: "render_spec 2.4.0 requires visualGrammarId and transitionRole on every Beat",
+        path: `${path}.visualGrammarId`,
+        message: "render_spec 2.4.0 requires visualGrammarId on every Beat",
+      });
+    }
+    if (beat.transitionRole === undefined) {
+      fail({
+        code: "VG_ROOT_CONTRACT_MISSING",
+        path: `${path}.transitionRole`,
+        message: "render_spec 2.4.0 requires transitionRole on every Beat",
       });
     }
 
+    const grammarId = beat.visualGrammarId;
+    const transitionRole = beat.transitionRole;
     if (!isVisualGrammarTemplatePairAllowed(grammarId, beat.visualTemplate)) {
       fail({
         code: "VG_GRAMMAR_TEMPLATE_MISMATCH",
