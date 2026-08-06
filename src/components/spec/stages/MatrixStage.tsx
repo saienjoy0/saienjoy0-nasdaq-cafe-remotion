@@ -3,12 +3,18 @@ import {StageShellFrame, stageOrnament, stagePalette, type StageShellProps} from
 export const MatrixStage: React.FC<StageShellProps> = ({children, accent = stagePalette.cyan, style}) => (
   <StageShellFrame
     shellId="MatrixStage"
+    themeId="verification-gate"
     accent={accent}
-    background={`linear-gradient(${accent}15 2px,transparent 2px),linear-gradient(90deg,${accent}15 2px,transparent 2px),linear-gradient(145deg,rgba(248,251,253,.98),rgba(228,239,246,.95))`}
-    border={`3px solid ${accent}88`}
-    borderRadius={16}
-    boxShadow="0 16px 38px rgba(0,0,0,.19)"
+    background="linear-gradient(180deg,#F7F9FA,#EDF2F5)"
+    border="1px solid #B5C4CE"
+    borderRadius={8}
+    boxShadow="0 12px 28px rgba(16,32,51,.12)"
     style={style}
-    ornaments={stageOrnament({left: 28, top: 28, width: 24, height: 24, border: `4px solid ${accent}`, background: "rgba(255,255,255,.68)"})}
+    ornaments={<>
+      {stageOrnament({left: 38, right: 38, top: 30, height: 2, background: "#8DA0AF"})}
+      {stageOrnament({left: "33.333%", top: 30, bottom: 30, width: 1, background: "#A8B7C2"})}
+      {stageOrnament({left: "66.666%", top: 30, bottom: 30, width: 1, background: "#A8B7C2"})}
+      {stageOrnament({left: 38, top: 24, width: 18, height: 18, borderRadius: 99, background: accent})}
+    </>}
   >{children}</StageShellFrame>
 );
