@@ -1,0 +1,90 @@
+name: Run Assembled-Closing Renderer Validation 2026-08-06
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/apply-renderer-compat-2026-08-06-v19.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-renderer-compat-2026-08-06-v19
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SPEC_PATH: "render-specs/2026-08-06/render_spec.json"
+      READY_PATH: "render-specs/2026-08-06/production_ready.json"
+      PACKAGE_PATH: "episode-packages/2026-08-06/episode_package_2026-08-06.md"
+      REPORT_PATH: "preview-status/2026-08-06/normalization_report.json"
+      COMPATIBILITY_PATH: "contracts/visual_grammar_renderer_compatibility.json"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Apply all deterministic Renderer adapters
+        run: |
+          python3 scripts/normalize_nasdaq_cafe_2026_08_06.py --spec "$SPEC_PATH" --package "$PACKAGE_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/adapt_nasdaq_cafe_2026_08_06_renderer.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_template_contracts_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_reaction_timeline_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_metric_board_density_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_numeric_value_selection_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_family_diversity_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_sequence_policy_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_template_variant_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_registered_variants_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_visual_modes_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_visual_grammar_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_transition_roles_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH" --compatibility "$COMPATIBILITY_PATH"
+          python3 scripts/patch_final_assembly_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+          python3 scripts/patch_final_assembly_lines_2026_08_06.py --spec "$SPEC_PATH" --ready "$READY_PATH" --report "$REPORT_PATH"
+      - name: Run formal Renderer validator
+        run: npm run episode:spec:validate -- "$SPEC_PATH"
+      - name: Commit validated input
+        shell: bash
+        run: |
+          set -euo pipefail
+          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$SPEC_PATH" "$READY_PATH" "$REPORT_PATH"
+          for path in \
+            scripts/normalize_nasdaq_cafe_2026_08_06.py \
+            scripts/adapt_nasdaq_cafe_2026_08_06_renderer.py \
+            scripts/patch_template_contracts_2026_08_06.py \
+            scripts/patch_reaction_timeline_2026_08_06.py \
+            scripts/patch_metric_board_density_2026_08_06.py \
+            scripts/patch_numeric_value_selection_2026_08_06.py \
+            scripts/patch_family_diversity_2026_08_06.py \
+            scripts/patch_sequence_policy_2026_08_06.py \
+            scripts/patch_template_variant_2026_08_06.py \
+            scripts/patch_registered_variants_2026_08_06.py \
+            scripts/patch_visual_modes_2026_08_06.py \
+            scripts/patch_visual_grammar_2026_08_06.py \
+            scripts/patch_transition_roles_2026_08_06.py \
+            scripts/patch_final_assembly_2026_08_06.py \
+            scripts/patch_final_assembly_lines_2026_08_06.py; do
+            git rm --ignore-unmatch "$path"
+          done
+          for version in $(seq 2 19); do
+            git rm --ignore-unmatch ".github/workflows/apply-renderer-compat-2026-08-06-v${version}.yml"
+          done
+          git rm --ignore-unmatch .github/workflows/apply-normalized-preview-2026-08-06.yml
+          git rm --ignore-unmatch .github/workflows/normalize-and-render-preview-2026-08-06.yml
+          git rm --ignore-unmatch .github/workflows/normalize-financial-and-render-preview-2026-08-06.yml
+          git commit -m "Store formally validated Renderer input for 2026-08-06"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "Validated render_spec SHA-256: $SPEC_SHA"
