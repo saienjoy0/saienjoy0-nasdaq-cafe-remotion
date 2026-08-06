@@ -126,3 +126,5 @@ jobs:
           git commit -m "Record Nasdaq Cafe Preview for 2026-08-06"
           git push origin HEAD:main
           test "$(jq -r '.conclusion' <<<"$RUN_JSON")" = "success"
+
+# Retriggered after VG-6R merge to produce a user-review Preview only.
