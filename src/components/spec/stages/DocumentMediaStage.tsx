@@ -3,15 +3,17 @@ import {StageShellFrame, stageOrnament, stagePalette, type StageShellProps} from
 export const DocumentMediaStage: React.FC<StageShellProps> = ({children, accent = stagePalette.cyan, style}) => (
   <StageShellFrame
     shellId="DocumentMediaStage"
+    themeId="evidence-paper"
     accent={accent}
-    background="linear-gradient(145deg,#111b25,#243543)"
-    border="8px solid rgba(255,255,255,.08)"
-    borderRadius={12}
-    boxShadow="inset 0 0 0 2px rgba(255,255,255,.10),0 20px 48px rgba(0,0,0,.32)"
+    background="linear-gradient(180deg,#FFFFFF,#F1F5F8)"
+    border="1px solid #AFC0CE"
+    borderRadius={6}
+    boxShadow="0 14px 34px rgba(16,32,51,.16)"
     style={style}
     ornaments={<>
-      {stageOrnament({left: 24, top: 22, width: 70, height: 5, borderRadius: 99, background: accent})}
-      {stageOrnament({right: 24, bottom: 20, width: 126, height: 2, background: "rgba(255,255,255,.32)"})}
+      {stageOrnament({left: 0, top: 0, bottom: 0, width: 10, background: accent})}
+      {stageOrnament({left: 34, right: 34, top: 28, height: 2, background: "#9FB2C1"})}
+      {stageOrnament({right: 34, bottom: 26, width: 126, height: 2, background: "#6D8294"})}
     </>}
   >{children}</StageShellFrame>
 );
