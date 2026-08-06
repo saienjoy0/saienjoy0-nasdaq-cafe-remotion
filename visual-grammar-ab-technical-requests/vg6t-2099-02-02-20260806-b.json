@@ -1,0 +1,11 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "vg6t-2099-02-02-20260806-b",
+  "episodeDate": "2099-02-02",
+  "sourceSpecPath": "shared-fixtures/financial-visual-2.3/render_spec.json",
+  "mappingPath": "contracts/visual_grammar_technical_fixture_2099-02-02.json",
+  "expectedSourceSpecSha256": "60b1c610a0ae2d57f9dc0d426104a1429efc83a1fcc7195e8d837f9242bc7ee5",
+  "expectedTtsInputSha256": "07b8566af579ead2210b0beafe6fe6f05d50d1a8b7773e5a0be3565017e665ba",
+  "confirmation": "TECHNICAL_AB_PREVIEW",
+  "finalAuthorized": false
+}
