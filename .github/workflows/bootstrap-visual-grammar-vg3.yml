@@ -49,7 +49,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- \
             package.json \
-            .github/workflows/visual-grammar-renderer-contract.yml \
             src/components/spec/VisualTemplateRenderer.tsx \
             src/components/spec/AdditionalVisualTemplates.tsx \
             src/components/spec/FinancialVisualTemplates.tsx \
