@@ -1,14 +1,14 @@
 {
   "artifactId": null,
-  "artifactName": "nasdaq-cafe-rescue-preview-2026-08-06-31080706876",
-  "commitSha": "9da5bdfde89fa187831abe1c81f294f87cc014d3",
+  "artifactName": "nasdaq-cafe-rescue-preview-2026-08-06-31080848265",
+  "commitSha": "68195a53e94e85ff5f4b1e332b4718155d53b52f",
   "episodeDate": "2026-08-06",
   "finalAuthorized": false,
   "mode": "temporary-rescue-preview",
   "rescueSpecSha256": "71daaa508d177eb4a9d0aaef51bf536ec1662a6ce35d2ecc5aee8ad36c48571e",
   "runAttempt": 1,
-  "runId": 31080706876,
-  "runUrl": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31080706876",
+  "runId": 31080848265,
+  "runUrl": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31080848265",
   "status": "failure",
   "steps": {
     "checkout": "success",
