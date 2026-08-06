@@ -2,24 +2,24 @@
 
 ## 1. 目的
 
-VG-6は、旧共通Surface表示と新Visual Grammar Stage Shell表示を、内容差のない二本のPreviewとして生成する。
+VG-6は、旧共通Surface相当の表示と新Visual Grammar Stage Shell表示を、内容差のない二本のPreviewとして生成する。
 
 比較で変更してよいものはStage Shellだけである。次は完全に同一でなければならない。
 
-- render_spec.json
+- `render_spec.json`
 - ナレーション
 - 字幕
 - Scene順
 - 数字
 - 使用情報源
-- Primary / Fallbackの最終採用経路
+- Primary / Approved Fallbackの最終採用経路
 - Voice Profile
 - 発音辞書
 - Gemini TTS 2ブロック音声
 - Renderer commit
 - production data
 
-旧版と新版で異なるのは、同一Renderer commitへ渡す次の内部Stage modeだけである。
+旧版と新版で異なるのは、同一Renderer commitへ渡す内部Stage modeだけである。
 
 ```text
 baseline  = legacy
@@ -30,7 +30,7 @@ candidate = candidate
 
 ## 2. なぜ旧commitと比較しないか
 
-Visual Grammarの実装過程ではCompatibility Registry SHA、Template登録、validatorが更新される。旧commitへ現在のrender_spec 2.4.0を渡すと、Registry SHA不一致で正しく停止する。
+Visual Grammarの実装過程ではCompatibility Registry SHA、Template登録、validatorが更新される。旧commitへ現在の`render_spec 2.4.0`を渡すと、Registry SHA不一致で正しく停止する。
 
 そのためVG-6では、旧commitと新commitを比較しない。同じcommit、同じ依存関係、同じcontract registryを使用し、Stage Shellの有無だけを切り替える。
 
@@ -59,29 +59,38 @@ A/B経路は次を行わない。
 - ナレーション、字幕、数字、出典の変更
 - Primary / Fallbackの選び直し
 - 画像生成
+- Gemini APIによる音声生成・再生成
+- TTS cacheの新規保存
 - AIによる完成動画採点
 - finalレンダー
 - final権限の付与
 
-全レポートと最終manifestは`finalAuthorized: false`を固定する。
+A/B workflowへGemini APIキーを渡さない。全レポートと最終manifestは`finalAuthorized: false`を固定する。
 
-## 4. 音声
+## 4. 音声は完全cache-only
 
-音声は一度だけ準備する。
+音声は標準Previewがすでに生成・検証した2ブロックだけを使用する。
 
 ```text
-exact render_spec
+標準Preview
+→ exact TTS input SHAの2ブロック音声を生成・検証
+→ Actions cacheまたは承認済みexport Artifactへ保存
+
+A/B Preview
+→ exact render_spec
 → TTS input SHA
 → Actions cache restore
-→ miss時だけGemini TTS 2ブロック生成
+→ 必要時は承認済みexport Artifactをrestore
 → 2つのaudio.wavを検証
 → shared_tts_cache.tar.gz
 → baseline / candidateの両方へ同じtarを展開
 ```
 
-二本のレンダーでは`SPEC_TTS_CACHE_ONLY=1`を使用する。共有cacheが欠けている場合は停止し、各レンダーが個別にTTSを生成しない。
+A/B経路は音声を生成しない。exact cacheが見つからない場合は停止し、先に標準Previewを実行するよう明示する。
 
-A/B manifest生成時に、二つの`audio.wav`の相対パス、SHA-256、byte数から音声identityを作り、baselineとcandidateが一致しなければ停止する。
+準備jobと二本のrender jobはすべて`SPEC_TTS_CACHE_ONLY=1`で動く。各render jobが個別に音声を作ることはない。
+
+A/B manifest生成時に、二つの`audio.wav`の相対パス、SHA-256、byte数から音声identityを作る。baselineとcandidateが一致しなければ比較Artifactを作らない。
 
 ## 5. Stage mode
 
@@ -122,7 +131,7 @@ immutable input preflight
 → mainのrenderer commit固定
 → render_spec 2.4.0検査
 → TTS input SHA固定
-→ narrationを一度だけ準備
+→ 承認済み2ブロック音声cacheを復元
 → legacy / candidateを並列レンダー
 → 両MP4をfull decode検査
 → spec・音声・台本・production data等のidentity比較
@@ -195,7 +204,7 @@ inspection SHA
 
 A/B Previewへ渡せるのは、次を満たす入力だけである。
 
-- 正式なrender_spec 2.4.0
+- 正式な`render_spec 2.4.0`
 - Visual Grammar root contractあり
 - 全Visual Beatに`visualGrammarId`と`transitionRole`
 - `return`には`returnTargetBeatId`
@@ -203,5 +212,6 @@ A/B Previewへ渡せるのは、次を満たす入力だけである。
 - 未解決状態0
 - Primary / Fallback採用経路確定
 - Post-TTS measured diversity PASS
+- exact TTS input SHAの承認済み2ブロック音声cacheあり
 
-実日入力がまだない場合は、正本ルールに従って完成した技術fixtureを使用する。日付、数字、因果をA/B実行のために創作しない。
+実日入力がまだない場合は、正本ルールに従って完成した技術fixtureを使用する。日付、数字、因果、音声をA/B実行のために創作しない。
