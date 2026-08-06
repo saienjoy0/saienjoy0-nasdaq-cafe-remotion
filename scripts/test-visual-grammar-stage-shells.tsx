@@ -5,8 +5,10 @@ import {renderToStaticMarkup} from "react-dom/server";
 import {
   VISUAL_GRAMMAR_STAGE_SHELL_IDS,
   VisualGrammarStageHost,
+  VisualGrammarStageModeProvider,
   getVisualGrammarStageShellId,
 } from "../src/components/spec/VisualGrammarStageHost";
+import {StageShell as ShotStageShell} from "../src/components/spec/StageSafeArea";
 import {VISUAL_GRAMMAR_RENDERER_COMPATIBILITY} from "../src/spec/visual-grammar-contract";
 import {VISUAL_TEMPLATE_CONTRACTS} from "../src/spec/visual-template-contract";
 
@@ -59,6 +61,41 @@ test("Stage Host renders the resolved physical shell without viewer text metadat
   assert.match(markup, />content</);
   assert.doesNotMatch(markup, />gap</);
   assert.doesNotMatch(markup, />progressive-chart</);
+});
+
+test("Shot-plan surface yields to the resolved Stage Shell in candidate mode", () => {
+  const markup = renderToStaticMarkup(
+    <VisualGrammarStageModeProvider mode="candidate">
+      <VisualGrammarStageHost visualTemplate="opening-contradiction" variant="default">
+        <ShotStageShell><span>shot-content</span></ShotStageShell>
+      </VisualGrammarStageHost>
+    </VisualGrammarStageModeProvider>,
+  );
+  assert.match(markup, /data-stage-shell="OpenHeroStage"/);
+  assert.match(markup, /--shot-stage-background:transparent/);
+  assert.match(markup, /background:var\(--shot-stage-background,/);
+  assert.match(markup, />shot-content</);
+});
+
+test("legacy mode keeps the old Shot surface and removes the Grammar shell", () => {
+  const markup = renderToStaticMarkup(
+    <VisualGrammarStageModeProvider mode="legacy">
+      <VisualGrammarStageHost visualTemplate="opening-contradiction" variant="default">
+        <ShotStageShell><span>shot-content</span></ShotStageShell>
+      </VisualGrammarStageHost>
+    </VisualGrammarStageModeProvider>,
+  );
+  assert.doesNotMatch(markup, /data-stage-shell=/);
+  assert.doesNotMatch(markup, /--shot-stage-background:transparent/);
+  assert.match(markup, /background:var\(--shot-stage-background,/);
+});
+
+test("production Shot path is wrapped by VisualGrammarStageHost", () => {
+  const source = readFileSync("src/components/spec/ShotStageRenderer.tsx", "utf8");
+  const hostIndex = source.indexOf("<VisualGrammarStageHost");
+  const shotIndex = source.indexOf("<ShotTransitionHost", hostIndex);
+  assert(hostIndex >= 0, "ShotStageRenderer must resolve a Visual Grammar Stage Host");
+  assert(shotIndex > hostIndex, "ShotTransitionHost must render inside VisualGrammarStageHost");
 });
 
 test("all Stage Shells produce distinct DOM signatures", () => {
