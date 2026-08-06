@@ -31,20 +31,27 @@ export const StageShell: React.FC<{
   accent?: string;
   transparent?: boolean;
   style?: React.CSSProperties;
-}> = ({children, accent = palette.cyan, transparent = false, style}) => <div style={{
-  position: "absolute",
-  inset: 0,
-  overflow: "hidden",
-  boxSizing: "border-box",
-  borderRadius: 30,
-  color: palette.ink,
-  background: transparent
+}> = ({children, accent = palette.cyan, transparent = false, style}) => {
+  const legacyBackground = transparent
     ? "linear-gradient(145deg,rgba(5,12,28,.38),rgba(14,31,53,.30))"
-    : `radial-gradient(circle at 70% 25%,${accent}20,transparent 44%),linear-gradient(145deg,${palette.dark},${palette.darkSoft})`,
-  border: `2px solid ${accent}78`,
-  boxShadow: "0 24px 58px rgba(0,0,0,.34)",
-  ...style,
-}}>{children}</div>;
+    : `radial-gradient(circle at 70% 25%,${accent}20,transparent 44%),linear-gradient(145deg,${palette.dark},${palette.darkSoft})`;
+
+  return <div style={{
+    position: "absolute",
+    inset: 0,
+    overflow: "hidden",
+    boxSizing: "border-box",
+    // The fallbacks preserve the old Shot surface in legacy mode. A resolved
+    // Visual Grammar Stage Shell provides inherited variables that remove this
+    // generic board so its physically distinct background and ornaments show.
+    borderRadius: "var(--shot-stage-border-radius, 30px)",
+    color: palette.ink,
+    background: `var(--shot-stage-background, ${legacyBackground})`,
+    border: `var(--shot-stage-border, 2px solid ${accent}78)`,
+    boxShadow: "var(--shot-stage-box-shadow, 0 24px 58px rgba(0,0,0,.34))",
+    ...style,
+  }}>{children}</div>;
+};
 
 export const SafeContent: React.FC<{
   children: React.ReactNode;
