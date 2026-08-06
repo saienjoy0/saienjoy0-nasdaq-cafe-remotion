@@ -53,6 +53,13 @@ export const StageShellFrame: React.FC<StageShellFrameProps> = ({
       borderRadius,
       boxShadow,
       "--stage-accent": accent,
+      // Shot recipes historically draw one generic full-stage Surface. These
+      // inherited variables make that inner Surface transparent only when a
+      // resolved Visual Grammar Stage Shell is actually present.
+      "--shot-stage-background": "transparent",
+      "--shot-stage-border": "none",
+      "--shot-stage-border-radius": "0px",
+      "--shot-stage-box-shadow": "none",
     } as CSSProperties}
   >
     {ornaments}
