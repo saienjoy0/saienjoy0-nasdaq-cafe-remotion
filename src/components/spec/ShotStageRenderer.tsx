@@ -1,4 +1,5 @@
 import type {PublicMainContent, PublicShot} from "../../spec/public-view-model";
+import {VisualGrammarStageHost} from "./VisualGrammarStageHost";
 import {VisualTemplateRenderer} from "./VisualTemplateRenderer";
 import {ShotTransitionHost} from "./ShotTransitionHost";
 import {palette, safeFontSize} from "./StageSafeArea";
@@ -42,5 +43,14 @@ const renderShot = (content: PublicMainContent) => <>
 export const ShotStageRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
   // v2 compatibility remains only for inputs that have no Shot plan.
   if (!content.shot) return <VisualTemplateRenderer content={content}/>;
-  return <ShotTransitionHost content={content} renderShot={renderShot}/>;
+
+  // Shot-plan inputs are the production path. They must use the same resolved
+  // Visual Grammar Stage Shell as template-only inputs; otherwise the generic
+  // Shot surface hides every Stage Shell and legacy/candidate render identically.
+  return <VisualGrammarStageHost
+    visualTemplate={content.visualTemplate}
+    variant={content.templateConfig.variant}
+  >
+    <ShotTransitionHost content={content} renderShot={renderShot}/>
+  </VisualGrammarStageHost>;
 };
