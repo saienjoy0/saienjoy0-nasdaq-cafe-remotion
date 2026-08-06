@@ -30,17 +30,17 @@ export const stagePalette = {
   secondary: "var(--stage-text-secondary,#314A60)",
   muted: "var(--stage-text-muted,#506A7F)",
   line: "var(--stage-line,#6D8294)",
-  cyan: "var(--stage-accent,#078EAE)",
-  positive: "var(--stage-positive,#087B58)",
-  negative: "var(--stage-negative,#B63849)",
-  warning: "var(--stage-warning,#8A5200)",
-  emphasis: "var(--stage-emphasis,#5C348F)",
+  cyan: "#078EAE",
+  positive: "#087B58",
+  negative: "#B63849",
+  warning: "#8A5200",
+  emphasis: "#5C348F",
   dark: "var(--stage-background,#07111F)",
 } as const;
 
 export const StageShellFrame: React.FC<StageShellFrameProps> = ({
   children,
-  accent = "#078EAE",
+  accent = stagePalette.cyan,
   style,
   shellId,
   themeId = getStageThemeId(shellId),
