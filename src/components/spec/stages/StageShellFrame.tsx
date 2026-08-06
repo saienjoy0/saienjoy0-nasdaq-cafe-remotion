@@ -1,14 +1,22 @@
 import type {CSSProperties, ReactNode} from "react";
+import {
+  getStageTheme,
+  getStageThemeId,
+  stageThemeCssVariables,
+  type StageThemeId,
+} from "../../../spec/stage-theme-contract";
+import type {StageShellId} from "../../../spec/visual-grammar-contract";
 
 export type StageShellProps = {
   children: ReactNode;
   accent?: string;
   style?: CSSProperties;
+  themeId?: StageThemeId;
 };
 
 type StageShellFrameProps = StageShellProps & {
-  shellId: string;
-  background: string;
+  shellId: StageShellId;
+  background?: string;
   border?: string;
   borderRadius?: number;
   boxShadow?: string;
@@ -16,46 +24,51 @@ type StageShellFrameProps = StageShellProps & {
 };
 
 export const stagePalette = {
-  paper: "rgba(248,251,253,.97)",
-  paperSoft: "rgba(228,239,246,.96)",
-  ink: "#102033",
-  muted: "#53697b",
-  cyan: "#078eae",
-  positive: "#07865f",
-  negative: "#c74452",
-  warning: "#ba6b00",
-  emphasis: "#7046a8",
-  dark: "#101923",
+  paper: "var(--stage-surface,#FFFFFF)",
+  paperSoft: "var(--stage-surface-strong,#E7EEF4)",
+  ink: "var(--stage-text-primary,#102033)",
+  secondary: "var(--stage-text-secondary,#314A60)",
+  muted: "var(--stage-text-muted,#506A7F)",
+  line: "var(--stage-line,#6D8294)",
+  cyan: "var(--stage-accent,#078EAE)",
+  positive: "var(--stage-positive,#087B58)",
+  negative: "var(--stage-negative,#B63849)",
+  warning: "var(--stage-warning,#8A5200)",
+  emphasis: "var(--stage-emphasis,#5C348F)",
+  dark: "var(--stage-background,#07111F)",
 } as const;
 
 export const StageShellFrame: React.FC<StageShellFrameProps> = ({
   children,
-  accent = stagePalette.cyan,
+  accent = "#078EAE",
   style,
   shellId,
+  themeId = getStageThemeId(shellId),
   background,
   border = "none",
   borderRadius = 0,
   boxShadow = "none",
   ornaments,
-}) => (
-  <div
+}) => {
+  const theme = getStageTheme(themeId);
+  return <div
     data-stage-shell={shellId}
+    data-stage-theme={themeId}
     style={{
       position: "relative",
       width: "100%",
       height: "100%",
       boxSizing: "border-box",
       overflow: "hidden",
-      color: stagePalette.ink,
-      background,
+      color: theme.textPrimary,
+      background: background ?? theme.background,
       border,
       borderRadius,
       boxShadow,
-      "--stage-accent": accent,
-      // Shot recipes historically draw one generic full-stage Surface. These
-      // inherited variables make that inner Surface transparent only when a
-      // resolved Visual Grammar Stage Shell is actually present.
+      ...stageThemeCssVariables(theme, accent),
+      "--stage-shell-radius": `${borderRadius}px`,
+      // The production Shot recipes still own content layout. Candidate Stage
+      // mode removes only their old generic board and supplies semantic colors.
       "--shot-stage-background": "transparent",
       "--shot-stage-border": "none",
       "--shot-stage-border-radius": "0px",
@@ -66,8 +79,8 @@ export const StageShellFrame: React.FC<StageShellFrameProps> = ({
     <div style={{position: "relative", zIndex: 2, width: "100%", height: "100%", boxSizing: "border-box", ...style}}>
       {children}
     </div>
-  </div>
-);
+  </div>;
+};
 
 export const stageOrnament = (style: CSSProperties) => (
   <div aria-hidden="true" style={{position: "absolute", pointerEvents: "none", zIndex: 1, ...style}}/>
