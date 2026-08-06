@@ -1,0 +1,40 @@
+name: Probe Production Text Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/probe-production-text-fix.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Record latest fix run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p preview-status/2026-08-06
+          RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow apply-production-control-text-fix-main.yml --limit 1 --json databaseId | jq -r '.[0].databaseId // empty')"
+          test -n "$RUN_ID"
+          gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json databaseId,status,conclusion,createdAt,updatedAt,url,headSha,event,workflowName,jobs > preview-status/2026-08-06/production_text_fix_run.json
+      - name: Commit and remove probe
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview-status/2026-08-06/production_text_fix_run.json
+          git rm .github/workflows/probe-production-text-fix.yml
+          git commit -m "Record production text fix status"
+          git pull --rebase origin main
+          git push origin HEAD:main
