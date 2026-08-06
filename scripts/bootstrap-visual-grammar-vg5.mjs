@@ -7,6 +7,12 @@ const replaceOnce = (source, before, after, label) => {
   return source.slice(0, index) + after + source.slice(index + before.length);
 };
 
+const replaceFirst = (source, before, after, label) => {
+  const index = source.indexOf(before);
+  if (index < 0) throw new Error(`missing patch anchor: ${label}`);
+  return source.slice(0, index) + after + source.slice(index + before.length);
+};
+
 const cliPath = "scripts/spec-cli.ts";
 let cli = await readFile(cliPath, "utf8");
 
@@ -37,7 +43,7 @@ if (!cli.includes("visual_grammar_timing_report.json")) {
 
 const writeProductionAnchor = '  await writeFile(output, `${JSON.stringify(data, null, 2)}\\n`, "utf8");\n';
 if (!cli.includes("const visualGrammarTimingReport = measureVisualGrammarTiming")) {
-  cli = replaceOnce(
+  cli = replaceFirst(
     cli,
     writeProductionAnchor,
     writeProductionAnchor + `  const visualGrammarTimingReport = measureVisualGrammarTiming(spec, data);
