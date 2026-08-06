@@ -25,7 +25,7 @@ export const ShotTransitionHost: React.FC<{
   const previousContent = previousShot
     ? {...content, shot: {...previousShot, progress: 1}, previousShot: null, nextShot: effectiveShot}
     : null;
-  return <div data-effective-transition={effectiveTransition} style={{position: "absolute", inset: 0, overflow: "hidden", borderRadius: 30}}>
+  return <div data-effective-transition={effectiveTransition} style={{position: "absolute", inset: 0, overflow: "hidden", borderRadius: "var(--stage-shell-radius,0px)"}}>
     {previousContent && transition.previous > 0 ? <div data-shot-layer="previous" style={{position: "absolute", inset: 0, opacity: transition.previous}}>{renderShot(previousContent)}</div> : null}
     <div data-shot-layer="current" style={{position: "absolute", inset: 0, opacity: transition.current}}>{renderShot(currentContent)}</div>
     {previousShot && effectiveTransition === "reframe-shared-element" ? <SharedElementLayer content={currentContent} previousShot={previousShot} currentShot={effectiveShot} progress={transition.sharedProgress}/> : null}
