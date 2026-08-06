@@ -165,7 +165,7 @@ export const MarketPulseGridTemplate: FC<{content: PublicMainContent}> = ({conte
   return (
     <Surface accent={palette.cyan} style={{padding: "27px 34px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 19}}>
       <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24}}>
-        <div><Pill tone="neutral">MARKET SNAPSHOT</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
+        <div><Pill tone="neutral">市場スナップショット</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
         <div style={{maxWidth: 470, color: palette.emphasis, textAlign: "right", fontSize: 30, lineHeight: 1.2, fontWeight: 950}}>{content.screenQuestion}</div>
       </div>
       <div style={{display: "grid", gridTemplateColumns: `repeat(${columns},minmax(0,1fr))`, gap: 16, alignContent: "center"}}>
@@ -233,13 +233,13 @@ export const EarningsSurpriseTemplate: FC<{content: PublicMainContent}> = ({cont
   return (
     <Surface accent={palette.emphasis} style={{padding: "27px 32px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
       <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: 22}}>
-        <div><Pill tone="emphasis">EXPECTED / ACTUAL / GAP</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
+        <div><Pill tone="emphasis">予想・実績・差</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
         <div style={{maxWidth: 440, color: palette.emphasis, textAlign: "right", fontSize: 31, lineHeight: 1.2, fontWeight: 950}}>{content.screenQuestion}</div>
       </div>
       <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1.08fr", gap: 18, alignContent: "stretch"}}>
-        <SurprisePanel content={content} number={expected} title="EXPECTED" tone="neutral"/>
-        <SurprisePanel content={content} number={actual} title="ACTUAL" tone="positive"/>
-        <SurprisePanel content={content} number={gap} title="GAP" tone="emphasis" featured/>
+        <SurprisePanel content={content} number={expected} title="予想" tone="neutral"/>
+        <SurprisePanel content={content} number={actual} title="実績" tone="positive"/>
+        <SurprisePanel content={content} number={gap} title="差" tone="emphasis" featured/>
       </div>
       <div style={{display: "flex", justifyContent: "space-between", gap: 22, color: palette.muted, fontSize: 22, fontWeight: 850}}>
         <span>{content.templateConfig.comparisonBasis ?? "同一企業・同一期間・同一通貨"}</span>
@@ -280,7 +280,7 @@ export const DualAssetSplitTemplate: FC<{content: PublicMainContent}> = ({conten
   return (
     <Surface accent={palette.emphasis} style={{display: "grid", gridTemplateRows: "auto 1fr auto", padding: "27px 30px", gap: 16}}>
       <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: 22}}>
-        <div><Pill tone="emphasis">ENTITY DIVERGENCE</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
+        <div><Pill tone="emphasis">銘柄の明暗</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
         <div style={{maxWidth: 460, color: palette.emphasis, textAlign: "right", fontSize: 31, lineHeight: 1.2, fontWeight: 950}}>{content.screenQuestion}</div>
       </div>
       <div style={{display: "grid", gridTemplateColumns: "1fr 4px 1fr", gap: 6, alignItems: "stretch"}}>
@@ -316,7 +316,7 @@ export const MacroPressureTemplate: FC<{content: PublicMainContent}> = ({content
   return (
     <Surface accent={palette.warning} style={{padding: "25px 30px"}}>
       <div style={{position: "absolute", left: 30, right: 30, top: 24, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 22, zIndex: 2}}>
-        <div><Pill tone="warning">MACRO TRANSMISSION</Pill><div style={{marginTop: 9, fontSize: 31, fontWeight: 950}}>{content.headline}</div></div>
+        <div><Pill tone="warning">マクロの波及</Pill><div style={{marginTop: 9, fontSize: 31, fontWeight: 950}}>{content.headline}</div></div>
         <div style={{maxWidth: 470, color: palette.emphasis, textAlign: "right", fontSize: 30, lineHeight: 1.2, fontWeight: 950}}>{content.screenQuestion}</div>
       </div>
       <svg viewBox="0 0 1400 620" style={{position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible"}}>
@@ -387,7 +387,7 @@ export const SourceReceiptTemplate: FC<{content: PublicMainContent}> = ({content
   return (
     <Surface accent={palette.neutral} style={{padding: "28px 38px", display: "grid", gridTemplateColumns: "1.08fr .92fr", gap: 26}}>
       <div style={{display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0}}>
-        <div style={entryStyle(content, content.beatStartMs)}><Pill tone="neutral">SOURCE EVIDENCE</Pill></div>
+        <div style={entryStyle(content, content.beatStartMs)}><Pill tone="neutral">確認済みの根拠</Pill></div>
         <div style={{...entryStyle(content, content.beatStartMs + 250), marginTop: 20, fontSize: 47, lineHeight: 1.15, fontWeight: 950}}>{content.primaryElement || content.headline}</div>
         <div style={{...entryStyle(content, content.beatStartMs + 500), marginTop: 18, color: palette.emphasis, fontSize: 30, lineHeight: 1.25, fontWeight: 950}}>{content.screenQuestion}</div>
         {content.numbers.slice(0, 2).map((number) => (
@@ -398,7 +398,7 @@ export const SourceReceiptTemplate: FC<{content: PublicMainContent}> = ({content
       </div>
       <div style={{...entryStyle(content, content.beatStartMs + 380, "x"), position: "relative", alignSelf: "center", minHeight: 410, padding: "30px 29px", borderRadius: 18, background: "rgba(255,255,255,.92)", border: `2px solid ${palette.line}`, boxShadow: "0 18px 35px rgba(16,32,51,.13)"}}>
         <div style={{position: "absolute", left: 22, right: 22, top: 18, height: 3, background: `repeating-linear-gradient(90deg,${palette.neutral} 0 12px,transparent 12px 21px)`}}/>
-        <div style={{marginTop: 10, display: "flex", justifyContent: "space-between", gap: 15, color: palette.muted, fontSize: 20, fontWeight: 900}}><span>CONFIRMED MATERIAL</span><span>RECEIPT</span></div>
+        <div style={{marginTop: 10, display: "flex", justifyContent: "space-between", gap: 15, color: palette.muted, fontSize: 20, fontWeight: 900}}><span>確認済み資料</span><span>出典メモ</span></div>
         <div style={{marginTop: 22, display: "grid", gap: 17}}>
           {evidence.map((item, index) => (
             <div key={`${index}-${item}`} style={{...entryStyle(content, content.beatStartMs + 620 + index * 420), display: "grid", gridTemplateColumns: "34px 1fr", gap: 13, alignItems: "start", paddingBottom: 15, borderBottom: `2px dashed ${palette.line}`}}>

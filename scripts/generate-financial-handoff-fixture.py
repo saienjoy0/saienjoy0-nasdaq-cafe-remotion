@@ -31,15 +31,24 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def make_number(number_id: str, label: str, value: str, numeric: float, tone: str) -> dict[str, Any]:
+def make_number(
+    number_id: str,
+    label: str,
+    value: str,
+    numeric: float,
+    precision: int,
+    unit: str,
+    comparison: str,
+    tone: str,
+) -> dict[str, Any]:
     return {
         "numberId": number_id,
         "label": label,
         "value": value,
         "numericValue": numeric,
-        "precision": 1,
-        "unit": "billion USD",
-        "comparison": "AWS revenue, technical fixture",
+        "precision": precision,
+        "unit": unit,
+        "comparison": comparison,
         "tone": tone,
     }
 
@@ -70,7 +79,7 @@ def make_financial_shots(number_ids: list[str]) -> list[dict[str, Any]]:
             "transitionOut": "carry-forward",
             "continuityKey": continuity,
             "typographyTreatment": "underline-draw",
-            "typographyText": "Expected｜42.3B",
+            "typographyText": "市場予想｜423億ドル",
             "soundCue": None,
             "foxExpression": "分析",
         },
@@ -96,7 +105,7 @@ def make_financial_shots(number_ids: list[str]) -> list[dict[str, Any]]:
             "transitionOut": "carry-forward",
             "continuityKey": continuity,
             "typographyTreatment": "gap-highlight",
-            "typographyText": "Actual｜43.0B",
+            "typographyText": "実績｜430億ドル",
             "soundCue": "soft-impact",
             "foxExpression": "軽い驚き",
         },
@@ -122,7 +131,7 @@ def make_financial_shots(number_ids: list[str]) -> list[dict[str, Any]]:
             "transitionOut": "collapse-to-node",
             "continuityKey": continuity,
             "typographyTreatment": "gap-highlight",
-            "typographyText": "Gap｜+0.7B",
+            "typographyText": "差｜+7億ドル",
             "soundCue": None,
             "foxExpression": "分析",
         },
@@ -204,7 +213,7 @@ def generate() -> tuple[str, str]:
     spec["schemaVersion"] = "2.3.0"
     spec["episode"]["id"] = TECHNICAL_DATE
     spec["episode"]["targetDate"] = TECHNICAL_DATE
-    spec["episode"]["marketSession"] = "TECHNICAL ACCEPTANCE"
+    spec["episode"]["marketSession"] = "技術検証"
     spec["financialVisualContract"] = {
         "contractVersion": "1.0.0",
         "intentVersion": "1.1.0",
@@ -221,9 +230,9 @@ def generate() -> tuple[str, str]:
     number_ids = ["fvu-aws-expected", "fvu-aws-actual", "fvu-aws-gap"]
     scene["numbers"] = [item for item in scene["numbers"] if item["numberId"] not in number_ids]
     scene["numbers"].extend([
-        make_number(number_ids[0], "EXPECTED", "$42.3B", 42.3, "neutral"),
-        make_number(number_ids[1], "ACTUAL", "$43.0B", 43.0, "positive"),
-        make_number(number_ids[2], "GAP", "+$0.7B", 0.7, "emphasis"),
+        make_number(number_ids[0], "市場予想", "423", 423, 0, "億ドル", "AWS売上高・市場予想", "neutral"),
+        make_number(number_ids[1], "実績", "430", 430, 0, "億ドル", "AWS売上高・実績", "positive"),
+        make_number(number_ids[2], "上振れ幅", "+7", 7, 0, "億ドル", "市場予想との差", "emphasis"),
     ])
 
     scene["visualMode"] = "number-comparison"
@@ -235,7 +244,7 @@ def generate() -> tuple[str, str]:
     beat["templateVariant"] = "zero-baseline"
     beat["templateConfig"] = {
         "variant": "zero-baseline",
-        "comparisonBasis": "AWS revenue, same entity, period, currency, and unit",
+        "comparisonBasis": "AWS売上高・同一企業・同一期間・同一通貨・同一単位",
         "dataBasis": "financial-recipe-plan",
         "nodeOrder": [],
         "laneLabels": [],
@@ -249,8 +258,8 @@ def generate() -> tuple[str, str]:
     beat["finalHoldMs"] = 900
     beat["contentType"] = "financial-data"
     beat["screenQuestion"] = "予想を上回っても、市場が見た差は何か"
-    beat["primaryElement"] = "AWS revenue gap"
-    beat["viewerTexts"] = ["Expected $42.3B", "Actual $43.0B", "Gap +$0.7B"]
+    beat["primaryElement"] = "AWS売上高の上振れ幅"
+    beat["viewerTexts"] = ["市場予想 423億ドル", "実績 430億ドル", "差 +7億ドル"]
     beat["changeCue"] = beat["narrationStartCue"]
     beat["objectIds"] = number_ids
     beat["assetPlacementIds"] = []
@@ -271,7 +280,7 @@ def generate() -> tuple[str, str]:
         "metricIds": number_ids,
         "causalStepIds": [],
         "displayOrder": number_ids,
-        "comparisonBasis": "AWS revenue, same entity, period, currency, and unit",
+        "comparisonBasis": "AWS売上高・同一企業・同一期間・同一通貨・同一単位",
         "reasonCodes": [],
     }
     beat["shots"] = make_financial_shots(number_ids)

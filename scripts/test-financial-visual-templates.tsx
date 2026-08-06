@@ -127,7 +127,7 @@ const market = baseContent({
   ],
 });
 const marketMarkup = render(<MarketPulseGridTemplate content={market}/>);
-assert.match(marketMarkup, /MARKET SNAPSHOT/);
+assert.match(marketMarkup, /市場スナップショット/);
 assert.match(marketMarkup, /NASDAQ/);
 assert.match(marketMarkup, /SOXX/);
 
@@ -135,15 +135,15 @@ const earnings = baseContent({
   visualTemplate: "earnings-surprise",
   templateConfig: {...baseContent({}).templateConfig, variant: "zero-baseline"},
   numbers: [
-    number("expected", "Expected", 42.3, "neutral"),
-    number("actual", "Actual", 43.0, "positive"),
-    number("gap", "Gap", 0.7, "emphasis"),
+    number("expected", "市場予想", 42.3, "neutral"),
+    number("actual", "実績", 43.0, "positive"),
+    number("gap", "上振れ幅", 0.7, "emphasis"),
   ],
 });
 const earningsMarkup = render(<EarningsSurpriseTemplate content={earnings}/>);
-assert.match(earningsMarkup, /EXPECTED/);
-assert.match(earningsMarkup, /ACTUAL/);
-assert.match(earningsMarkup, /GAP/);
+assert.match(earningsMarkup, /予想・実績・差/);
+assert.match(earningsMarkup, /市場予想/);
+assert.match(earningsMarkup, /上振れ幅/);
 
 const divergence = baseContent({
   visualTemplate: "dual-asset-split",
@@ -154,7 +154,7 @@ const divergence = baseContent({
   ],
 });
 const divergenceMarkup = render(<DualAssetSplitTemplate content={divergence}/>);
-assert.match(divergenceMarkup, /ENTITY DIVERGENCE/);
+assert.match(divergenceMarkup, /銘柄の明暗/);
 assert.match(divergenceMarkup, /Amazon/);
 assert.match(divergenceMarkup, /Apple/);
 
@@ -179,7 +179,7 @@ const macro = baseContent({
   ],
 });
 const macroMarkup = render(<MacroPressureTemplate content={macro}/>);
-assert.match(macroMarkup, /MACRO TRANSMISSION/);
+assert.match(macroMarkup, /マクロの波及/);
 assert.match(macroMarkup, /Rates rose/);
 assert.match(macroMarkup, /NASDAQ/);
 
@@ -191,9 +191,15 @@ const receipt = baseContent({
   texts: ["Company filing", "Market close data"],
 });
 const receiptMarkup = render(<SourceReceiptTemplate content={receipt}/>);
-assert.match(receiptMarkup, /SOURCE EVIDENCE/);
+assert.match(receiptMarkup, /確認済みの根拠/);
+assert.match(receiptMarkup, /確認済み資料/);
+assert.match(receiptMarkup, /出典メモ/);
 assert.match(receiptMarkup, /Amazon reported AWS revenue/);
 assert.doesNotMatch(receiptMarkup, /financialVisualTrace|recipePlanSha256|selectedPlanId/);
+
+for (const markup of [marketMarkup, earningsMarkup, divergenceMarkup, macroMarkup, receiptMarkup]) {
+  assert.doesNotMatch(markup, /MARKET SNAPSHOT|EXPECTED \/ ACTUAL \/ GAP|ENTITY DIVERGENCE|MACRO TRANSMISSION|SOURCE EVIDENCE|CONFIRMED MATERIAL|>RECEIPT</);
+}
 
 assert.throws(
   () => assertFinancialTemplateContent("market-pulse-grid", baseContent({visualTemplate: "market-pulse-grid", numbers: market.numbers.slice(0, 2)})),
