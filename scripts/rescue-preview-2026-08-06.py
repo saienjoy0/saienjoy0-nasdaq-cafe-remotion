@@ -27,17 +27,27 @@ def set_template(scene_number: int, beat_number: int, name: str, variant: str):
 beat(2, 1)["returnScreenState"] = "Chart"
 beat(2, 1)["sequencePolicy"] = "explicit"
 set_template(2, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(3, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
+set_template(3, 1, "tailwind-headwind", "two-lane")
+beat(3, 1)["templateConfig"]["laneLabels"] = ["基準", "実績"]
+beat(3, 1)["viewerTexts"] = ["基準｜会社見通し中心 112億ドル", "実績｜実績 115.4億ドル", "実績｜差 +3.4億ドル"]
 set_template(3, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(4, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
+set_template(4, 1, "tailwind-headwind", "two-lane")
+beat(4, 1)["templateConfig"]["laneLabels"] = ["予想", "実績"]
+beat(4, 1)["viewerTexts"] = ["予想｜Expected 125.2億ドル", "実績｜Actual 130億ドル", "実績｜Gap +4.8億ドル"]
 beat(4, 2)["templateConfig"]["variant"] = "confirmed-vs-unconfirmed"
 beat(5, 1)["returnScreenState"] = "Chart"
 beat(5, 1)["sequencePolicy"] = "explicit"
-set_template(5, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
+set_template(5, 2, "tailwind-headwind", "two-lane")
+beat(5, 2)["templateConfig"]["laneLabels"] = ["需要", "採用"]
+beat(5, 2)["viewerTexts"] = ["需要｜SpaceX計算増設", "採用｜NVIDIA専属採用", "採用｜将来需要の具体化"]
 set_template(6, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(6, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
+set_template(6, 2, "tailwind-headwind", "two-lane")
+beat(6, 2)["templateConfig"]["laneLabels"] = ["半導体", "大型テック"]
+beat(6, 2)["viewerTexts"] = ["半導体｜SOXX -2.12%", "大型テック｜Alphabet -4.03%", "大型テック｜Microsoft -1.09%"]
 set_template(7, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(7, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
+set_template(7, 2, "tailwind-headwind", "two-lane")
+beat(7, 2)["templateConfig"]["laneLabels"] = ["半導体", "NASDAQ"]
+beat(7, 2)["viewerTexts"] = ["半導体｜採用証拠の差", "NASDAQ｜大型テック安も重なる", "NASDAQ｜Dow +0.5%の混合相場"]
 set_template(8, 1, "verification-checklist", "default")
 
 spec["scenes"][7]["visualMode"] = "verification-points"
