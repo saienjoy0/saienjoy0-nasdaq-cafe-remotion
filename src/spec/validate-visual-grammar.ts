@@ -69,8 +69,8 @@ export const validateVisualGrammarContract = (spec: RenderSpec) => {
       });
     }
 
-    const grammarId = beat.visualGrammarId;
-    const transitionRole = beat.transitionRole;
+    const grammarId = beat.visualGrammarId!;
+    const transitionRole = beat.transitionRole!;
     if (!isVisualGrammarTemplatePairAllowed(grammarId, beat.visualTemplate)) {
       fail({
         code: "VG_GRAMMAR_TEMPLATE_MISMATCH",
