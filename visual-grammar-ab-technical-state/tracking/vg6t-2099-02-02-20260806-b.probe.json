@@ -1,0 +1,17 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "vg6t-2099-02-02-20260806-b",
+  "targetHeadSha": "3d08257839e01d1e2bc6e200daf1bae8d2d27195",
+  "found": true,
+  "workflowRun": {
+    "conclusion": "",
+    "createdAt": "2026-08-06T07:06:13Z",
+    "databaseId": 31079641713,
+    "displayTitle": "Rerun Visual Grammar technical A/B after Shot Stage fix",
+    "headSha": "3d08257839e01d1e2bc6e200daf1bae8d2d27195",
+    "status": "in_progress",
+    "updatedAt": "2026-08-06T07:06:41Z",
+    "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31079641713"
+  },
+  "finalAuthorized": false
+}
