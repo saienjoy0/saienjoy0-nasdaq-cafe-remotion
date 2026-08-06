@@ -27,18 +27,18 @@ def set_template(scene_number: int, beat_number: int, name: str, variant: str):
 beat(2, 1)["returnScreenState"] = "Chart"
 beat(2, 1)["sequencePolicy"] = "explicit"
 set_template(2, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(3, 1, "tailwind-headwind", "two-lane")
+set_template(3, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
 set_template(3, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(4, 1, "tailwind-headwind", "two-lane")
+set_template(4, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
 beat(4, 2)["templateConfig"]["variant"] = "confirmed-vs-unconfirmed"
 beat(5, 1)["returnScreenState"] = "Chart"
 beat(5, 1)["sequencePolicy"] = "explicit"
-set_template(5, 2, "tailwind-headwind", "two-lane")
+set_template(5, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
 set_template(6, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(6, 2, "tailwind-headwind", "two-lane")
+set_template(6, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
 set_template(7, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
-set_template(7, 2, "tailwind-headwind", "two-lane")
-beat(8, 1)["templateConfig"]["variant"] = "strengthen-vs-weaken"
+set_template(7, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
+set_template(8, 1, "verification-checklist", "default")
 
 spec["scenes"][7]["visualMode"] = "verification-points"
 for visual_beat in spec["scenes"][7]["visualBeats"]:
