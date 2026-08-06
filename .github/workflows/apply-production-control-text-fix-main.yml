@@ -24,6 +24,15 @@ jobs:
           node-version: "22"
           cache: npm
 
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
       - name: Apply narrow machine-control exemption
         shell: bash
         run: |
