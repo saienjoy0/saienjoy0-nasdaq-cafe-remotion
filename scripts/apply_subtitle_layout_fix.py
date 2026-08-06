@@ -91,4 +91,22 @@ assert.throws(
 subtitle_tests = replace_once(subtitle_tests, footer, regression, "subtitle regression footer")
 subtitle_test_path.write_text(subtitle_tests, encoding="utf-8")
 
+render_spec_test_path = Path("scripts/test-render-spec.ts")
+render_spec_tests = render_spec_test_path.read_text(encoding="utf-8")
+legacy_caption_overflow = 'overflowTest("captionText", (value) => {value.scenes[0].narrationChunks[0].caption.text = "長".repeat(71);}, /caption\\.text/);'
+replacement = '''test("long caption metadata is ignored while rendered speech cues remain layout-safe", async () => {
+  const production = await compileRenderSpec(structuredClone(fixture), technicalSynth, assetPaths);
+  const chunk = production.scenes[0].narrationChunks[0];
+  chunk.caption.text = "長".repeat(156);
+  chunk.speechText = "長".repeat(156);
+  assert.doesNotThrow(() => assertSpecLayoutFits(production));
+});'''
+render_spec_tests = replace_once(
+    render_spec_tests,
+    legacy_caption_overflow,
+    replacement,
+    "legacy caption metadata overflow regression",
+)
+render_spec_test_path.write_text(render_spec_tests, encoding="utf-8")
+
 print("subtitle layout fix applied")
