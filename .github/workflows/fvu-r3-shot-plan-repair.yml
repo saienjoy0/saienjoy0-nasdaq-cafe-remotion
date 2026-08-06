@@ -1,4 +1,4 @@
-name: FVU R3 Shot Plan Repair and Preview Redispatch
+name: Sync Official FVU R3 Fixture and Redispatch Preview
 
 on:
   pull_request:
@@ -11,14 +11,15 @@ permissions:
   actions: write
 
 jobs:
-  repair:
+  sync-and-dispatch:
     if: github.event.pull_request.head.ref == 'tech/fvu-r3-preview-v2-2099-02-02'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       HEAD_REF: tech/fvu-r3-preview-v2-2099-02-02
       EPISODE_DATE: 2099-02-02
-      SPEC_PATH: render-specs/2099-02-02/render_spec.json
+      SOURCE_SPEC: shared-fixtures/financial-visual-2.3/render_spec.json
+      TARGET_SPEC: render-specs/2099-02-02/render_spec.json
       PREVIOUS_RUN_ID: "31057914208"
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -34,149 +35,79 @@ jobs:
 
       - run: npm ci
 
-      - name: Add explicit three-Shot financial plan
+      - name: Verify official fixture changes Shots only and preserves TTS input
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
-          import copy, json, re
+          import copy, json
           from pathlib import Path
 
-          path = Path("render-specs/2099-02-02/render_spec.json")
-          spec = json.loads(path.read_text(encoding="utf-8"))
-          original = copy.deepcopy(spec)
-          scene = next(s for s in spec["scenes"] if s["sceneId"] == "scene-04")
-          beat = next(b for b in scene["visualBeats"] if b["beatId"] == "vb-04-02")
-          if beat.get("visualTemplate") != "earnings-surprise" or beat.get("shots"):
-              raise SystemExit("target financial Beat is no longer in the expected unplanned state")
-          chunk = next(c for c in scene["narrationChunks"] if c["chunkId"] == "scene-04-chunk-001")
-          normalize = lambda value: re.sub(r"\s+", "", value).strip()
-          speech = normalize(chunk["speechText"])
+          source_path = Path("shared-fixtures/financial-visual-2.3/render_spec.json")
+          target_path = Path("render-specs/2099-02-02/render_spec.json")
+          source = json.loads(source_path.read_text(encoding="utf-8"))
+          target = json.loads(target_path.read_text(encoding="utf-8"))
 
-          def progress(cue, edge):
-              needle = normalize(cue)
-              positions = [m.start() for m in re.finditer(re.escape(needle), speech)]
-              if len(positions) != 1:
-                  raise SystemExit(f"cue must occur exactly once: {cue!r}")
-              offset = positions[0] + (len(needle) if edge == "end" else 0)
-              return round(offset / len(speech), 6)
+          def without_shots(value):
+              result = copy.deepcopy(value)
+              for scene in result["scenes"]:
+                  for beat in scene["visualBeats"]:
+                      beat.pop("shots", None)
+              return result
 
-          plans = [
-              dict(
-                  shotRecipe="expected-anchor",
-                  startCue="市場が事前に見ていた論点は、",
-                  endCue="GPU、電力、ネットワークへ",
-                  primaryTargetId="fvu-aws-expected",
-                  referenceTargetId=None,
-                  outcomeTargetId=None,
-                  secondaryTargetIds=[],
-                  cameraTargetId="fvu-aws-expected",
-                  stageLayout="full-stage",
-                  cameraPreset="static",
-                  transitionIn="soft-reveal",
-                  transitionOut="carry-forward",
-                  typographyTreatment="underline-draw",
-                  typographyText="Expected $42.3B",
-                  soundCue=None,
-                  foxExpression="分析",
-              ),
-              dict(
-                  shotRecipe="actual-crosses-expected",
-                  startCue="巨額の資金を使っています。",
-                  endCue="利用者と料金収入は後からついてきます。",
-                  primaryTargetId="fvu-aws-actual",
-                  referenceTargetId="fvu-aws-expected",
-                  outcomeTargetId=None,
-                  secondaryTargetIds=[],
-                  cameraTargetId="fvu-aws-actual",
-                  stageLayout="split-vertical",
-                  cameraPreset="push-in",
-                  transitionIn="reframe-shared-element",
-                  transitionOut="carry-forward",
-                  typographyTreatment="gap-highlight",
-                  typographyText="Actual $43.0B",
-                  soundCue="soft-impact",
-                  foxExpression="分析",
-              ),
-              dict(
-                  shotRecipe="gap-macro",
-                  startCue="主要報道では、",
-                  endCue="繰り返し注目されていました。",
-                  primaryTargetId="fvu-aws-gap",
-                  referenceTargetId="fvu-aws-expected",
-                  outcomeTargetId="fvu-aws-gap",
-                  secondaryTargetIds=["fvu-aws-actual"],
-                  cameraTargetId="fvu-aws-gap",
-                  stageLayout="hero-center",
-                  cameraPreset="reframe-outcome",
-                  transitionIn="reframe-shared-element",
-                  transitionOut="hold-outcome",
-                  typographyTreatment="word-build",
-                  typographyText="Gap +$0.7B",
-                  soundCue="soft-impact",
-                  foxExpression="分析",
-              ),
-          ]
+          if without_shots(source) != without_shots(target):
+              raise SystemExit("official shared fixture differs from technical input outside Shot arrays")
 
-          shots = []
-          previous_end = 0.0
-          for index, plan in enumerate(plans, 1):
-              start = progress(plan["startCue"], "start")
-              end = progress(plan["endCue"], "end")
-              if index == 1 and start != 0.0:
-                  raise SystemExit("first Shot must start at progress zero")
-              if abs(start - previous_end) > 0.000001 or end <= start:
-                  raise SystemExit(f"Shot {index} has a gap, overlap, or invalid duration")
-              shot = {
-                  "shotId": f"vb-04-02-shot-{index:03d}",
-                  "startChunkId": "scene-04-chunk-001",
-                  "startProgress": start,
-                  "startOffsetMs": 0,
-                  "endChunkId": "scene-04-chunk-001",
-                  "endProgress": end,
-                  "endOffsetMs": 0,
-                  "continuityKey": "vb-04-02-financial-flow",
-                  **plan,
+          def tts_identity(value):
+              return {
+                  "voiceProfileId": value.get("voiceProfileId"),
+                  "pronunciations": value.get("pronunciations"),
+                  "speech": [
+                      [chunk["speechText"] for chunk in scene["narrationChunks"]]
+                      for scene in value["scenes"]
+                  ],
               }
-              shots.append(shot)
-              previous_end = end
-          if previous_end != 1.0:
-              raise SystemExit("final Shot must end at progress one")
-          beat["shots"] = shots
 
-          before = copy.deepcopy(original)
-          after = copy.deepcopy(spec)
-          for value in (before, after):
-              for s in value["scenes"]:
-                  for b in s["visualBeats"]:
-                      b.pop("shots", None)
-          if before != after:
-              raise SystemExit("non-Shot render_spec content changed")
+          if tts_identity(source) != tts_identity(target):
+              raise SystemExit("official Shot fixture changed TTS input")
 
-          total = sum(len(b.get("shots", [])) for s in spec["scenes"] for b in s["visualBeats"])
+          scene = next(item for item in source["scenes"] if item["sceneId"] == "scene-04")
+          beat = next(item for item in scene["visualBeats"] if item["beatId"] == "vb-04-02")
+          shots = beat.get("shots", [])
+          expected_ids = [
+              "scene-04-beat-001-shot-001",
+              "scene-04-beat-001-shot-002",
+              "scene-04-beat-001-shot-003",
+          ]
+          if [item.get("shotId") for item in shots] != expected_ids:
+              raise SystemExit("official financial Shot IDs do not match the production contract")
+          total = sum(len(b.get("shots", [])) for s in source["scenes"] for b in s["visualBeats"])
           if total != 50:
-              raise SystemExit(f"expected exactly 50 Shots after repair, got {total}")
-          path.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-          print(json.dumps({"addedShots": 3, "totalShots": total, "progress": [[s["startProgress"], s["endProgress"]] for s in shots]}, indent=2))
+              raise SystemExit(f"official fixture must contain exactly 50 Shots, got {total}")
+
+          target_path.write_bytes(source_path.read_bytes())
+          print(json.dumps({"status": "official-fixture-copied", "financialShots": len(shots), "totalShots": total}, indent=2))
           PY
 
-      - name: Validate repaired spec and runtime contracts
+      - name: Validate official fixture and runtime contracts
         run: |
-          npm run episode:spec:validate -- "$SPEC_PATH"
+          npm run episode:spec:validate -- "$TARGET_SPEC"
           npm run test:runtime-stability
+          npm run test:visual-story
+          node --import tsx scripts/test-financial-handoff-fixture.ts
 
-      - name: Commit immutable repaired input
+      - name: Commit immutable official Preview input
         id: commit
         shell: bash
         run: |
           set -euo pipefail
-          spec_sha="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          spec_sha="$(sha256sum "$TARGET_SPEC" | awk '{print $1}')"
           rm -f technical-preview-run-id.txt
           git rm .github/workflows/fvu-r3-shot-plan-repair.yml
-          git add "$SPEC_PATH"
+          git add "$TARGET_SPEC"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Add explicit Scene 4 financial Shot plan"
+          git commit -m "Sync official financial Shot fixture for Preview"
           git push origin "HEAD:${HEAD_REF}"
           echo "spec_sha=$spec_sha" >> "$GITHUB_OUTPUT"
 
@@ -188,7 +119,14 @@ jobs:
           set -euo pipefail
           python3 - <<'PY' > /tmp/dispatch.json
           import json, os
-          print(json.dumps({"ref": os.environ["HEAD_REF"], "inputs": {"episode_date": os.environ["EPISODE_DATE"], "expected_spec_sha256": os.environ["SPEC_SHA"], "confirmation": "PREVIEW"}}))
+          print(json.dumps({
+              "ref": os.environ["HEAD_REF"],
+              "inputs": {
+                  "episode_date": os.environ["EPISODE_DATE"],
+                  "expected_spec_sha256": os.environ["SPEC_SHA"],
+                  "confirmation": "PREVIEW",
+              },
+          }))
           PY
           curl -fsS -X POST \
             -H "Accept: application/vnd.github+json" \
@@ -203,7 +141,7 @@ jobs:
           set -euo pipefail
           api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
           run_id=""
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 40); do
             payload="$(curl -fsS -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "${api}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${HEAD_REF}&event=workflow_dispatch&per_page=20")"
             run_id="$(PREVIOUS_RUN_ID="$PREVIOUS_RUN_ID" python3 -c 'import json,os,sys; old=int(os.environ["PREVIOUS_RUN_ID"]); runs=json.load(sys.stdin).get("workflow_runs", []); candidates=[r for r in runs if int(r["id"]) != old]; print(candidates[0]["id"] if candidates else "")' <<< "$payload")"
             [[ -n "$run_id" ]] && break
@@ -212,6 +150,6 @@ jobs:
           [[ -n "$run_id" ]] || { echo "::error::corrected Preview run not found"; exit 1; }
           printf '%s\n' "$run_id" > technical-preview-run-id.txt
           git add technical-preview-run-id.txt
-          git commit -m "Record Shot-repaired Preview run"
+          git commit -m "Record official Shot-fixture Preview run"
           git push origin "HEAD:${HEAD_REF}"
           echo "Corrected Preview run ID: $run_id"
