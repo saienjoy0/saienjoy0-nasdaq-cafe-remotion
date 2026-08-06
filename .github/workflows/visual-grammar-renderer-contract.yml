@@ -1,4 +1,5 @@
 name: Visual Grammar Renderer Contract
+# VG-4 validates timeline precision, motion pacing, and TTS identity invariance.
 
 on:
   pull_request:
