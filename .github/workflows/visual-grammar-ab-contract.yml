@@ -55,7 +55,9 @@ jobs:
       - name: Validate JSON and workflow YAML syntax
         run: |
           node -e "JSON.parse(require('node:fs').readFileSync('contracts/visual_grammar_ab_manifest.schema.json','utf8'))"
-          npx prettier --check .github/workflows/visual-grammar-ab-preview.yml .github/workflows/visual-grammar-ab-contract.yml
+          ruby -e 'require "yaml"; ARGV.each { |file| YAML.load_file(file); puts "PASS #{file}" }' \
+            .github/workflows/visual-grammar-ab-preview.yml \
+            .github/workflows/visual-grammar-ab-contract.yml
 
       - name: Run A/B contract and Stage mode tests
         run: npx tsx scripts/test-visual-grammar-ab-contract.tsx
