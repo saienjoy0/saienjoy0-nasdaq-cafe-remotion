@@ -7,9 +7,11 @@ import {SpecAssetLayer} from "../components/spec/SpecAssetLayer";
 import {FoxExpressionLayer} from "../components/spec/FoxExpressionLayer";
 import {ShotStageRenderer} from "../components/spec/ShotStageRenderer";
 import {SoundCueTrack} from "../components/spec/SoundCueTrack";
-import {VisualGrammarStageModeProvider} from "../components/spec/VisualGrammarStageHost";
+import {VisualGrammarStageModeProvider, getVisualGrammarStageShellId} from "../components/spec/VisualGrammarStageHost";
+import {useVisualGrammarStageMode} from "../components/spec/VisualGrammarStageMode";
 import type {RenderProductionData, RenderSpecScene} from "../spec/render-spec";
 import {getSceneRenderState, getSpecDurationInFrames, getTransitionDurationInFrames} from "../spec/render-state";
+import {getStageChromeModeForShell, type StageChromeMode} from "../spec/stage-theme-contract";
 import type {VisualGrammarStageMode} from "../spec/visual-grammar-stage-mode";
 import {toPublicSceneViewModel} from "../spec/public-view-model";
 import {assertSpecLayoutFits} from "../spec/validate-render-layout";
@@ -21,6 +23,49 @@ const sceneStyle: React.CSSProperties = {
   fontFamily,
 };
 
+const headlineStyle = (mode: StageChromeMode): React.CSSProperties => mode === "full"
+  ? {
+      position: "absolute",
+      left: 400,
+      top: 42,
+      width: 1472,
+      height: 82,
+      zIndex: 50,
+      display: "flex",
+      alignItems: "center",
+      padding: "7px 20px",
+      boxSizing: "border-box",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      borderRadius: 16,
+      background: "linear-gradient(90deg,rgba(4,10,23,.88),rgba(4,10,23,.48),rgba(4,10,23,0))",
+      fontSize: 46,
+      lineHeight: "64px",
+      fontWeight: 950,
+      textShadow: "0 4px 14px rgba(0,0,0,.9)",
+    }
+  : {
+      position: "absolute",
+      left: 416,
+      top: 64,
+      maxWidth: 980,
+      height: 50,
+      zIndex: 50,
+      display: "flex",
+      alignItems: "center",
+      padding: "5px 16px",
+      boxSizing: "border-box",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      borderRadius: 10,
+      background: "rgba(7,17,31,.76)",
+      borderLeft: "5px solid rgba(41,215,240,.88)",
+      fontSize: 30,
+      lineHeight: "40px",
+      fontWeight: 900,
+      textShadow: "0 3px 10px rgba(0,0,0,.72)",
+    };
+
 export const SpecSceneFrame: React.FC<{
   scene: RenderProductionData["scenes"][number];
   assets: Record<string, string>;
@@ -28,12 +73,20 @@ export const SpecSceneFrame: React.FC<{
 }> = ({scene, assets, timeMsOverride}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
+  const stageMode = useVisualGrammarStageMode();
   const timeMs = timeMsOverride ?? (frame / fps) * 1000;
   const state = getSceneRenderState(scene, timeMs);
   const view = toPublicSceneViewModel(scene, state, assets);
-  return <AbsoluteFill style={sceneStyle}>
+  const stageShellId = view.mainContent
+    ? getVisualGrammarStageShellId(view.mainContent.visualTemplate, view.mainContent.templateConfig.variant)
+    : null;
+  const chromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
+    ? getStageChromeModeForShell(stageShellId)
+    : "full";
+
+  return <AbsoluteFill style={sceneStyle} data-stage-chrome={chromeMode}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
-    <div style={{position: "absolute", left: 416, top: 144, width: 1440, height: 648, zIndex: 10, overflow: "hidden", borderRadius: 30}}>
+    <div style={{position: "absolute", left: 416, top: 144, width: 1440, height: 648, zIndex: 10, overflow: "hidden", borderRadius: stageMode === "legacy" ? 30 : 0}}>
       <SpecAssetLayer assets={view.mainAssets} zIndex={10}/>
       {view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><ShotStageRenderer content={view.mainContent}/></div> : null}
     </div>
@@ -41,7 +94,7 @@ export const SpecSceneFrame: React.FC<{
       <FoxExpressionLayer fox={view.fox} previousFox={view.previousFox} transitionProgress={view.foxTransitionProgress}/>
     </div>
     <SpecAssetLayer assets={view.overlays} zIndex={40}/>
-    <div style={{position: "absolute", left: 400, top: 42, width: 1472, height: 92, zIndex: 50, display: "flex", alignItems: "center", padding: "8px 20px", boxSizing: "border-box", overflow: "hidden", whiteSpace: "nowrap", borderRadius: 18, background: "linear-gradient(90deg,rgba(4,10,23,.88),rgba(4,10,23,.58),rgba(4,10,23,0))", fontSize: 52, lineHeight: "72px", fontWeight: 950, textShadow: "0 4px 14px rgba(0,0,0,.9)"}}>{view.headline}</div>
+    {chromeMode !== "none" ? <div style={headlineStyle(chromeMode)}>{view.headline}</div> : null}
     {view.sourceLabel ? <div style={{position: "absolute", left: 1016, top: 744, width: 808, height: 32, zIndex: 50, overflow: "hidden", whiteSpace: "nowrap", color: "#b6cad9", fontSize: 22, lineHeight: "32px", textAlign: "right"}}>{view.sourceLabel}</div> : null}
     {state.subtitleText ? <div style={{position: "absolute", left: 208, top: 812, width: 1664, height: 208, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: "14px 42px", boxSizing: "border-box", overflow: "hidden", borderRadius: 18, background: "rgba(0,0,0,.88)", borderTop: "4px solid rgba(255,199,74,.88)", color: "#fff7df", fontSize: 52, lineHeight: 1.28, fontWeight: 900, letterSpacing: "0.01em", textAlign: "center", whiteSpace: "pre-line", wordBreak: "keep-all", overflowWrap: "anywhere", textShadow: "0 4px 12px #000"}}>{state.subtitleText}</div> : null}
   </AbsoluteFill>;

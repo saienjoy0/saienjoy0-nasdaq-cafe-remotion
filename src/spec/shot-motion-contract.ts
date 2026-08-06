@@ -1,12 +1,12 @@
 import type {ShotRecipe} from "./shot-contract";
 import type {ResolvedShot} from "./shot-timeline";
 
-export const SHOT_INTRO_DURATION_MS = 320;
-export const MIN_SHOT_FINAL_HOLD_MS = 450;
-export const MAX_SHOT_ENTER_MS = 400;
-export const MAX_SHOT_BUILD_MS = 2_400;
-export const CAMERA_SETTLE_BEFORE_END_MS = 200;
-export const NARRATION_ITEM_REVEAL_MS = 420;
+export const SHOT_INTRO_DURATION_MS = 260;
+export const MIN_SHOT_FINAL_HOLD_MS = 500;
+export const MAX_SHOT_ENTER_MS = 360;
+export const MAX_SHOT_BUILD_MS = 1_800;
+export const CAMERA_SETTLE_BEFORE_END_MS = 220;
+export const NARRATION_ITEM_REVEAL_MS = 300;
 
 export type ShotMotionProfile = {
   enterMs: number;
@@ -16,18 +16,18 @@ export type ShotMotionProfile = {
 };
 
 export const SHOT_MOTION_PROFILES: Record<ShotRecipe, ShotMotionProfile> = {
-  "hero-metric-impact": {enterMs: 340, buildMs: 340, staggerMs: 0, holdMinMs: 600},
-  "contradiction-interrupt": {enterMs: 240, buildMs: 240, staggerMs: 0, holdMinMs: 550},
-  "expected-anchor": {enterMs: 320, buildMs: 360, staggerMs: 0, holdMinMs: 600},
-  "actual-crosses-expected": {enterMs: 340, buildMs: 420, staggerMs: 0, holdMinMs: 600},
-  "gap-macro": {enterMs: 320, buildMs: 360, staggerMs: 0, holdMinMs: 600},
-  "causal-build": {enterMs: 220, buildMs: 2_200, staggerMs: 420, holdMinMs: 700},
-  "counterforce-interrupt": {enterMs: 240, buildMs: 280, staggerMs: 0, holdMinMs: 550},
-  "entity-cutaway": {enterMs: 300, buildMs: 320, staggerMs: 0, holdMinMs: 600},
-  "split-opposition": {enterMs: 300, buildMs: 420, staggerMs: 0, holdMinMs: 600},
-  "focus-matrix-reveal": {enterMs: 260, buildMs: 1_800, staggerMs: 380, holdMinMs: 700},
-  "verification-two-paths": {enterMs: 260, buildMs: 2_000, staggerMs: 400, holdMinMs: 750},
-  "recap-assembly": {enterMs: 240, buildMs: 2_200, staggerMs: 420, holdMinMs: 850},
+  "hero-metric-impact": {enterMs: 220, buildMs: 260, staggerMs: 0, holdMinMs: 650},
+  "contradiction-interrupt": {enterMs: 180, buildMs: 220, staggerMs: 0, holdMinMs: 600},
+  "expected-anchor": {enterMs: 240, buildMs: 300, staggerMs: 0, holdMinMs: 650},
+  "actual-crosses-expected": {enterMs: 260, buildMs: 340, staggerMs: 0, holdMinMs: 650},
+  "gap-macro": {enterMs: 220, buildMs: 280, staggerMs: 0, holdMinMs: 650},
+  "causal-build": {enterMs: 180, buildMs: 1_800, staggerMs: 260, holdMinMs: 750},
+  "counterforce-interrupt": {enterMs: 190, buildMs: 240, staggerMs: 0, holdMinMs: 600},
+  "entity-cutaway": {enterMs: 230, buildMs: 280, staggerMs: 0, holdMinMs: 650},
+  "split-opposition": {enterMs: 230, buildMs: 320, staggerMs: 0, holdMinMs: 650},
+  "focus-matrix-reveal": {enterMs: 210, buildMs: 1_200, staggerMs: 260, holdMinMs: 750},
+  "verification-two-paths": {enterMs: 210, buildMs: 1_300, staggerMs: 280, holdMinMs: 800},
+  "recap-assembly": {enterMs: 240, buildMs: 1_500, staggerMs: 300, holdMinMs: 900},
 };
 
 const clampUnit = (value: number) => Math.max(0, Math.min(1, value));

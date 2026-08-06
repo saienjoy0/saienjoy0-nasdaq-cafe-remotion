@@ -7,20 +7,20 @@ export const STAGE_LABEL_HEIGHT = 68;
 export const STAGE_TYPOGRAPHY_HEIGHT = 92;
 
 export const palette = {
-  ink: "#f7fbff",
-  dark: "rgba(5,12,28,.94)",
-  darkSoft: "rgba(14,31,53,.86)",
-  cyan: "#29d7f0",
-  positive: "#39d99a",
-  negative: "#ff6b7a",
-  warning: "#ffc74a",
-  neutral: "#8fb7d1",
-  emphasis: "#b78cff",
+  ink: "var(--stage-text-primary,#F7FBFF)",
+  dark: "var(--stage-surface-strong,rgba(5,12,28,.94))",
+  darkSoft: "var(--stage-surface,rgba(14,31,53,.86))",
+  cyan: "var(--stage-accent,#29D7F0)",
+  positive: "var(--stage-positive,#39D99A)",
+  negative: "var(--stage-negative,#FF6B7A)",
+  warning: "var(--stage-warning,#FFC74A)",
+  neutral: "var(--stage-text-muted,#8FB7D1)",
+  emphasis: "var(--stage-emphasis,#B78CFF)",
 };
 
 export const visibleLength = (value: string) => Array.from(value.replace(/\s+/gu, "")).length;
 
-export const safeFontSize = (value: string, preferred: number, minimum = 28, width = 1180) => {
+export const safeFontSize = (value: string, preferred: number, minimum = 30, width = 1180) => {
   const length = Math.max(1, visibleLength(value));
   const estimated = Math.floor(width / (length * .62));
   return Math.max(minimum, Math.min(preferred, estimated));
@@ -34,21 +34,18 @@ export const StageShell: React.FC<{
 }> = ({children, accent = palette.cyan, transparent = false, style}) => {
   const legacyBackground = transparent
     ? "linear-gradient(145deg,rgba(5,12,28,.38),rgba(14,31,53,.30))"
-    : `radial-gradient(circle at 70% 25%,${accent}20,transparent 44%),linear-gradient(145deg,${palette.dark},${palette.darkSoft})`;
+    : "radial-gradient(circle at 70% 25%,rgba(41,215,240,.14),transparent 44%),linear-gradient(145deg,rgba(5,12,28,.94),rgba(14,31,53,.86))";
 
   return <div style={{
     position: "absolute",
     inset: 0,
     overflow: "hidden",
     boxSizing: "border-box",
-    // The fallbacks preserve the old Shot surface in legacy mode. A resolved
-    // Visual Grammar Stage Shell provides inherited variables that remove this
-    // generic board so its physically distinct background and ornaments show.
-    borderRadius: "var(--shot-stage-border-radius, 30px)",
+    borderRadius: "var(--shot-stage-border-radius,30px)",
     color: palette.ink,
-    background: `var(--shot-stage-background, ${legacyBackground})`,
-    border: `var(--shot-stage-border, 2px solid ${accent}78)`,
-    boxShadow: "var(--shot-stage-box-shadow, 0 24px 58px rgba(0,0,0,.34))",
+    background: `var(--shot-stage-background,${legacyBackground})`,
+    border: `var(--shot-stage-border,2px solid ${accent})`,
+    boxShadow: "var(--shot-stage-box-shadow,0 24px 58px rgba(0,0,0,.34))",
     ...style,
   }}>{children}</div>;
 };
@@ -69,9 +66,9 @@ export const SafeContent: React.FC<{
 }}>{children}</div>;
 
 export const StageEyebrow: React.FC<{children: React.ReactNode; tone?: string}> = ({children, tone = palette.neutral}) => <div style={{
-  fontSize: 27,
-  lineHeight: "34px",
+  fontSize: 29,
+  lineHeight: "36px",
   color: tone,
   fontWeight: 900,
-  letterSpacing: ".04em",
+  letterSpacing: ".035em",
 }}>{children}</div>;
