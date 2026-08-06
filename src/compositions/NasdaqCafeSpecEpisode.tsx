@@ -7,8 +7,10 @@ import {SpecAssetLayer} from "../components/spec/SpecAssetLayer";
 import {FoxExpressionLayer} from "../components/spec/FoxExpressionLayer";
 import {ShotStageRenderer} from "../components/spec/ShotStageRenderer";
 import {SoundCueTrack} from "../components/spec/SoundCueTrack";
+import {VisualGrammarStageModeProvider} from "../components/spec/VisualGrammarStageHost";
 import type {RenderProductionData, RenderSpecScene} from "../spec/render-spec";
 import {getSceneRenderState, getSpecDurationInFrames, getTransitionDurationInFrames} from "../spec/render-state";
+import type {VisualGrammarStageMode} from "../spec/visual-grammar-stage-mode";
 import {toPublicSceneViewModel} from "../spec/public-view-model";
 import {assertSpecLayoutFits} from "../spec/validate-render-layout";
 import {fontFamily} from "../fonts";
@@ -45,20 +47,25 @@ export const SpecSceneFrame: React.FC<{
   </AbsoluteFill>;
 };
 
-export const NasdaqCafeSpecEpisode: React.FC<{data: RenderProductionData}> = ({data}) => {
+export const NasdaqCafeSpecEpisode: React.FC<{
+  data: RenderProductionData;
+  visualGrammarStageMode?: VisualGrammarStageMode;
+}> = ({data, visualGrammarStageMode = "candidate"}) => {
   assertSpecLayoutFits(data);
-  return <TransitionSeries>{data.scenes.map((scene, index) => {
-    const transitionFrames = getTransitionDurationInFrames(scene, data.episode.fps);
-    if (transitionFrames >= scene.durationInFrames) throw new Error(`$.scenes[${index}].transition.durationMs: transition must be shorter than Scene`);
-    return <Fragment key={scene.sceneId}>
-      <TransitionSeries.Sequence durationInFrames={scene.durationInFrames} premountFor={data.episode.fps}>
-        <SpecSceneFrame scene={scene} assets={data.assets}/>
-        {scene.narrationChunks.map((chunk) => <Sequence key={chunk.chunkId} from={chunk.startFrame} durationInFrames={Math.max(1, chunk.endFrame - chunk.startFrame + 1)} premountFor={data.episode.fps}><Audio src={staticFile(chunk.audioSrc)}/></Sequence>)}
-        <SoundCueTrack scene={scene} fps={data.episode.fps}/>
-      </TransitionSeries.Sequence>
-      {index < data.scenes.length - 1 && scene.transition.type === "fade" ? <TransitionSeries.Transition presentation={fade()} timing={linearTiming({durationInFrames: transitionFrames})}/> : null}
-    </Fragment>;
-  })}</TransitionSeries>;
+  return <VisualGrammarStageModeProvider mode={visualGrammarStageMode}>
+    <TransitionSeries>{data.scenes.map((scene, index) => {
+      const transitionFrames = getTransitionDurationInFrames(scene, data.episode.fps);
+      if (transitionFrames >= scene.durationInFrames) throw new Error(`$.scenes[${index}].transition.durationMs: transition must be shorter than Scene`);
+      return <Fragment key={scene.sceneId}>
+        <TransitionSeries.Sequence durationInFrames={scene.durationInFrames} premountFor={data.episode.fps}>
+          <SpecSceneFrame scene={scene} assets={data.assets}/>
+          {scene.narrationChunks.map((chunk) => <Sequence key={chunk.chunkId} from={chunk.startFrame} durationInFrames={Math.max(1, chunk.endFrame - chunk.startFrame + 1)} premountFor={data.episode.fps}><Audio src={staticFile(chunk.audioSrc)}/></Sequence>)}
+          <SoundCueTrack scene={scene} fps={data.episode.fps}/>
+        </TransitionSeries.Sequence>
+        {index < data.scenes.length - 1 && scene.transition.type === "fade" ? <TransitionSeries.Transition presentation={fade()} timing={linearTiming({durationInFrames: transitionFrames})}/> : null}
+      </Fragment>;
+    })}</TransitionSeries>
+  </VisualGrammarStageModeProvider>;
 };
 
 export const calculateSpecDurationInFrames = (data: RenderProductionData) =>
