@@ -1,0 +1,241 @@
+{
+  "contractVersion": "1.0.0",
+  "semanticGrammarVersion": "1.0.0",
+  "renderSpecTargetVersion": "2.4.0",
+  "entries": [
+    {
+      "visualTemplateId": "opening-contradiction",
+      "allowedGrammarIds": ["contradiction"],
+      "appearanceClass": "open-hero",
+      "dominantSurface": "open-canvas",
+      "stageShell": "OpenHeroStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "market-pulse-grid",
+      "allowedGrammarIds": ["evidence", "reaction"],
+      "appearanceClass": "metric-board",
+      "dominantSurface": "card-board",
+      "stageShell": "MetricBoardStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "earnings-surprise",
+      "allowedGrammarIds": ["gap"],
+      "appearanceClass": "progressive-chart",
+      "dominantSurface": "plot",
+      "stageShell": "ProgressiveChartStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "dual-asset-split",
+      "allowedGrammarIds": ["comparison"],
+      "appearanceClass": "split-comparison",
+      "dominantSurface": "split",
+      "stageShell": "SplitComparisonStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "macro-pressure",
+      "allowedGrammarIds": ["causal"],
+      "appearanceClass": "causal-path",
+      "dominantSurface": "network",
+      "stageShell": "CausalPathStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "source-receipt",
+      "allowedGrammarIds": ["evidence"],
+      "appearanceClass": "document-media",
+      "dominantSurface": "media",
+      "stageShell": "DocumentMediaStage",
+      "nonAnalysis": true,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "hero-number",
+      "allowedGrammarIds": ["contradiction", "evidence"],
+      "appearanceClass": "open-hero",
+      "dominantSurface": "open-canvas",
+      "stageShell": "OpenHeroStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "closing-recap",
+      "allowedGrammarIds": ["assembly"],
+      "appearanceClass": "assembly-map",
+      "dominantSurface": "assembly",
+      "stageShell": "AssemblyStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "final-assembly",
+      "allowedGrammarIds": ["assembly"],
+      "appearanceClass": "assembly-map",
+      "dominantSurface": "assembly",
+      "stageShell": "AssemblyStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "conclusion-card",
+      "allowedGrammarIds": ["assembly"],
+      "appearanceClass": "assembly-map",
+      "dominantSurface": "assembly",
+      "stageShell": "AssemblyStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "expected-actual-bullet",
+      "allowedGrammarIds": ["gap"],
+      "appearanceClass": "progressive-chart",
+      "dominantSurface": "plot",
+      "stageShell": "ProgressiveChartStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "expected-actual-gap-flow",
+      "allowedGrammarIds": ["gap"],
+      "appearanceClass": "progressive-chart",
+      "dominantSurface": "plot",
+      "stageShell": "ProgressiveChartStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "metric-comparison-board",
+      "allowedGrammarIds": ["evidence", "comparison"],
+      "appearanceClass": "metric-board",
+      "dominantSurface": "card-board",
+      "stageShell": "MetricBoardStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "index-return-bars",
+      "allowedGrammarIds": ["evidence", "reaction"],
+      "appearanceClass": "progressive-chart",
+      "dominantSurface": "plot",
+      "stageShell": "ProgressiveChartStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "diverging-stock-bars",
+      "allowedGrammarIds": ["comparison"],
+      "appearanceClass": "split-comparison",
+      "dominantSurface": "split",
+      "stageShell": "SplitComparisonStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "split-comparison",
+      "allowedGrammarIds": ["comparison"],
+      "appearanceClass": "split-comparison",
+      "dominantSurface": "split",
+      "stageShell": "SplitComparisonStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "focus-matrix",
+      "allowedGrammarIds": ["comparison", "evidence"],
+      "appearanceClass": "matrix-grid",
+      "dominantSurface": "matrix",
+      "stageShell": "MatrixStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "causal-lane",
+      "allowedGrammarIds": ["causal"],
+      "appearanceClass": "causal-path",
+      "dominantSurface": "network",
+      "stageShell": "CausalPathStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "tailwind-headwind",
+      "allowedGrammarIds": ["causal", "evidence"],
+      "appearanceClass": "dual-lane",
+      "dominantSurface": "split",
+      "stageShell": "DualLaneStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "evidence-boundary",
+      "allowedGrammarIds": ["evidence"],
+      "appearanceClass": "dual-lane",
+      "dominantSurface": "split",
+      "stageShell": "DualLaneStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "verification-checklist",
+      "allowedGrammarIds": ["verification"],
+      "appearanceClass": "verification-gates",
+      "dominantSurface": "split",
+      "stageShell": "VerificationGateStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "verification-matrix",
+      "allowedGrammarIds": ["verification"],
+      "appearanceClass": "verification-gates",
+      "dominantSurface": "matrix",
+      "stageShell": "VerificationGateStage",
+      "nonAnalysis": false,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "analogy-steps",
+      "allowedGrammarIds": ["analogy"],
+      "appearanceClass": "picturebook-canvas",
+      "dominantSurface": "picturebook",
+      "stageShell": "PictureBookStage",
+      "nonAnalysis": true,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "entity-card-full",
+      "allowedGrammarIds": ["entity"],
+      "appearanceClass": "entity-canvas",
+      "dominantSurface": "entity",
+      "stageShell": "EntityStage",
+      "nonAnalysis": true,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "news-media",
+      "allowedGrammarIds": ["evidence"],
+      "appearanceClass": "document-media",
+      "dominantSurface": "media",
+      "stageShell": "DocumentMediaStage",
+      "nonAnalysis": true,
+      "status": "active"
+    },
+    {
+      "visualTemplateId": "text-focus",
+      "allowedGrammarIds": ["bridge-text"],
+      "appearanceClass": "text-bridge",
+      "dominantSurface": "text",
+      "stageShell": "TextBridgeStage",
+      "nonAnalysis": true,
+      "status": "active"
+    }
+  ]
+}
