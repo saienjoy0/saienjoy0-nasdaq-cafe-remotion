@@ -56,7 +56,7 @@ jobs:
       - name: Run reaction timeline renderer tests
         run: npm run test:event-reaction-timeline
       - name: Run reaction timeline validator tests
-        run: npm run test:reaction-timeline-contract
+        run: npx tsx scripts/test-reaction-timeline-contract.ts
       - name: Run motion language and TTS identity tests
         run: npm run test:visual-grammar-motion
       - name: Typecheck
