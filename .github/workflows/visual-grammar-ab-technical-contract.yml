@@ -1,0 +1,74 @@
+name: Visual Grammar Technical A/B Contract
+
+on:
+  pull_request:
+    paths:
+      - "contracts/visual_grammar_technical_fixture_2099-02-02.json"
+      - "scripts/migrate_visual_grammar_technical_fixture.py"
+      - "scripts/compile-visual-grammar-ab-technical.ts"
+      - "scripts/test_visual_grammar_technical_fixture.py"
+      - ".github/workflows/visual-grammar-ab-technical-preview.yml"
+      - ".github/workflows/visual-grammar-ab-technical-contract.yml"
+      - "visual-grammar-ab-technical-requests/README.md"
+  push:
+    branches:
+      - main
+    paths:
+      - "contracts/visual_grammar_technical_fixture_2099-02-02.json"
+      - "scripts/migrate_visual_grammar_technical_fixture.py"
+      - "scripts/compile-visual-grammar-ab-technical.ts"
+      - "scripts/test_visual_grammar_technical_fixture.py"
+      - ".github/workflows/visual-grammar-ab-technical-preview.yml"
+      - ".github/workflows/visual-grammar-ab-technical-contract.yml"
+      - "visual-grammar-ab-technical-requests/README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Validate JSON and workflow YAML syntax
+        run: |
+          python3 -m json.tool contracts/visual_grammar_technical_fixture_2099-02-02.json >/dev/null
+          ruby -e 'require "yaml"; ARGV.each { |file| YAML.load_file(file); puts "PASS #{file}" }' \
+            .github/workflows/visual-grammar-ab-technical-preview.yml \
+            .github/workflows/visual-grammar-ab-technical-contract.yml
+
+      - name: Run deterministic technical fixture migration tests
+        run: python3 scripts/test_visual_grammar_technical_fixture.py
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run existing A/B and workflow safety contracts
+        run: |
+          npx tsx scripts/test-visual-grammar-ab-contract.tsx
+          npm run test:workflow-contract
+
+      - name: Validate migrated render_spec 2.4.0
+        run: |
+          rm -rf build/tests/visual-grammar-technical
+          mkdir -p build/tests/visual-grammar-technical
+          python3 scripts/migrate_visual_grammar_technical_fixture.py \
+            --source shared-fixtures/financial-visual-2.3/render_spec.json \
+            --mapping contracts/visual_grammar_technical_fixture_2099-02-02.json \
+            --output build/tests/visual-grammar-technical/render_spec.json \
+            --manifest build/tests/visual-grammar-technical/migration.json
+          npm run episode:spec:validate -- build/tests/visual-grammar-technical/render_spec.json
