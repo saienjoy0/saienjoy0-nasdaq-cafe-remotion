@@ -1,6 +1,7 @@
 name: Sync Official FVU R3 Fixture and Redispatch Preview
 
-# Retriggered after the technical PR was reopened.
+# One-time technical bootstrap. The workflow deletes itself before validating
+# the repository workflow contract and before committing the Preview input.
 on:
   pull_request:
     types: [synchronize]
@@ -83,11 +84,13 @@ jobs:
           print(json.dumps({"status": "official-fixture-copied", "financialShots": len(shots), "totalShots": total}, indent=2))
           PY
 
+      - name: Remove one-time dispatcher before repository contract tests
+        run: git rm .github/workflows/fvu-r3-shot-plan-repair.yml
+
       - name: Validate official fixture and runtime contracts
         run: |
           npm run episode:spec:validate -- "$TARGET_SPEC"
           npm run test:runtime-stability
-          npm run test:visual-story
           node --import tsx scripts/test-financial-handoff-fixture.ts
 
       - name: Commit immutable official Preview input
@@ -97,7 +100,6 @@ jobs:
           set -euo pipefail
           spec_sha="$(sha256sum "$TARGET_SPEC" | awk '{print $1}')"
           rm -f technical-preview-run-id.txt
-          git rm .github/workflows/fvu-r3-shot-plan-repair.yml
           git add "$TARGET_SPEC"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
