@@ -74,7 +74,7 @@ with tempfile.TemporaryDirectory(prefix="vg-technical-fixture-") as tmp:
         "migration changed source content outside Visual Grammar metadata"
     )
     assert output["schemaVersion"] == "2.4.0"
-    assert output["visualGrammarContract"]["beatCount"] == 17
+    assert output["visualGrammarContract"]["beatCount"] == 18
     assert output["visualGrammarContract"]["semanticsSha256"] == sha(MAPPING)
     assert output["visualGrammarContract"]["rendererCompatibilitySha256"] == sha(REGISTRY)
     assert output["visualGrammarContract"]["finalEpisodeContractSha256"] == sha(SOURCE)
