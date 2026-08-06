@@ -11,7 +11,7 @@ const generated = z.toJSONSchema(renderSpecSchema, {
 const schema = {
   ...generated,
   $id: "schemas/render_spec.schema.json",
-  title: "NASDAQ Cafe render_spec 2.3.0",
+  title: "NASDAQ Cafe render_spec 2.4.0",
   description: "Generated from src/spec/render-spec.ts. Do not edit by hand.",
 };
 const output = path.join(PROJECT_DIR, "schemas", "render_spec.schema.json");

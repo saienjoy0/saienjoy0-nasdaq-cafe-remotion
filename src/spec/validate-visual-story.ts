@@ -1,6 +1,7 @@
 import type {RenderSpec} from "./render-spec";
 import {collectCausalVisualEventIssues} from "./causal-visual-event-contract";
 import {VISUAL_TEMPLATE_CONTRACTS} from "./visual-template-contract";
+import {validateVisualGrammarContract} from "./validate-visual-grammar";
 
 const fail = (path: string, message: string): never => {
   throw new Error(`${path}: ${message}`);
@@ -28,6 +29,7 @@ export const validateVisualStoryContract = (
   spec: RenderSpec,
   options: {enforceVariety?: boolean} = {},
 ) => {
+  validateVisualGrammarContract(spec);
   const families: string[] = [];
 
   spec.scenes.forEach((scene, sceneIndex) => {
