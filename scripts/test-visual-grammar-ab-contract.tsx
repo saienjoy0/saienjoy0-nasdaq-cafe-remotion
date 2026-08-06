@@ -145,7 +145,7 @@ const workflowText = readFileSync(
 );
 assert.match(workflowText, /workflow_dispatch:/);
 assert.match(workflowText, /confirmation must be exactly AB_PREVIEW/);
-assert.match(workflowText, /github.actor == github.repository_owner/);
+assert.match(workflowText, /GITHUB_ACTOR.*GITHUB_REPOSITORY_OWNER/);
 assert.match(workflowText, /SPEC_TTS_CACHE_ONLY: "1"/);
 assert.match(workflowText, /VISUAL_GRAMMAR_AB_PREVIEW: "1"/);
 assert.match(workflowText, /stage_mode: legacy/);
