@@ -871,6 +871,7 @@
                     "analogy-steps",
                     "entity-card-full",
                     "news-media",
+                    "event-reaction-timeline",
                     "text-focus"
                   ]
                 },
@@ -912,7 +913,11 @@
                     "prebuilt-card",
                     "grid",
                     "receipt",
-                    "pressure-lane"
+                    "pressure-lane",
+                    "verified-series",
+                    "reported-sequence",
+                    "official-time-plus-close",
+                    "close-only"
                   ]
                 },
                 "templateConfig": {
@@ -931,7 +936,11 @@
                         "prebuilt-card",
                         "grid",
                         "receipt",
-                        "pressure-lane"
+                        "pressure-lane",
+                        "verified-series",
+                        "reported-sequence",
+                        "official-time-plus-close",
+                        "close-only"
                       ]
                     },
                     "comparisonBasis": {
@@ -1004,6 +1013,43 @@
                         "type": "string",
                         "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
                       }
+                    },
+                    "reactionTimeline": {
+                      "type": "object",
+                      "properties": {
+                        "precision": {
+                          "type": "string",
+                          "enum": [
+                            "verified-intraday-series",
+                            "reported-sequence",
+                            "official-time-plus-close",
+                            "close-only"
+                          ]
+                        },
+                        "eventOrderIds": {
+                          "minItems": 1,
+                          "maxItems": 8,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                          }
+                        },
+                        "seriesObjectIds": {
+                          "maxItems": 6,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                          }
+                        }
+                      },
+                      "required": [
+                        "precision",
+                        "eventOrderIds",
+                        "seriesObjectIds"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [

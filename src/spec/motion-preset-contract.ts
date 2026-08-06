@@ -52,22 +52,22 @@ export const MOTION_PRESETS_BY_ACTION: Record<MotionAction, readonly MotionPrese
 };
 
 export const DEFAULT_MOTION_DURATION_MS: Record<MotionPreset, number> = {
-  "fade-soft": 420,
-  "slide-soft-left": 560,
-  "slide-soft-right": 560,
-  "rise-soft": 560,
-  "scale-settle": 620,
-  "grow-from-baseline": 680,
-  "grow-from-center": 680,
-  "draw-line": 720,
-  "count-up": 760,
-  "focus-ring": 420,
-  "scale-focus": 480,
-  "dim-others": 420,
-  "pulse-once": 520,
-  "fade-out": 360,
-  "slide-out-soft": 460,
-  "collapse-to-outcome": 620,
+  "fade-soft": 240,
+  "slide-soft-left": 400,
+  "slide-soft-right": 400,
+  "rise-soft": 380,
+  "scale-settle": 420,
+  "grow-from-baseline": 460,
+  "grow-from-center": 460,
+  "draw-line": 600,
+  "count-up": 460,
+  "focus-ring": 300,
+  "scale-focus": 360,
+  "dim-others": 300,
+  "pulse-once": 360,
+  "fade-out": 260,
+  "slide-out-soft": 360,
+  "collapse-to-outcome": 420,
 };
 
 export const isMotionPresetAllowed = (

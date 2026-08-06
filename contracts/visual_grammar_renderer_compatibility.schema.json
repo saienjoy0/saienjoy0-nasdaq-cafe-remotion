@@ -14,8 +14,8 @@
     },
     "templates": {
       "type": "array",
-      "minItems": 26,
-      "maxItems": 26,
+      "minItems": 27,
+      "maxItems": 27,
       "items": {
         "$ref": "#/$defs/template"
       }
@@ -114,7 +114,11 @@
             "prebuilt-card",
             "grid",
             "receipt",
-            "pressure-lane"
+            "pressure-lane",
+            "verified-series",
+            "reported-sequence",
+            "official-time-plus-close",
+            "close-only"
           ]
         },
         "appearanceClass": {
@@ -170,6 +174,7 @@
             "analogy-steps",
             "entity-card-full",
             "news-media",
+            "event-reaction-timeline",
             "text-focus"
           ]
         },

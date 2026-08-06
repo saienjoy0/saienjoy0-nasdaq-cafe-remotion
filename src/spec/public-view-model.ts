@@ -211,7 +211,7 @@ export const toPublicSceneViewModel = (
         ? "explicit"
         : "object-order-fallback";
   const sequencePolicy = beat.sequencePolicy ?? inferredSequencePolicy;
-  const staggerMs = Math.min(900, Math.max(260, beatDurationMs * 0.11));
+  const staggerMs = Math.min(560, Math.max(200, beatDurationMs * 0.08));
   const defaultRevealAtMs = (id: string) => {
     if (sequencePolicy === "static") return beat.startMs;
     const index = Math.max(0, beat.objectIds.indexOf(id));
