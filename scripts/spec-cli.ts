@@ -1,3 +1,4 @@
+import {createHash} from "node:crypto";
 import {mkdir, readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import {bundle} from "@remotion/bundler";
@@ -6,6 +7,7 @@ import voiceProfilesJson from "../config/voice-profiles.json";
 import {productionAssetPaths} from "../src/config/production-assets";
 import {compileRenderSpec, type SynthesizedChunk} from "../src/spec/compile-render-spec";
 import {getTransitionDurationInFrames} from "../src/spec/render-state";
+import {measureVisualGrammarTiming} from "../src/spec/measure-visual-grammar";
 import {assertProductionTextSafe, resolveVoiceProfile} from "../src/spec/validate-render-spec";
 import {
   evaluateDurationContract,
@@ -31,6 +33,8 @@ const workspaceFor = (id: string) =>
     : path.join(PROJECT_DIR, "build", id);
 const buildPath = (id: string) => path.join(workspaceFor(id), "render_data.production.json");
 const technicalPath = (id: string) => path.join(workspaceFor(id), "technical_report.json");
+const visualGrammarTimingPath = (id: string) =>
+  path.join(workspaceFor(id), "visual_grammar_timing_report.json");
 const mediaPath = (kind: "preview" | "final", id: string) => {
   const directory = isFixture
     ? path.join(PROJECT_DIR, "renders", "tests", "expression-final-verification", kind)
@@ -76,6 +80,16 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
   const reportPath = technicalPath(spec.episode.id);
   await mkdir(path.dirname(output), {recursive: true});
   await writeFile(output, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  const visualGrammarTimingReport = measureVisualGrammarTiming(spec, data);
+  const visualGrammarTimingReportPath = visualGrammarTimingReport
+    ? visualGrammarTimingPath(spec.episode.id)
+    : null;
+  let visualGrammarTimingReportSha256: string | null = null;
+  if (visualGrammarTimingReport && visualGrammarTimingReportPath) {
+    const timingJson = `${JSON.stringify(visualGrammarTimingReport, null, 2)}\n`;
+    await writeFile(visualGrammarTimingReportPath, timingJson, "utf8");
+    visualGrammarTimingReportSha256 = createHash("sha256").update(timingJson).digest("hex");
+  }
   const diagnosticByChunk = new Map(
     audioDiagnostics.map((item) => [item.chunkId, item.audio]),
   );
@@ -104,7 +118,7 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
     frames: getTransitionDurationInFrames(scene, spec.episode.fps),
   }));
   const report = {
-    status: "compiled",
+    status: visualGrammarTimingReport?.status === "FAIL" ? "compile-blocked" : "compiled",
     generatedAt: new Date().toISOString(),
     inputSpecPath: loaded.resolved,
     inputSpecSha256: sha256,
@@ -141,12 +155,24 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
       endFrame: scene.endFrame,
     })),
     transitionOverlaps: overlaps,
+    visualGrammarTiming: visualGrammarTimingReport
+      ? {
+          status: visualGrammarTimingReport.status,
+          path: visualGrammarTimingReportPath,
+          sha256: visualGrammarTimingReportSha256,
+          timingBasis: visualGrammarTimingReport.timingBasis,
+          fallbackDiversityRecheck: visualGrammarTimingReport.fallbackDiversityRecheck,
+          selectedFallbackBeatIds: visualGrammarTimingReport.selectedFallbackBeatIds,
+          unresolvedStateCount: visualGrammarTimingReport.unresolvedStateCount,
+          failureCodes: visualGrammarTimingReport.failures.map((failure) => failure.code),
+        }
+      : null,
     totalProductionDuration: {
       frames: data.timeline.totalDurationInFrames,
       ms: measuredDurationMs,
     },
     warnings: durationWarnings,
-    errors: [],
+    errors: visualGrammarTimingReport?.failures ?? [],
     productionJsonPath: output,
     previewPath: mediaPath("preview", spec.episode.id),
     testFinalPath: isFixture ? mediaPath("final", spec.episode.id) : null,
@@ -162,7 +188,21 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
     },
   };
   await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
-  return {spec, data, output, reportPath};
+  if (visualGrammarTimingReport?.status === "FAIL") {
+    throw new Error(
+      `Visual Grammar measured diversity gate failed: ${visualGrammarTimingReport.failures
+        .map((failure) => failure.code)
+        .join(", ")}`,
+    );
+  }
+  return {
+    spec,
+    data,
+    output,
+    reportPath,
+    visualGrammarTimingReportPath,
+    visualGrammarTimingReportSha256,
+  };
 };
 
 const prepare = async (
