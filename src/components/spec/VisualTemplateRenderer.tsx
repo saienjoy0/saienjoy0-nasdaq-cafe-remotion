@@ -22,6 +22,7 @@ import {
   MarketPulseGridTemplate,
   SourceReceiptTemplate,
 } from "./FinancialVisualTemplates";
+import {VisualGrammarStageHost} from "./VisualGrammarStageHost";
 
 const FPS = 30;
 const color = {
@@ -198,17 +199,12 @@ const timedStyle = (
   axis: "x" | "y" = "y",
 ): React.CSSProperties => entryStyle(content, revealAtMs, axis);
 
-const Surface: React.FC<{children: React.ReactNode; accent?: string; style?: React.CSSProperties}> = ({children, accent = color.cyan, style}) => <div style={{
+const Surface: React.FC<{children: React.ReactNode; accent?: string; style?: React.CSSProperties}> = ({children, style}) => <div style={{
   position: "relative",
   width: "100%",
   height: "100%",
   boxSizing: "border-box",
   overflow: "hidden",
-  borderRadius: 28,
-  color: color.ink,
-  background: `linear-gradient(145deg,${color.paper},${color.paperSoft})`,
-  border: `3px solid ${accent}`,
-  boxShadow: "0 22px 52px rgba(0,0,0,.27)",
   ...style,
 }}>{children}</div>;
 
@@ -315,7 +311,7 @@ const FinalAssembly: React.FC<{content: PublicMainContent}> = ({content}) => {
 };
 
 
-export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
+const renderSelectedVisualTemplate = (content: PublicMainContent): React.ReactNode => {
   switch (content.visualTemplate) {
     case "market-pulse-grid": return <MarketPulseGridTemplate content={content}/>;
     case "earnings-surprise": return <EarningsSurpriseTemplate content={content}/>;
@@ -345,4 +341,14 @@ export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({
     case "text-focus":
       return <SpecVisualMode content={content}/>;
   }
+  throw new Error(`unsupported Visual Template: ${content.visualTemplate}`);
 };
+
+export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({content}) => (
+  <VisualGrammarStageHost
+    visualTemplate={content.visualTemplate}
+    variant={content.templateConfig.variant}
+  >
+    {renderSelectedVisualTemplate(content)}
+  </VisualGrammarStageHost>
+);

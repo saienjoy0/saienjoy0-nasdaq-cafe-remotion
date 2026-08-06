@@ -84,17 +84,12 @@ const Surface: React.FC<{
   children: React.ReactNode;
   accent?: string;
   style?: React.CSSProperties;
-}> = ({children, accent = colors.cyan, style}) => <div style={{
+}> = ({children, style}) => <div style={{
   position: "relative",
   width: "100%",
   height: "100%",
   boxSizing: "border-box",
   overflow: "hidden",
-  borderRadius: 28,
-  color: colors.ink,
-  background: `linear-gradient(145deg,${colors.paper},${colors.paperSoft})`,
-  border: `3px solid ${accent}`,
-  boxShadow: "0 22px 50px rgba(0,0,0,.26)",
   ...style,
 }}>{children}</div>;
 

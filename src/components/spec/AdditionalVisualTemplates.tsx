@@ -50,16 +50,12 @@ const revealStyle = (
   };
 };
 
-const Surface: React.FC<{children: React.ReactNode; accent?: string; style?: React.CSSProperties}> = ({children, accent = palette.cyan, style}) => <div style={{
+const Surface: React.FC<{children: React.ReactNode; accent?: string; style?: React.CSSProperties}> = ({children, style}) => <div style={{
+  position: "relative",
   width: "100%",
   height: "100%",
   boxSizing: "border-box",
   overflow: "hidden",
-  borderRadius: 28,
-  color: palette.ink,
-  background: `linear-gradient(145deg,${palette.paper},${palette.paperSoft})`,
-  border: `3px solid ${accent}`,
-  boxShadow: "0 22px 52px rgba(0,0,0,.27)",
   ...style,
 }}>{children}</div>;
 

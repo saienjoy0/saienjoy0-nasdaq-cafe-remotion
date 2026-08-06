@@ -9,7 +9,14 @@ on:
       - "src/spec/validate-visual-grammar.ts"
       - "src/spec/render-spec.ts"
       - "src/spec/validate-visual-story.ts"
+      - "src/components/spec/VisualGrammarStageHost.tsx"
+      - "src/components/spec/stages/**"
+      - "src/components/spec/VisualTemplateRenderer.tsx"
+      - "src/components/spec/AdditionalVisualTemplates.tsx"
+      - "src/components/spec/FinancialVisualTemplates.tsx"
+      - "src/components/spec/SpecVisualModes.tsx"
       - "scripts/test-visual-grammar-contract.ts"
+      - "scripts/test-visual-grammar-stage-shells.tsx"
       - "scripts/generate-render-spec-schema.ts"
       - "schemas/render_spec.schema.json"
       - "package.json"
@@ -36,9 +43,13 @@ jobs:
           git diff --exit-code -- schemas/render_spec.schema.json
       - name: Run Visual Grammar contract tests
         run: npm run test:visual-grammar
+      - name: Run Stage Shell contract tests
+        run: npm run test:visual-grammar-stage-shells
       - name: Typecheck
         run: npm run typecheck
       - name: Run Visual Template regression tests
         run: npm run test:visual-templates
       - name: Run Visual Validator regression tests
         run: npm run test:visual-validator
+      - name: Run public screen boundary tests
+        run: npm run test:public-screen
