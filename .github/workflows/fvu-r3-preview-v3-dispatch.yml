@@ -1,0 +1,69 @@
+name: FVU R3 Preview V3 Dispatch
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fvu-r3-preview-v3-dispatch.yml"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  dispatch:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'tech/fvu-r3-preview-v3-2099-02-02'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Materialize immutable input and remove dispatcher
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          EXPECTED_SHA: de3807ba9e439dab0e2c1b919a96a68437b68689f01bacb1e21fa4bc275e30b6
+        run: |
+          set -euo pipefail
+          mkdir -p render-specs/2099-02-02
+          cp shared-fixtures/financial-visual-2.3/render_spec.json render-specs/2099-02-02/render_spec.json
+          actual="$(sha256sum render-specs/2099-02-02/render_spec.json | awk '{print $1}')"
+          test "$actual" = "$EXPECTED_SHA"
+          git rm .github/workflows/fvu-r3-preview-v3-dispatch.yml
+          git add render-specs/2099-02-02/render_spec.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Materialize FVU R3 Preview V3 input"
+          git push origin "HEAD:${HEAD_REF}"
+      - name: Dispatch standard Preview and record run ID
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
+          REPOSITORY: ${{ github.repository }}
+          EXPECTED_SHA: de3807ba9e439dab0e2c1b919a96a68437b68689f01bacb1e21fa4bc275e30b6
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${REPOSITORY}"
+          before="$(curl -fsS -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "${api}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${HEAD_REF}&event=workflow_dispatch&per_page=20")"
+          printf '%s' "$before" | python3 -c 'import json,sys; print("\n".join(str(r["id"]) for r in json.load(sys.stdin).get("workflow_runs", [])))' > /tmp/before-runs.txt
+          curl -fsS -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${api}/actions/workflows/nasdaq-cafe-preview.yml/dispatches" \
+            -d "{\"ref\":\"${HEAD_REF}\",\"inputs\":{\"episode_date\":\"2099-02-02\",\"expected_spec_sha256\":\"${EXPECTED_SHA}\",\"confirmation\":\"PREVIEW\"}}"
+          run_id=""
+          for attempt in $(seq 1 45); do
+            after="$(curl -fsS -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "${api}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${HEAD_REF}&event=workflow_dispatch&per_page=20")"
+            run_id="$(BEFORE_FILE=/tmp/before-runs.txt python3 -c 'import json,os,sys; old=set(open(os.environ["BEFORE_FILE"]).read().split()); runs=json.load(sys.stdin).get("workflow_runs", []); fresh=[str(r["id"]) for r in runs if str(r["id"]) not in old]; print(fresh[0] if fresh else "")' <<< "$after")"
+            [[ -n "$run_id" ]] && break
+            sleep 2
+          done
+          [[ -n "$run_id" ]]
+          printf '%s\n' "$run_id" > technical-preview-run-id.txt
+          git add technical-preview-run-id.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Record FVU R3 Preview V3 run"
+          git push origin "HEAD:${HEAD_REF}"
+          echo "Preview run ID: $run_id"
