@@ -1,0 +1,152 @@
+name: Rescue Preview 2026-08-06
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/rescue-preview-2026-08-06.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: rescue-preview-2026-08-06
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    if: contains(github.event.head_commit.message, '[run-rescue-preview-2026-08-06]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    env:
+      CI: "true"
+      SPEC_PATH: render-specs/2026-08-06/render_spec.json
+      EPISODE_ID: 2026-08-06
+      EXPECTED_RESCUE_SHA: 22bffa3b8091b990371a16bc867d249f6e3542d03203244179446c29c94567f5
+      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+      GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
+      GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Materialize approved temporary rescue spec
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$SPEC_PATH" <<'PY'
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          spec = json.loads(path.read_text(encoding="utf-8"))
+          if spec.get("episode", {}).get("id") != "2026-08-06":
+              raise SystemExit("unexpected episode id")
+          if spec.get("schemaVersion") != "2.4.0":
+              raise SystemExit("rescue source must be the approved 2.4.0 input")
+
+          for key in ("expectedConfirmed", "imageSelection", "tts", "visualGrammarContractVersion"):
+              spec.pop(key, None)
+          for scene in spec["scenes"]:
+              for visual_beat in scene["visualBeats"]:
+                  visual_beat.pop("visualBeatId", None)
+                  visual_beat.pop("visualGrammar", None)
+
+          def beat(scene_number, beat_number):
+              return spec["scenes"][scene_number - 1]["visualBeats"][beat_number - 1]
+
+          def set_template(scene_number, beat_number, template, variant):
+              visual_beat = beat(scene_number, beat_number)
+              visual_beat["visualTemplate"] = template
+              visual_beat["templateConfig"]["variant"] = variant
+
+          beat(2, 1)["returnScreenState"] = "Chart"
+          set_template(2, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
+          set_template(3, 1, "tailwind-headwind", "two-lane")
+          set_template(3, 2, "evidence-boundary", "confirmed-vs-unconfirmed")
+          set_template(4, 1, "tailwind-headwind", "two-lane")
+          beat(4, 2)["templateConfig"]["variant"] = "confirmed-vs-unconfirmed"
+          beat(5, 1)["returnScreenState"] = "Chart"
+          set_template(5, 2, "tailwind-headwind", "two-lane")
+          set_template(6, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
+          set_template(6, 2, "tailwind-headwind", "two-lane")
+          set_template(7, 1, "evidence-boundary", "confirmed-vs-unconfirmed")
+          set_template(7, 2, "tailwind-headwind", "two-lane")
+          beat(8, 1)["templateConfig"]["variant"] = "strengthen-vs-weaken"
+          spec["scenes"][7]["visualMode"] = "verification-points"
+          for visual_beat in spec["scenes"][7]["visualBeats"]:
+              visual_beat["visualMode"] = "verification-points"
+          spec["scenes"][8]["sceneRole"] = "closing-recap-sendoff-goodnight"
+          spec["scenes"][8]["visualMode"] = "conclusion-card"
+          beat(9, 1)["visualMode"] = "conclusion-card"
+          beat(9, 1)["visualTemplate"] = "final-assembly"
+
+          spec["schemaVersion"] = "2.2.0"
+          spec["sources"] = [
+              source for source in spec["sources"]
+              if re.fullmatch(r"source-[0-9]{3}", str(source.get("sourceId", "")))
+          ]
+          for source in spec["sources"]:
+              if source.get("sourceType") == "company-ir":
+                  source["sourceType"] = "company"
+
+          path.write_text(
+              json.dumps(spec, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          ACTUAL_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          if [[ "$ACTUAL_SHA" != "$EXPECTED_RESCUE_SHA" ]]; then
+            echo "::error::temporary rescue spec SHA mismatch"
+            echo "expected=$EXPECTED_RESCUE_SHA"
+            echo "actual=$ACTUAL_SHA"
+            exit 1
+          fi
+
+      - name: Validate render spec
+        run: npm run episode:spec:validate -- "$SPEC_PATH"
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Run runtime stability tests
+        run: npm run test:runtime-stability
+
+      - name: Generate preview
+        run: npm run episode:spec:preview -- "$SPEC_PATH"
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-rescue-preview-2026-08-06-${{ github.run_id }}
+          path: |
+            renders/preview/2026-08-06_nasdaq-cafe-spec-preview.mp4
+            build/2026-08-06/technical_report.json
+            build/2026-08-06/render_data.production.json
+            public/spec-audio/2026-08-06/tts-block-state.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
