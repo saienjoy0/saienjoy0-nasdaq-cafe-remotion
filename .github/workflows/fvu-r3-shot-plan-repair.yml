@@ -22,211 +22,155 @@ jobs:
       PREVIOUS_RUN_ID: "31057914208"
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Checkout technical branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ env.HEAD_REF }}
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Add explicit four-Shot financial plan
+      - name: Add explicit three-Shot financial plan
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
-          import copy
-          import json
-          import re
+          import copy, json, re
           from pathlib import Path
 
           path = Path("render-specs/2099-02-02/render_spec.json")
           spec = json.loads(path.read_text(encoding="utf-8"))
           original = copy.deepcopy(spec)
-
-          scene = next(item for item in spec["scenes"] if item["sceneId"] == "scene-04")
-          beat = next(item for item in scene["visualBeats"] if item["beatId"] == "vb-04-02")
-          if beat.get("visualTemplate") != "earnings-surprise":
-              raise SystemExit("target beat is no longer the approved earnings-surprise Template")
-          if beat.get("shots"):
-              raise SystemExit("target beat already has Shots; refusing to overwrite")
-          chunk = next(item for item in scene["narrationChunks"] if item["chunkId"] == "scene-04-chunk-001")
-
-          def normalize(value: str) -> str:
-              return re.sub(r"\s+", "", value).strip()
-
+          scene = next(s for s in spec["scenes"] if s["sceneId"] == "scene-04")
+          beat = next(b for b in scene["visualBeats"] if b["beatId"] == "vb-04-02")
+          if beat.get("visualTemplate") != "earnings-surprise" or beat.get("shots"):
+              raise SystemExit("target financial Beat is no longer in the expected unplanned state")
+          chunk = next(c for c in scene["narrationChunks"] if c["chunkId"] == "scene-04-chunk-001")
+          normalize = lambda value: re.sub(r"\s+", "", value).strip()
           speech = normalize(chunk["speechText"])
 
-          def progress(cue: str, edge: str) -> float:
+          def progress(cue, edge):
               needle = normalize(cue)
-              locations = [match.start() for match in re.finditer(re.escape(needle), speech)]
-              if len(locations) != 1:
-                  raise SystemExit(f"cue must occur exactly once: {cue!r} count={len(locations)}")
-              value = locations[0] + (len(needle) if edge == "end" else 0)
-              return round(value / len(speech), 6)
+              positions = [m.start() for m in re.finditer(re.escape(needle), speech)]
+              if len(positions) != 1:
+                  raise SystemExit(f"cue must occur exactly once: {cue!r}")
+              offset = positions[0] + (len(needle) if edge == "end" else 0)
+              return round(offset / len(speech), 6)
 
           plans = [
-              {
-                  "shotRecipe": "expected-anchor",
-                  "startCue": "市場が事前に見ていた論点は、",
-                  "endCue": "AI設備投資の大きさでした。",
-                  "primaryTargetId": "fvu-aws-expected",
-                  "referenceTargetId": None,
-                  "outcomeTargetId": None,
-                  "secondaryTargetIds": [],
-                  "cameraTargetId": "fvu-aws-expected",
-                  "stageLayout": "full-stage",
-                  "cameraPreset": "static",
-                  "transitionIn": "soft-reveal",
-                  "transitionOut": "carry-forward",
-                  "typographyTreatment": "underline-draw",
-                  "typographyText": "Expected $42.3B",
-                  "soundCue": None,
-                  "foxExpression": "分析",
-              },
-              {
-                  "shotRecipe": "actual-crosses-expected",
-                  "startCue": "大手クラウド各社は",
-                  "endCue": "巨額の資金を使っています。",
-                  "primaryTargetId": "fvu-aws-actual",
-                  "referenceTargetId": "fvu-aws-expected",
-                  "outcomeTargetId": None,
-                  "secondaryTargetIds": [],
-                  "cameraTargetId": "fvu-aws-actual",
-                  "stageLayout": "split-vertical",
-                  "cameraPreset": "push-in",
-                  "transitionIn": "reframe-shared-element",
-                  "transitionOut": "carry-forward",
-                  "typographyTreatment": "gap-highlight",
-                  "typographyText": "Actual $43.0B",
-                  "soundCue": "soft-impact",
-                  "foxExpression": "分析",
-              },
-              {
-                  "shotRecipe": "gap-macro",
-                  "startCue": "支出した瞬間に利益が出るわけではなく、",
-                  "endCue": "利用者と料金収入は後からついてきます。",
-                  "primaryTargetId": "fvu-aws-gap",
-                  "referenceTargetId": "fvu-aws-actual",
-                  "outcomeTargetId": "fvu-aws-gap",
-                  "secondaryTargetIds": [],
-                  "cameraTargetId": "fvu-aws-gap",
-                  "stageLayout": "macro-detail",
-                  "cameraPreset": "macro-detail",
-                  "transitionIn": "reframe-shared-element",
-                  "transitionOut": "carry-forward",
-                  "typographyTreatment": "gap-highlight",
-                  "typographyText": "Gap +$0.7B",
-                  "soundCue": None,
-                  "foxExpression": "軽い驚き",
-              },
-              {
-                  "shotRecipe": "hero-metric-impact",
-                  "startCue": "主要報道では、",
-                  "endCue": "繰り返し注目されていました。",
-                  "primaryTargetId": "fvu-aws-gap",
-                  "referenceTargetId": "fvu-aws-expected",
-                  "outcomeTargetId": "fvu-aws-gap",
-                  "secondaryTargetIds": ["fvu-aws-actual"],
-                  "cameraTargetId": "fvu-aws-gap",
-                  "stageLayout": "hero-center",
-                  "cameraPreset": "reframe-outcome",
-                  "transitionIn": "reframe-shared-element",
-                  "transitionOut": "hold-outcome",
-                  "typographyTreatment": "word-build",
-                  "typographyText": "回収できるか",
-                  "soundCue": "soft-impact",
-                  "foxExpression": "分析",
-              },
+              dict(
+                  shotRecipe="expected-anchor",
+                  startCue="市場が事前に見ていた論点は、",
+                  endCue="GPU、電力、ネットワークへ",
+                  primaryTargetId="fvu-aws-expected",
+                  referenceTargetId=None,
+                  outcomeTargetId=None,
+                  secondaryTargetIds=[],
+                  cameraTargetId="fvu-aws-expected",
+                  stageLayout="full-stage",
+                  cameraPreset="static",
+                  transitionIn="soft-reveal",
+                  transitionOut="carry-forward",
+                  typographyTreatment="underline-draw",
+                  typographyText="Expected $42.3B",
+                  soundCue=None,
+                  foxExpression="分析",
+              ),
+              dict(
+                  shotRecipe="actual-crosses-expected",
+                  startCue="巨額の資金を使っています。",
+                  endCue="利用者と料金収入は後からついてきます。",
+                  primaryTargetId="fvu-aws-actual",
+                  referenceTargetId="fvu-aws-expected",
+                  outcomeTargetId=None,
+                  secondaryTargetIds=[],
+                  cameraTargetId="fvu-aws-actual",
+                  stageLayout="split-vertical",
+                  cameraPreset="push-in",
+                  transitionIn="reframe-shared-element",
+                  transitionOut="carry-forward",
+                  typographyTreatment="gap-highlight",
+                  typographyText="Actual $43.0B",
+                  soundCue="soft-impact",
+                  foxExpression="分析",
+              ),
+              dict(
+                  shotRecipe="gap-macro",
+                  startCue="主要報道では、",
+                  endCue="繰り返し注目されていました。",
+                  primaryTargetId="fvu-aws-gap",
+                  referenceTargetId="fvu-aws-expected",
+                  outcomeTargetId="fvu-aws-gap",
+                  secondaryTargetIds=["fvu-aws-actual"],
+                  cameraTargetId="fvu-aws-gap",
+                  stageLayout="hero-center",
+                  cameraPreset="reframe-outcome",
+                  transitionIn="reframe-shared-element",
+                  transitionOut="hold-outcome",
+                  typographyTreatment="word-build",
+                  typographyText="Gap +$0.7B",
+                  soundCue="soft-impact",
+                  foxExpression="分析",
+              ),
           ]
 
           shots = []
           previous_end = 0.0
-          for index, plan in enumerate(plans, start=1):
+          for index, plan in enumerate(plans, 1):
               start = progress(plan["startCue"], "start")
               end = progress(plan["endCue"], "end")
               if index == 1 and start != 0.0:
-                  raise SystemExit("first Shot does not start at progress zero")
-              if start < previous_end or start - previous_end > 0.02:
-                  raise SystemExit(f"Shot {index} has an invalid semantic gap or overlap")
-              if end <= start:
-                  raise SystemExit(f"Shot {index} has invalid progress")
-              shots.append({
+                  raise SystemExit("first Shot must start at progress zero")
+              if abs(start - previous_end) > 0.000001 or end <= start:
+                  raise SystemExit(f"Shot {index} has a gap, overlap, or invalid duration")
+              shot = {
                   "shotId": f"vb-04-02-shot-{index:03d}",
-                  "shotRecipe": plan["shotRecipe"],
                   "startChunkId": "scene-04-chunk-001",
                   "startProgress": start,
                   "startOffsetMs": 0,
                   "endChunkId": "scene-04-chunk-001",
                   "endProgress": end,
                   "endOffsetMs": 0,
-                  "startCue": plan["startCue"],
-                  "endCue": plan["endCue"],
-                  "primaryTargetId": plan["primaryTargetId"],
-                  "referenceTargetId": plan["referenceTargetId"],
-                  "outcomeTargetId": plan["outcomeTargetId"],
-                  "secondaryTargetIds": plan["secondaryTargetIds"],
-                  "cameraTargetId": plan["cameraTargetId"],
-                  "stageLayout": plan["stageLayout"],
-                  "cameraPreset": plan["cameraPreset"],
-                  "transitionIn": plan["transitionIn"],
-                  "transitionOut": plan["transitionOut"],
                   "continuityKey": "vb-04-02-financial-flow",
-                  "typographyTreatment": plan["typographyTreatment"],
-                  "typographyText": plan["typographyText"],
-                  "soundCue": plan["soundCue"],
-                  "foxExpression": plan["foxExpression"],
-              })
+                  **plan,
+              }
+              shots.append(shot)
               previous_end = end
           if previous_end != 1.0:
-              raise SystemExit(f"final Shot must end at progress 1.0, got {previous_end}")
-
+              raise SystemExit("final Shot must end at progress one")
           beat["shots"] = shots
 
-          original_without_shots = copy.deepcopy(original)
-          updated_without_shots = copy.deepcopy(spec)
-          for value in (original_without_shots, updated_without_shots):
-              for item_scene in value["scenes"]:
-                  for item_beat in item_scene["visualBeats"]:
-                      item_beat.pop("shots", None)
-          if original_without_shots != updated_without_shots:
-              raise SystemExit("repair changed non-Shot render_spec content")
+          before = copy.deepcopy(original)
+          after = copy.deepcopy(spec)
+          for value in (before, after):
+              for s in value["scenes"]:
+                  for b in s["visualBeats"]:
+                      b.pop("shots", None)
+          if before != after:
+              raise SystemExit("non-Shot render_spec content changed")
 
-          total_shots = sum(
-              len(item_beat.get("shots", []))
-              for item_scene in spec["scenes"]
-              for item_beat in item_scene["visualBeats"]
-          )
-          if not 24 <= total_shots <= 50:
-              raise SystemExit(f"episode Shot count is outside production contract: {total_shots}")
-
+          total = sum(len(b.get("shots", [])) for s in spec["scenes"] for b in s["visualBeats"])
+          if total != 50:
+              raise SystemExit(f"expected exactly 50 Shots after repair, got {total}")
           path.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-          print(json.dumps({
-              "targetBeat": beat["beatId"],
-              "addedShots": len(shots),
-              "totalShots": total_shots,
-              "progress": [[item["startProgress"], item["endProgress"]] for item in shots],
-          }, ensure_ascii=False, indent=2))
+          print(json.dumps({"addedShots": 3, "totalShots": total, "progress": [[s["startProgress"], s["endProgress"]] for s in shots]}, indent=2))
           PY
 
-      - name: Validate repaired render spec
+      - name: Validate repaired spec and runtime contracts
         run: |
           npm run episode:spec:validate -- "$SPEC_PATH"
           npm run test:runtime-stability
 
-      - name: Commit repaired immutable input
+      - name: Commit immutable repaired input
         id: commit
         shell: bash
         run: |
           set -euo pipefail
-          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          spec_sha="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
           rm -f technical-preview-run-id.txt
           git rm .github/workflows/fvu-r3-shot-plan-repair.yml
           git add "$SPEC_PATH"
@@ -234,8 +178,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Add explicit Scene 4 financial Shot plan"
           git push origin "HEAD:${HEAD_REF}"
-          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
-          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$spec_sha" >> "$GITHUB_OUTPUT"
 
       - name: Dispatch corrected standard Preview
         shell: bash
@@ -243,25 +186,16 @@ jobs:
           SPEC_SHA: ${{ steps.commit.outputs.spec_sha }}
         run: |
           set -euo pipefail
-          api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
-          payload="$(python3 - <<'PY'
+          python3 - <<'PY' > /tmp/dispatch.json
           import json, os
-          print(json.dumps({
-              "ref": os.environ["HEAD_REF"],
-              "inputs": {
-                  "episode_date": os.environ["EPISODE_DATE"],
-                  "expected_spec_sha256": os.environ["SPEC_SHA"],
-                  "confirmation": "PREVIEW",
-              },
-          }))
+          print(json.dumps({"ref": os.environ["HEAD_REF"], "inputs": {"episode_date": os.environ["EPISODE_DATE"], "expected_spec_sha256": os.environ["SPEC_SHA"], "confirmation": "PREVIEW"}}))
           PY
-          )"
           curl -fsS -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "${api}/actions/workflows/nasdaq-cafe-preview.yml/dispatches" \
-            -d "$payload"
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/dispatches" \
+            --data-binary @/tmp/dispatch.json
 
       - name: Record corrected Preview run ID
         shell: bash
@@ -270,19 +204,12 @@ jobs:
           api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
           run_id=""
           for attempt in $(seq 1 30); do
-            payload="$(curl -fsS \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "${api}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${HEAD_REF}&event=workflow_dispatch&per_page=20")"
+            payload="$(curl -fsS -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "${api}/actions/workflows/nasdaq-cafe-preview.yml/runs?branch=${HEAD_REF}&event=workflow_dispatch&per_page=20")"
             run_id="$(PREVIOUS_RUN_ID="$PREVIOUS_RUN_ID" python3 -c 'import json,os,sys; old=int(os.environ["PREVIOUS_RUN_ID"]); runs=json.load(sys.stdin).get("workflow_runs", []); candidates=[r for r in runs if int(r["id"]) != old]; print(candidates[0]["id"] if candidates else "")' <<< "$payload")"
-            if [[ -n "$run_id" ]]; then break; fi
+            [[ -n "$run_id" ]] && break
             sleep 2
           done
-          if [[ -z "$run_id" ]]; then
-            echo "::error::Corrected Preview run was not found"
-            exit 1
-          fi
+          [[ -n "$run_id" ]] || { echo "::error::corrected Preview run not found"; exit 1; }
           printf '%s\n' "$run_id" > technical-preview-run-id.txt
           git add technical-preview-run-id.txt
           git commit -m "Record Shot-repaired Preview run"
