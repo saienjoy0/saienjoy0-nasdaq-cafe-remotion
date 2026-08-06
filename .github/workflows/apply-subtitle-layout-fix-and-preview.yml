@@ -1,4 +1,4 @@
-name: Apply Subtitle Layout Fix and Retry Preview
+name: Apply Subtitle Layout Validation Fix
 
 on:
   push:
@@ -8,22 +8,11 @@ on:
 
 permissions:
   contents: write
-  actions: write
-
-concurrency:
-  group: apply-subtitle-layout-fix-and-preview
-  cancel-in-progress: false
 
 jobs:
-  patch-test-preview:
+  patch-test-commit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 110
-    env:
-      EPISODE_DATE: "2026-08-06"
-      SPEC_PATH: "render-specs/2026-08-06/render_spec.json"
-      EXPECTED_SPEC_SHA256: "56362777f841e5594e01a3f19a1c7051e1950fe8b6e67a679d839893e4693362"
-      EXPECTED_TTS_INPUT_SHA256: "b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509"
-
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
         with:
@@ -45,7 +34,7 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Align layout validation with rendered subtitle cues
+      - name: Patch subtitle layout validation
         shell: bash
         run: |
           set -euo pipefail
@@ -54,29 +43,19 @@ jobs:
 
           path = Path("src/spec/validate-render-layout.ts")
           text = path.read_text(encoding="utf-8")
-
-          import_old = 'import type {RenderProductionData} from "./render-spec";'
-          import_new = 'import type {RenderProductionData} from "./render-spec";\nimport {createSubtitleCues} from "./subtitle-cues";'
-          if text.count(import_old) != 1:
-              raise SystemExit("render layout import insertion point changed")
-          text = text.replace(import_old, import_new, 1)
-
-          limit_old = 'captionText: {perLine: 34, lines: 3},'
-          limit_new = 'captionText: {perLine: 22, lines: 2},'
-          if text.count(limit_old) != 1:
-              raise SystemExit("caption layout limit insertion point changed")
-          text = text.replace(limit_old, limit_new, 1)
-
-          wrapped_block = '''const assertWrapped = (value: string, perLine: number, lines: number, path: string, area: string) => {
-  const explicitLines = value.split(/\\r?\\n/);
-  if (explicitLines.length > lines) throw new Error(`${path}: ${area} exceeds ${lines} lines`);
-  explicitLines.forEach((line, index) => assertLength(line, perLine, `${path}[line ${index + 1}]`, area));
-  const total = Array.from(value.replace(/\\r?\\n/g, "")).length;
-  if (total > perLine * lines) throw new Error(`${path}: ${total} characters exceed ${area} capacity ${perLine * lines}`);
-};'''
-          helper_block = wrapped_block + '''
-
-export type SubtitleLayoutChunk = {
+          text = text.replace(
+              'import type {RenderProductionData} from "./render-spec";',
+              'import type {RenderProductionData} from "./render-spec";\nimport {createSubtitleCues} from "./subtitle-cues";',
+              1,
+          )
+          text = text.replace(
+              'captionText: {perLine: 34, lines: 3},',
+              'captionText: {perLine: 22, lines: 2},',
+              1,
+          )
+          marker = '''const assertCausalShape = (
+'''
+          helper = '''export type SubtitleLayoutChunk = {
   speechText: string;
   startMs: number;
   endMs: number;
@@ -84,87 +63,56 @@ export type SubtitleLayoutChunk = {
 };
 
 export const assertSubtitleCueTextFits = (value: string, path = "$.subtitle") =>
-  assertWrapped(
-    value,
-    limits.captionText.perLine,
-    limits.captionText.lines,
-    path,
-    "subtitle",
-  );
+  assertWrapped(value, limits.captionText.perLine, limits.captionText.lines, path, "subtitle");
 
 export const assertNarrationChunkSubtitleLayoutFits = (
   chunk: SubtitleLayoutChunk,
   path: string,
 ) => {
-  // caption.text is retained as production metadata. The public subtitle layer
-  // renders time-sliced cues derived from speechText, so layout validation must
-  // inspect those exact cues rather than the unsliced metadata string.
   const cues = createSubtitleCues(chunk.speechText, chunk.startMs, chunk.endMs);
   cues.forEach((cue, cueIndex) =>
     assertSubtitleCueTextFits(cue.text, `${path}.subtitleCues[${cueIndex}].text`),
   );
   return cues;
-};'''
-          if text.count(wrapped_block) != 1:
-              raise SystemExit("assertWrapped block changed")
-          text = text.replace(wrapped_block, helper_block, 1)
+};
 
-          validation_old = 'scene.narrationChunks.forEach((chunk, index) => assertWrapped(chunk.caption.text, limits.captionText.perLine, limits.captionText.lines, `${base}.narrationChunks[${index}].caption.text`, "caption"));'
-          validation_new = 'scene.narrationChunks.forEach((chunk, index) => assertNarrationChunkSubtitleLayoutFits(chunk, `${base}.narrationChunks[${index}]`));'
-          if text.count(validation_old) != 1:
-              raise SystemExit("narration caption validation call changed")
-          text = text.replace(validation_old, validation_new, 1)
-          path.write_text(text, encoding="utf-8")
+'''
+          if text.count(marker) != 1:
+              raise SystemExit("subtitle helper insertion point changed")
+          text = text.replace(marker, helper + marker, 1)
+          old_call = 'scene.narrationChunks.forEach((chunk, index) => assertWrapped(chunk.caption.text, limits.captionText.perLine, limits.captionText.lines, `${base}.narrationChunks[${index}].caption.text`, "caption"));'
+          new_call = 'scene.narrationChunks.forEach((chunk, index) => assertNarrationChunkSubtitleLayoutFits(chunk, `${base}.narrationChunks[${index}]`));'
+          if text.count(old_call) != 1:
+              raise SystemExit("caption layout validation call changed")
+          path.write_text(text.replace(old_call, new_call, 1), encoding="utf-8")
 
           test_path = Path("scripts/test-subtitles.ts")
-          test_text = test_path.read_text(encoding="utf-8")
-          test_import_old = 'import {createSubtitleCues, getSubtitleTextAtTime} from "../src/spec/subtitle-cues";'
-          test_import_new = test_import_old + '\nimport {assertNarrationChunkSubtitleLayoutFits, assertSubtitleCueTextFits} from "../src/spec/validate-render-layout";'
-          if test_text.count(test_import_old) != 1:
-              raise SystemExit("subtitle test import changed")
-          test_text = test_text.replace(test_import_old, test_import_new, 1)
-
-          marker = 'console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);'
-          additions = '''const longMetadataCaption = "長いメタデータ字幕".repeat(18);
-const layoutCues = assertNarrationChunkSubtitleLayoutFits({
+          tests = test_path.read_text(encoding="utf-8")
+          import_line = 'import {createSubtitleCues, getSubtitleTextAtTime} from "../src/spec/subtitle-cues";'
+          tests = tests.replace(
+              import_line,
+              import_line + '\nimport {assertNarrationChunkSubtitleLayoutFits, assertSubtitleCueTextFits} from "../src/spec/validate-render-layout";',
+              1,
+          )
+          footer = 'console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);'
+          regression = '''const layoutCues = assertNarrationChunkSubtitleLayoutFits({
   speechText: speech,
   startMs: 0,
   endMs: 19_219,
-  caption: {text: longMetadataCaption},
+  caption: {text: "あ".repeat(156)},
 }, "$.scenes[0].narrationChunks[0]");
-assert.deepEqual(layoutCues, cues, "layout validation must inspect the same time-sliced cues used by the renderer");
-assert.equal(
-  layoutCues.map((cue) => cue.text.replace(/\\n/gu, "")).join(""),
-  speech,
-  "layout-only wrapping must preserve every narration character",
-);
-assert.doesNotThrow(
-  () => assertNarrationChunkSubtitleLayoutFits({
-    speechText: speech,
-    startMs: 0,
-    endMs: 19_219,
-    caption: {text: "あ".repeat(156)},
-  }, "$.long-caption-metadata"),
-  "an unsliced metadata caption must not block a valid rendered subtitle sequence",
-);
-assert.throws(
-  () => assertSubtitleCueTextFits("あ".repeat(23), "$.too-wide"),
-  /23 characters exceed subtitle limit 22/u,
-  "a rendered subtitle line wider than the public safe area must still fail",
-);
-assert.throws(
-  () => assertSubtitleCueTextFits("一行目\\n二行目\\n三行目", "$.too-tall"),
-  /subtitle exceeds 2 lines/u,
-  "a rendered subtitle taller than the public safe area must still fail",
-);
+assert.deepEqual(layoutCues, cues);
+assert.equal(layoutCues.map((cue) => cue.text.replace(/\\n/gu, "")).join(""), speech);
+assert.throws(() => assertSubtitleCueTextFits("あ".repeat(23), "$.too-wide"), /23 characters exceed subtitle limit 22/u);
+assert.throws(() => assertSubtitleCueTextFits("一行目\\n二行目\\n三行目", "$.too-tall"), /subtitle exceeds 2 lines/u);
 
-''' + marker
-          if test_text.count(marker) != 1:
+''' + footer
+          if tests.count(footer) != 1:
               raise SystemExit("subtitle test footer changed")
-          test_path.write_text(test_text.replace(marker, additions, 1), encoding="utf-8")
+          test_path.write_text(tests.replace(footer, regression, 1), encoding="utf-8")
           PY
 
-      - name: Verify subtitle fix and full renderer contracts
+      - name: Verify complete renderer contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -172,11 +120,10 @@ assert.throws(
           npm run typecheck
           npm run test:spec
           npm run build
-          test "$(sha256sum "$SPEC_PATH" | awk '{print $1}')" = "$EXPECTED_SPEC_SHA256"
-          test "$(jq -r '.rendererNormalization.ttsInputSha256After' "render-specs/${EPISODE_DATE}/production_ready.json")" = "$EXPECTED_TTS_INPUT_SHA256"
+          test "$(sha256sum render-specs/2026-08-06/render_spec.json | awk '{print $1}')" = "56362777f841e5594e01a3f19a1c7051e1950fe8b6e67a679d839893e4693362"
+          test "$(jq -r '.rendererNormalization.ttsInputSha256After' render-specs/2026-08-06/production_ready.json)" = "b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509"
 
       - name: Commit tested renderer-only fix
-        id: commit
         shell: bash
         run: |
           set -euo pipefail
@@ -188,63 +135,3 @@ assert.throws(
           git commit -m "Validate rendered subtitle cues instead of metadata captions"
           git pull --rebase origin main
           git push origin HEAD:main
-          echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Dispatch formal Preview
-        id: dispatch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh workflow run nasdaq-cafe-preview.yml \
-            --repo "$GITHUB_REPOSITORY" \
-            --ref main \
-            -f episode_date="$EPISODE_DATE" \
-            -f expected_spec_sha256="$EXPECTED_SPEC_SHA256" \
-            -f confirmation=PREVIEW
-          for attempt in $(seq 1 40); do
-            RUNS="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow nasdaq-cafe-preview.yml --event workflow_dispatch --limit 20 --json databaseId,headSha)"
-            RUN_ID="$(jq -r --arg head "${{ steps.commit.outputs.head_sha }}" '[.[] | select(.headSha == $head)][0].databaseId // empty' <<<"$RUNS")"
-            if [[ "$RUN_ID" =~ ^[0-9]+$ ]]; then
-              echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "::error::Unable to identify formal Preview after subtitle fix"
-          exit 1
-
-      - name: Wait for Preview
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set +e
-          gh run watch "${{ steps.dispatch.outputs.run_id }}" --repo "$GITHUB_REPOSITORY" --exit-status --interval 10
-          echo "$?" > /tmp/watch-exit.txt
-          exit 0
-
-      - name: Record Preview result
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          RUN_ID="${{ steps.dispatch.outputs.run_id }}"
-          RUN_JSON="$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json databaseId,status,conclusion,createdAt,updatedAt,url,headSha,event,workflowName,jobs)"
-          ARTIFACT_JSON="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts")"
-          mkdir -p "preview-status/$EPISODE_DATE"
-          jq -n \
-            --arg episode_date "$EPISODE_DATE" \
-            --arg expected_spec_sha256 "$EXPECTED_SPEC_SHA256" \
-            --arg watch_exit "$(cat /tmp/watch-exit.txt)" \
-            --argjson workflow_run "$RUN_JSON" \
-            --argjson artifacts "$ARTIFACT_JSON" \
-            '{version:1,episodeDate:$episode_date,expectedSpecSha256:$expected_spec_sha256,watchExitCode:($watch_exit|tonumber),workflowRun:$workflow_run,artifacts:$artifacts.artifacts}' \
-            > "preview-status/$EPISODE_DATE/subtitle_fixed_preview_run.json"
-          git pull --rebase origin main
-          git add "preview-status/$EPISODE_DATE/subtitle_fixed_preview_run.json"
-          git commit -m "Record subtitle-fixed VG-6R Preview result"
-          git push origin HEAD:main
-          test "$(jq -r '.conclusion' <<<"$RUN_JSON")" = "success"
