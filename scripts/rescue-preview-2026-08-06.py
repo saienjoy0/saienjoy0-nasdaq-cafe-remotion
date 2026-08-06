@@ -70,6 +70,30 @@ for scene in spec["scenes"]:
     if scene.get("expectedBasisType") not in allowed_expected_basis:
         scene["expectedBasisType"] = None
 
+captions = {
+    "scene-01-chunk-001": "NASDAQ -0.83%、SOXX -2.12%\nNVIDIA +3.43%、AMD -7.04%\n同じAI半導体でも値動きは真逆",
+    "scene-01-chunk-002": "市場が見たのはAI需要の有無ではない\n次の巨大需要を誰が確実に取るか\nNVIDIAにはSpaceX採用が加わった",
+    "scene-02-chunk-001": "AMD Q2売上115.4億ドル\nデータセンター売上67.2億ドル\nAI需要が弱い決算ではない",
+    "scene-02-chunk-002": "売上も見通しも予想超え\nそれでもAMD株は7.04%下落\n決算が悪かった夜ではない",
+    "scene-03-chunk-001": "Q2売上は事前中心値を3.4億ドル超過\nデータセンター売上は前年比2倍超\n確認できた数字は強い",
+    "scene-03-chunk-002": "Q3見通し130億ドル\n市場予想を4.8億ドル上回る\n粗利率見通しは56%で横ばい",
+    "scene-04-chunk-001": "Expected 125.2億ドル\nActual 130億ドル\n数字のGapはプラス",
+    "scene-04-chunk-002": "通常予想には勝った\n高まったAI期待には届かなかった\nこれが株価とのGap",
+    "scene-05-chunk-001": "SpaceXはNVIDIA GPU専属方針\n次世代Vera Rubinを高く評価\nNVIDIAだけ上がった理由",
+    "scene-05-chunk-002": "SpaceXは計算能力を大幅拡大予定\n次の増設先をNVIDIAへ固定\n具体的な大型顧客の採用証拠",
+    "scene-05-chunk-003": "AMDの売上成長は消えない\nただしNVIDIAに顧客証拠が加わった\nAMDには一段強い証明が必要",
+    "scene-06-chunk-001": "SpaceX説明会の後にAMD決算\nAMD -7.04%、NVIDIA +3.43%\nSOXXは2.12%安",
+    "scene-06-chunk-002": "分足がなく瞬間寄与は断定できない\nNASDAQ安はAMD一社では説明不能\n大型テック安も重なった",
+    "scene-07-chunk-001": "NVIDIA +3.43%\nAMD -7.04%、Alphabet -4.03%\nAIという一語では説明できない",
+    "scene-07-chunk-002": "AI全面安ではない\n半導体は顧客採用の証拠で差がついた\nNASDAQには大型テック安も重なった",
+    "scene-08-chunk-001": "次に見るのは三点\nAMDの大型顧客・粗利率と供給制約\nNVIDIA以外へ上昇が広がるか",
+    "scene-08-chunk-002": "AMDの顧客獲得と利益率改善なら弱まる\nNVIDIA集中と粗利率横ばいなら強まる\n需要量より受注確実性を見る仮説",
+    "scene-09-chunk-001": "悪い決算ではなく証拠の基準が上がった\nAMDには大型受注と利益率改善が必要\n以上、朝のNASDAQカフェでした",
+}
+for scene in spec["scenes"]:
+    for chunk in scene["narrationChunks"]:
+        chunk["captionText"] = captions[chunk["chunkId"]]
+
 spec["schemaVersion"] = "2.2.0"
 spec["sources"] = [
     source
