@@ -44,6 +44,91 @@ def make_number(number_id: str, label: str, value: str, numeric: float, tone: st
     }
 
 
+def make_financial_shots(number_ids: list[str]) -> list[dict[str, Any]]:
+    expected_id, actual_id, gap_id = number_ids
+    continuity = "scene-04-beat-001-flow"
+    return [
+        {
+            "shotId": "scene-04-beat-001-shot-001",
+            "shotRecipe": "expected-anchor",
+            "startChunkId": "scene-04-chunk-001",
+            "startProgress": 0.0,
+            "startOffsetMs": 0,
+            "endChunkId": "scene-04-chunk-001",
+            "endProgress": 0.317073,
+            "endOffsetMs": 0,
+            "startCue": "市場が事前に見ていた論点は、",
+            "endCue": "GPU、電力、",
+            "primaryTargetId": expected_id,
+            "referenceTargetId": None,
+            "outcomeTargetId": gap_id,
+            "secondaryTargetIds": [],
+            "cameraTargetId": expected_id,
+            "stageLayout": "full-stage",
+            "cameraPreset": "static",
+            "transitionIn": "soft-reveal",
+            "transitionOut": "carry-forward",
+            "continuityKey": continuity,
+            "typographyTreatment": "underline-draw",
+            "typographyText": "Expected｜42.3B",
+            "soundCue": None,
+            "foxExpression": "分析",
+        },
+        {
+            "shotId": "scene-04-beat-001-shot-002",
+            "shotRecipe": "actual-crosses-expected",
+            "startChunkId": "scene-04-chunk-001",
+            "startProgress": 0.317073,
+            "startOffsetMs": 0,
+            "endChunkId": "scene-04-chunk-001",
+            "endProgress": 0.658537,
+            "endOffsetMs": 0,
+            "startCue": "ネットワークへ巨額の資金を使っています。",
+            "endCue": "利用者と料金収入は",
+            "primaryTargetId": actual_id,
+            "referenceTargetId": expected_id,
+            "outcomeTargetId": gap_id,
+            "secondaryTargetIds": [],
+            "cameraTargetId": actual_id,
+            "stageLayout": "full-stage",
+            "cameraPreset": "push-in",
+            "transitionIn": "reframe-shared-element",
+            "transitionOut": "carry-forward",
+            "continuityKey": continuity,
+            "typographyTreatment": "gap-highlight",
+            "typographyText": "Actual｜43.0B",
+            "soundCue": "soft-impact",
+            "foxExpression": "軽い驚き",
+        },
+        {
+            "shotId": "scene-04-beat-001-shot-003",
+            "shotRecipe": "gap-macro",
+            "startChunkId": "scene-04-chunk-001",
+            "startProgress": 0.658537,
+            "startOffsetMs": 0,
+            "endChunkId": "scene-04-chunk-001",
+            "endProgress": 1.0,
+            "endOffsetMs": 0,
+            "startCue": "後からついてきます。",
+            "endCue": "繰り返し注目されていました。",
+            "primaryTargetId": gap_id,
+            "referenceTargetId": expected_id,
+            "outcomeTargetId": gap_id,
+            "secondaryTargetIds": [],
+            "cameraTargetId": gap_id,
+            "stageLayout": "macro-detail",
+            "cameraPreset": "macro-detail",
+            "transitionIn": "reframe-shared-element",
+            "transitionOut": "collapse-to-node",
+            "continuityKey": continuity,
+            "typographyTreatment": "gap-highlight",
+            "typographyText": "Gap｜+0.7B",
+            "soundCue": None,
+            "foxExpression": "分析",
+        },
+    ]
+
+
 def remove_replaced_beat_events(scene: dict[str, Any], beat: dict[str, Any]) -> None:
     chunk_ids = [chunk["chunkId"] for chunk in scene.get("narrationChunks", [])]
     chunk_index = {chunk_id: index for index, chunk_id in enumerate(chunk_ids)}
@@ -189,7 +274,7 @@ def generate() -> tuple[str, str]:
         "comparisonBasis": "AWS revenue, same entity, period, currency, and unit",
         "reasonCodes": [],
     }
-    beat.pop("shots", None)
+    beat["shots"] = make_financial_shots(number_ids)
 
     resolve_explicit_show_events(spec)
     write_json(OUT_SPEC, spec)
