@@ -13,6 +13,7 @@ export const STAGE_THEME_IDS = [
 
 export type StageThemeId = (typeof STAGE_THEME_IDS)[number];
 export type StageChromeMode = "full" | "minimal" | "none";
+export type StageMotionRole = "continuation" | "major-shift" | "return" | "closing";
 
 export type StageTheme = {
   id: StageThemeId;
@@ -140,6 +141,19 @@ export const getStageChromeMode = (
   if (["causal", "comparison", "verification", "gap", "reaction"].includes(grammarId)) return "none";
   if (grammarId === "contradiction") return "full";
   return "minimal";
+};
+
+export const getStageChromeModeForShell = (shellId: StageShellId): StageChromeMode => {
+  if (["AssemblyStage", "TextBridgeStage", "CausalPathStage", "SplitComparisonStage", "VerificationGateStage", "MatrixStage"].includes(shellId)) return "none";
+  if (shellId === "OpenHeroStage") return "full";
+  return "minimal";
+};
+
+export const getStageMotionRoleForShell = (shellId: StageShellId): StageMotionRole => {
+  if (shellId === "OpenHeroStage") return "major-shift";
+  if (shellId === "AssemblyStage" || shellId === "TextBridgeStage") return "closing";
+  if (shellId === "EntityStage" || shellId === "DocumentMediaStage") return "return";
+  return "continuation";
 };
 
 const parseHex = (value: string) => {
