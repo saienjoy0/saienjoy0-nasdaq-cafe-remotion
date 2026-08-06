@@ -34,83 +34,8 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Patch subtitle layout validation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-
-          path = Path("src/spec/validate-render-layout.ts")
-          text = path.read_text(encoding="utf-8")
-          text = text.replace(
-              'import type {RenderProductionData} from "./render-spec";',
-              'import type {RenderProductionData} from "./render-spec";\nimport {createSubtitleCues} from "./subtitle-cues";',
-              1,
-          )
-          text = text.replace(
-              'captionText: {perLine: 34, lines: 3},',
-              'captionText: {perLine: 22, lines: 2},',
-              1,
-          )
-          marker = '''const assertCausalShape = (
-'''
-          helper = '''export type SubtitleLayoutChunk = {
-  speechText: string;
-  startMs: number;
-  endMs: number;
-  caption: {text: string};
-};
-
-export const assertSubtitleCueTextFits = (value: string, path = "$.subtitle") =>
-  assertWrapped(value, limits.captionText.perLine, limits.captionText.lines, path, "subtitle");
-
-export const assertNarrationChunkSubtitleLayoutFits = (
-  chunk: SubtitleLayoutChunk,
-  path: string,
-) => {
-  const cues = createSubtitleCues(chunk.speechText, chunk.startMs, chunk.endMs);
-  cues.forEach((cue, cueIndex) =>
-    assertSubtitleCueTextFits(cue.text, `${path}.subtitleCues[${cueIndex}].text`),
-  );
-  return cues;
-};
-
-'''
-          if text.count(marker) != 1:
-              raise SystemExit("subtitle helper insertion point changed")
-          text = text.replace(marker, helper + marker, 1)
-          old_call = 'scene.narrationChunks.forEach((chunk, index) => assertWrapped(chunk.caption.text, limits.captionText.perLine, limits.captionText.lines, `${base}.narrationChunks[${index}].caption.text`, "caption"));'
-          new_call = 'scene.narrationChunks.forEach((chunk, index) => assertNarrationChunkSubtitleLayoutFits(chunk, `${base}.narrationChunks[${index}]`));'
-          if text.count(old_call) != 1:
-              raise SystemExit("caption layout validation call changed")
-          path.write_text(text.replace(old_call, new_call, 1), encoding="utf-8")
-
-          test_path = Path("scripts/test-subtitles.ts")
-          tests = test_path.read_text(encoding="utf-8")
-          import_line = 'import {createSubtitleCues, getSubtitleTextAtTime} from "../src/spec/subtitle-cues";'
-          tests = tests.replace(
-              import_line,
-              import_line + '\nimport {assertNarrationChunkSubtitleLayoutFits, assertSubtitleCueTextFits} from "../src/spec/validate-render-layout";',
-              1,
-          )
-          footer = 'console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);'
-          regression = '''const layoutCues = assertNarrationChunkSubtitleLayoutFits({
-  speechText: speech,
-  startMs: 0,
-  endMs: 19_219,
-  caption: {text: "あ".repeat(156)},
-}, "$.scenes[0].narrationChunks[0]");
-assert.deepEqual(layoutCues, cues);
-assert.equal(layoutCues.map((cue) => cue.text.replace(/\\n/gu, "")).join(""), speech);
-assert.throws(() => assertSubtitleCueTextFits("あ".repeat(23), "$.too-wide"), /23 characters exceed subtitle limit 22/u);
-assert.throws(() => assertSubtitleCueTextFits("一行目\\n二行目\\n三行目", "$.too-tall"), /subtitle exceeds 2 lines/u);
-
-''' + footer
-          if tests.count(footer) != 1:
-              raise SystemExit("subtitle test footer changed")
-          test_path.write_text(tests.replace(footer, regression, 1), encoding="utf-8")
-          PY
+      - name: Apply subtitle layout fix
+        run: python3 scripts/apply_subtitle_layout_fix.py
 
       - name: Verify complete renderer contracts
         shell: bash
@@ -130,6 +55,7 @@ assert.throws(() => assertSubtitleCueTextFits("一行目\\n二行目\\n三行目
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/spec/validate-render-layout.ts scripts/test-subtitles.ts
+          git rm scripts/apply_subtitle_layout_fix.py
           git rm --ignore-unmatch .github/workflows/dispatch-vg6r-preview-final-retry.yml
           git rm .github/workflows/apply-subtitle-layout-fix-and-preview.yml
           git commit -m "Validate rendered subtitle cues instead of metadata captions"
