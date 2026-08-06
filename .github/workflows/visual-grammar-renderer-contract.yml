@@ -6,17 +6,25 @@ on:
       - "contracts/visual_grammar_renderer_compatibility.json"
       - "contracts/visual_grammar_renderer_compatibility.schema.json"
       - "src/spec/visual-grammar-contract.ts"
+      - "src/spec/reaction-timeline-contract.ts"
       - "src/spec/validate-visual-grammar.ts"
+      - "src/spec/validate-reaction-timeline.ts"
+      - "src/spec/motion-preset-contract.ts"
       - "src/spec/render-spec.ts"
+      - "src/spec/public-view-model.ts"
       - "src/spec/validate-visual-story.ts"
       - "src/components/spec/VisualGrammarStageHost.tsx"
       - "src/components/spec/stages/**"
       - "src/components/spec/VisualTemplateRenderer.tsx"
+      - "src/components/spec/EventReactionTimelineTemplate.tsx"
       - "src/components/spec/AdditionalVisualTemplates.tsx"
       - "src/components/spec/FinancialVisualTemplates.tsx"
       - "src/components/spec/SpecVisualModes.tsx"
       - "scripts/test-visual-grammar-contract.ts"
       - "scripts/test-visual-grammar-stage-shells.tsx"
+      - "scripts/test-event-reaction-timeline.tsx"
+      - "scripts/test-reaction-timeline-contract.ts"
+      - "scripts/test-visual-grammar-motion-language.ts"
       - "scripts/generate-render-spec-schema.ts"
       - "schemas/render_spec.schema.json"
       - "package.json"
@@ -45,6 +53,12 @@ jobs:
         run: npm run test:visual-grammar
       - name: Run Stage Shell contract tests
         run: npm run test:visual-grammar-stage-shells
+      - name: Run reaction timeline renderer tests
+        run: npm run test:event-reaction-timeline
+      - name: Run reaction timeline validator tests
+        run: npm run test:reaction-timeline-contract
+      - name: Run motion language and TTS identity tests
+        run: npm run test:visual-grammar-motion
       - name: Typecheck
         run: npm run typecheck
       - name: Run Visual Template regression tests
