@@ -43,8 +43,8 @@ renderer = replaceSection(
   ),
   "VisualTemplateRenderer generic Surface",
 );
-const oldRendererExport = renderer.slice(renderer.indexOf("export const VisualTemplateRenderer:"));
-if (!oldRendererExport.startsWith("export const VisualTemplateRenderer:")) throw new Error("missing renderer export");
+const exportIndex = renderer.indexOf("export const VisualTemplateRenderer:");
+if (exportIndex < 0) throw new Error("missing renderer export");
 const newRendererExport = `const renderSelectedVisualTemplate = (content: PublicMainContent): React.ReactNode => {
   switch (content.visualTemplate) {
     case "market-pulse-grid": return <MarketPulseGridTemplate content={content}/>;
@@ -87,7 +87,7 @@ export const VisualTemplateRenderer: React.FC<{content: PublicMainContent}> = ({
   </VisualGrammarStageHost>
 );
 `;
-renderer = renderer.slice(0, renderer.indexOf("export const VisualTemplateRenderer:")) + newRendererExport;
+renderer = renderer.slice(0, exportIndex) + newRendererExport;
 await writeFile(rendererPath, renderer, "utf8");
 
 const additionalPath = "src/components/spec/AdditionalVisualTemplates.tsx";
@@ -161,21 +161,5 @@ if (!packageJson.scripts["test:visual-story"].includes("test:visual-grammar-stag
   );
 }
 await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`, "utf8");
-
-const workflowPath = ".github/workflows/visual-grammar-renderer-contract.yml";
-let workflow = await readFile(workflowPath, "utf8");
-workflow = replaceOnce(
-  workflow,
-  `      - "src/spec/visual-grammar-contract.ts"\n`,
-  `      - "src/spec/visual-grammar-contract.ts"\n      - "src/components/spec/VisualGrammarStageHost.tsx"\n      - "src/components/spec/stages/**"\n      - "src/components/spec/VisualTemplateRenderer.tsx"\n      - "src/components/spec/AdditionalVisualTemplates.tsx"\n      - "src/components/spec/FinancialVisualTemplates.tsx"\n      - "src/components/spec/SpecVisualModes.tsx"\n`,
-  "Stage Shell workflow paths",
-);
-workflow = replaceOnce(
-  workflow,
-  `      - name: Typecheck\n`,
-  `      - name: Run Stage Shell contract tests\n        run: npm run test:visual-grammar-stage-shells\n      - name: Typecheck\n`,
-  "Stage Shell workflow step",
-);
-await writeFile(workflowPath, workflow, "utf8");
 
 console.log("VG-3 Stage Shell integration applied");
