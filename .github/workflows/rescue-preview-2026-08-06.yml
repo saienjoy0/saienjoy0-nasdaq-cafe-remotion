@@ -7,7 +7,7 @@ on:
       - ".github/workflows/rescue-preview-2026-08-06.yml"
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 concurrency:
@@ -34,17 +34,21 @@ jobs:
       GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
 
     steps:
-      - uses: actions/checkout@v6
+      - id: checkout
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v6
+      - id: setup_node
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
       - name: Materialize approved temporary rescue spec
+        id: materialize
         shell: bash
         run: |
           set -euo pipefail
@@ -121,9 +125,11 @@ jobs:
           fi
 
       - name: Validate render spec
+        id: validate
         run: npm run episode:spec:validate -- "$SPEC_PATH"
 
       - name: Ensure ffmpeg is available
+        id: ffmpeg
         shell: bash
         run: |
           set -euo pipefail
@@ -133,12 +139,15 @@ jobs:
           fi
 
       - name: Run runtime stability tests
+        id: stability
         run: npm run test:runtime-stability
 
       - name: Generate preview
+        id: generate
         run: npm run episode:spec:preview -- "$SPEC_PATH"
 
       - name: Upload preview artifact
+        id: upload
         uses: actions/upload-artifact@v6
         with:
           name: nasdaq-cafe-rescue-preview-2026-08-06-${{ github.run_id }}
@@ -150,3 +159,70 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+      - name: Publish completion receipt
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
+          SETUP_NODE_OUTCOME: ${{ steps.setup_node.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          FFMPEG_OUTCOME: ${{ steps.ffmpeg.outcome }}
+          STABILITY_OUTCOME: ${{ steps.stability.outcome }}
+          GENERATE_OUTCOME: ${{ steps.generate.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+        run: |
+          set -euo pipefail
+          RECEIPT_PATH="preview-status/2026-08-06-rescue.json"
+          ARTIFACT_NAME="nasdaq-cafe-rescue-preview-2026-08-06-${GITHUB_RUN_ID}"
+          python3 - <<'PY' > /tmp/rescue-preview-receipt.json
+          import json
+          import os
+
+          steps = {
+              "checkout": os.getenv("CHECKOUT_OUTCOME", "unknown"),
+              "setupNode": os.getenv("SETUP_NODE_OUTCOME", "unknown"),
+              "install": os.getenv("INSTALL_OUTCOME", "unknown"),
+              "materialize": os.getenv("MATERIALIZE_OUTCOME", "unknown"),
+              "validate": os.getenv("VALIDATE_OUTCOME", "unknown"),
+              "ffmpeg": os.getenv("FFMPEG_OUTCOME", "unknown"),
+              "stability": os.getenv("STABILITY_OUTCOME", "unknown"),
+              "generate": os.getenv("GENERATE_OUTCOME", "unknown"),
+              "upload": os.getenv("UPLOAD_OUTCOME", "unknown"),
+          }
+          success = steps["generate"] == "success" and steps["upload"] == "success"
+          receipt = {
+              "status": "success" if success else "failure",
+              "episodeDate": "2026-08-06",
+              "mode": "temporary-rescue-preview",
+              "runId": int(os.environ["GITHUB_RUN_ID"]),
+              "runAttempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+              "runUrl": f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+              "commitSha": os.environ["GITHUB_SHA"],
+              "rescueSpecSha256": os.environ["EXPECTED_RESCUE_SHA"],
+              "artifactId": os.getenv("ARTIFACT_ID") or None,
+              "artifactName": f"nasdaq-cafe-rescue-preview-2026-08-06-{os.environ['GITHUB_RUN_ID']}",
+              "steps": steps,
+              "finalAuthorized": False,
+          }
+          print(json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True))
+          PY
+
+          CONTENT="$(base64 -w0 /tmp/rescue-preview-receipt.json)"
+          EXISTING_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/contents/${RECEIPT_PATH}?ref=main" --jq .sha 2>/dev/null || true)"
+          if [[ -n "$EXISTING_SHA" ]]; then
+            gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/${RECEIPT_PATH}" \
+              -f message="Record rescue preview run ${GITHUB_RUN_ID}" \
+              -f content="$CONTENT" \
+              -f sha="$EXISTING_SHA" \
+              -f branch=main >/dev/null
+          else
+            gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/${RECEIPT_PATH}" \
+              -f message="Record rescue preview run ${GITHUB_RUN_ID}" \
+              -f content="$CONTENT" \
+              -f branch=main >/dev/null
+          fi
