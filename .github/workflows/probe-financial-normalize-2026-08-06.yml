@@ -1,0 +1,42 @@
+name: Probe Complete Renderer 2.4 Preview 2026-08-06
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/probe-financial-normalize-2026-08-06.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Read latest workflow run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p preview-status/2026-08-06
+          RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow normalize-financial-and-render-preview-2026-08-06.yml --limit 1 --json databaseId | jq -r '.[0].databaseId // empty')"
+          test "$RUN_ID" != ""
+          gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json databaseId,status,conclusion,createdAt,updatedAt,url,headSha,event,workflowName,jobs > preview-status/2026-08-06/financial_normalization_workflow_run.json
+      - name: Commit status and remove probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview-status/2026-08-06/financial_normalization_workflow_run.json
+          git rm .github/workflows/probe-financial-normalize-2026-08-06.yml
+          git commit -m "Record complete Renderer 2.4 normalization status"
+          git pull --rebase origin main
+          git push origin HEAD:main
