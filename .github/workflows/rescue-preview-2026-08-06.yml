@@ -23,7 +23,7 @@ jobs:
       CI: "true"
       SPEC_PATH: render-specs/2026-08-06/render_spec.json
       EPISODE_ID: 2026-08-06
-      EXPECTED_RESCUE_SHA: 3adb8bb1b4e3e4058b9c30ed5e94b5c69242a8baf6cb41f9f223628af655aac8
+      EXPECTED_RESCUE_SHA: 4753a67def54755e128662207905966a2ec528e67ad9e0ce4b5166c732cd55c9
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
@@ -100,6 +100,12 @@ jobs:
           spec["scenes"][8]["visualMode"] = "conclusion-card"
           beat(9, 1)["visualMode"] = "conclusion-card"
           beat(9, 1)["visualTemplate"] = "final-assembly"
+
+          for scene_number in (3, 4, 7):
+              scene = spec["scenes"][scene_number - 1]
+              scene["visualMode"] = "text-focus"
+              for visual_beat in scene["visualBeats"]:
+                  visual_beat["visualMode"] = "text-focus"
 
           allowed_expected_basis = {
               "official-consensus",
