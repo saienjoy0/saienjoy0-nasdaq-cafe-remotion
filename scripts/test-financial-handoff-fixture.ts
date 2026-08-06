@@ -45,6 +45,13 @@ assert.equal(beat.templateConfig.dataBasis, "financial-recipe-plan");
 assert.deepEqual(beat.templateConfig.metricIds, beat.objectIds);
 assert.deepEqual(beat.templateConfig.nodeOrder, []);
 assert.equal(beat.templateConfig.outcomeNodeId, null);
+assert.equal(beat.shots?.length, 3, "financial Beat requires three explicit Shots");
+assert.deepEqual(beat.shots?.map((shot) => shot.shotRecipe), [
+  "expected-anchor",
+  "actual-crosses-expected",
+  "gap-macro",
+]);
+assert.deepEqual(beat.shots?.map((shot) => shot.primaryTargetId), beat.objectIds);
 
 const assetPaths = Object.fromEntries(
   Object.entries(productionAssetManifest.assets).map(([id, asset]) => [id, asset.path]),
@@ -53,9 +60,9 @@ const production = await compileRenderSpec(
   spec,
   async ({chunkId}) => ({
     audioSrc: `audio/${chunkId}.wav`,
-    durationMs: 1000,
+    durationMs: chunkId === "scene-04-chunk-001" ? 26_753 : 1_000,
     cacheKey: createHash("sha256").update(chunkId).digest("hex"),
-    sampleRate: 48000,
+    sampleRate: 48_000,
     channels: 1,
     codec: "pcm_s16le",
   }),
@@ -70,5 +77,6 @@ const productionBeat = productionScene.visualBeats.find((item) => item.beatId ==
 assert.ok(productionBeat);
 assert.equal(productionBeat.visualTemplate, "earnings-surprise");
 assert.equal(productionBeat.financialVisualTrace?.recipePlanSha256, "a".repeat(64));
+assert.equal(productionBeat.shots?.length, 3);
 
 console.log("shared financial handoff fixture acceptance: PASS");
