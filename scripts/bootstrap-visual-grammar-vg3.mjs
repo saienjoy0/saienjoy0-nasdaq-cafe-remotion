@@ -15,7 +15,7 @@ const replaceSection = (source, start, end, replacement, label) => {
   return source.slice(0, startIndex) + replacement + source.slice(endIndex);
 };
 
-const transparentSurface = (typeDeclaration, end) => `${typeDeclaration} = ({children, style}) => <div style={{
+const transparentSurface = (typeDeclaration) => `${typeDeclaration} = ({children, style}) => <div style={{
   position: "relative",
   width: "100%",
   height: "100%",
@@ -24,7 +24,7 @@ const transparentSurface = (typeDeclaration, end) => `${typeDeclaration} = ({chi
   ...style,
 }}>{children}</div>;
 
-${end}`;
+`;
 
 const rendererPath = "src/components/spec/VisualTemplateRenderer.tsx";
 let renderer = await readFile(rendererPath, "utf8");
@@ -40,7 +40,6 @@ renderer = replaceSection(
   "const Tag:",
   transparentSurface(
     "const Surface: React.FC<{children: React.ReactNode; accent?: string; style?: React.CSSProperties}>",
-    "const Tag:",
   ),
   "VisualTemplateRenderer generic Surface",
 );
@@ -99,7 +98,6 @@ additional = replaceSection(
   "const Value:",
   transparentSurface(
     "const Surface: React.FC<{children: React.ReactNode; accent?: string; style?: React.CSSProperties}>",
-    "const Value:",
   ),
   "AdditionalVisualTemplates generic Surface",
 );
@@ -124,7 +122,7 @@ financial = replaceSection(
   </div>
 );
 
-const Pill:`,
+`,
   "FinancialVisualTemplates generic Surface",
 );
 await writeFile(financialPath, financial, "utf8");
@@ -148,7 +146,7 @@ modes = replaceSection(
   ...style,
 }}>{children}</div>;
 
-const Pill:`,
+`,
   "SpecVisualModes generic Surface",
 );
 await writeFile(modesPath, modes, "utf8");
