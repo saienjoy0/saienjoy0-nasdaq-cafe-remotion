@@ -95,8 +95,8 @@
   - 主要視覚機能：Explain
   - 画面状態：Data
   - Visual Grammar：evidence / continuation
-  - Visual Template ID：hero-number
-  - Template Variant：default
+  - Visual Template ID：evidence-boundary
+  - Template Variant：confirmed-vs-unconfirmed
   - 入力構造：AI需要の有無ではない / 次の巨大需要を誰が取るか
   - 画面の問い：市場が見た論点は何か
   - 主要要素：需要の有無から受注証拠へ
@@ -226,8 +226,8 @@
   - 終了合図：八億ドル上回りました。一方、調整後粗利率の見通しは五十六パーセントで、第二四半期から横ばいです。
   - 主要視覚機能：Explain
   - 画面状態：Chart
-  - Visual Grammar：evidence / continuation
-  - Visual Template ID：metric-comparison-board
+  - Visual Grammar：contradiction / continuation
+  - Visual Template ID：opening-contradiction
   - Template Variant：default
   - 入力構造：会社見通し 130億ドル / 市場予想 125.2億ドル / 粗利率 56%
   - 画面の問い：Q3見通しは市場予想を超えたか
@@ -579,9 +579,9 @@
   - 終了合図：DIAへ集中し、AMDの利益率が横ばいなら、需要の量より受注の確実性を重く見る仮説が強まります。
   - 主要視覚機能：Explain
   - 画面状態：Data
-  - Visual Grammar：verification / continuation
-  - Visual Template ID：verification-checklist
-  - Template Variant：default
+  - Visual Grammar：evidence / continuation
+  - Visual Template ID：evidence-boundary
+  - Template Variant：confirmed-vs-unconfirmed
   - 入力構造：弱まる：AMDの受注・利益率・セクター反応が改善 / 強まる：大型採用がNVIDIAへ集中
   - 画面の問い：仮説が弱まる条件は何か
   - 主要要素：強まる条件と弱まる条件

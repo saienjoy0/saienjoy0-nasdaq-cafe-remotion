@@ -78,10 +78,113 @@
   "financialSelectionCount": 2,
   "mappingContractSha256": "863038fa5afbb604e2ac7d5e132b568c95031f1b4f158d562f644b0233bd8c95",
   "marketMeaningChanged": false,
+  "measuredDiversityRepair": {
+    "captionsChanged": false,
+    "changes": [
+      {
+        "after": {
+          "objectIds": [
+            "scene-01-card-002"
+          ],
+          "variant": "confirmed-vs-unconfirmed",
+          "viewerTexts": [
+            "AI需要の有無ではない",
+            "次の巨大需要を誰が取るか"
+          ],
+          "visualGrammarId": "evidence",
+          "visualTemplate": "evidence-boundary"
+        },
+        "beatId": "scene-01-beat-002",
+        "before": {
+          "objectIds": [
+            "scene-01-card-002"
+          ],
+          "variant": "default",
+          "viewerTexts": [
+            "AI需要の有無ではない",
+            "次の巨大需要を誰が取るか"
+          ],
+          "visualGrammarId": "evidence",
+          "visualTemplate": "hero-number"
+        },
+        "reason": "split AI demand existence from demand winner"
+      },
+      {
+        "after": {
+          "objectIds": [
+            "scene-03-beat-002-number-01",
+            "scene-03-beat-002-number-02",
+            "scene-03-beat-002-number-03"
+          ],
+          "variant": "default",
+          "viewerTexts": [
+            "会社見通し 130億ドル",
+            "市場予想 125.2億ドル",
+            "粗利率 56%"
+          ],
+          "visualGrammarId": "contradiction",
+          "visualTemplate": "opening-contradiction"
+        },
+        "beatId": "scene-03-beat-002",
+        "before": {
+          "objectIds": [
+            "scene-03-beat-002-number-01",
+            "scene-03-beat-002-number-02",
+            "scene-03-beat-002-number-03"
+          ],
+          "variant": "default",
+          "viewerTexts": [
+            "会社見通し 130億ドル",
+            "市場予想 125.2億ドル",
+            "粗利率 56%"
+          ],
+          "visualGrammarId": "evidence",
+          "visualTemplate": "metric-comparison-board"
+        },
+        "reason": "contrast strong revenue outlook with margin caution"
+      },
+      {
+        "after": {
+          "objectIds": [
+            "scene-08-card-002"
+          ],
+          "variant": "confirmed-vs-unconfirmed",
+          "viewerTexts": [
+            "弱まる：AMDの受注・利益率・セクター反応が改善",
+            "強まる：大型採用がNVIDIAへ集中"
+          ],
+          "visualGrammarId": "evidence",
+          "visualTemplate": "evidence-boundary"
+        },
+        "beatId": "scene-08-beat-002",
+        "before": {
+          "objectIds": [
+            "scene-08-card-002"
+          ],
+          "variant": "default",
+          "viewerTexts": [
+            "弱まる：AMDの受注・利益率・セクター反応が改善",
+            "強まる：大型採用がNVIDIAへ集中"
+          ],
+          "visualGrammarId": "verification",
+          "visualTemplate": "verification-checklist"
+        },
+        "reason": "present strengthen/weaken conditions as evidence boundaries"
+      }
+    ],
+    "narrationChanged": false,
+    "numbersChanged": false,
+    "sceneOrderChanged": false,
+    "sourcesChanged": false,
+    "status": "PASS",
+    "timingBasis": "post-tts-production-data",
+    "ttsIdentityChanged": false,
+    "unresolvedStateCount": 0
+  },
   "metricNumbersRemoved": false,
   "metricTextRemoved": false,
   "narrationChanged": false,
-  "normalizedRenderSpecSha256": "b380543aa20a2118f28f5f0aec45f1e09ce35ea3b3ad63b02755402f10fb18c1",
+  "normalizedRenderSpecSha256": "56362777f841e5594e01a3f19a1c7051e1950fe8b6e67a679d839893e4693362",
   "numberTextChanged": false,
   "numbersChanged": false,
   "numericSelectionChanges": [
