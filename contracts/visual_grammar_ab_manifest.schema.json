@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.nasdaq-cafe.local/visual_grammar_ab_manifest.schema.json",
+  "title": "NASDAQ Cafe Visual Grammar A/B Preview Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "status",
+    "finalAuthorized",
+    "userReviewRequired",
+    "episodeId",
+    "specPath",
+    "specSha256",
+    "ttsInputSha256",
+    "baseline",
+    "candidate",
+    "invariants",
+    "reviewQuestions",
+    "createdAt"
+  ],
+  "properties": {
+    "contractVersion": {"const": "1.0.0"},
+    "status": {"const": "ready-for-user-review"},
+    "finalAuthorized": {"const": false},
+    "userReviewRequired": {"const": true},
+    "episodeId": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "specPath": {"type": "string", "pattern": "^render-specs/\\d{4}-\\d{2}-\\d{2}/render_spec\\.json$"},
+    "specSha256": {"$ref": "#/$defs/sha256"},
+    "ttsInputSha256": {"$ref": "#/$defs/sha256"},
+    "baseline": {"$ref": "#/$defs/render"},
+    "candidate": {"$ref": "#/$defs/render"},
+    "invariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sameSpec",
+        "sameTtsInput",
+        "sameTtsAudio",
+        "sameNarration",
+        "sameCaptions",
+        "sameSceneOrder",
+        "sameNumbers",
+        "sameSources",
+        "sameSelectedPaths",
+        "sameVoiceProfile",
+        "sameProductionData",
+        "allEqual"
+      ],
+      "properties": {
+        "sameSpec": {"const": true},
+        "sameTtsInput": {"const": true},
+        "sameTtsAudio": {"const": true},
+        "sameNarration": {"const": true},
+        "sameCaptions": {"const": true},
+        "sameSceneOrder": {"const": true},
+        "sameNumbers": {"const": true},
+        "sameSources": {"const": true},
+        "sameSelectedPaths": {"const": true},
+        "sameVoiceProfile": {"const": true},
+        "sameProductionData": {"const": true},
+        "allEqual": {"const": true}
+      }
+    },
+    "reviewQuestions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 160}
+    },
+    "createdAt": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "render": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "ref",
+        "stageMode",
+        "commitSha",
+        "previewPath",
+        "previewSha256",
+        "previewBytes",
+        "technicalReportSha256",
+        "inspectionSha256",
+        "productionDataSha256",
+        "ttsAudioSha256"
+      ],
+      "properties": {
+        "label": {"enum": ["baseline", "candidate"]},
+        "ref": {"type": "string", "minLength": 1, "maxLength": 200},
+        "stageMode": {"enum": ["legacy", "candidate"]},
+        "commitSha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "previewPath": {"type": "string", "minLength": 1},
+        "previewSha256": {"$ref": "#/$defs/sha256"},
+        "previewBytes": {"type": "integer", "minimum": 1},
+        "technicalReportSha256": {"$ref": "#/$defs/sha256"},
+        "inspectionSha256": {"$ref": "#/$defs/sha256"},
+        "productionDataSha256": {"$ref": "#/$defs/sha256"},
+        "ttsAudioSha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}
