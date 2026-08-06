@@ -316,6 +316,10 @@ export const PRODUCTION_FORBIDDEN_TEXT = [
   "conversion warning", "debug metadata", "タイトルの約束を回収", "図を再表示",
 ] as const;
 
+const PRODUCTION_MACHINE_CONTROL_TEXT_KEYS = new Set([
+  "sequencePolicy",
+]);
+
 export const assertProductionTextSafe = (value: unknown, path = "$"): void => {
   if (typeof value === "string") {
     const lower = value.toLowerCase();
@@ -324,5 +328,10 @@ export const assertProductionTextSafe = (value: unknown, path = "$"): void => {
     return;
   }
   if (Array.isArray(value)) return value.forEach((item, index) => assertProductionTextSafe(item, `${path}[${index}]`));
-  if (value && typeof value === "object") Object.entries(value).forEach(([key, item]) => assertProductionTextSafe(item, `${path}.${key}`));
+  if (value && typeof value === "object") {
+    Object.entries(value).forEach(([key, item]) => {
+      if (PRODUCTION_MACHINE_CONTROL_TEXT_KEYS.has(key)) return;
+      assertProductionTextSafe(item, `${path}.${key}`);
+    });
+  }
 };
