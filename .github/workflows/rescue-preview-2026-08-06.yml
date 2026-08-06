@@ -58,8 +58,8 @@ jobs:
           fi
       - id: stability
         run: |
-          tsx scripts/test-duration-policy.ts
-          tsx scripts/test-spec-inspect.ts
+          npx tsx scripts/test-duration-policy.ts
+          npx tsx scripts/test-spec-inspect.ts
           node --import tsx scripts/test-gemini-api-key-pool.ts
           npm run test:visual-story
       - id: generate
