@@ -1,0 +1,15 @@
+{
+  "contractVersion": "1.0.0",
+  "status": "succeeded",
+  "requestId": "vg6t-2099-02-02-20260806-a",
+  "requestPath": "visual-grammar-ab-technical-requests/vg6t-2099-02-02-20260806-a.json",
+  "episodeId": "2099-02-02",
+  "workflowRunId": 31077842910,
+  "workflowRunUrl": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31077842910",
+  "rendererCommitSha": "a19a7169783394fe02a1bebdc99bbf16ed7430bf",
+  "artifactName": "visual-grammar-technical-ab-review-2099-02-02-31077842910",
+  "renderSpecSha256": "6c25832d68a6bbbd1539d27007863444d6550cf1fe872166e4df29dc4645a49c",
+  "timingGateStatus": "FAIL",
+  "productionEligible": false,
+  "finalAuthorized": false
+}
