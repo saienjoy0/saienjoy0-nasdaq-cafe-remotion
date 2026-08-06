@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Keep full metric cards while limiting highlighted Number objects to four.
+"""Route the full Scene 3 metric sets through the registered focus-matrix.
 
-Renderer permits at most four Number objects in a metric-comparison-board.
-The original cards remain selected, so every original metric string remains
-visible; only the formal highlight subset is bounded.
+The Renderer metric-comparison-board permits four Number objects and no Card.
+Scene 3 has one source Card plus up to six exact metrics, which matches the
+focus-matrix contract. All original metrics remain selected and visible.
 """
 
 from __future__ import annotations
@@ -42,21 +42,28 @@ def main() -> int:
                 for object_id in beat["objectIds"]
                 if object_id in number_ids
             ]
-            if len(selected_numbers) <= 4:
-                continue
-            highlighted = selected_numbers[:4]
-            previous = list(beat["objectIds"])
-            beat["objectIds"] = [card_id, *highlighted]
+            if not 2 <= len(selected_numbers) <= 6:
+                raise ValueError(
+                    f"focus-matrix requires 2-6 metrics: {beat['beatId']} "
+                    f"got {len(selected_numbers)}"
+                )
+            previous_template = beat["visualTemplate"]
+            previous_objects = list(beat["objectIds"])
+            beat["visualTemplate"] = "focus-matrix"
+            beat["templateConfig"]["variant"] = "default"
+            beat["objectIds"] = [card_id, *selected_numbers]
             beat["templateConfig"]["displayOrder"] = list(beat["objectIds"])
             changes.append(
                 {
                     "sceneId": scene["sceneId"],
                     "beatId": beat["beatId"],
+                    "fromTemplate": previous_template,
+                    "toTemplate": "focus-matrix",
                     "originalCardId": card_id,
-                    "previousObjectIds": previous,
+                    "previousObjectIds": previous_objects,
                     "resolvedObjectIds": list(beat["objectIds"]),
                     "allOriginalCardLinesRemainVisible": True,
-                    "highlightedNumberCount": len(highlighted),
+                    "selectedNumberCount": len(selected_numbers),
                 }
             )
 
@@ -69,8 +76,8 @@ def main() -> int:
     normalization = dict(ready.get("rendererNormalization", {}))
     normalization.update(
         {
-            "metricBoardDensityBound": True,
-            "metricBoardDensityChanges": changes,
+            "scene3FocusMatrixResolved": True,
+            "scene3FocusMatrixChanges": changes,
             "metricTextRemoved": False,
             "metricNumbersRemoved": False,
         }
@@ -83,15 +90,15 @@ def main() -> int:
 
     report = json.loads(args.report.read_text(encoding="utf-8"))
     report["normalizedRenderSpecSha256"] = sha
-    report["metricBoardDensityBound"] = True
-    report["metricBoardDensityChanges"] = changes
+    report["scene3FocusMatrixResolved"] = True
+    report["scene3FocusMatrixChanges"] = changes
     report["metricTextRemoved"] = False
     report["metricNumbersRemoved"] = False
     args.report.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(json.dumps({"status": "bounded", "count": len(changes), "sha256": sha}))
+    print(json.dumps({"status": "focus-matrix", "count": len(changes), "sha256": sha}))
     return 0
 
 
