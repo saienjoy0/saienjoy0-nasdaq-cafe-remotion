@@ -21,7 +21,7 @@ export const SHOT_MOTION_PROFILES: Record<ShotRecipe, ShotMotionProfile> = {
   "expected-anchor": {enterMs: 240, buildMs: 300, staggerMs: 0, holdMinMs: 650},
   "actual-crosses-expected": {enterMs: 260, buildMs: 340, staggerMs: 0, holdMinMs: 650},
   "gap-macro": {enterMs: 220, buildMs: 280, staggerMs: 0, holdMinMs: 650},
-  "causal-build": {enterMs: 180, buildMs: 1_400, staggerMs: 260, holdMinMs: 750},
+  "causal-build": {enterMs: 180, buildMs: 1_800, staggerMs: 260, holdMinMs: 750},
   "counterforce-interrupt": {enterMs: 190, buildMs: 240, staggerMs: 0, holdMinMs: 600},
   "entity-cutaway": {enterMs: 230, buildMs: 280, staggerMs: 0, holdMinMs: 650},
   "split-opposition": {enterMs: 230, buildMs: 320, staggerMs: 0, holdMinMs: 650},
