@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.nasdaq-cafe.local/visual_grammar_renderer_compatibility.schema.json",
+  "title": "NASDAQ Cafe Visual Grammar Renderer Compatibility",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "templates"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "1.0.0"
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 26,
+      "maxItems": 26,
+      "items": {
+        "$ref": "#/$defs/template"
+      }
+    }
+  },
+  "$defs": {
+    "appearance": {
+      "enum": [
+        "open-hero",
+        "entity-canvas",
+        "document-media",
+        "metric-board",
+        "progressive-chart",
+        "causal-path",
+        "dual-lane",
+        "timeline-track",
+        "split-comparison",
+        "matrix-grid",
+        "verification-gates",
+        "picturebook-canvas",
+        "assembly-map",
+        "text-bridge"
+      ]
+    },
+    "dominantSurface": {
+      "enum": [
+        "open-canvas",
+        "entity",
+        "media",
+        "card-board",
+        "plot",
+        "network",
+        "split",
+        "matrix",
+        "picturebook",
+        "assembly",
+        "text"
+      ]
+    },
+    "stageShell": {
+      "enum": [
+        "OpenHeroStage",
+        "EntityStage",
+        "DocumentMediaStage",
+        "MetricBoardStage",
+        "ProgressiveChartStage",
+        "CausalPathStage",
+        "DualLaneStage",
+        "TimelineStage",
+        "SplitComparisonStage",
+        "MatrixStage",
+        "VerificationGateStage",
+        "PictureBookStage",
+        "AssemblyStage",
+        "TextBridgeStage"
+      ]
+    },
+    "motionLanguage": {
+      "enum": [
+        "open-hero",
+        "entity-focus",
+        "document-reveal",
+        "metric-board",
+        "progressive-chart",
+        "causal-path",
+        "dual-lane",
+        "timeline-track",
+        "split-comparison",
+        "matrix-grid",
+        "verification-gates",
+        "picturebook",
+        "assembly",
+        "text-bridge"
+      ]
+    },
+    "variantOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variant",
+        "appearanceClass",
+        "dominantSurface",
+        "stageShell",
+        "motionLanguage"
+      ],
+      "properties": {
+        "variant": {
+          "enum": [
+            "default",
+            "left-to-right",
+            "zero-baseline",
+            "center-zero",
+            "two-lane",
+            "confirmed-vs-unconfirmed",
+            "strengthen-vs-weaken",
+            "prebuilt-card",
+            "grid",
+            "receipt",
+            "pressure-lane"
+          ]
+        },
+        "appearanceClass": {
+          "$ref": "#/$defs/appearance"
+        },
+        "dominantSurface": {
+          "$ref": "#/$defs/dominantSurface"
+        },
+        "stageShell": {
+          "$ref": "#/$defs/stageShell"
+        },
+        "motionLanguage": {
+          "$ref": "#/$defs/motionLanguage"
+        }
+      }
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visualTemplateId",
+        "allowedGrammarIds",
+        "appearanceClass",
+        "dominantSurface",
+        "stageShell",
+        "motionLanguage"
+      ],
+      "properties": {
+        "visualTemplateId": {
+          "enum": [
+            "opening-contradiction",
+            "market-pulse-grid",
+            "earnings-surprise",
+            "dual-asset-split",
+            "macro-pressure",
+            "source-receipt",
+            "hero-number",
+            "closing-recap",
+            "final-assembly",
+            "conclusion-card",
+            "expected-actual-bullet",
+            "expected-actual-gap-flow",
+            "metric-comparison-board",
+            "index-return-bars",
+            "diverging-stock-bars",
+            "split-comparison",
+            "focus-matrix",
+            "causal-lane",
+            "tailwind-headwind",
+            "evidence-boundary",
+            "verification-checklist",
+            "verification-matrix",
+            "analogy-steps",
+            "entity-card-full",
+            "news-media",
+            "text-focus"
+          ]
+        },
+        "allowedGrammarIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "contradiction",
+              "entity",
+              "evidence",
+              "gap",
+              "causal",
+              "reaction",
+              "comparison",
+              "verification",
+              "analogy",
+              "assembly",
+              "bridge-text"
+            ]
+          }
+        },
+        "appearanceClass": {
+          "$ref": "#/$defs/appearance"
+        },
+        "dominantSurface": {
+          "$ref": "#/$defs/dominantSurface"
+        },
+        "stageShell": {
+          "$ref": "#/$defs/stageShell"
+        },
+        "motionLanguage": {
+          "$ref": "#/$defs/motionLanguage"
+        },
+        "variantOverrides": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/variantOverride"
+          }
+        }
+      }
+    }
+  }
+}

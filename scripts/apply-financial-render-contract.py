@@ -2,8 +2,9 @@
 """Apply the FVU-R1 render contract patch deterministically.
 
 The script is intentionally narrow and idempotent. It updates only the existing
-render-spec and visual-template contract anchors needed for render_spec 2.3.0.
-Use --check after the patch has been committed to ensure no source drift.
+render-spec and visual-template contract anchors needed for render_spec 2.3.0 or
+later compatible schema versions. Use --check after the patch has been committed
+to ensure no source drift.
 """
 
 from __future__ import annotations
@@ -122,7 +123,7 @@ def patch_render_spec(text: str) -> str:
             "financial Visual Beat trace fields",
         )
 
-    if 'schemaVersion: z.union([z.literal("2.2.0"), z.literal("2.3.0")])' not in text:
+    if "financialVisualContract: financialVisualRootContractSchema.optional()" not in text:
         text = replace_once(
             text,
             '  schemaVersion: z.literal("2.2.0"),\n  episode: episodeSchema,\n',
@@ -154,7 +155,7 @@ def patch_render_spec(text: str) -> str:
   );
   if (spec.schemaVersion === "2.2.0") {
     if (spec.financialVisualContract !== undefined) context.addIssue({code: "custom", path: ["financialVisualContract"], message: "render_spec 2.2.0 must not contain the financial root contract"});
-    if (financialTraceBeats.length > 0 || newFinancialTemplates.length > 0) context.addIssue({code: "custom", path: ["scenes"], message: "financial Visual Beats require render_spec 2.3.0"});
+    if (financialTraceBeats.length > 0 || newFinancialTemplates.length > 0) context.addIssue({code: "custom", path: ["scenes"], message: "financial Visual Beats require render_spec 2.3.0 or later"});
   } else {
     if (newFinancialTemplates.some(({beat}) => beat.financialVisualTrace === undefined)) {
       context.addIssue({code: "custom", path: ["scenes"], message: "new financial Visual Templates require financialVisualTrace"});

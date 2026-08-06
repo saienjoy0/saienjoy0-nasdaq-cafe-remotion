@@ -11,6 +11,11 @@ import {
   VISUAL_TEMPLATE_VARIANT_IDS,
 } from "./visual-template-contract";
 import {
+  transitionRoleSchema,
+  visualGrammarIdSchema,
+  visualGrammarRootContractSchema,
+} from "./visual-grammar-contract";
+import {
   financialVisualRootContractSchema,
   financialVisualTraceSchema,
   isFinancialRecipeTemplatePairAllowed,
@@ -287,6 +292,8 @@ const visualBeatSchema = z.object({
   screenState: screenStateSchema,
   visualMode: specVisualModeSchema,
   visualTemplate: visualTemplateSchema,
+  visualGrammarId: visualGrammarIdSchema.optional(),
+  transitionRole: transitionRoleSchema.optional(),
   templateVariant: visualTemplateVariantSchema.optional(),
   templateConfig: visualTemplateConfigSchema,
   sequencePolicy: sequencePolicySchema.optional(),
@@ -400,8 +407,13 @@ const sceneSchema = z.object({
 }).strict();
 
 export const renderSpecSchema = z.object({
-  schemaVersion: z.union([z.literal("2.2.0"), z.literal("2.3.0")]),
+  schemaVersion: z.union([
+    z.literal("2.2.0"),
+    z.literal("2.3.0"),
+    z.literal("2.4.0"),
+  ]),
   financialVisualContract: financialVisualRootContractSchema.optional(),
+  visualGrammarContract: visualGrammarRootContractSchema.optional(),
   episode: episodeSchema,
   editorial: editorialSchema,
   publishing: publishingSchema,
@@ -501,6 +513,67 @@ export const renderSpecSchema = z.object({
       });
     }
   }
+  const visualGrammarBeats = spec.scenes.flatMap((scene, sceneIndex) =>
+    scene.visualBeats.map((beat, beatIndex) => ({sceneIndex, beatIndex, beat})),
+  );
+  if (spec.schemaVersion === "2.4.0") {
+    if (spec.visualGrammarContract === undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["visualGrammarContract"],
+        message: "render_spec 2.4.0 requires visualGrammarContract",
+      });
+    } else if (spec.visualGrammarContract.beatCount !== visualGrammarBeats.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["visualGrammarContract", "beatCount"],
+        message: `beatCount must equal Visual Beat count ${visualGrammarBeats.length}`,
+      });
+    }
+    visualGrammarBeats.forEach(({sceneIndex, beatIndex, beat}) => {
+      const path = ["scenes", sceneIndex, "visualBeats", beatIndex] as const;
+      if (beat.visualGrammarId === undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "visualGrammarId"],
+          message: "render_spec 2.4.0 requires visualGrammarId",
+        });
+      }
+      if (beat.transitionRole === undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "transitionRole"],
+          message: "render_spec 2.4.0 requires transitionRole",
+        });
+      }
+    });
+  } else {
+    if (spec.visualGrammarContract !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["visualGrammarContract"],
+        message: `render_spec ${spec.schemaVersion} must not contain visualGrammarContract`,
+      });
+    }
+    visualGrammarBeats.forEach(({sceneIndex, beatIndex, beat}) => {
+      const path = ["scenes", sceneIndex, "visualBeats", beatIndex] as const;
+      if (beat.visualGrammarId !== undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "visualGrammarId"],
+          message: `render_spec ${spec.schemaVersion} must not contain visualGrammarId`,
+        });
+      }
+      if (beat.transitionRole !== undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "transitionRole"],
+          message: `render_spec ${spec.schemaVersion} must not contain transitionRole`,
+        });
+      }
+    });
+  }
+
 });
 
 export type RenderSpec = z.infer<typeof renderSpecSchema>;

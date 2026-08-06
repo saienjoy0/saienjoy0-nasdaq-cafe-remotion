@@ -1,0 +1,44 @@
+name: Visual Grammar Renderer Contract
+
+on:
+  pull_request:
+    paths:
+      - "contracts/visual_grammar_renderer_compatibility.json"
+      - "contracts/visual_grammar_renderer_compatibility.schema.json"
+      - "src/spec/visual-grammar-contract.ts"
+      - "src/spec/validate-visual-grammar.ts"
+      - "src/spec/render-spec.ts"
+      - "src/spec/validate-visual-story.ts"
+      - "scripts/test-visual-grammar-contract.ts"
+      - "scripts/generate-render-spec-schema.ts"
+      - "schemas/render_spec.schema.json"
+      - "package.json"
+      - ".github/workflows/visual-grammar-renderer-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify generated render_spec schema
+        run: |
+          npm run episode:spec:schema
+          git diff --exit-code -- schemas/render_spec.schema.json
+      - name: Run Visual Grammar contract tests
+        run: npm run test:visual-grammar
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Run Visual Template regression tests
+        run: npm run test:visual-templates
+      - name: Run Visual Validator regression tests
+        run: npm run test:visual-validator
