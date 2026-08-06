@@ -1,0 +1,134 @@
+name: Apply Tailwind Headwind Repair 2026-08-06
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-tailwind-headwind-fix-2026-08-06
+  cancel-in-progress: false
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      EPISODE_DATE: "2026-08-06"
+      SPEC_PATH: "render-specs/2026-08-06/render_spec.json"
+      READY_PATH: "render-specs/2026-08-06/production_ready.json"
+      EXPECTED_TTS_INPUT_SHA256: "b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509"
+      TTS_CACHE_COMPATIBILITY_SHA256: "d35fe5c048bfcf6c07652c434e6773e4bde7d59dc2b875689709d5b6819ce9c4"
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+      SPEC_TTS_CACHE_ONLY: "1"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies and ffmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Apply lane and renderer repairs
+        run: |
+          python3 scripts/apply_tailwind_headwind_lane_fix.py
+          python3 scripts/apply_tailwind_renderer_fix.py
+
+      - name: Run formal validator and complete contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run episode:spec:validate -- "$SPEC_PATH"
+          npm run test:visual-templates
+          npm run typecheck
+          npm run test:spec
+          npm run build
+
+      - name: Restore exact two-block TTS cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: Linux-spec-tts-block-v2-${{ env.TTS_CACHE_COMPATIBILITY_SHA256 }}-${{ env.EXPECTED_TTS_INPUT_SHA256 }}
+          restore-keys: |
+            Linux-spec-tts-block-v2-${{ env.TTS_CACHE_COMPATIBILITY_SHA256 }}-${{ env.EXPECTED_TTS_INPUT_SHA256 }}-partial-
+
+      - name: Compile cached production data and inspect exact public layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run episode:spec:compile -- "$SPEC_PATH"
+          TECH="build/${EPISODE_DATE}/technical_report.json"
+          test "$(jq -r '.visualGrammarTiming.status' "$TECH")" = "PASS"
+          test "$(jq -r '.visualGrammarTiming.unresolvedStateCount' "$TECH")" = "0"
+          test "$(jq -r '.ttsInputSha256' "$TECH")" = "$EXPECTED_TTS_INPUT_SHA256"
+          node --import tsx --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            import {assertSpecLayoutFits} from "./src/spec/validate-render-layout.ts";
+            const data = JSON.parse(readFileSync("build/2026-08-06/production_data.json", "utf8"));
+            assertSpecLayoutFits(data);
+            console.log("PASS: exact production data layout fits");
+          '
+
+      - name: Mark repair PASS and confirm immutable editorial identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+          for raw in [
+              "render-specs/2026-08-06/production_ready.json",
+              "preview-status/2026-08-06/normalization_report.json",
+          ]:
+              path = Path(raw)
+              value = json.loads(path.read_text(encoding="utf-8"))
+              repair = value["rendererNormalization"]["tailwindHeadwindLaneRepair"] if "rendererNormalization" in value else value["tailwindHeadwindLaneRepair"]
+              repair.update({
+                  "status": "PASS",
+                  "validationBasis": "formal-validator-cached-tts-production-layout",
+                  "unresolvedStateCount": 0,
+              })
+              path.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+          test "$(jq -r '.rendererNormalization.ttsInputSha256After' "$READY_PATH")" = "$EXPECTED_TTS_INPUT_SHA256"
+          jq -e '.rendererNormalization.tailwindHeadwindLaneRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
+
+      - name: Commit tested repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            "$SPEC_PATH" \
+            "$READY_PATH" \
+            episode-packages/2026-08-06/episode_package_2026-08-06.md \
+            preview-status/2026-08-06/normalization_report.json \
+            src/components/spec/VisualTemplateRenderer.tsx \
+            scripts/test-visual-templates.ts
+          git rm scripts/apply_tailwind_headwind_lane_fix.py
+          git rm scripts/apply_tailwind_renderer_fix.py
+          git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
+          git commit -m "Repair Scene 2 tailwind-headwind lanes and rendering"
+          git pull --rebase origin main
+          git push origin HEAD:main
