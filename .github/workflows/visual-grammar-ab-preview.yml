@@ -32,7 +32,6 @@ env:
 jobs:
   preflight:
     name: Freeze exact A/B input and renderer commit
-    if: github.actor == github.repository_owner
     runs-on: ubuntu-24.04
     timeout-minutes: 10
 
@@ -70,6 +69,7 @@ jobs:
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           set -euo pipefail
+          [[ "$GITHUB_ACTOR" == "$GITHUB_REPOSITORY_OWNER" ]] || { echo "::error::A/B Preview is repository-owner only"; exit 1; }
           [[ "$CONFIRMATION" == "AB_PREVIEW" ]] || { echo "::error::confirmation must be exactly AB_PREVIEW"; exit 1; }
           [[ "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "::error::episode_date must match YYYY-MM-DD"; exit 1; }
 
