@@ -1,0 +1,68 @@
+name: Inspect Visual Grammar Technical A/B
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/inspect-visual-grammar-technical-ab.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      TARGET_HEAD_SHA: "a19a7169783394fe02a1bebdc99bbf16ed7430bf"
+      TARGET_WORKFLOW: "visual-grammar-ab-technical-preview.yml"
+      REQUEST_ID: "vg6t-2099-02-02-20260806-a"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Inspect current run state
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUNS="$(gh run list \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow "$TARGET_WORKFLOW" \
+            --event push \
+            --limit 30 \
+            --json databaseId,status,conclusion,createdAt,updatedAt,url,headSha,displayTitle)"
+          MATCH="$(jq --arg sha "$TARGET_HEAD_SHA" '[.[] | select(.headSha == $sha)][0] // null' <<<"$RUNS")"
+          OUTPUT="visual-grammar-ab-technical-state/tracking/${REQUEST_ID}.probe.json"
+          mkdir -p "$(dirname "$OUTPUT")"
+          jq -n \
+            --arg request_id "$REQUEST_ID" \
+            --arg target_head_sha "$TARGET_HEAD_SHA" \
+            --argjson workflow_run "$MATCH" \
+            '{
+              contractVersion: "1.0.0",
+              requestId: $request_id,
+              targetHeadSha: $target_head_sha,
+              found: ($workflow_run != null),
+              workflowRun: $workflow_run,
+              finalAuthorized: false
+            }' > "$OUTPUT"
+
+      - name: Commit probe and remove inspector
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --ff-only origin main
+          OUTPUT="visual-grammar-ab-technical-state/tracking/${REQUEST_ID}.probe.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUTPUT"
+          git rm --ignore-unmatch ".github/workflows/inspect-visual-grammar-technical-ab.yml"
+          git commit -m "Inspect Visual Grammar technical A/B state: ${REQUEST_ID}"
+          git push origin HEAD:main
