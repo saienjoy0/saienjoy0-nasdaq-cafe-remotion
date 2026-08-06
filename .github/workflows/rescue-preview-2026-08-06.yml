@@ -24,7 +24,7 @@ jobs:
       CI: "true"
       SPEC_PATH: render-specs/2026-08-06/render_spec.json
       EPISODE_ID: 2026-08-06
-      EXPECTED_RESCUE_SHA: 0084fc5a1e1e82db027363c707a97306898bb53e328fff2f7103fdbf885a6bb3
+      EXPECTED_RESCUE_SHA: bb5a27d896672f5001bafb4e84634feeec94f45d7701679e9ae3f73a4f7fb728
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
