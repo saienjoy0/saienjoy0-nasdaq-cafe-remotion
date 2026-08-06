@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "recentRuns": [
+    {
+      "conclusion": "failure",
+      "createdAt": "2026-08-06T06:47:13Z",
+      "databaseId": 31078476724,
+      "event": "push",
+      "headSha": "72bca4384b82ff579a45fb67e163cf1139edb13d",
+      "status": "completed",
+      "updatedAt": "2026-08-06T06:47:42Z",
+      "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31078476724",
+      "workflowName": "Normalize and Render Nasdaq Cafe Preview 2026-08-06"
+    }
+  ],
+  "latestRun": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-06T06:47:13Z",
+    "databaseId": 31078476724,
+    "event": "push",
+    "headSha": "72bca4384b82ff579a45fb67e163cf1139edb13d",
+    "jobs": [
+      {
+        "completedAt": "2026-08-06T06:47:41Z",
+        "conclusion": "failure",
+        "databaseId": 92541617976,
+        "name": "normalize-validate-render",
+        "startedAt": "2026-08-06T06:47:18Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-08-06T06:47:21Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-08-06T06:47:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:25Z",
+            "conclusion": "success",
+            "name": "Checkout main",
+            "number": 2,
+            "startedAt": "2026-08-06T06:47:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:30Z",
+            "conclusion": "success",
+            "name": "Set up Node.js",
+            "number": 3,
+            "startedAt": "2026-08-06T06:47:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:38Z",
+            "conclusion": "success",
+            "name": "Install locked dependencies",
+            "number": 4,
+            "startedAt": "2026-08-06T06:47:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:38Z",
+            "conclusion": "success",
+            "name": "Normalize Plot 2.4 payload to Renderer 2.4 schema",
+            "number": 5,
+            "startedAt": "2026-08-06T06:47:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "failure",
+            "name": "Run formal Renderer validator",
+            "number": 6,
+            "startedAt": "2026-08-06T06:47:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "skipped",
+            "name": "Commit normalized immutable input",
+            "number": 7,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "skipped",
+            "name": "Dispatch formal Preview",
+            "number": 8,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "skipped",
+            "name": "Wait for Preview completion",
+            "number": 9,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "skipped",
+            "name": "Record final Preview status",
+            "number": 10,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "skipped",
+            "name": "Post Set up Node.js",
+            "number": 19,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "success",
+            "name": "Post Checkout main",
+            "number": 20,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:47:39Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 21,
+            "startedAt": "2026-08-06T06:47:39Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31078476724/job/92541617976"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-06T06:47:42Z",
+    "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31078476724",
+    "workflowName": "Normalize and Render Nasdaq Cafe Preview 2026-08-06"
+  }
+}
