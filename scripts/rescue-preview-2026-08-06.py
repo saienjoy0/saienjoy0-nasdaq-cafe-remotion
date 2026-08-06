@@ -49,6 +49,8 @@ spec["scenes"][8]["visualMode"] = "conclusion-card"
 spec["scenes"][8]["transition"] = {"type": "none", "durationMs": 0}
 beat(9, 1)["visualMode"] = "conclusion-card"
 beat(9, 1)["visualTemplate"] = "final-assembly"
+spec["scenes"][8]["cards"][0]["lines"][0]["value"] = "AMD -7.04%"
+spec["scenes"][8]["cards"][0]["lines"][1]["value"] = "NVIDIA +3.43%"
 
 for scene_number in (3, 4, 7):
     scene = spec["scenes"][scene_number - 1]
