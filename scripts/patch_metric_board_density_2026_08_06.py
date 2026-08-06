@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Route the full Scene 3 metric sets through the registered focus-matrix.
+"""Deduplicate the formal Number objects selected by Scene 3 metric boards.
 
-The Renderer metric-comparison-board permits four Number objects and no Card.
-Scene 3 has one source Card plus up to six exact metrics, which matches the
-focus-matrix contract. All original metrics remain selected and visible.
+Two adapter stages promoted the same three source lines under different IDs.
+Keep the three Number objects that carry numericValue and preserve the original
+metric-comparison-board. No metric text or numeric value is removed.
 """
 
 from __future__ import annotations
@@ -13,10 +13,7 @@ import hashlib
 import json
 from pathlib import Path
 
-CARD_BY_BEAT = {
-    "scene-03-beat-001": "scene-03-card-001",
-    "scene-03-beat-002": "scene-03-card-002",
-}
+BEAT_IDS = {"scene-03-beat-001", "scene-03-beat-002"}
 
 
 def main() -> int:
@@ -29,41 +26,42 @@ def main() -> int:
     spec = json.loads(args.spec.read_text(encoding="utf-8"))
     changes = []
     for scene in spec["scenes"]:
-        number_ids = {number["numberId"] for number in scene.get("numbers", [])}
-        card_ids = {card["cardId"] for card in scene.get("cards", [])}
+        numbers = {
+            number["numberId"]: number
+            for number in scene.get("numbers", [])
+        }
         for beat in scene["visualBeats"]:
-            card_id = CARD_BY_BEAT.get(beat["beatId"])
-            if card_id is None:
+            if beat["beatId"] not in BEAT_IDS:
                 continue
-            if card_id not in card_ids:
-                raise ValueError(f"missing original metric card: {card_id}")
-            selected_numbers = [
+            numeric_ids = [
                 object_id
                 for object_id in beat["objectIds"]
-                if object_id in number_ids
+                if object_id in numbers
+                and numbers[object_id].get("numericValue") is not None
             ]
-            if not 2 <= len(selected_numbers) <= 6:
+            if len(numeric_ids) != 3:
                 raise ValueError(
-                    f"focus-matrix requires 2-6 metrics: {beat['beatId']} "
-                    f"got {len(selected_numbers)}"
+                    f"Scene 3 metric board requires exactly three numeric metrics: "
+                    f"{beat['beatId']} got {len(numeric_ids)}"
                 )
             previous_template = beat["visualTemplate"]
             previous_objects = list(beat["objectIds"])
-            beat["visualTemplate"] = "focus-matrix"
+            beat["visualTemplate"] = "metric-comparison-board"
             beat["templateConfig"]["variant"] = "default"
-            beat["objectIds"] = [card_id, *selected_numbers]
-            beat["templateConfig"]["displayOrder"] = list(beat["objectIds"])
+            beat["objectIds"] = numeric_ids
+            beat["templateConfig"]["displayOrder"] = list(numeric_ids)
             changes.append(
                 {
                     "sceneId": scene["sceneId"],
                     "beatId": beat["beatId"],
                     "fromTemplate": previous_template,
-                    "toTemplate": "focus-matrix",
-                    "originalCardId": card_id,
+                    "toTemplate": "metric-comparison-board",
                     "previousObjectIds": previous_objects,
-                    "resolvedObjectIds": list(beat["objectIds"]),
-                    "allOriginalCardLinesRemainVisible": True,
-                    "selectedNumberCount": len(selected_numbers),
+                    "resolvedObjectIds": list(numeric_ids),
+                    "selectedNumberCount": len(numeric_ids),
+                    "sourceMetricCount": 3,
+                    "metricTextRemoved": False,
+                    "metricNumbersRemoved": False,
                 }
             )
 
@@ -76,8 +74,8 @@ def main() -> int:
     normalization = dict(ready.get("rendererNormalization", {}))
     normalization.update(
         {
-            "scene3FocusMatrixResolved": True,
-            "scene3FocusMatrixChanges": changes,
+            "scene3MetricDuplicatesResolved": True,
+            "scene3MetricDeduplicationChanges": changes,
             "metricTextRemoved": False,
             "metricNumbersRemoved": False,
         }
@@ -90,15 +88,15 @@ def main() -> int:
 
     report = json.loads(args.report.read_text(encoding="utf-8"))
     report["normalizedRenderSpecSha256"] = sha
-    report["scene3FocusMatrixResolved"] = True
-    report["scene3FocusMatrixChanges"] = changes
+    report["scene3MetricDuplicatesResolved"] = True
+    report["scene3MetricDeduplicationChanges"] = changes
     report["metricTextRemoved"] = False
     report["metricNumbersRemoved"] = False
     args.report.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(json.dumps({"status": "focus-matrix", "count": len(changes), "sha256": sha}))
+    print(json.dumps({"status": "deduplicated", "count": len(changes), "sha256": sha}))
     return 0
 
 
