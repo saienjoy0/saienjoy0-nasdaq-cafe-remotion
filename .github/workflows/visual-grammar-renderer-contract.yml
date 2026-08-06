@@ -1,13 +1,15 @@
 name: Visual Grammar Renderer Contract
-# VG-4 validates timeline precision, motion pacing, and TTS identity invariance.
+# VG-5 adds post-TTS measured diversity and compile-stop validation.
 
 on:
   pull_request:
     paths:
       - "contracts/visual_grammar_renderer_compatibility.json"
       - "contracts/visual_grammar_renderer_compatibility.schema.json"
+      - "contracts/visual_grammar_timing_report.schema.json"
       - "src/spec/visual-grammar-contract.ts"
       - "src/spec/reaction-timeline-contract.ts"
+      - "src/spec/measure-visual-grammar.ts"
       - "src/spec/validate-visual-grammar.ts"
       - "src/spec/validate-reaction-timeline.ts"
       - "src/spec/motion-preset-contract.ts"
@@ -21,11 +23,13 @@ on:
       - "src/components/spec/AdditionalVisualTemplates.tsx"
       - "src/components/spec/FinancialVisualTemplates.tsx"
       - "src/components/spec/SpecVisualModes.tsx"
+      - "scripts/spec-cli.ts"
       - "scripts/test-visual-grammar-contract.ts"
       - "scripts/test-visual-grammar-stage-shells.tsx"
       - "scripts/test-event-reaction-timeline.tsx"
       - "scripts/test-reaction-timeline-contract.ts"
       - "scripts/test-visual-grammar-motion-language.ts"
+      - "scripts/test-visual-grammar-timing.ts"
       - "scripts/generate-render-spec-schema.ts"
       - "schemas/render_spec.schema.json"
       - "package.json"
@@ -60,6 +64,8 @@ jobs:
         run: npx tsx scripts/test-reaction-timeline-contract.ts
       - name: Run motion language and TTS identity tests
         run: npm run test:visual-grammar-motion
+      - name: Run post-TTS measured diversity tests
+        run: npm run test:visual-grammar-timing
       - name: Typecheck
         run: npm run typecheck
       - name: Run Visual Template regression tests
