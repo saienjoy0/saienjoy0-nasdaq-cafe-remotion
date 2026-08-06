@@ -1,0 +1,127 @@
+name: FVU Financial Japanese UI Bootstrap
+
+on:
+  push:
+    branches:
+      - fix/financial-visual-japanese-ui
+    paths:
+      - .github/workflows/fvu-financial-japanese-ui-bootstrap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/financial-visual-japanese-ui
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Localize fixed financial UI and fixture copy
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path: str, old: str, new: str, count: int = 1) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              actual = text.count(old)
+              if actual != count:
+                  raise SystemExit(f"{path}: expected {count} occurrences of {old!r}, found {actual}")
+              file.write_text(text.replace(old, new), encoding="utf-8")
+
+          component = "src/components/spec/FinancialVisualTemplates.tsx"
+          for old, new in [
+              ("MARKET SNAPSHOT", "市場スナップショット"),
+              ("EXPECTED / ACTUAL / GAP", "予想・実績・差"),
+              ('title="EXPECTED"', 'title="予想"'),
+              ('title="ACTUAL"', 'title="実績"'),
+              ('title="GAP"', 'title="差"'),
+              ("ENTITY DIVERGENCE", "銘柄の明暗"),
+              ("MACRO TRANSMISSION", "マクロの波及"),
+              ("SOURCE EVIDENCE", "確認済みの根拠"),
+              ("<span>CONFIRMED MATERIAL</span><span>RECEIPT</span>", "<span>確認済み資料</span><span>出典メモ</span>"),
+          ]:
+              replace_exact(component, old, new)
+
+          generator = "scripts/generate-financial-handoff-fixture.py"
+          replace_exact(
+              generator,
+              'def make_number(number_id: str, label: str, value: str, numeric: float, tone: str) -> dict[str, Any]:\n    return {\n        "numberId": number_id,\n        "label": label,\n        "value": value,\n        "numericValue": numeric,\n        "precision": 1,\n        "unit": "billion USD",\n        "comparison": "AWS revenue, technical fixture",\n        "tone": tone,\n    }',
+              'def make_number(\n    number_id: str,\n    label: str,\n    value: str,\n    numeric: float,\n    precision: int,\n    unit: str,\n    comparison: str,\n    tone: str,\n) -> dict[str, Any]:\n    return {\n        "numberId": number_id,\n        "label": label,\n        "value": value,\n        "numericValue": numeric,\n        "precision": precision,\n        "unit": unit,\n        "comparison": comparison,\n        "tone": tone,\n    }',
+          )
+          for old, new in [
+              ('"typographyText": "Expected｜42.3B"', '"typographyText": "市場予想｜423億ドル"'),
+              ('"typographyText": "Actual｜43.0B"', '"typographyText": "実績｜430億ドル"'),
+              ('"typographyText": "Gap｜+0.7B"', '"typographyText": "差｜+7億ドル"'),
+              ('spec["episode"]["marketSession"] = "TECHNICAL ACCEPTANCE"', 'spec["episode"]["marketSession"] = "技術検証"'),
+              ('make_number(number_ids[0], "EXPECTED", "$42.3B", 42.3, "neutral")', 'make_number(number_ids[0], "市場予想", "423", 423, 0, "億ドル", "AWS売上高・市場予想", "neutral")'),
+              ('make_number(number_ids[1], "ACTUAL", "$43.0B", 43.0, "positive")', 'make_number(number_ids[1], "実績", "430", 430, 0, "億ドル", "AWS売上高・実績", "positive")'),
+              ('make_number(number_ids[2], "GAP", "+$0.7B", 0.7, "emphasis")', 'make_number(number_ids[2], "上振れ幅", "+7", 7, 0, "億ドル", "市場予想との差", "emphasis")'),
+              ('beat["primaryElement"] = "AWS revenue gap"', 'beat["primaryElement"] = "AWS売上高の上振れ幅"'),
+              ('beat["viewerTexts"] = ["Expected $42.3B", "Actual $43.0B", "Gap +$0.7B"]', 'beat["viewerTexts"] = ["市場予想 423億ドル", "実績 430億ドル", "差 +7億ドル"]'),
+          ]:
+              replace_exact(generator, old, new)
+          replace_exact(
+              generator,
+              '"comparisonBasis": "AWS revenue, same entity, period, currency, and unit"',
+              '"comparisonBasis": "AWS売上高・同一企業・同一期間・同一通貨・同一単位"',
+              count=2,
+          )
+
+          test = "scripts/test-financial-visual-templates.tsx"
+          for old, new in [
+              ('assert.match(marketMarkup, /MARKET SNAPSHOT/);', 'assert.match(marketMarkup, /市場スナップショット/);'),
+              ('number("expected", "Expected", 42.3, "neutral")', 'number("expected", "市場予想", 42.3, "neutral")'),
+              ('number("actual", "Actual", 43.0, "positive")', 'number("actual", "実績", 43.0, "positive")'),
+              ('number("gap", "Gap", 0.7, "emphasis")', 'number("gap", "上振れ幅", 0.7, "emphasis")'),
+              ('assert.match(earningsMarkup, /EXPECTED/);\nassert.match(earningsMarkup, /ACTUAL/);\nassert.match(earningsMarkup, /GAP/);', 'assert.match(earningsMarkup, /予想・実績・差/);\nassert.match(earningsMarkup, /市場予想/);\nassert.match(earningsMarkup, /上振れ幅/);'),
+              ('assert.match(divergenceMarkup, /ENTITY DIVERGENCE/);', 'assert.match(divergenceMarkup, /銘柄の明暗/);'),
+              ('assert.match(macroMarkup, /MACRO TRANSMISSION/);', 'assert.match(macroMarkup, /マクロの波及/);'),
+              ('assert.match(receiptMarkup, /SOURCE EVIDENCE/);', 'assert.match(receiptMarkup, /確認済みの根拠/);\nassert.match(receiptMarkup, /確認済み資料/);\nassert.match(receiptMarkup, /出典メモ/);'),
+              ('assert.doesNotMatch(receiptMarkup, /financialVisualTrace|recipePlanSha256|selectedPlanId/);', 'assert.doesNotMatch(receiptMarkup, /financialVisualTrace|recipePlanSha256|selectedPlanId/);\n\nfor (const markup of [marketMarkup, earningsMarkup, divergenceMarkup, macroMarkup, receiptMarkup]) {\n  assert.doesNotMatch(markup, /MARKET SNAPSHOT|EXPECTED \/ ACTUAL \/ GAP|ENTITY DIVERGENCE|MACRO TRANSMISSION|SOURCE EVIDENCE|CONFIRMED MATERIAL|>RECEIPT</);\n}'),
+          ]:
+              replace_exact(test, old, new)
+          PY
+
+      - name: Regenerate fixture twice and verify determinism
+        shell: bash
+        run: |
+          python3 scripts/generate-financial-handoff-fixture.py
+          cp shared-fixtures/financial-visual-2.3/render_spec.json /tmp/render_spec.first.json
+          cp shared-fixtures/financial-visual-2.3/fixture_manifest.json /tmp/fixture_manifest.first.json
+          python3 scripts/generate-financial-handoff-fixture.py
+          cmp /tmp/render_spec.first.json shared-fixtures/financial-visual-2.3/render_spec.json
+          cmp /tmp/fixture_manifest.first.json shared-fixtures/financial-visual-2.3/fixture_manifest.json
+
+      - name: Run focused verification
+        run: |
+          npx tsx scripts/test-financial-visual-templates.tsx
+          npx tsx scripts/test-financial-handoff-fixture.ts
+          npm run episode:spec:validate -- shared-fixtures/financial-visual-2.3/render_spec.json
+          npm run typecheck
+
+      - name: Commit localized implementation and remove bootstrap
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fvu-financial-japanese-ui-bootstrap.yml
+          git add -- src/components/spec/FinancialVisualTemplates.tsx
+          git add -- scripts/generate-financial-handoff-fixture.py
+          git add -- scripts/test-financial-visual-templates.tsx
+          git add -- shared-fixtures/financial-visual-2.3/render_spec.json
+          git add -- shared-fixtures/financial-visual-2.3/fixture_manifest.json
+          git commit -m "Localize financial visual UI in Japanese"
+          git push origin HEAD:fix/financial-visual-japanese-ui
