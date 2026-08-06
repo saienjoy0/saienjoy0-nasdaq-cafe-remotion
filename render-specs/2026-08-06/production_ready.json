@@ -1,0 +1,16 @@
+{
+  "consistencyStatus": "pass",
+  "episodeDate": "2026-08-06",
+  "episodePackagePath": "episode-packages/2026-08-06/episode_package_2026-08-06.md",
+  "episodePackageSha256": "706d12355ba7bf2cb02261257eb54278cb6ad5abd5d4e757f4d5418809667d59",
+  "finalAuthorized": false,
+  "previewOnly": true,
+  "renderSpecPath": "render-specs/2026-08-06/render_spec.json",
+  "renderSpecSha256": "0b4d094bfc5325602d42e955a281bd16d2e358a150afa04ad9e3d765ee75a515",
+  "sourceArtifactSha256": "f5a99dd4a0c5ce9360e3acbf82047756fbb9faba521ed1277810fd7c32fe71a2",
+  "sourceBundleId": "b72cd4c21cfba06e867e31e126eb67a3e30122235d45e94c9745263a3e38c774",
+  "status": "ready",
+  "unresolvedStateCount": 0,
+  "validatorStatus": "pass",
+  "version": 1
+}
