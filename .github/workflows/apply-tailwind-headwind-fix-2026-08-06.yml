@@ -49,10 +49,11 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Apply lane and renderer repairs
+      - name: Apply lane, renderer, and Scene 3 layout repairs
         run: |
           python3 scripts/apply_tailwind_headwind_lane_fix.py
           python3 scripts/apply_tailwind_renderer_fix.py
+          python3 scripts/apply_scene3_split_comparison_fix.py
 
       - name: Run formal validator and complete contracts
         shell: bash
@@ -91,31 +92,35 @@ jobs:
             console.log("PASS: exact production data layout fits");
           '
 
-      - name: Mark repair PASS and confirm immutable editorial identity
+      - name: Mark repairs PASS and confirm immutable editorial identity
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
           import json
           from pathlib import Path
+          repair_keys = ["tailwindHeadwindLaneRepair", "scene3LayoutCompatibilityRepair"]
           for raw in [
               "render-specs/2026-08-06/production_ready.json",
               "preview-status/2026-08-06/normalization_report.json",
           ]:
               path = Path(raw)
               value = json.loads(path.read_text(encoding="utf-8"))
-              repair = value["rendererNormalization"]["tailwindHeadwindLaneRepair"] if "rendererNormalization" in value else value["tailwindHeadwindLaneRepair"]
-              repair.update({
-                  "status": "PASS",
-                  "validationBasis": "formal-validator-cached-tts-production-layout",
-                  "unresolvedStateCount": 0,
-              })
+              container = value["rendererNormalization"] if "rendererNormalization" in value else value
+              for key in repair_keys:
+                  repair = container[key]
+                  repair.update({
+                      "status": "PASS",
+                      "validationBasis": "formal-validator-cached-tts-production-layout",
+                      "unresolvedStateCount": 0,
+                  })
               path.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
           test "$(jq -r '.rendererNormalization.ttsInputSha256After' "$READY_PATH")" = "$EXPECTED_TTS_INPUT_SHA256"
           jq -e '.rendererNormalization.tailwindHeadwindLaneRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
+          jq -e '.rendererNormalization.scene3LayoutCompatibilityRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
 
-      - name: Commit tested repair
+      - name: Commit tested repairs
         shell: bash
         run: |
           set -euo pipefail
@@ -130,7 +135,8 @@ jobs:
             scripts/test-visual-templates.ts
           git rm scripts/apply_tailwind_headwind_lane_fix.py
           git rm scripts/apply_tailwind_renderer_fix.py
+          git rm scripts/apply_scene3_split_comparison_fix.py
           git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
-          git commit -m "Repair Scene 2 tailwind-headwind lanes and rendering"
+          git commit -m "Repair Scene 2 lanes and Scene 3 comparison layout"
           git pull --rebase origin main
           git push origin HEAD:main
