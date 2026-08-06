@@ -57,7 +57,11 @@ jobs:
             sudo apt-get update && sudo apt-get install -y ffmpeg
           fi
       - id: stability
-        run: npm run test:runtime-stability
+        run: |
+          tsx scripts/test-duration-policy.ts
+          tsx scripts/test-spec-inspect.ts
+          node --import tsx scripts/test-gemini-api-key-pool.ts
+          npm run test:visual-story
       - id: generate
         run: npm run episode:spec:preview -- "$SPEC_PATH"
       - id: upload
