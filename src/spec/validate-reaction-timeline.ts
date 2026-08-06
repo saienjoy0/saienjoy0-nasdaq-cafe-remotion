@@ -2,6 +2,7 @@ import type {RenderSpec} from "./render-spec";
 import {
   REACTION_TIMELINE_VARIANT_PRECISION,
   isReactionTimelineVariant,
+  type ReactionTimelineVariant,
 } from "./reaction-timeline-contract";
 
 export type ReactionTimelineIssueCode =
@@ -37,12 +38,13 @@ export const validateReactionTimelineBeat = (
       `${variant} is not a reaction timeline variant`,
     );
   }
-  const expectedPrecision = REACTION_TIMELINE_VARIANT_PRECISION[variant];
+  const timelineVariant = variant as ReactionTimelineVariant;
+  const expectedPrecision = REACTION_TIMELINE_VARIANT_PRECISION[timelineVariant];
   if (config.precision !== expectedPrecision) {
     fail(
       "VG_REACTION_PRECISION_MISMATCH",
       `${path}.templateConfig.reactionTimeline.precision`,
-      `${variant} requires ${expectedPrecision}, got ${config.precision}`,
+      `${timelineVariant} requires ${expectedPrecision}, got ${config.precision}`,
     );
   }
 
