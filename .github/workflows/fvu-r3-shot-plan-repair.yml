@@ -1,5 +1,6 @@
 name: Sync Official FVU R3 Fixture and Redispatch Preview
 
+# Retriggered after the technical PR was reopened.
 on:
   pull_request:
     types: [synchronize]
@@ -62,10 +63,7 @@ jobs:
               return {
                   "voiceProfileId": value.get("voiceProfileId"),
                   "pronunciations": value.get("pronunciations"),
-                  "speech": [
-                      [chunk["speechText"] for chunk in scene["narrationChunks"]]
-                      for scene in value["scenes"]
-                  ],
+                  "speech": [[chunk["speechText"] for chunk in scene["narrationChunks"]] for scene in value["scenes"]],
               }
 
           if tts_identity(source) != tts_identity(target):
@@ -74,11 +72,7 @@ jobs:
           scene = next(item for item in source["scenes"] if item["sceneId"] == "scene-04")
           beat = next(item for item in scene["visualBeats"] if item["beatId"] == "vb-04-02")
           shots = beat.get("shots", [])
-          expected_ids = [
-              "scene-04-beat-001-shot-001",
-              "scene-04-beat-001-shot-002",
-              "scene-04-beat-001-shot-003",
-          ]
+          expected_ids = ["scene-04-beat-001-shot-001", "scene-04-beat-001-shot-002", "scene-04-beat-001-shot-003"]
           if [item.get("shotId") for item in shots] != expected_ids:
               raise SystemExit("official financial Shot IDs do not match the production contract")
           total = sum(len(b.get("shots", [])) for s in source["scenes"] for b in s["visualBeats"])
@@ -119,14 +113,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY' > /tmp/dispatch.json
           import json, os
-          print(json.dumps({
-              "ref": os.environ["HEAD_REF"],
-              "inputs": {
-                  "episode_date": os.environ["EPISODE_DATE"],
-                  "expected_spec_sha256": os.environ["SPEC_SHA"],
-                  "confirmation": "PREVIEW",
-              },
-          }))
+          print(json.dumps({"ref": os.environ["HEAD_REF"], "inputs": {"episode_date": os.environ["EPISODE_DATE"], "expected_spec_sha256": os.environ["SPEC_SHA"], "confirmation": "PREVIEW"}}))
           PY
           curl -fsS -X POST \
             -H "Accept: application/vnd.github+json" \
