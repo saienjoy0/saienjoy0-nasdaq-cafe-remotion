@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactNode} from "react";
 import type {VisualTemplateId, VisualTemplateVariant} from "../../spec/visual-template-contract";
 import {getVisualGrammarAppearance, type StageShellId} from "../../spec/visual-grammar-contract";
+import {VisualGrammarStageModeProvider, useVisualGrammarStageMode} from "./VisualGrammarStageMode";
 import {AssemblyStage} from "./stages/AssemblyStage";
 import {CausalPathStage} from "./stages/CausalPathStage";
 import {DocumentMediaStage} from "./stages/DocumentMediaStage";
@@ -50,7 +51,12 @@ export const VisualGrammarStageHost: React.FC<{
   accent?: string;
   style?: CSSProperties;
 }> = ({visualTemplate, variant, children, accent, style}) => {
+  const stageMode = useVisualGrammarStageMode();
+  if (stageMode === "legacy") return <>{children}</>;
+
   const stageShellId = getVisualGrammarStageShellId(visualTemplate, variant);
   const StageShell = STAGE_SHELL_COMPONENTS[stageShellId];
   return <StageShell accent={accent} style={style}>{children}</StageShell>;
 };
+
+export {VisualGrammarStageModeProvider};
