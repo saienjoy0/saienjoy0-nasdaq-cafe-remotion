@@ -73,9 +73,9 @@ jobs:
           changes = {
               "scene-01-beat-002": {
                   "visualGrammarId": "evidence",
-                  "visualTemplate": "source-receipt",
-                  "variant": "receipt",
-                  "reason": "break 39.6s open-hero run with a source/evidence surface",
+                  "visualTemplate": "evidence-boundary",
+                  "variant": "confirmed-vs-unconfirmed",
+                  "reason": "break 39.6s open-hero run with a non-financial evidence boundary",
               },
               "scene-03-beat-002": {
                   "visualGrammarId": "evidence",
@@ -169,8 +169,8 @@ jobs:
               return text[:start] + block + text[end:]
 
           package = update_beat_block(package, "scene-01-beat-002", [
-              ("  - Visual Template ID：hero-number", "  - Visual Template ID：source-receipt"),
-              ("  - Template Variant：default", "  - Template Variant：receipt"),
+              ("  - Visual Template ID：hero-number", "  - Visual Template ID：evidence-boundary"),
+              ("  - Template Variant：default", "  - Template Variant：confirmed-vs-unconfirmed"),
           ])
           package = update_beat_block(package, "scene-03-beat-002", [
               ("  - Visual Template ID：metric-comparison-board", "  - Visual Template ID：focus-matrix"),
