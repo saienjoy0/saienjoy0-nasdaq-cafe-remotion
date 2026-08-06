@@ -1,0 +1,583 @@
+{
+  "duplicateNonNumericSelectionsRemoved": true,
+  "episodeDate": "2026-08-06",
+  "episodePackageSha256": "706d12355ba7bf2cb02261257eb54278cb6ad5abd5d4e757f4d5418809667d59",
+  "expectedActualGapTextChanged": false,
+  "finalAssemblyLineRepair": {
+    "allResolvedLinesPreviouslyDisplayed": true,
+    "cardId": "scene-09-card-001",
+    "marketMeaningChanged": false,
+    "narrationChanged": false,
+    "newEvidenceIntroduced": false,
+    "numbersChanged": false,
+    "previousLines": [
+      "AMD：予想超過でも下落",
+      "NVIDIA：SpaceX採用で上昇",
+      "NASDAQ：大型テック安も重なる"
+    ],
+    "resolvedLineProvenance": {
+      "NASDAQ：大型テック安も重なる": {
+        "sceneId": "scene-07",
+        "sourceId": "scene-07-card-002",
+        "surface": "card-line"
+      },
+      "SpaceXがGPUを専属採用": {
+        "sceneId": "scene-05",
+        "sourceId": "scene-05-card-001",
+        "surface": "card-line"
+      },
+      "大型顧客の獲得": {
+        "sceneId": "scene-08",
+        "sourceId": "scene-08-card-001",
+        "surface": "card-line"
+      },
+      "確認済み：売上・見通しは上振れ": {
+        "sceneId": "scene-04",
+        "sourceId": "scene-04-beat-002",
+        "surface": "viewer-text"
+      },
+      "粗利率・供給制約": {
+        "sceneId": "scene-08",
+        "sourceId": "scene-08-card-001",
+        "surface": "card-line"
+      }
+    },
+    "resolvedLines": [
+      "確認済み：売上・見通しは上振れ",
+      "SpaceXがGPUを専属採用",
+      "大型顧客の獲得",
+      "粗利率・供給制約",
+      "NASDAQ：大型テック安も重なる"
+    ],
+    "sceneId": "scene-09",
+    "sceneOrderChanged": false
+  },
+  "finalAssemblyRepair": {
+    "beatId": "scene-09-beat-001",
+    "marketMeaningChanged": false,
+    "narrationChanged": false,
+    "numbersChanged": false,
+    "previous": {
+      "objectIds": [
+        "scene-09-card-001"
+      ],
+      "variant": "default",
+      "visualTemplate": "closing-recap"
+    },
+    "resolved": {
+      "objectIds": [
+        "scene-09-card-001"
+      ],
+      "variant": "default",
+      "visualTemplate": "final-assembly"
+    },
+    "sceneId": "scene-09",
+    "visibleCardTextChanged": false
+  },
+  "financialRecipePlanSha256": "e9b7f051db63e23ba8d2284c93f719bbd32e42cefaa4d9c8dde47fa39c744457",
+  "financialSelectionCount": 2,
+  "mappingContractSha256": "863038fa5afbb604e2ac7d5e132b568c95031f1b4f158d562f644b0233bd8c95",
+  "marketMeaningChanged": false,
+  "metricNumbersRemoved": false,
+  "metricTextRemoved": false,
+  "narrationChanged": false,
+  "normalizedRenderSpecSha256": "b380543aa20a2118f28f5f0aec45f1e09ce35ea3b3ad63b02755402f10fb18c1",
+  "numberTextChanged": false,
+  "numbersChanged": false,
+  "numericSelectionChanges": [
+    {
+      "beatId": "scene-07-beat-001",
+      "previousObjectIds": [
+        "scene-07-beat-001-number-01-01",
+        "scene-07-beat-001-number-01-02",
+        "scene-07-beat-001-number-01-03",
+        "scene-07-beat-001-number-01",
+        "scene-07-beat-001-number-02",
+        "scene-07-beat-001-number-03"
+      ],
+      "removedDuplicateNumberIds": [
+        "scene-07-beat-001-number-01-01",
+        "scene-07-beat-001-number-01-02",
+        "scene-07-beat-001-number-01-03"
+      ],
+      "resolvedObjectIds": [
+        "scene-07-beat-001-number-01",
+        "scene-07-beat-001-number-02",
+        "scene-07-beat-001-number-03"
+      ],
+      "sceneId": "scene-07",
+      "visibleMetricContentChanged": false,
+      "visualTemplate": "diverging-stock-bars"
+    }
+  ],
+  "promotedExpectedActualGapCardCount": 3,
+  "promotedExpectedActualGapCards": [
+    {
+      "cardId": "scene-04-card-expected",
+      "role": "expected",
+      "sourceLine": "Expected 125.2億ドル"
+    },
+    {
+      "cardId": "scene-04-card-actual",
+      "role": "actual",
+      "sourceLine": "Actual 130億ドル"
+    },
+    {
+      "cardId": "scene-04-card-gap",
+      "role": "gap",
+      "sourceLine": "Gap +4.8億ドル"
+    }
+  ],
+  "promotedNumberObjectCount": 12,
+  "promotedNumbers": [
+    {
+      "beatId": "scene-03-beat-001",
+      "numberId": "scene-03-beat-001-number-01-01",
+      "sceneId": "scene-03",
+      "sourceCardId": "scene-03-card-001",
+      "sourceLine": "会社見通し中心 112億ドル"
+    },
+    {
+      "beatId": "scene-03-beat-001",
+      "numberId": "scene-03-beat-001-number-01-02",
+      "sceneId": "scene-03",
+      "sourceCardId": "scene-03-card-001",
+      "sourceLine": "実績 115.4億ドル"
+    },
+    {
+      "beatId": "scene-03-beat-001",
+      "numberId": "scene-03-beat-001-number-01-03",
+      "sceneId": "scene-03",
+      "sourceCardId": "scene-03-card-001",
+      "sourceLine": "差 +3.4億ドル"
+    },
+    {
+      "beatId": "scene-03-beat-002",
+      "numberId": "scene-03-beat-002-number-01-01",
+      "sceneId": "scene-03",
+      "sourceCardId": "scene-03-card-002",
+      "sourceLine": "会社見通し 130億ドル"
+    },
+    {
+      "beatId": "scene-03-beat-002",
+      "numberId": "scene-03-beat-002-number-01-02",
+      "sceneId": "scene-03",
+      "sourceCardId": "scene-03-card-002",
+      "sourceLine": "市場予想 125.2億ドル"
+    },
+    {
+      "beatId": "scene-03-beat-002",
+      "numberId": "scene-03-beat-002-number-01-03",
+      "sceneId": "scene-03",
+      "sourceCardId": "scene-03-card-002",
+      "sourceLine": "粗利率 56%"
+    },
+    {
+      "beatId": "scene-07-beat-001",
+      "numberId": "scene-07-beat-001-number-01-01",
+      "sceneId": "scene-07",
+      "sourceCardId": "scene-07-card-001",
+      "sourceLine": "NVIDIA +3.43%"
+    },
+    {
+      "beatId": "scene-07-beat-001",
+      "numberId": "scene-07-beat-001-number-01-02",
+      "sceneId": "scene-07",
+      "sourceCardId": "scene-07-card-001",
+      "sourceLine": "AMD -7.04%"
+    },
+    {
+      "beatId": "scene-07-beat-001",
+      "numberId": "scene-07-beat-001-number-01-03",
+      "sceneId": "scene-07",
+      "sourceCardId": "scene-07-card-001",
+      "sourceLine": "Alphabet -4.03%"
+    },
+    {
+      "beatId": "scene-07-beat-002",
+      "numberId": "scene-07-beat-002-number-01-01",
+      "sceneId": "scene-07",
+      "sourceCardId": "scene-07-card-002",
+      "sourceLine": "半導体：採用証拠の差"
+    },
+    {
+      "beatId": "scene-07-beat-002",
+      "numberId": "scene-07-beat-002-number-01-02",
+      "sceneId": "scene-07",
+      "sourceCardId": "scene-07-card-002",
+      "sourceLine": "NASDAQ：大型テック安も重なる"
+    },
+    {
+      "beatId": "scene-07-beat-002",
+      "numberId": "scene-07-beat-002-number-01-03",
+      "sceneId": "scene-07",
+      "sourceCardId": "scene-07-card-002",
+      "sourceLine": "Dow +0.5%の混合相場"
+    }
+  ],
+  "reactionTimelineEventOrderIds": [
+    "scene-06-card-001"
+  ],
+  "reactionTimelinePrecision": "official-time-plus-close",
+  "reactionTimelineSeriesInvented": false,
+  "reactionTimelineSeriesObjectIds": [],
+  "recipePlanSha256": "d7d7ad80c041a8339986a5117889c05a5d18d4a1563743006c61460daadd4d81",
+  "registeredVariantChanges": [
+    {
+      "beatId": "scene-04-beat-002",
+      "from": "default",
+      "sceneId": "scene-04",
+      "to": "confirmed-vs-unconfirmed"
+    }
+  ],
+  "scene3MetricDeduplicationChanges": [
+    {
+      "beatId": "scene-03-beat-001",
+      "fromTemplate": "metric-comparison-board",
+      "metricNumbersRemoved": false,
+      "metricTextRemoved": false,
+      "previousObjectIds": [
+        "scene-03-beat-001-number-01-01",
+        "scene-03-beat-001-number-01-02",
+        "scene-03-beat-001-number-01-03",
+        "scene-03-beat-001-number-01",
+        "scene-03-beat-001-number-02",
+        "scene-03-beat-001-number-03"
+      ],
+      "resolvedObjectIds": [
+        "scene-03-beat-001-number-01",
+        "scene-03-beat-001-number-02",
+        "scene-03-beat-001-number-03"
+      ],
+      "sceneId": "scene-03",
+      "selectedNumberCount": 3,
+      "sourceMetricCount": 3,
+      "toTemplate": "metric-comparison-board"
+    },
+    {
+      "beatId": "scene-03-beat-002",
+      "fromTemplate": "metric-comparison-board",
+      "metricNumbersRemoved": false,
+      "metricTextRemoved": false,
+      "previousObjectIds": [
+        "scene-03-beat-002-number-01-01",
+        "scene-03-beat-002-number-01-02",
+        "scene-03-beat-002-number-01-03",
+        "scene-03-beat-002-number-01",
+        "scene-03-beat-002-number-02",
+        "scene-03-beat-002-number-03"
+      ],
+      "resolvedObjectIds": [
+        "scene-03-beat-002-number-01",
+        "scene-03-beat-002-number-02",
+        "scene-03-beat-002-number-03"
+      ],
+      "sceneId": "scene-03",
+      "selectedNumberCount": 3,
+      "sourceMetricCount": 3,
+      "toTemplate": "metric-comparison-board"
+    }
+  ],
+  "scene3MetricDuplicatesResolved": true,
+  "scene9TransitionNormalized": true,
+  "sceneOrderChanged": false,
+  "sequencePolicyChanges": [
+    {
+      "beatId": "scene-02-beat-001",
+      "from": "static",
+      "objectIds": [
+        "scene-02-card-001"
+      ],
+      "sceneId": "scene-02",
+      "showTargetIds": [
+        "scene-02-card-001"
+      ],
+      "to": "explicit"
+    },
+    {
+      "beatId": "scene-03-beat-001",
+      "from": "explicit",
+      "objectIds": [
+        "scene-03-beat-001-number-01",
+        "scene-03-beat-001-number-02",
+        "scene-03-beat-001-number-03"
+      ],
+      "sceneId": "scene-03",
+      "showTargetIds": [
+        "scene-03-beat-001-number-01"
+      ],
+      "to": "object-order-fallback"
+    },
+    {
+      "beatId": "scene-03-beat-002",
+      "from": "explicit",
+      "objectIds": [
+        "scene-03-beat-002-number-01",
+        "scene-03-beat-002-number-02",
+        "scene-03-beat-002-number-03"
+      ],
+      "sceneId": "scene-03",
+      "showTargetIds": [
+        "scene-03-beat-002-number-01"
+      ],
+      "to": "object-order-fallback"
+    },
+    {
+      "beatId": "scene-04-beat-002",
+      "from": "explicit",
+      "objectIds": [],
+      "sceneId": "scene-04",
+      "showTargetIds": [],
+      "to": "static"
+    },
+    {
+      "beatId": "scene-05-beat-001",
+      "from": "static",
+      "objectIds": [
+        "scene-05-card-001"
+      ],
+      "sceneId": "scene-05",
+      "showTargetIds": [
+        "scene-05-card-001"
+      ],
+      "to": "explicit"
+    },
+    {
+      "beatId": "scene-05-beat-002",
+      "from": "explicit",
+      "objectIds": [
+        "scene-05-node-001",
+        "scene-05-node-002",
+        "scene-05-arrow-001",
+        "scene-05-node-003",
+        "scene-05-arrow-002"
+      ],
+      "sceneId": "scene-05",
+      "showTargetIds": [
+        "scene-05-node-001"
+      ],
+      "to": "object-order-fallback"
+    },
+    {
+      "beatId": "scene-06-beat-002",
+      "from": "explicit",
+      "objectIds": [
+        "scene-06-beat-002-number-01",
+        "scene-06-beat-002-number-02",
+        "scene-06-beat-002-number-03"
+      ],
+      "sceneId": "scene-06",
+      "showTargetIds": [
+        "scene-06-beat-002-number-01"
+      ],
+      "to": "object-order-fallback"
+    },
+    {
+      "beatId": "scene-07-beat-001",
+      "from": "explicit",
+      "objectIds": [
+        "scene-07-beat-001-number-01",
+        "scene-07-beat-001-number-02",
+        "scene-07-beat-001-number-03"
+      ],
+      "sceneId": "scene-07",
+      "showTargetIds": [
+        "scene-07-beat-001-number-01"
+      ],
+      "to": "object-order-fallback"
+    }
+  ],
+  "sequencePolicyResolved": true,
+  "sourceRenderSpecSha256": "0b4d094bfc5325602d42e955a281bd16d2e358a150afa04ad9e3d765ee75a515",
+  "status": "normalized-for-renderer-2.4",
+  "templateContractChanges": [
+    {
+      "beatId": "scene-02-beat-002",
+      "template": "metric-comparison-board"
+    },
+    {
+      "beatId": "scene-05-beat-002",
+      "promotedCausalNodes": 3
+    },
+    {
+      "beatId": "scene-07-beat-002",
+      "template": "tailwind-headwind"
+    }
+  ],
+  "templateContractsAligned": true,
+  "templateVariantRebindings": [
+    {
+      "beatId": "scene-01-beat-001",
+      "from": null,
+      "sceneId": "scene-01",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-01-beat-002",
+      "from": null,
+      "sceneId": "scene-01",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-02-beat-001",
+      "from": null,
+      "sceneId": "scene-02",
+      "to": "prebuilt-card"
+    },
+    {
+      "beatId": "scene-02-beat-002",
+      "from": null,
+      "sceneId": "scene-02",
+      "to": "two-lane"
+    },
+    {
+      "beatId": "scene-03-beat-001",
+      "from": null,
+      "sceneId": "scene-03",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-03-beat-002",
+      "from": null,
+      "sceneId": "scene-03",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-04-beat-001",
+      "from": null,
+      "sceneId": "scene-04",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-04-beat-002",
+      "from": null,
+      "sceneId": "scene-04",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-05-beat-001",
+      "from": null,
+      "sceneId": "scene-05",
+      "to": "prebuilt-card"
+    },
+    {
+      "beatId": "scene-05-beat-002",
+      "from": null,
+      "sceneId": "scene-05",
+      "to": "left-to-right"
+    },
+    {
+      "beatId": "scene-05-beat-003",
+      "from": null,
+      "sceneId": "scene-05",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-06-beat-001",
+      "from": null,
+      "sceneId": "scene-06",
+      "to": "official-time-plus-close"
+    },
+    {
+      "beatId": "scene-06-beat-002",
+      "from": "default",
+      "sceneId": "scene-06",
+      "to": "grid"
+    },
+    {
+      "beatId": "scene-07-beat-001",
+      "from": null,
+      "sceneId": "scene-07",
+      "to": "center-zero"
+    },
+    {
+      "beatId": "scene-07-beat-002",
+      "from": null,
+      "sceneId": "scene-07",
+      "to": "two-lane"
+    },
+    {
+      "beatId": "scene-08-beat-001",
+      "from": null,
+      "sceneId": "scene-08",
+      "to": "strengthen-vs-weaken"
+    },
+    {
+      "beatId": "scene-08-beat-002",
+      "from": null,
+      "sceneId": "scene-08",
+      "to": "default"
+    },
+    {
+      "beatId": "scene-09-beat-001",
+      "from": null,
+      "sceneId": "scene-09",
+      "to": "default"
+    }
+  ],
+  "transitionRoleChanges": [],
+  "transitionRolesPhysical": true,
+  "ttsIdentityChanged": false,
+  "ttsInputSha256After": "b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509",
+  "ttsInputSha256Before": "b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509",
+  "version": 1,
+  "visibleContentChangedByTransitionRepair": false,
+  "visibleMetricContentChanged": false,
+  "visibleNumbersChanged": false,
+  "visibleTextChanged": false,
+  "visualBeatCount": 18,
+  "visualEventsChanged": false,
+  "visualFamilyDiversityRepair": {
+    "beatId": "scene-02-beat-002",
+    "marketMeaningChanged": false,
+    "narrationChanged": false,
+    "numbersChanged": false,
+    "previous": {
+      "objectIds": [
+        "scene-02-beat-002-number-01",
+        "scene-02-beat-002-number-02"
+      ],
+      "visualGrammarId": "comparison",
+      "visualMode": "number-comparison",
+      "visualTemplate": "metric-comparison-board"
+    },
+    "resolved": {
+      "objectIds": [
+        "scene-02-card-002"
+      ],
+      "visualGrammarId": "evidence",
+      "visualMode": "text-focus",
+      "visualTemplate": "tailwind-headwind"
+    },
+    "sceneId": "scene-02",
+    "visibleCardTextChanged": false
+  },
+  "visualGrammarChanges": [
+    {
+      "beatId": "scene-07-beat-002",
+      "from": "comparison",
+      "sceneId": "scene-07",
+      "to": "evidence"
+    }
+  ],
+  "visualModeChanges": [
+    {
+      "beatId": "scene-05-beat-002",
+      "from": "text-focus",
+      "sceneId": "scene-05",
+      "to": "causal-diagram"
+    },
+    {
+      "beatId": "scene-06-beat-002",
+      "from": "timeline",
+      "sceneId": "scene-06",
+      "to": "number-comparison"
+    },
+    {
+      "beatId": "scene-07-beat-002",
+      "from": "number-comparison",
+      "sceneId": "scene-07",
+      "to": "text-focus"
+    }
+  ]
+}
