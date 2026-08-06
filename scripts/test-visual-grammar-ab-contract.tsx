@@ -151,6 +151,12 @@ assert.match(workflowText, /VISUAL_GRAMMAR_AB_PREVIEW: "1"/);
 assert.match(workflowText, /stage_mode: legacy/);
 assert.match(workflowText, /stage_mode: candidate/);
 assert.match(workflowText, /same renderer commit/);
+assert.match(workflowText, /A\/B is cache-only/);
+assert.match(workflowText, /restore_exported_tts_cache\.py/);
+assert.doesNotMatch(workflowText, /GEMINI_API_KEY_/);
+assert.doesNotMatch(workflowText, /TTS_PROVIDER:\s*gemini/);
+assert.doesNotMatch(workflowText, /actions\/cache\/save/);
+assert.doesNotMatch(workflowText, /episode:spec:preview/);
 assert.doesNotMatch(workflowText, /episode:spec:final/);
 assert.doesNotMatch(workflowText, /\bFINAL\b/);
 
