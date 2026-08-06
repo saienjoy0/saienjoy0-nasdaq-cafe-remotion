@@ -246,7 +246,13 @@ const overflowTest = (name: string, mutate: (production: Awaited<ReturnType<type
   rejects(() => assertSpecLayoutFits(production), path);
 });
 overflowTest("supportingTexts", (value) => {value.scenes[0].supportingTexts[0] = "長".repeat(91);}, /supportingTexts\[0\]/);
-overflowTest("captionText", (value) => {value.scenes[0].narrationChunks[0].caption.text = "長".repeat(71);}, /caption\.text/);
+test("long caption metadata is ignored while rendered speech cues remain layout-safe", async () => {
+  const production = await compileRenderSpec(structuredClone(fixture), technicalSynth, assetPaths);
+  const chunk = production.scenes[0].narrationChunks[0];
+  chunk.caption.text = "長".repeat(156);
+  chunk.speechText = "長".repeat(156);
+  assert.doesNotThrow(() => assertSpecLayoutFits(production));
+});
 overflowTest("card title", (value) => {value.scenes[0].cards[0].title = "長".repeat(49);}, /cards\[0\]\.title/);
 overflowTest("card label", (value) => {value.scenes[0].cards[0].lines[0].label = "長".repeat(33);}, /lines\[0\]\.label/);
 overflowTest("card value", (value) => {value.scenes[0].cards[0].lines[0].value = "長".repeat(73);}, /lines\[0\]\.value/);

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {createSubtitleCues, getSubtitleTextAtTime} from "../src/spec/subtitle-cues";
+import {assertNarrationChunkSubtitleLayoutFits, assertSubtitleCueTextFits} from "../src/spec/validate-render-layout";
 
 const speech = "昨夜のNasdaq Compositeは一・〇〇パーセント上昇しました。主役は、十五パーセントを超えて急騰したAmazonです。ただし、半導体のETFは終値でほぼ横ばい。Appleは大幅安でした。全部のテック株が同じ理由で上がった夜ではありません。";
 const shortSummary = "NASDAQ +1.00%";
@@ -27,5 +28,26 @@ const hardSplitCues = createSubtitleCues(unpunctuated, 500, 6_500);
 assert.equal(hardSplitCues[0].startMs, 500);
 assert.equal(hardSplitCues.at(-1)?.endMs, 6_500);
 assert.ok(hardSplitCues.every((cue) => cue.text.split("\n").length <= 2));
+
+const layoutCues = assertNarrationChunkSubtitleLayoutFits({
+  speechText: speech,
+  startMs: 0,
+  endMs: 19_219,
+  caption: {text: "あ".repeat(156)},
+}, "$.scenes[0].narrationChunks[0]");
+assert.deepEqual(layoutCues, cues, "validator and renderer must use the same subtitle cues");
+assert.equal(
+  layoutCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  speech,
+  "layout-only paging must preserve every narration character",
+);
+assert.throws(
+  () => assertSubtitleCueTextFits("あ".repeat(23), "$.too-wide"),
+  /23 characters exceed subtitle limit 22/u,
+);
+assert.throws(
+  () => assertSubtitleCueTextFits("一行目\n二行目\n三行目", "$.too-tall"),
+  /subtitle exceeds 2 lines/u,
+);
 
 console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);

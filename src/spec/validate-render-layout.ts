@@ -1,9 +1,10 @@
 import type {RenderProductionData} from "./render-spec";
+import {createSubtitleCues} from "./subtitle-cues";
 
 const limits = {
   headline: {perLine: 26, lines: 1},
   supportingText: {perLine: 28, lines: 3},
-  captionText: {perLine: 34, lines: 3},
+  captionText: {perLine: 22, lines: 2},
   cardTitle: {perLine: 18, lines: 2},
   cardLabel: {perLine: 24, lines: 2},
   cardValue: {perLine: 28, lines: 3},
@@ -25,6 +26,29 @@ const assertWrapped = (value: string, perLine: number, lines: number, path: stri
   explicitLines.forEach((line, index) => assertLength(line, perLine, `${path}[line ${index + 1}]`, area));
   const total = Array.from(value.replace(/\r?\n/g, "")).length;
   if (total > perLine * lines) throw new Error(`${path}: ${total} characters exceed ${area} capacity ${perLine * lines}`);
+};
+
+export type SubtitleLayoutChunk = {
+  speechText: string;
+  startMs: number;
+  endMs: number;
+  caption: {text: string};
+};
+
+export const assertSubtitleCueTextFits = (value: string, path = "$.subtitle") =>
+  assertWrapped(value, limits.captionText.perLine, limits.captionText.lines, path, "subtitle");
+
+export const assertNarrationChunkSubtitleLayoutFits = (
+  chunk: SubtitleLayoutChunk,
+  path: string,
+) => {
+  // The public subtitle layer renders time-sliced speechText cues. caption.text
+  // remains production metadata and must not be treated as one visible page.
+  const cues = createSubtitleCues(chunk.speechText, chunk.startMs, chunk.endMs);
+  cues.forEach((cue, cueIndex) =>
+    assertSubtitleCueTextFits(cue.text, `${path}.subtitleCues[${cueIndex}].text`),
+  );
+  return cues;
 };
 
 const assertCausalShape = (
@@ -71,7 +95,7 @@ export const assertSpecLayoutFits = (data: RenderProductionData) => {
     const base = `$.scenes[${sceneIndex}]`;
     assertWrapped(scene.headline, limits.headline.perLine, limits.headline.lines, `${base}.headline`, "headline");
     scene.supportingTexts.forEach((text, index) => assertWrapped(text, limits.supportingText.perLine, limits.supportingText.lines, `${base}.supportingTexts[${index}]`, "supporting text"));
-    scene.narrationChunks.forEach((chunk, index) => assertWrapped(chunk.caption.text, limits.captionText.perLine, limits.captionText.lines, `${base}.narrationChunks[${index}].caption.text`, "caption"));
+    scene.narrationChunks.forEach((chunk, index) => assertNarrationChunkSubtitleLayoutFits(chunk, `${base}.narrationChunks[${index}]`));
     scene.cards.forEach((card, cardIndex) => {
       assertWrapped(card.title, limits.cardTitle.perLine, limits.cardTitle.lines, `${base}.cards[${cardIndex}].title`, "card title");
       card.lines.forEach((line, lineIndex) => {
