@@ -23,7 +23,7 @@ jobs:
       CI: "true"
       SPEC_PATH: render-specs/2026-08-06/render_spec.json
       EPISODE_ID: 2026-08-06
-      EXPECTED_RESCUE_SHA: 22bffa3b8091b990371a16bc867d249f6e3542d03203244179446c29c94567f5
+      EXPECTED_RESCUE_SHA: 3adb8bb1b4e3e4058b9c30ed5e94b5c69242a8baf6cb41f9f223628af655aac8
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
@@ -100,6 +100,18 @@ jobs:
           spec["scenes"][8]["visualMode"] = "conclusion-card"
           beat(9, 1)["visualMode"] = "conclusion-card"
           beat(9, 1)["visualTemplate"] = "final-assembly"
+
+          allowed_expected_basis = {
+              "official-consensus",
+              "company-prior-guidance",
+              "major-reporting",
+              "analyst-view",
+              "price-inference",
+              "unconfirmed",
+          }
+          for scene in spec["scenes"]:
+              if scene.get("expectedBasisType") not in allowed_expected_basis:
+                  scene["expectedBasisType"] = None
 
           spec["schemaVersion"] = "2.2.0"
           spec["sources"] = [
@@ -178,7 +190,6 @@ jobs:
         run: |
           set -euo pipefail
           RECEIPT_PATH="preview-status/2026-08-06-rescue.json"
-          ARTIFACT_NAME="nasdaq-cafe-rescue-preview-2026-08-06-${GITHUB_RUN_ID}"
           python3 - <<'PY' > /tmp/rescue-preview-receipt.json
           import json
           import os
