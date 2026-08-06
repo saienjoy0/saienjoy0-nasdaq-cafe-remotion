@@ -1,0 +1,393 @@
+name: Visual Grammar Technical A/B Preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "visual-grammar-ab-technical-requests/*.json"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: visual-grammar-technical-ab-request
+  cancel-in-progress: false
+
+jobs:
+  resolve-request:
+    name: Resolve one approved technical A/B request
+    if: >-
+      github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
+      github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      request_id: ${{ steps.resolve.outputs.request_id }}
+      request_path: ${{ steps.resolve.outputs.request_path }}
+      episode_date: ${{ steps.resolve.outputs.episode_date }}
+      source_spec_path: ${{ steps.resolve.outputs.source_spec_path }}
+      mapping_path: ${{ steps.resolve.outputs.mapping_path }}
+      expected_source_sha: ${{ steps.resolve.outputs.expected_source_sha }}
+      expected_tts_sha: ${{ steps.resolve.outputs.expected_tts_sha }}
+
+    steps:
+      - name: Checkout immutable request commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Resolve and validate the changed request
+        id: resolve
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import pathlib
+          import re
+          import subprocess
+
+          before = os.environ["BEFORE_SHA"]
+          trigger = os.environ["TRIGGER_SHA"]
+          zero = "0" * 40
+          if before == zero:
+              command = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", trigger]
+          else:
+              command = ["git", "diff", "--name-only", before, trigger]
+          changed = subprocess.check_output(command, text=True).splitlines()
+          requests = sorted(
+              item for item in changed
+              if re.fullmatch(r"visual-grammar-ab-technical-requests/[A-Za-z0-9._-]+\.json", item)
+          )
+          if len(requests) != 1:
+              raise SystemExit(f"exactly one technical A/B request must change; found={requests}")
+          request_path = pathlib.Path(requests[0])
+          value = json.loads(request_path.read_text(encoding="utf-8"))
+          required = {
+              "contractVersion", "requestId", "episodeDate", "sourceSpecPath",
+              "mappingPath", "expectedSourceSpecSha256", "expectedTtsInputSha256",
+              "confirmation", "finalAuthorized",
+          }
+          if set(value) != required:
+              raise SystemExit(f"request keys mismatch: expected={sorted(required)} actual={sorted(value)}")
+          if value["contractVersion"] != "1.0.0":
+              raise SystemExit("contractVersion must be 1.0.0")
+          if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{2,80}", value["requestId"]):
+              raise SystemExit("unsafe requestId")
+          if value["episodeDate"] != "2099-02-02":
+              raise SystemExit("technical A/B request is restricted to episode 2099-02-02")
+          if value["sourceSpecPath"] != "shared-fixtures/financial-visual-2.3/render_spec.json":
+              raise SystemExit("unexpected sourceSpecPath")
+          if value["mappingPath"] != "contracts/visual_grammar_technical_fixture_2099-02-02.json":
+              raise SystemExit("unexpected mappingPath")
+          for key in ("expectedSourceSpecSha256", "expectedTtsInputSha256"):
+              if not re.fullmatch(r"[a-f0-9]{64}", value[key]):
+                  raise SystemExit(f"{key} must be SHA-256")
+          if value["confirmation"] != "TECHNICAL_AB_PREVIEW":
+              raise SystemExit("confirmation must be exactly TECHNICAL_AB_PREVIEW")
+          if value["finalAuthorized"] is not False:
+              raise SystemExit("finalAuthorized must be false")
+          print(f"request_id={value['requestId']}")
+          print(f"request_path={request_path.as_posix()}")
+          print(f"episode_date={value['episodeDate']}")
+          print(f"source_spec_path={value['sourceSpecPath']}")
+          print(f"mapping_path={value['mappingPath']}")
+          print(f"expected_source_sha={value['expectedSourceSpecSha256']}")
+          print(f"expected_tts_sha={value['expectedTtsInputSha256']}")
+          PY
+
+  render-technical-ab:
+    name: Render cache-only technical A/B pair
+    needs: resolve-request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      artifact_name: ${{ steps.package.outputs.artifact_name }}
+      spec_sha: ${{ steps.migrate.outputs.spec_sha }}
+      timing_status: ${{ steps.package.outputs.timing_status }}
+
+    env:
+      EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+      SOURCE_SPEC_PATH: ${{ needs.resolve-request.outputs.source_spec_path }}
+      MAPPING_PATH: ${{ needs.resolve-request.outputs.mapping_path }}
+      EXPECTED_SOURCE_SHA: ${{ needs.resolve-request.outputs.expected_source_sha }}
+      EXPECTED_TTS_SHA: ${{ needs.resolve-request.outputs.expected_tts_sha }}
+      SPEC_PATH: render-specs/${{ needs.resolve-request.outputs.episode_date }}/render_spec.json
+      MIGRATION_MANIFEST: build/${{ needs.resolve-request.outputs.episode_date }}/visual_grammar_technical_migration.json
+      SPEC_TTS_CACHE_ONLY: "1"
+      VISUAL_GRAMMAR_AB_PREVIEW: "1"
+      VISUAL_GRAMMAR_TECHNICAL_AB: "1"
+
+    steps:
+      - name: Checkout frozen renderer and request
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Verify immutable source fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$SOURCE_SPEC_PATH"
+          ACTUAL="$(sha256sum "$SOURCE_SPEC_PATH" | awk '{print $1}')"
+          [[ "$ACTUAL" == "$EXPECTED_SOURCE_SHA" ]] || {
+            echo "::error::source fixture SHA mismatch expected=$EXPECTED_SOURCE_SHA actual=$ACTUAL"
+            exit 1
+          }
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Deterministically migrate the approved fixture to render_spec 2.4.0
+        id: migrate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate_visual_grammar_technical_fixture.py \
+            --source "$SOURCE_SPEC_PATH" \
+            --mapping "$MAPPING_PATH" \
+            --output "$SPEC_PATH" \
+            --manifest "$MIGRATION_MANIFEST"
+          SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          [[ "$SPEC_SHA" =~ ^[a-f0-9]{64}$ ]]
+          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+          npm run episode:spec:validate -- "$SPEC_PATH"
+
+      - name: Verify unchanged two-block TTS identity
+        id: tts
+        shell: bash
+        run: |
+          set -euo pipefail
+          TTS_SHA="$(python3 - "$SPEC_PATH" <<'PY'
+          import hashlib
+          import json
+          import sys
+          value = json.load(open(sys.argv[1], encoding="utf-8"))
+          blocks = []
+          for block_id, first_scene, last_scene in (("scenes-01-04", 1, 4), ("scenes-05-09", 5, 9)):
+              speech = [chunk["speechText"] for scene in value["scenes"] if first_scene <= scene["sceneNumber"] <= last_scene for chunk in scene["narrationChunks"]]
+              blocks.append({"id": block_id, "speechText": speech})
+          payload = {"synthesisVersion": "gemini-two-block-v1", "model": "gemini-3.1-flash-tts-preview", "voice": "Charon", "voiceProfileId": value.get("voiceProfileId"), "pronunciations": value.get("pronunciations"), "blocks": blocks}
+          print(hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
+          PY
+          )"
+          [[ "$TTS_SHA" == "$EXPECTED_TTS_SHA" ]] || {
+            echo "::error::TTS identity changed expected=$EXPECTED_TTS_SHA actual=$TTS_SHA"
+            exit 1
+          }
+          echo "tts_sha=$TTS_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare TTS cache directory
+        run: mkdir -p .cache/spec-tts-blocks
+
+      - name: Restore exact production TTS cache
+        id: restore
+        continue-on-error: true
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.tts.outputs.tts_sha }}
+          restore-keys: |
+            ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ steps.tts.outputs.tts_sha }}-partial-
+
+      - name: Restore approved exported TTS cache
+        if: steps.restore.outputs.cache-hit != 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/restore_exported_tts_cache.py --root . --tts-input-sha "${{ steps.tts.outputs.tts_sha }}"
+
+      - name: Require exactly two cached narration blocks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t AUDIO < <(find .cache/spec-tts-blocks -type f -name audio.wav -print | sort)
+          [[ "${#AUDIO[@]}" -eq 2 ]] || {
+            echo "::error::technical A/B is cache-only; exact narration cache unavailable. found=${#AUDIO[@]}"
+            exit 1
+          }
+          for file in "${AUDIO[@]}"; do
+            ffmpeg -nostdin -v error -i "$file" -f null -
+          done
+
+      - name: Compile technical comparison data without production promotion
+        run: npx tsx scripts/compile-visual-grammar-ab-technical.ts "$SPEC_PATH"
+
+      - name: Render and inspect baseline
+        timeout-minutes: 50
+        run: npx tsx scripts/render-visual-grammar-ab-preview.ts "$SPEC_PATH" legacy
+
+      - name: Render and inspect candidate
+        timeout-minutes: 50
+        run: npx tsx scripts/render-visual-grammar-ab-preview.ts "$SPEC_PATH" candidate
+
+      - name: Package immutable technical A/B review artifact
+        id: package
+        shell: bash
+        env:
+          SPEC_SHA: ${{ steps.migrate.outputs.spec_sha }}
+          TTS_SHA: ${{ steps.tts.outputs.tts_sha }}
+        run: |
+          set -euo pipefail
+          OUTPUT="ab-delivery"
+          mkdir -p "$OUTPUT/baseline" "$OUTPUT/candidate" "$OUTPUT/contracts"
+          for MODE in legacy candidate; do
+            LABEL="candidate"
+            [[ "$MODE" == "legacy" ]] && LABEL="baseline"
+            SOURCE="build/${EPISODE_DATE}/visual-grammar-ab/${MODE}"
+            PREVIEW="renders/visual-grammar-ab/${EPISODE_DATE}/${MODE}.mp4"
+            cp "$PREVIEW" "$OUTPUT/$LABEL/preview.mp4"
+            cp "$SOURCE/technical_report.json" "$OUTPUT/$LABEL/technical_report.json"
+            cp "$SOURCE/render_data.production.json" "$OUTPUT/$LABEL/render_data.production.json"
+            cp "$SOURCE/preview_inspection.json" "$OUTPUT/$LABEL/preview_inspection.json"
+            npx tsx scripts/create-visual-grammar-ab-manifest.ts identity \
+              --label "$LABEL" \
+              --ref main \
+              --stage-mode "$MODE" \
+              --commit-sha "$GITHUB_SHA" \
+              --spec-file "$SPEC_PATH" \
+              --spec-path "$SPEC_PATH" \
+              --tts-input-sha "$TTS_SHA" \
+              --audio-root .cache/spec-tts-blocks \
+              --preview "$OUTPUT/$LABEL/preview.mp4" \
+              --technical-report "$OUTPUT/$LABEL/technical_report.json" \
+              --inspection "$OUTPUT/$LABEL/preview_inspection.json" \
+              --production-data "$OUTPUT/$LABEL/render_data.production.json" \
+              --output "$OUTPUT/$LABEL/render_identity.json"
+          done
+          npx tsx scripts/create-visual-grammar-ab-manifest.ts manifest \
+            --baseline "$OUTPUT/baseline/render_identity.json" \
+            --candidate "$OUTPUT/candidate/render_identity.json" \
+            --output "$OUTPUT/visual_grammar_ab_manifest.json"
+          cp "$SPEC_PATH" "$OUTPUT/render_spec.json"
+          cp "$MIGRATION_MANIFEST" "$OUTPUT/visual_grammar_technical_migration.json"
+          cp "build/${EPISODE_DATE}/visual_grammar_timing_report.json" "$OUTPUT/visual_grammar_timing_report.json"
+          cp contracts/visual_grammar_ab_manifest.schema.json "$OUTPUT/contracts/"
+          cp contracts/visual_grammar_renderer_compatibility.json "$OUTPUT/contracts/"
+          cp "$MAPPING_PATH" "$OUTPUT/contracts/"
+          TIMING_STATUS="$(node -e 'const v=require("./build/'"$EPISODE_DATE"'/visual_grammar_timing_report.json"); process.stdout.write(v.status)')"
+          cat > "$OUTPUT/technical_ab_status.json" <<JSON
+          {
+            "contractVersion": "1.0.0",
+            "status": "ready-for-user-visual-review",
+            "episodeId": "$EPISODE_DATE",
+            "requestId": "${{ needs.resolve-request.outputs.request_id }}",
+            "rendererCommitSha": "$GITHUB_SHA",
+            "renderSpecSha256": "$SPEC_SHA",
+            "ttsInputSha256": "$TTS_SHA",
+            "timingGateStatus": "$TIMING_STATUS",
+            "timingGateDiagnosticOnly": true,
+            "productionEligible": false,
+            "userReviewRequired": true,
+            "finalAuthorized": false
+          }
+          JSON
+          ARTIFACT_NAME="visual-grammar-technical-ab-review-${EPISODE_DATE}-${GITHUB_RUN_ID}"
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          echo "timing_status=$TIMING_STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Upload technical A/B review package
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: ab-delivery
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  record-outcome:
+    name: Record terminal technical A/B outcome
+    needs:
+      - resolve-request
+      - render-technical-ab
+    if: >-
+      always() &&
+      needs.resolve-request.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Commit immutable outcome record
+        shell: bash
+        env:
+          REQUEST_ID: ${{ needs.resolve-request.outputs.request_id }}
+          REQUEST_PATH: ${{ needs.resolve-request.outputs.request_path }}
+          EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+          RENDER_RESULT: ${{ needs.render-technical-ab.result }}
+          ARTIFACT_NAME: ${{ needs.render-technical-ab.outputs.artifact_name }}
+          SPEC_SHA: ${{ needs.render-technical-ab.outputs.spec_sha }}
+          TIMING_STATUS: ${{ needs.render-technical-ab.outputs.timing_status }}
+        run: |
+          set -euo pipefail
+          git pull --ff-only origin main
+          OUTCOME="visual-grammar-ab-technical-state/outcomes/${REQUEST_ID}.json"
+          if [[ -f "$OUTCOME" ]]; then
+            echo "Outcome already exists: $OUTCOME"
+            exit 0
+          fi
+          mkdir -p "$(dirname "$OUTCOME")"
+          python3 <<'PY'
+          import json
+          import os
+          import pathlib
+          status = "succeeded" if os.environ["RENDER_RESULT"] == "success" else "failed"
+          value = {
+              "contractVersion": "1.0.0",
+              "status": status,
+              "requestId": os.environ["REQUEST_ID"],
+              "requestPath": os.environ["REQUEST_PATH"],
+              "episodeId": os.environ["EPISODE_DATE"],
+              "workflowRunId": int(os.environ["GITHUB_RUN_ID"]),
+              "workflowRunUrl": f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+              "rendererCommitSha": os.environ["GITHUB_SHA"],
+              "artifactName": os.environ.get("ARTIFACT_NAME") or None,
+              "renderSpecSha256": os.environ.get("SPEC_SHA") or None,
+              "timingGateStatus": os.environ.get("TIMING_STATUS") or None,
+              "productionEligible": False,
+              "finalAuthorized": False,
+          }
+          target = pathlib.Path("visual-grammar-ab-technical-state/outcomes") / f"{os.environ['REQUEST_ID']}.json"
+          target.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUTCOME"
+          git commit -m "Record Visual Grammar technical A/B outcome: ${REQUEST_ID}"
+          git push origin HEAD:main
