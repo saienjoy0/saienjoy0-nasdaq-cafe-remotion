@@ -1,0 +1,273 @@
+{
+  "version": 1,
+  "episodeDate": "2026-08-06",
+  "expectedSpecSha256": "b380543aa20a2118f28f5f0aec45f1e09ce35ea3b3ad63b02755402f10fb18c1",
+  "watchExitCode": 1,
+  "workflowRun": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-06T09:32:56Z",
+    "databaseId": 31089565177,
+    "event": "workflow_dispatch",
+    "headSha": "ec3b8e85ef15948b270c231b17e7b7bc3c37b3ab",
+    "jobs": [
+      {
+        "completedAt": "2026-08-06T09:33:11Z",
+        "conclusion": "success",
+        "databaseId": 92577038728,
+        "name": "Verify immutable render input",
+        "startedAt": "2026-08-06T09:33:04Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-08-06T09:33:05Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-08-06T09:33:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:09Z",
+            "conclusion": "success",
+            "name": "Checkout repository",
+            "number": 2,
+            "startedAt": "2026-08-06T09:33:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:09Z",
+            "conclusion": "success",
+            "name": "Verify path, JSON, date, SHA, TTS identity, and secrets",
+            "number": 3,
+            "startedAt": "2026-08-06T09:33:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:09Z",
+            "conclusion": "success",
+            "name": "Post Checkout repository",
+            "number": 6,
+            "startedAt": "2026-08-06T09:33:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:09Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 7,
+            "startedAt": "2026-08-06T09:33:09Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31089565177/job/92577038728"
+      },
+      {
+        "completedAt": "2026-08-06T09:34:09Z",
+        "conclusion": "failure",
+        "databaseId": 92577085148,
+        "name": "Validate, TTS, and render preview",
+        "startedAt": "2026-08-06T09:33:14Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-08-06T09:33:17Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-08-06T09:33:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:20Z",
+            "conclusion": "success",
+            "name": "Checkout repository",
+            "number": 2,
+            "startedAt": "2026-08-06T09:33:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:20Z",
+            "conclusion": "success",
+            "name": "Recheck immutable input after checkout",
+            "number": 3,
+            "startedAt": "2026-08-06T09:33:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:22Z",
+            "conclusion": "success",
+            "name": "Set up Node.js",
+            "number": 4,
+            "startedAt": "2026-08-06T09:33:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:29Z",
+            "conclusion": "success",
+            "name": "Install dependencies",
+            "number": 5,
+            "startedAt": "2026-08-06T09:33:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:30Z",
+            "conclusion": "success",
+            "name": "Validate render spec",
+            "number": 6,
+            "startedAt": "2026-08-06T09:33:29Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:46Z",
+            "conclusion": "success",
+            "name": "Ensure ffmpeg is available",
+            "number": 7,
+            "startedAt": "2026-08-06T09:33:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:59Z",
+            "conclusion": "success",
+            "name": "Run runtime stability tests",
+            "number": 8,
+            "startedAt": "2026-08-06T09:33:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:33:59Z",
+            "conclusion": "success",
+            "name": "Prepare TTS cache directory",
+            "number": 9,
+            "startedAt": "2026-08-06T09:33:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:00Z",
+            "conclusion": "success",
+            "name": "Restore Gemini two-block TTS cache",
+            "number": 10,
+            "startedAt": "2026-08-06T09:33:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:05Z",
+            "conclusion": "failure",
+            "name": "Generate preview",
+            "number": 11,
+            "startedAt": "2026-08-06T09:34:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:05Z",
+            "conclusion": "success",
+            "name": "Detect generated TTS cache content",
+            "number": 12,
+            "startedAt": "2026-08-06T09:34:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:05Z",
+            "conclusion": "skipped",
+            "name": "Save complete Gemini two-block TTS cache",
+            "number": 13,
+            "startedAt": "2026-08-06T09:34:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:07Z",
+            "conclusion": "success",
+            "name": "Save recoverable partial Gemini TTS cache",
+            "number": 14,
+            "startedAt": "2026-08-06T09:34:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:07Z",
+            "conclusion": "skipped",
+            "name": "Upload raw preview payload",
+            "number": 15,
+            "startedAt": "2026-08-06T09:34:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:07Z",
+            "conclusion": "success",
+            "name": "Create build failure manifest",
+            "number": 16,
+            "startedAt": "2026-08-06T09:34:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:07Z",
+            "conclusion": "success",
+            "name": "Upload build failure diagnostics",
+            "number": 17,
+            "startedAt": "2026-08-06T09:34:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:07Z",
+            "conclusion": "skipped",
+            "name": "Post Set up Node.js",
+            "number": 33,
+            "startedAt": "2026-08-06T09:34:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:08Z",
+            "conclusion": "success",
+            "name": "Post Checkout repository",
+            "number": 34,
+            "startedAt": "2026-08-06T09:34:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T09:34:08Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 35,
+            "startedAt": "2026-08-06T09:34:08Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31089565177/job/92577085148"
+      },
+      {
+        "completedAt": "2026-08-06T09:34:10Z",
+        "conclusion": "skipped",
+        "databaseId": 92577307753,
+        "name": "Inspect and package preview",
+        "startedAt": "2026-08-06T09:34:10Z",
+        "status": "completed",
+        "steps": [],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31089565177/job/92577307753"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-06T09:34:10Z",
+    "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31089565177",
+    "workflowName": "Nasdaq Cafe Preview"
+  },
+  "artifacts": [
+    {
+      "id": 8962858284,
+      "node_id": "MDg6QXJ0aWZhY3Q4OTYyODU4Mjg0",
+      "name": "nasdaq-cafe-preview-build-failure-2026-08-06-54-1",
+      "size_in_bytes": 23712,
+      "url": "https://api.github.com/repos/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/artifacts/8962858284",
+      "archive_download_url": "https://api.github.com/repos/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/artifacts/8962858284/zip",
+      "expired": false,
+      "digest": "sha256:f2a2c31d1cdf750a3c6bf8ef04398e14f1e2ab5d34106e3bad72b806acada473",
+      "created_at": "2026-08-06T09:34:07Z",
+      "updated_at": "2026-08-06T09:34:07Z",
+      "expires_at": "2026-08-20T09:34:07Z",
+      "workflow_run": {
+        "id": 31089565177,
+        "repository_id": 1319929434,
+        "head_repository_id": 1319929434,
+        "head_branch": "main",
+        "head_sha": "ec3b8e85ef15948b270c231b17e7b7bc3c37b3ab"
+      }
+    }
+  ]
+}
