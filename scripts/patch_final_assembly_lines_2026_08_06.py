@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Build Scene 9 only from exact lines already introduced in Scenes 1-8.
 
-The fixed ending narration is untouched. The closing card reuses prior lines
-verbatim so the Renderer final-assembly contract does not introduce new evidence.
+The fixed ending narration is untouched. The closing card reuses prior visible
+strings verbatim so the Renderer final-assembly contract does not introduce new
+evidence. A string counts as introduced when it appeared either in a card line
+or in a Visual Beat viewerText; both are public screen content.
 """
 
 from __future__ import annotations
@@ -31,10 +33,41 @@ def main() -> int:
 
     spec = json.loads(args.spec.read_text(encoding="utf-8"))
     introduced: dict[str, dict[str, str]] = {}
+    provenance: dict[str, dict[str, str]] = {}
     for scene in spec["scenes"][:-1]:
         for card in scene.get("cards", []):
             for line in card.get("lines", []):
-                introduced.setdefault(line["value"].strip(), deepcopy(line))
+                value = line["value"].strip()
+                introduced.setdefault(value, deepcopy(line))
+                provenance.setdefault(
+                    value,
+                    {
+                        "sceneId": scene["sceneId"],
+                        "surface": "card-line",
+                        "sourceId": card["cardId"],
+                    },
+                )
+        for beat in scene.get("visualBeats", []):
+            for index, value in enumerate(beat.get("viewerTexts", []), start=1):
+                visible = value.strip()
+                if not visible:
+                    continue
+                introduced.setdefault(
+                    visible,
+                    {
+                        "label": str(index),
+                        "value": visible,
+                        "tone": "neutral",
+                    },
+                )
+                provenance.setdefault(
+                    visible,
+                    {
+                        "sceneId": scene["sceneId"],
+                        "surface": "viewer-text",
+                        "sourceId": beat["beatId"],
+                    },
+                )
 
     missing = [value for value in DESIRED_LINES if value not in introduced]
     if missing:
@@ -54,7 +87,10 @@ def main() -> int:
         "cardId": card["cardId"],
         "previousLines": previous_lines,
         "resolvedLines": DESIRED_LINES,
-        "allResolvedLinesPreviouslyIntroduced": True,
+        "resolvedLineProvenance": {
+            value: provenance[value] for value in DESIRED_LINES
+        },
+        "allResolvedLinesPreviouslyDisplayed": True,
         "newEvidenceIntroduced": False,
         "narrationChanged": False,
         "numbersChanged": False,
