@@ -37,8 +37,8 @@ jobs:
         run: npm run test:visual-grammar
       - name: Typecheck
         run: npm run typecheck
-      - name: Run render spec regression tests
-        run: npm run test:spec
+      - name: Run render spec contract regression tests
+        run: npx tsx scripts/test-render-spec.ts
       - name: Run public screen boundary tests
         run: npm run test:public-screen
       - name: Commit integrated VG-5 source
