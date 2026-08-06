@@ -1,0 +1,125 @@
+name: Apply Production Control Text Fix
+
+on:
+  push:
+    branches: [fix/production-control-text-scan]
+    paths:
+      - ".github/workflows/apply-production-control-text-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/production-control-text-scan
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Apply narrow machine-control exemption
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path("src/spec/validate-render-spec.ts")
+          text = path.read_text(encoding="utf-8")
+          old = '''export const assertProductionTextSafe = (value: unknown, path = "$" ): void => {'''
+          if old in text:
+              raise SystemExit("unexpected spacing variant found")
+          old = '''export const assertProductionTextSafe = (value: unknown, path = "$"): void => {
+            if (typeof value === "string") {
+              const lower = value.toLowerCase();
+              const found = PRODUCTION_FORBIDDEN_TEXT.find((item) => lower.includes(item.toLowerCase()));
+              if (found) fail(path, `production forbidden text: ${found}`);
+              return;
+            }
+            if (Array.isArray(value)) return value.forEach((item, index) => assertProductionTextSafe(item, `${path}[${index}]`));
+            if (value && typeof value === "object") Object.entries(value).forEach(([key, item]) => assertProductionTextSafe(item, `${path}.${key}`));
+          };'''
+          new = '''const PRODUCTION_MACHINE_CONTROL_TEXT_KEYS = new Set([
+            "sequencePolicy",
+          ]);
+
+          export const assertProductionTextSafe = (value: unknown, path = "$"): void => {
+            if (typeof value === "string") {
+              const lower = value.toLowerCase();
+              const found = PRODUCTION_FORBIDDEN_TEXT.find((item) => lower.includes(item.toLowerCase()));
+              if (found) fail(path, `production forbidden text: ${found}`);
+              return;
+            }
+            if (Array.isArray(value)) return value.forEach((item, index) => assertProductionTextSafe(item, `${path}[${index}]`));
+            if (value && typeof value === "object") {
+              Object.entries(value).forEach(([key, item]) => {
+                if (PRODUCTION_MACHINE_CONTROL_TEXT_KEYS.has(key)) return;
+                assertProductionTextSafe(item, `${path}.${key}`);
+              });
+            }
+          };'''
+          if text.count(old) != 1:
+              raise SystemExit("production text safety block was not found exactly once")
+          path.write_text(text.replace(old, new), encoding="utf-8")
+
+          package_path = Path("package.json")
+          package = package_path.read_text(encoding="utf-8")
+          package = package.replace(
+              '"test:runtime-stability": "npm run test:workflow-contract && tsx scripts/test-duration-policy.ts',
+              '"test:runtime-stability": "npm run test:workflow-contract && npm run test:production-text-safety && tsx scripts/test-duration-policy.ts',
+          )
+          package = package.replace(
+              '"test:public-screen": "tsx scripts/test-public-screen.ts",',
+              '"test:production-text-safety": "tsx scripts/test-production-text-safety.ts",\n    "test:public-screen": "tsx scripts/test-public-screen.ts",',
+          )
+          package_path.write_text(package, encoding="utf-8")
+          PY
+
+          cat > scripts/test-production-text-safety.ts <<'EOF'
+          import assert from "node:assert/strict";
+          import {assertProductionTextSafe} from "../src/spec/validate-render-spec";
+
+          assert.doesNotThrow(() => assertProductionTextSafe({
+            scenes: [{visualBeats: [{sequencePolicy: "object-order-fallback"}]}],
+          }));
+
+          assert.throws(
+            () => assertProductionTextSafe({headline: "fallbackを表示"}),
+            /\$\.headline: production forbidden text: fallback/u,
+          );
+          assert.throws(
+            () => assertProductionTextSafe({caption: {text: "画面構成：デバッグ"}}),
+            /\$\.caption\.text: production forbidden text: 画面構成：/u,
+          );
+          assert.throws(
+            () => assertProductionTextSafe({cards: [{lines: [{value: "debug metadata"}]}]}),
+            /\$\.cards\[0\]\.lines\[0\]\.value: production forbidden text: debug metadata/u,
+          );
+
+          console.log("PASS: machine-only sequencePolicy is exempt while every viewer-facing string remains protected");
+          EOF
+
+      - name: Install and verify
+        run: |
+          npm ci
+          npm run test:production-text-safety
+          npm run typecheck
+          npm run test:spec
+
+      - name: Commit tested fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/spec/validate-render-spec.ts scripts/test-production-text-safety.ts package.json
+          git rm .github/workflows/apply-production-control-text-fix.yml
+          git commit -m "Fix production text scan for machine sequence policy"
+          git push origin HEAD:fix/production-control-text-scan
