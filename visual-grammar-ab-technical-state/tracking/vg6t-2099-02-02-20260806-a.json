@@ -1,0 +1,315 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "vg6t-2099-02-02-20260806-a",
+  "targetHeadSha": "a19a7169783394fe02a1bebdc99bbf16ed7430bf",
+  "watchExitCode": 0,
+  "workflowRun": {
+    "conclusion": "success",
+    "createdAt": "2026-08-06T06:36:17Z",
+    "databaseId": 31077842910,
+    "event": "push",
+    "headSha": "a19a7169783394fe02a1bebdc99bbf16ed7430bf",
+    "jobs": [
+      {
+        "completedAt": "2026-08-06T06:36:28Z",
+        "conclusion": "success",
+        "databaseId": 92539684340,
+        "name": "Resolve one approved technical A/B request",
+        "startedAt": "2026-08-06T06:36:22Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-08-06T06:36:24Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-08-06T06:36:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:27Z",
+            "conclusion": "success",
+            "name": "Checkout immutable request commit",
+            "number": 2,
+            "startedAt": "2026-08-06T06:36:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:27Z",
+            "conclusion": "success",
+            "name": "Resolve and validate the changed request",
+            "number": 3,
+            "startedAt": "2026-08-06T06:36:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:27Z",
+            "conclusion": "success",
+            "name": "Post Checkout immutable request commit",
+            "number": 6,
+            "startedAt": "2026-08-06T06:36:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:27Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 7,
+            "startedAt": "2026-08-06T06:36:27Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31077842910/job/92539684340"
+      },
+      {
+        "completedAt": "2026-08-06T06:52:04Z",
+        "conclusion": "success",
+        "databaseId": 92539710979,
+        "name": "Render cache-only technical A/B pair",
+        "startedAt": "2026-08-06T06:36:31Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-08-06T06:36:33Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-08-06T06:36:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:36Z",
+            "conclusion": "success",
+            "name": "Checkout frozen renderer and request",
+            "number": 2,
+            "startedAt": "2026-08-06T06:36:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:36Z",
+            "conclusion": "success",
+            "name": "Verify immutable source fixture",
+            "number": 3,
+            "startedAt": "2026-08-06T06:36:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:37Z",
+            "conclusion": "success",
+            "name": "Set up Node.js",
+            "number": 4,
+            "startedAt": "2026-08-06T06:36:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:36:46Z",
+            "conclusion": "success",
+            "name": "Install locked dependencies",
+            "number": 5,
+            "startedAt": "2026-08-06T06:36:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:02Z",
+            "conclusion": "success",
+            "name": "Ensure ffmpeg is available",
+            "number": 6,
+            "startedAt": "2026-08-06T06:36:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:03Z",
+            "conclusion": "success",
+            "name": "Deterministically migrate the approved fixture to render_spec 2.4.0",
+            "number": 7,
+            "startedAt": "2026-08-06T06:37:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:03Z",
+            "conclusion": "success",
+            "name": "Verify unchanged two-block TTS identity",
+            "number": 8,
+            "startedAt": "2026-08-06T06:37:03Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:03Z",
+            "conclusion": "success",
+            "name": "Prepare TTS cache directory",
+            "number": 9,
+            "startedAt": "2026-08-06T06:37:03Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:03Z",
+            "conclusion": "success",
+            "name": "Restore exact production TTS cache",
+            "number": 10,
+            "startedAt": "2026-08-06T06:37:03Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:05Z",
+            "conclusion": "success",
+            "name": "Restore approved exported TTS cache",
+            "number": 11,
+            "startedAt": "2026-08-06T06:37:03Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:06Z",
+            "conclusion": "success",
+            "name": "Require exactly two cached narration blocks",
+            "number": 12,
+            "startedAt": "2026-08-06T06:37:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:37:12Z",
+            "conclusion": "success",
+            "name": "Compile technical comparison data without production promotion",
+            "number": 13,
+            "startedAt": "2026-08-06T06:37:06Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:44:40Z",
+            "conclusion": "success",
+            "name": "Render and inspect baseline",
+            "number": 14,
+            "startedAt": "2026-08-06T06:37:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:51:59Z",
+            "conclusion": "success",
+            "name": "Render and inspect candidate",
+            "number": 15,
+            "startedAt": "2026-08-06T06:44:40Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:01Z",
+            "conclusion": "success",
+            "name": "Package immutable technical A/B review artifact",
+            "number": 16,
+            "startedAt": "2026-08-06T06:51:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:02Z",
+            "conclusion": "success",
+            "name": "Upload technical A/B review package",
+            "number": 17,
+            "startedAt": "2026-08-06T06:52:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:02Z",
+            "conclusion": "success",
+            "name": "Post Set up Node.js",
+            "number": 33,
+            "startedAt": "2026-08-06T06:52:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:03Z",
+            "conclusion": "success",
+            "name": "Post Checkout frozen renderer and request",
+            "number": 34,
+            "startedAt": "2026-08-06T06:52:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:03Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 35,
+            "startedAt": "2026-08-06T06:52:03Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31077842910/job/92539710979"
+      },
+      {
+        "completedAt": "2026-08-06T06:52:16Z",
+        "conclusion": "success",
+        "databaseId": 92542506802,
+        "name": "Record terminal technical A/B outcome",
+        "startedAt": "2026-08-06T06:52:08Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-08-06T06:52:09Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-08-06T06:52:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:13Z",
+            "conclusion": "success",
+            "name": "Checkout latest main",
+            "number": 2,
+            "startedAt": "2026-08-06T06:52:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:14Z",
+            "conclusion": "success",
+            "name": "Commit immutable outcome record",
+            "number": 3,
+            "startedAt": "2026-08-06T06:52:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:14Z",
+            "conclusion": "success",
+            "name": "Post Checkout latest main",
+            "number": 6,
+            "startedAt": "2026-08-06T06:52:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-08-06T06:52:14Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 7,
+            "startedAt": "2026-08-06T06:52:14Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31077842910/job/92542506802"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-06T06:52:17Z",
+    "url": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31077842910",
+    "workflowName": "Visual Grammar Technical A/B Preview"
+  },
+  "artifacts": [
+    {
+      "id": 8958563919,
+      "node_id": "MDg6QXJ0aWZhY3Q4OTU4NTYzOTE5",
+      "name": "visual-grammar-technical-ab-review-2099-02-02-31077842910",
+      "size_in_bytes": 42777341,
+      "url": "https://api.github.com/repos/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/artifacts/8958563919",
+      "archive_download_url": "https://api.github.com/repos/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/artifacts/8958563919/zip",
+      "expired": false,
+      "digest": "sha256:57e57d1ef847a9f99ef785f2a797ffb98031a03bae47461fd8257a9ace265de2",
+      "created_at": "2026-08-06T06:52:02Z",
+      "updated_at": "2026-08-06T06:52:02Z",
+      "expires_at": "2026-09-05T06:52:01Z",
+      "workflow_run": {
+        "id": 31077842910,
+        "repository_id": 1319929434,
+        "head_repository_id": 1319929434,
+        "head_branch": "main",
+        "head_sha": "a19a7169783394fe02a1bebdc99bbf16ed7430bf"
+      }
+    }
+  ],
+  "finalAuthorized": false
+}
