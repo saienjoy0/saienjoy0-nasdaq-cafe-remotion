@@ -1,0 +1,53 @@
+name: Visual Grammar Renderer Contract CI
+
+on:
+  pull_request:
+    paths:
+      - "contracts/visual_grammar_renderer_compatibility.json"
+      - "contracts/visual_grammar_renderer_compatibility.schema.json"
+      - "src/spec/visual-grammar-renderer-contract.ts"
+      - "scripts/test-visual-grammar-renderer-contract.ts"
+      - "docs/16_visual_grammar_renderer_contract.md"
+      - ".github/workflows/visual-grammar-renderer-contract-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "contracts/visual_grammar_renderer_compatibility.json"
+      - "contracts/visual_grammar_renderer_compatibility.schema.json"
+      - "src/spec/visual-grammar-renderer-contract.ts"
+      - "scripts/test-visual-grammar-renderer-contract.ts"
+      - "docs/16_visual_grammar_renderer_contract.md"
+      - ".github/workflows/visual-grammar-renderer-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate contract JSON syntax
+        run: |
+          node -e "JSON.parse(require('node:fs').readFileSync('contracts/visual_grammar_renderer_compatibility.json','utf8'))"
+          node -e "JSON.parse(require('node:fs').readFileSync('contracts/visual_grammar_renderer_compatibility.schema.json','utf8'))"
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run Visual Grammar renderer contract tests
+        run: npx tsx scripts/test-visual-grammar-renderer-contract.ts
