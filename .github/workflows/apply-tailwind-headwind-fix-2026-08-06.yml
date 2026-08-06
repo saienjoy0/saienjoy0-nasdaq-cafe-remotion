@@ -76,15 +76,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$(jq -r '.rendererNormalization.ttsInputSha256After' "$READY_PATH")" = "$EXPECTED_TTS_INPUT_SHA256"
           npm run episode:spec:compile -- "$SPEC_PATH"
           TECH="build/${EPISODE_DATE}/technical_report.json"
+          DATA="build/${EPISODE_DATE}/render_data.production.json"
           test "$(jq -r '.visualGrammarTiming.status' "$TECH")" = "PASS"
           test "$(jq -r '.visualGrammarTiming.unresolvedStateCount' "$TECH")" = "0"
-          test "$(jq -r '.ttsInputSha256' "$TECH")" = "$EXPECTED_TTS_INPUT_SHA256"
+          test -s "$DATA"
           node --import tsx --input-type=module -e '
             import {readFileSync} from "node:fs";
             import {assertSpecLayoutFits} from "./src/spec/validate-render-layout.ts";
-            const data = JSON.parse(readFileSync("build/2026-08-06/production_data.json", "utf8"));
+            const data = JSON.parse(readFileSync("build/2026-08-06/render_data.production.json", "utf8"));
             assertSpecLayoutFits(data);
             console.log("PASS: exact production data layout fits");
           '
