@@ -54,7 +54,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/spec/validate-render-layout.ts scripts/test-subtitles.ts
+          git add src/spec/validate-render-layout.ts scripts/test-subtitles.ts scripts/test-render-spec.ts
           git rm scripts/apply_subtitle_layout_fix.py
           git rm --ignore-unmatch .github/workflows/dispatch-vg6r-preview-final-retry.yml
           git rm .github/workflows/apply-subtitle-layout-fix-and-preview.yml
