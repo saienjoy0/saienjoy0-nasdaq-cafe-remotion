@@ -1,24 +1,24 @@
 {
-  "artifactId": null,
-  "artifactName": "nasdaq-cafe-rescue-preview-2026-08-06-31082505849",
-  "commitSha": "18e0b31d5116833b6e9c04384ff1c5731d38bc67",
+  "artifactId": "8960504096",
+  "artifactName": "nasdaq-cafe-rescue-preview-2026-08-06-31083009136",
+  "commitSha": "7d2824e7f55c7f125de92d4423b5dc57b955b080",
   "episodeDate": "2026-08-06",
   "finalAuthorized": false,
   "mode": "temporary-rescue-preview",
-  "rescueSpecSha256": "0084fc5a1e1e82db027363c707a97306898bb53e328fff2f7103fdbf885a6bb3",
+  "rescueSpecSha256": "bb5a27d896672f5001bafb4e84634feeec94f45d7701679e9ae3f73a4f7fb728",
   "runAttempt": 1,
-  "runId": 31082505849,
-  "runUrl": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31082505849",
-  "status": "failure",
+  "runId": 31083009136,
+  "runUrl": "https://github.com/saienjoy0/saienjoy0-nasdaq-cafe-remotion/actions/runs/31083009136",
+  "status": "success",
   "steps": {
     "checkout": "success",
     "ffmpeg": "success",
-    "generate": "failure",
+    "generate": "success",
     "install": "success",
     "materialize": "success",
     "setupNode": "success",
     "stability": "success",
-    "upload": "skipped",
+    "upload": "success",
     "validate": "success"
   }
 }
