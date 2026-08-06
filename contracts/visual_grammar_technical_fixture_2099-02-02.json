@@ -1,0 +1,26 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeId": "2099-02-02",
+  "sourceSchemaVersion": "2.3.0",
+  "targetSchemaVersion": "2.4.0",
+  "sourceSpecPath": "shared-fixtures/financial-visual-2.3/render_spec.json",
+  "beats": [
+    {"beatId": "scene-01-beat-001", "visualTemplate": "opening-contradiction", "visualGrammarId": "contradiction", "transitionRole": "continuation"},
+    {"beatId": "scene-01-beat-002", "visualTemplate": "text-focus", "visualGrammarId": "bridge-text", "transitionRole": "continuation"},
+    {"beatId": "scene-02-beat-001", "visualTemplate": "hero-number", "visualGrammarId": "entity", "transitionRole": "continuation"},
+    {"beatId": "scene-02-beat-002", "visualTemplate": "diverging-stock-bars", "visualGrammarId": "comparison", "transitionRole": "continuation"},
+    {"beatId": "scene-03-beat-001", "visualTemplate": "expected-actual-bullet", "visualGrammarId": "gap", "transitionRole": "continuation"},
+    {"beatId": "scene-03-beat-002", "visualTemplate": "metric-comparison-board", "visualGrammarId": "evidence", "transitionRole": "continuation"},
+    {"beatId": "vb-04-02", "visualTemplate": "earnings-surprise", "visualGrammarId": "gap", "transitionRole": "continuation"},
+    {"beatId": "scene-04-beat-002", "visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "transitionRole": "continuation"},
+    {"beatId": "scene-04-beat-003", "visualTemplate": "causal-lane", "visualGrammarId": "causal", "transitionRole": "continuation"},
+    {"beatId": "scene-05-beat-001", "visualTemplate": "causal-lane", "visualGrammarId": "causal", "transitionRole": "continuation"},
+    {"beatId": "scene-06-beat-001", "visualTemplate": "causal-lane", "visualGrammarId": "causal", "transitionRole": "continuation"},
+    {"beatId": "scene-06-beat-002", "visualTemplate": "split-comparison", "visualGrammarId": "comparison", "transitionRole": "continuation"},
+    {"beatId": "scene-07-beat-001", "visualTemplate": "entity-card-full", "visualGrammarId": "entity", "transitionRole": "continuation"},
+    {"beatId": "scene-07-beat-002", "visualTemplate": "focus-matrix", "visualGrammarId": "comparison", "transitionRole": "continuation"},
+    {"beatId": "scene-08-beat-001", "visualTemplate": "verification-checklist", "visualGrammarId": "verification", "transitionRole": "continuation"},
+    {"beatId": "scene-08-beat-002", "visualTemplate": "verification-matrix", "visualGrammarId": "verification", "transitionRole": "continuation"},
+    {"beatId": "scene-09-beat-001", "visualTemplate": "final-assembly", "visualGrammarId": "assembly", "transitionRole": "closing"}
+  ]
+}
