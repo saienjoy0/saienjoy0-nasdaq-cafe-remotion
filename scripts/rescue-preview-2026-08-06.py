@@ -61,6 +61,8 @@ beat(9, 1)["visualMode"] = "conclusion-card"
 beat(9, 1)["visualTemplate"] = "final-assembly"
 spec["scenes"][8]["cards"][0]["lines"][0]["value"] = "AMD -7.04%"
 spec["scenes"][8]["cards"][0]["lines"][1]["value"] = "NVIDIA +3.43%"
+spec["scenes"][3]["cards"][0]["title"] = "予想・実績・Gap"
+spec["scenes"][6]["cards"][0]["title"] = "NVIDIA・AMD\nAlphabet比較"
 
 for scene_number in (3, 4, 7):
     scene = spec["scenes"][scene_number - 1]
