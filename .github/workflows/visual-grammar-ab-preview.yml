@@ -26,8 +26,6 @@ concurrency:
 
 env:
   CI: "true"
-  GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
-  GEMINI_TTS_VOICE: Charon
 
 jobs:
   preflight:
@@ -85,7 +83,6 @@ jobs:
             python3 - "$SPEC_PATH" "$EPISODE_DATE" <<'PY'
           import hashlib
           import json
-          import os
           import sys
 
           spec_path, episode_date = sys.argv[1:]
@@ -98,8 +95,7 @@ jobs:
               raise SystemExit("episode object missing")
           if episode.get("id") != episode_date or episode.get("targetDate") != episode_date:
               raise SystemExit("episode.id/targetDate must match episode_date")
-          root_contract = value.get("visualGrammarContract")
-          if not isinstance(root_contract, dict):
+          if not isinstance(value.get("visualGrammarContract"), dict):
               raise SystemExit("visualGrammarContract root missing")
           scenes = value.get("scenes")
           if not isinstance(scenes, list) or len(scenes) != 9:
@@ -131,13 +127,18 @@ jobs:
               blocks.append({"id": block_id, "speechText": speech})
           payload = {
               "synthesisVersion": "gemini-two-block-v1",
-              "model": os.environ["GEMINI_TTS_MODEL"],
-              "voice": os.environ["GEMINI_TTS_VOICE"],
+              "model": "gemini-3.1-flash-tts-preview",
+              "voice": "Charon",
               "voiceProfileId": value.get("voiceProfileId"),
               "pronunciations": value.get("pronunciations"),
               "blocks": blocks,
           }
-          encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+          encoded = json.dumps(
+              payload,
+              ensure_ascii=False,
+              sort_keys=True,
+              separators=(",", ":"),
+          ).encode("utf-8")
           print(episode["id"])
           print(hashlib.sha256(encoded).hexdigest())
           PY
@@ -161,6 +162,7 @@ jobs:
             "baselineStageMode": "legacy",
             "candidateStageMode": "candidate",
             "sameRendererCommit": true,
+            "cacheOnly": true,
             "finalAuthorized": false
           }
           JSON
@@ -181,10 +183,10 @@ jobs:
           retention-days: 14
 
   prepare-shared-audio:
-    name: Prepare narration once
+    name: Restore one approved narration payload
     needs: preflight
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 20
 
     outputs:
       tts_artifact: ${{ steps.package.outputs.tts_artifact }}
@@ -194,12 +196,7 @@ jobs:
       EPISODE_ID: ${{ needs.preflight.outputs.episode_id }}
       SPEC_SHA: ${{ needs.preflight.outputs.spec_sha }}
       TTS_INPUT_SHA: ${{ needs.preflight.outputs.tts_input_sha }}
-      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
-      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
-      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
-      TTS_PROVIDER: gemini
-      GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
-      GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
+      SPEC_TTS_CACHE_ONLY: "1"
 
     steps:
       - name: Checkout frozen renderer
@@ -247,7 +244,7 @@ jobs:
       - name: Prepare TTS cache directory
         run: mkdir -p .cache/spec-tts-blocks
 
-      - name: Restore exact two-block TTS cache
+      - name: Restore exact production TTS cache
         id: restore
         continue-on-error: true
         uses: actions/cache/restore@v5
@@ -257,27 +254,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-
 
-      - name: Compile once and prepare narration
-        timeout-minutes: 30
-        run: npm run episode:spec:compile -- "$SPEC_PATH"
+      - name: Restore approved exported TTS cache
+        if: steps.restore.outputs.cache-hit != 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/restore_exported_tts_cache.py --root . --tts-input-sha "$TTS_INPUT_SHA"
 
       - name: Require exactly two validated cache blocks
         shell: bash
         run: |
           set -euo pipefail
           mapfile -t AUDIO < <(find .cache/spec-tts-blocks -type f -name audio.wav -print | sort)
-          [[ "${#AUDIO[@]}" -eq 2 ]] || { echo "::error::A/B requires exactly two audio.wav cache blocks; found=${#AUDIO[@]}"; exit 1; }
+          [[ "${#AUDIO[@]}" -eq 2 ]] || {
+            echo "::error::A/B is cache-only. Run the standard Preview first so the exact two-block narration cache exists. found=${#AUDIO[@]}"
+            exit 1
+          }
           for file in "${AUDIO[@]}"; do
             ffmpeg -nostdin -v error -i "$file" -f null -
           done
 
-      - name: Save complete narration cache
-        if: steps.restore.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v5
-        with:
-          path: .cache/spec-tts-blocks
-          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
+      - name: Compile once from exact narration cache only
+        timeout-minutes: 10
+        run: npm run episode:spec:compile -- "$SPEC_PATH"
 
       - name: Package one shared narration payload
         id: package
@@ -287,9 +286,15 @@ jobs:
           mkdir -p /tmp/vg-ab-tts
           tar -czf /tmp/vg-ab-tts/shared_tts_cache.tar.gz -C .cache spec-tts-blocks
           python3 - <<'PY'
-          import hashlib, json, os, pathlib
+          import hashlib
+          import json
+          import os
+          import pathlib
+
           root = pathlib.Path(".cache/spec-tts-blocks")
           files = sorted(root.rglob("audio.wav"))
+          if len(files) != 2:
+              raise SystemExit(f"expected exactly two audio.wav files; found={len(files)}")
           payload = []
           for file in files:
               data = file.read_bytes()
@@ -301,6 +306,7 @@ jobs:
           identity = {
               "ttsInputSha256": os.environ["TTS_INPUT_SHA"],
               "audioFiles": payload,
+              "cacheOnly": True,
               "samePayloadForBothRenders": True,
               "finalAuthorized": False,
           }
