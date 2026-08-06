@@ -24,6 +24,7 @@ export const VISUAL_TEMPLATE_IDS = [
   "analogy-steps",
   "entity-card-full",
   "news-media",
+  "event-reaction-timeline",
   "text-focus",
 ] as const;
 
@@ -39,6 +40,10 @@ export const VISUAL_TEMPLATE_VARIANT_IDS = [
   "grid",
   "receipt",
   "pressure-lane",
+  "verified-series",
+  "reported-sequence",
+  "official-time-plus-close",
+  "close-only",
 ] as const;
 
 export type VisualTemplateId = typeof VISUAL_TEMPLATE_IDS[number];
@@ -85,5 +90,6 @@ export const VISUAL_TEMPLATE_CONTRACTS: Record<VisualTemplateId, VisualTemplateC
   "analogy-steps": {family: "analogy", supportedScreenStates: ["Data", "PictureBook"], variants: ["default", "left-to-right"], cards: range(0, 3), numbers: range(0, 0), nodes: range(0, 4), arrows: range(0, 3), requiresNumericValue: false},
   "entity-card-full": {family: "entity", supportedScreenStates: ["EntityFocus", "MainWithEntity"], variants: ["prebuilt-card", "default"], cards: range(0, 1), numbers: range(0, 2), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
   "news-media": {family: "media", supportedScreenStates: ["News"], variants: ["default"], cards: range(0, 1), numbers: range(0, 0), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
+  "event-reaction-timeline": {family: "reaction-timeline", supportedScreenStates: ["Data", "Chart"], variants: ["verified-series", "reported-sequence", "official-time-plus-close", "close-only"], cards: range(0, 4), numbers: range(0, 6), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
   "text-focus": {family: "text", supportedScreenStates: ["Data"], variants: ["default"], cards: range(0, 1), numbers: range(0, 1), nodes: range(0, 0), arrows: range(0, 0), requiresNumericValue: false},
 };

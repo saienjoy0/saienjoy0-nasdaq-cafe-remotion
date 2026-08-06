@@ -23,6 +23,7 @@ import {
   SourceReceiptTemplate,
 } from "./FinancialVisualTemplates";
 import {VisualGrammarStageHost} from "./VisualGrammarStageHost";
+import {EventReactionTimelineTemplate} from "./EventReactionTimelineTemplate";
 
 const FPS = 30;
 const color = {
@@ -340,6 +341,8 @@ const renderSelectedVisualTemplate = (content: PublicMainContent): React.ReactNo
     case "news-media":
     case "text-focus":
       return <SpecVisualMode content={content}/>;
+    case "event-reaction-timeline":
+      return <EventReactionTimelineTemplate content={content}/>;
   }
   throw new Error(`unsupported Visual Template: ${content.visualTemplate}`);
 };

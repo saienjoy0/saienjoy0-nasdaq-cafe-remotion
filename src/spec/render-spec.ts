@@ -15,6 +15,7 @@ import {
   visualGrammarIdSchema,
   visualGrammarRootContractSchema,
 } from "./visual-grammar-contract";
+import {reactionTimelineConfigSchema} from "./reaction-timeline-contract";
 import {
   financialVisualRootContractSchema,
   financialVisualTraceSchema,
@@ -65,6 +66,7 @@ const visualTemplateConfigSchema = z.object({
   metricIds: z.array(safeId).max(6).optional(),
   causalStepIds: z.array(safeId).max(4).optional(),
   highlightObjectIds: z.array(safeId).max(4).optional(),
+  reactionTimeline: reactionTimelineConfigSchema.optional(),
 }).strict();
 export const visualBeatFunctionSchema = z.enum([
   "Anchor", "Evidence", "Compare", "Explain", "Verify",

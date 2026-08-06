@@ -28,15 +28,15 @@ test("every active Visual Template resolves to its approved Stage Shell", () => 
   }
 });
 
-test("active templates reach at least thirteen physically distinct Stage Shells", () => {
+test("active templates reach all fourteen physically distinct Stage Shells", () => {
   const active = new Set(
     VISUAL_GRAMMAR_RENDERER_COMPATIBILITY.templates.map((entry) => {
       const variant = VISUAL_TEMPLATE_CONTRACTS[entry.visualTemplateId].variants[0];
       return getVisualGrammarStageShellId(entry.visualTemplateId, variant);
     }),
   );
-  assert.ok(active.size >= 13, `active Stage Shell count was ${active.size}`);
-  assert.equal(active.has("TimelineStage"), false);
+  assert.equal(active.size, 14, `active Stage Shell count was ${active.size}`);
+  assert.equal(active.has("TimelineStage"), true);
 });
 
 test("variant override changes analogy-steps from PictureBook to CausalPath", () => {
