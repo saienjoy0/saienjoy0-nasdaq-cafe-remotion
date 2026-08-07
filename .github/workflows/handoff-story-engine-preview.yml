@@ -3,7 +3,8 @@ name: Story Engine Handoff Metadata Check
 on:
   pull_request:
     paths:
-      - "handoff-inbox/2026-08-06/render_spec.json.gz.b64"
+      - "handoff-inbox/2026-08-06/parts/*.b64"
+      - "scripts/restore-story-engine-handoff-spec.sh"
       - ".github/workflows/handoff-story-engine-preview.yml"
   workflow_dispatch:
 
@@ -19,15 +20,23 @@ jobs:
       - name: Verify exact immutable handoff payload only
         shell: bash
         env:
-          INBOX_PATH: handoff-inbox/2026-08-06/render_spec.json.gz.b64
-          EXPECTED_SPEC_SHA256: 0b104b5964285842062e032144858c7f38beeecaabad584524789342886e8d82
+          PARTS_DIR: handoff-inbox/2026-08-06/parts
+          EXPECTED_SPEC_SHA256: 7b19ef071026587d559a2a1b9c52bb2c0ba93e138811f401afa2b2b02fe866e0
         run: |
           set -euo pipefail
-          test -s "$INBOX_PATH"
-          base64 --decode "$INBOX_PATH" | gzip -dc > /tmp/story-engine-render-spec.json
+          shopt -s nullglob
+          PARTS=("$PARTS_DIR"/[0-9][0-9].b64)
+          shopt -u nullglob
+          if [[ "${#PARTS[@]}" -ne 9 ]]; then
+            echo "::error::expected exactly 9 immutable handoff payload parts"
+            exit 1
+          fi
+          cat "${PARTS[@]}" | base64 --decode | gzip -dc > /tmp/story-engine-render-spec.json
           ACTUAL_SHA="$(sha256sum /tmp/story-engine-render-spec.json | awk '{print $1}')"
           if [[ "$ACTUAL_SHA" != "$EXPECTED_SPEC_SHA256" ]]; then
             echo "::error::immutable handoff SHA mismatch"
+            echo "::error::expected=$EXPECTED_SPEC_SHA256"
+            echo "::error::actual=$ACTUAL_SHA"
             exit 1
           fi
           echo "Immutable handoff bytes verified: $ACTUAL_SHA"
