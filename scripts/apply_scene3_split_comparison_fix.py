@@ -33,10 +33,10 @@ before = {
     "viewerTexts": beat.get("viewerTexts", []),
     "objectIds": beat.get("objectIds", []),
 }
-# This beat compares two revenue values and a gross-margin percentage. Templates
-# that require one shared unit (such as split-comparison) are invalid here.
-# metric-comparison-board is explicitly registered for 1-4 mixed-unit numbers.
-beat["visualGrammarId"] = "comparison"
+# This beat displays two revenue values and a gross-margin percentage. The
+# registered mixed-unit board is metric-comparison-board, whose compatible
+# grammar is evidence. This restores the pre-diversity-repair semantic pair.
+beat["visualGrammarId"] = "evidence"
 beat["visualTemplate"] = "metric-comparison-board"
 beat["templateConfig"]["variant"] = "default"
 after = {
@@ -58,7 +58,7 @@ repair = {
     "beatId": BEAT_ID,
     "before": before,
     "after": after,
-    "reason": "Scene 3 compares revenue outlook, revenue consensus, and gross margin with mixed units; metric-comparison-board preserves all three values without inventing a shared unit",
+    "reason": "Scene 3 presents mixed-unit evidence (revenue outlook, consensus, gross margin); evidence + metric-comparison-board is the registered compatible pair and preserves all values",
     "narrationChanged": False,
     "captionsChanged": False,
     "numbersChanged": False,
@@ -96,7 +96,7 @@ if not bounds:
 end = min(bounds)
 block = package[start:end]
 for old, new in [
-    ("  - Visual Grammar：contradiction / continuation", "  - Visual Grammar：comparison / continuation"),
+    ("  - Visual Grammar：contradiction / continuation", "  - Visual Grammar：evidence / continuation"),
     ("  - Visual Template ID：opening-contradiction", "  - Visual Template ID：metric-comparison-board"),
 ]:
     if old not in block:
