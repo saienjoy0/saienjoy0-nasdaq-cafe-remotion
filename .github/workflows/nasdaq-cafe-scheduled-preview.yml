@@ -18,6 +18,7 @@ on:
     paths:
       - "handoff-inbox/2026-08-06/render_spec.json.gz.b64"
       - "handoff-inbox/2026-08-06/parts/*.b64"
+      - "handoff-inbox/2026-08-06/parts-v2/*.b64"
       - "scripts/restore-story-engine-handoff-spec.sh"
       - ".github/workflows/nasdaq-cafe-preview.yml"
       - ".github/workflows/nasdaq-cafe-scheduled-preview.yml"
@@ -56,10 +57,10 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             EPISODE_DATE="2026-08-06"
             SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
-            PACKAGE_PATH="immutable-handoff:15fe2dd8941be53535ceb5a31a9b9531f29c6e83460c4f7fdf4356146585978d"
-            SPEC_SHA="7b19ef071026587d559a2a1b9c52bb2c0ba93e138811f401afa2b2b02fe866e0"
-            PACKAGE_SHA="eddf85afd3e8f35960d76dc9cb6af37d649fb8ba5fc3b6cab07a1e82356eb84d"
-            PARTS_DIR="handoff-inbox/${EPISODE_DATE}/parts"
+            PACKAGE_PATH="immutable-handoff:3f182584057217c5a0ed938b34693bd66b9f066cfdac128b37315eb04a5dc029"
+            SPEC_SHA="a6a7f45031c703250ee71510b4ed1d7f20bd1ae6ad6f80c932305994097af711"
+            PACKAGE_SHA="39fb52b1146cf0e34f8eac1b03cda2427384728f5e2a8e9063dec250ee569d19"
+            PARTS_DIR="handoff-inbox/${EPISODE_DATE}/parts-v2"
             shopt -s nullglob
             PARTS=("$PARTS_DIR"/[0-9][0-9].b64)
             shopt -u nullglob
@@ -85,7 +86,7 @@ jobs:
               echo "### Story Engine PR preview gate"
               echo "- Episode date: \`$EPISODE_DATE\`"
               echo "- Target ref: \`$TARGET_REF\`"
-              echo "- Bundle ID: \`15fe2dd8941be53535ceb5a31a9b9531f29c6e83460c4f7fdf4356146585978d\`"
+              echo "- Bundle ID: \`3f182584057217c5a0ed938b34693bd66b9f066cfdac128b37315eb04a5dc029\`"
               echo "- Render spec SHA-256: \`$SPEC_SHA\`"
               echo "- Immutable split-payload verification: pass"
             } >> "$GITHUB_STEP_SUMMARY"
