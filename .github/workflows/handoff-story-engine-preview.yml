@@ -42,6 +42,9 @@ jobs:
           96441adf3a6636e82381f95bcfcbf4a6eadfe92aab29107fc00ba58272aadc85  handoff-inbox/2026-08-06/parts-v2/07.b64
           0e0a7e75d7d92ea141b9247435a7369d25adbd5dc852e9f862274c4e0648a5c2  handoff-inbox/2026-08-06/parts-v2/08.b64
           EOF
+          echo "Actual part sizes and SHA-256:"
+          wc -c "${PARTS[@]}"
+          sha256sum "${PARTS[@]}"
           sha256sum -c /tmp/expected-parts.sha256
           cat "${PARTS[@]}" | base64 --decode | gzip -dc > /tmp/story-engine-render-spec.json
           ACTUAL_SHA="$(sha256sum /tmp/story-engine-render-spec.json | awk '{print $1}')"
@@ -52,3 +55,11 @@ jobs:
             exit 1
           fi
           echo "Immutable handoff bytes verified: $ACTUAL_SHA"
+      - name: Upload checked payload parts for byte diff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-engine-handoff-v2-parts-${{ github.run_id }}
+          path: handoff-inbox/2026-08-06/parts-v2/
+          if-no-files-found: error
+          retention-days: 1
