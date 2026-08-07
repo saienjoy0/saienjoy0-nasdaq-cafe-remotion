@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Preview handoff restore remains byte-exact; this comment only retriggers the PR gate after adding render diagnostics.
 EPISODE_ID="${1:?episode id is required}"
 SPEC_PATH="${2:?spec path is required}"
 EXPECTED_SHA_RAW="${3:?expected SHA-256 is required}"
