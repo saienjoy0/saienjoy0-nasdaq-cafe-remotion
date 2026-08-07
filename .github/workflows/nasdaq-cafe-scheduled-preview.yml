@@ -243,9 +243,9 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .cache/scheduled-preview-run
-          key: ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-scheduled-preview-run-v2-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-
+            ${{ runner.os }}-scheduled-preview-run-v2-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-
 
       - name: Decide whether another preview run is required
         if: steps.ready.outputs.ready == 'true'
@@ -403,7 +403,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: .cache/scheduled-preview-run
-          key: ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ${{ runner.os }}-scheduled-preview-run-v2-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Record no-op result
         if: steps.ready.outputs.ready == 'true' && steps.decision.outputs.dispatch != 'true'
