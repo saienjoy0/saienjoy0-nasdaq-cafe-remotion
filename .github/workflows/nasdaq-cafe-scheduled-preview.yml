@@ -14,6 +14,12 @@ on:
         description: "定刻ゲートの検査日をYYYY-MM-DDで上書き（通常は空欄）"
         required: false
         type: string
+  pull_request:
+    paths:
+      - "handoff-inbox/2026-08-06/render_spec.json.gz.b64"
+      - "scripts/restore-story-engine-handoff-spec.sh"
+      - ".github/workflows/nasdaq-cafe-preview.yml"
+      - ".github/workflows/nasdaq-cafe-scheduled-preview.yml"
 
 permissions:
   contents: read
@@ -26,24 +32,58 @@ concurrency:
 jobs:
   gate-and-dispatch:
     name: Verify daily package and dispatch preview
+    if: github.event_name != 'pull_request' || (github.actor == github.repository_owner && github.head_ref == 'preview/story-engine-2026-08-06')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     env:
       TARGET_WORKFLOW: nasdaq-cafe-preview.yml
-      TARGET_REF: main
+      TARGET_REF: ${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
 
     steps:
-      - name: Checkout default branch
+      - name: Checkout verified source ref
         uses: actions/checkout@v6
 
-      - name: Resolve and verify today's production-ready package
+      - name: Resolve and verify production-ready package
         id: ready
         shell: bash
         env:
           EPISODE_DATE_OVERRIDE: ${{ inputs.episode_date_override }}
         run: |
           set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            EPISODE_DATE="2026-08-06"
+            SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
+            PACKAGE_PATH="immutable-handoff:4fff2b1baaec9ebe110e8206d1791a2e89e58df1a9149aa6c82a96ee36e23d9d"
+            SPEC_SHA="0b104b5964285842062e032144858c7f38beeecaabad584524789342886e8d82"
+            PACKAGE_SHA="57f2dcdcf3845e1c37126c179dedf49cb432f4bc627a11e73ef09193c1f0c098"
+            INBOX_PATH="handoff-inbox/${EPISODE_DATE}/render_spec.json.gz.b64"
+            test -s "$INBOX_PATH"
+            base64 --decode "$INBOX_PATH" | gzip -dc > /tmp/story-engine-render-spec.json
+            ACTUAL_SHA="$(sha256sum /tmp/story-engine-render-spec.json | awk '{print $1}')"
+            if [[ "$ACTUAL_SHA" != "$SPEC_SHA" ]]; then
+              echo "::error::immutable Story Engine handoff SHA mismatch"
+              echo "::error::expected=$SPEC_SHA"
+              echo "::error::actual=$ACTUAL_SHA"
+              exit 1
+            fi
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
+            echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
+            echo "package_path=$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
+            echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+            echo "package_sha=$PACKAGE_SHA" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Story Engine PR preview gate"
+              echo "- Episode date: \`$EPISODE_DATE\`"
+              echo "- Target ref: \`$TARGET_REF\`"
+              echo "- Bundle ID: \`4fff2b1baaec9ebe110e8206d1791a2e89e58df1a9149aa6c82a96ee36e23d9d\`"
+              echo "- Render spec SHA-256: \`$SPEC_SHA\`"
+              echo "- Immutable inbox verification: pass"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
 
           if [[ -n "${EPISODE_DATE_OVERRIDE:-}" ]]; then
             EPISODE_DATE="$EPISODE_DATE_OVERRIDE"
