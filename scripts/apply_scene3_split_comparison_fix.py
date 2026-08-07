@@ -35,7 +35,7 @@ before = {
 }
 beat["visualGrammarId"] = "comparison"
 beat["visualTemplate"] = "split-comparison"
-beat["templateConfig"]["variant"] = "default"
+beat["templateConfig"]["variant"] = "two-lane"
 after = {
     "visualGrammarId": beat["visualGrammarId"],
     "visualTemplate": beat["visualTemplate"],
@@ -95,10 +95,20 @@ block = package[start:end]
 for old, new in [
     ("  - Visual Grammar：contradiction / continuation", "  - Visual Grammar：comparison / continuation"),
     ("  - Visual Template ID：opening-contradiction", "  - Visual Template ID：split-comparison"),
+    ("  - Template Variant：default", "  - Template Variant：two-lane"),
 ]:
     if old not in block:
         raise SystemExit(f"episode package field not found: {old}")
     block = block.replace(old, new, 1)
-PACKAGE_PATH.write_text(package[:start] + block + package[end:], encoding="utf-8")
+final_package = package[:start] + block + package[end:]
+PACKAGE_PATH.write_text(final_package, encoding="utf-8")
+package_sha = hashlib.sha256(final_package.encode("utf-8")).hexdigest()
 
-print(json.dumps({"status": "patched", "renderSpecSha256": spec_sha, "repair": repair}, ensure_ascii=False))
+# Keep the production-ready manifest hashes aligned with the exact files that
+# will be committed. Preserve all renderer normalization evidence.
+ready = json.loads(READY_PATH.read_text(encoding="utf-8"))
+ready["renderSpecSha256"] = spec_sha
+ready["episodePackageSha256"] = package_sha
+READY_PATH.write_text(json.dumps(ready, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+print(json.dumps({"status": "patched", "renderSpecSha256": spec_sha, "episodePackageSha256": package_sha, "repair": repair}, ensure_ascii=False))
