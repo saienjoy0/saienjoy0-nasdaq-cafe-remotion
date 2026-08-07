@@ -1,0 +1,67 @@
+name: Diagnose VG Timing 2026-08-06
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/diagnose-vg-timing-2026-08-06.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SPEC_PATH: render-specs/2026-08-06/render_spec.json
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+      SPEC_TTS_CACHE_ONLY: "1"
+      TTS_INPUT_SHA: b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509
+      TTS_CACHE_COMPAT: d35fe5c048bfcf6c07652c434e6773e4bde7d59dc2b875689709d5b6819ce9c4
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Apply candidate repairs
+        run: |
+          python3 scripts/apply_tailwind_headwind_lane_fix.py
+          python3 scripts/apply_tailwind_renderer_fix.py
+          python3 scripts/apply_scene3_split_comparison_fix.py
+      - uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: Linux-spec-tts-block-v2-${{ env.TTS_CACHE_COMPAT }}-${{ env.TTS_INPUT_SHA }}
+          restore-keys: |
+            Linux-spec-tts-block-v2-${{ env.TTS_CACHE_COMPAT }}-${{ env.TTS_INPUT_SHA }}-partial-
+      - name: Compile and preserve timing diagnosis
+        shell: bash
+        run: |
+          set +e
+          npm run episode:spec:compile -- "$SPEC_PATH"
+          STATUS=$?
+          set -e
+          test -s build/2026-08-06/visual_grammar_timing_report.json
+          mkdir -p preview-status/2026-08-06
+          cp build/2026-08-06/visual_grammar_timing_report.json preview-status/2026-08-06/measured_vg_timing_diagnosis.json
+          jq '{status,metrics,failures,beats}' preview-status/2026-08-06/measured_vg_timing_diagnosis.json
+          echo "compile_status=$STATUS"
+      - name: Commit diagnosis and self-remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview-status/2026-08-06/measured_vg_timing_diagnosis.json
+          git rm .github/workflows/diagnose-vg-timing-2026-08-06.yml
+          git commit -m "Record measured VG timing diagnosis"
+          git pull --rebase origin main
+          git push origin HEAD:main
