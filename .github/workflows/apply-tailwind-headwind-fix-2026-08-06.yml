@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: apply-tailwind-headwind-fix-2026-08-06
@@ -16,11 +17,12 @@ concurrency:
 jobs:
   patch-test-commit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 55
+    timeout-minutes: 65
     env:
       EPISODE_DATE: "2026-08-06"
       SPEC_PATH: "render-specs/2026-08-06/render_spec.json"
       READY_PATH: "render-specs/2026-08-06/production_ready.json"
+      PACKAGE_PATH: "episode-packages/2026-08-06/episode_package_2026-08-06.md"
       EXPECTED_TTS_INPUT_SHA256: "b4743df29c22902365d06a7a7a548a41131fe806a2a67ac75431198dc9c59509"
       TTS_CACHE_COMPATIBILITY_SHA256: "d35fe5c048bfcf6c07652c434e6773e4bde7d59dc2b875689709d5b6819ce9c4"
       TTS_PROVIDER: gemini
@@ -119,6 +121,8 @@ jobs:
           test "$(jq -r '.rendererNormalization.ttsInputSha256After' "$READY_PATH")" = "$EXPECTED_TTS_INPUT_SHA256"
           jq -e '.rendererNormalization.tailwindHeadwindLaneRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
           jq -e '.rendererNormalization.scene3LayoutCompatibilityRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
+          test "$(jq -r '.renderSpecSha256' "$READY_PATH")" = "$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          test "$(jq -r '.episodePackageSha256' "$READY_PATH")" = "$(sha256sum "$PACKAGE_PATH" | awk '{print $1}')"
 
       - name: Commit tested repairs
         shell: bash
@@ -129,7 +133,7 @@ jobs:
           git add \
             "$SPEC_PATH" \
             "$READY_PATH" \
-            episode-packages/2026-08-06/episode_package_2026-08-06.md \
+            "$PACKAGE_PATH" \
             preview-status/2026-08-06/normalization_report.json \
             src/components/spec/VisualTemplateRenderer.tsx \
             scripts/test-visual-templates.ts
@@ -138,5 +142,55 @@ jobs:
           git rm scripts/apply_scene3_split_comparison_fix.py
           git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
           git commit -m "Repair Scene 2 lanes and Scene 3 comparison layout"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Dispatch formal Preview from repaired main
+        id: dispatch_preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          NEW_SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          test "$(jq -r '.renderSpecSha256' "$READY_PATH")" = "$NEW_SPEC_SHA"
+          gh workflow run nasdaq-cafe-preview.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f episode_date="$EPISODE_DATE" \
+            -f expected_spec_sha256="$NEW_SPEC_SHA" \
+            -f confirmation=PREVIEW
+          for attempt in $(seq 1 40); do
+            RUNS="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow nasdaq-cafe-preview.yml --event workflow_dispatch --limit 20 --json databaseId,headSha)"
+            RUN_ID="$(jq -r --arg head "$HEAD_SHA" '[.[] | select(.headSha == $head)][0].databaseId // empty' <<<"$RUNS")"
+            if [[ "$RUN_ID" =~ ^[0-9]+$ ]]; then
+              echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+              echo "spec_sha=$NEW_SPEC_SHA" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::Unable to identify dispatched formal Preview"
+          exit 1
+
+      - name: Record Preview dispatch receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.dispatch_preview.outputs.run_id }}"
+          SPEC_SHA="${{ steps.dispatch_preview.outputs.spec_sha }}"
+          mkdir -p "preview-status/$EPISODE_DATE"
+          jq -n \
+            --arg episodeDate "$EPISODE_DATE" \
+            --arg specSha256 "$SPEC_SHA" \
+            --arg runId "$RUN_ID" \
+            --arg url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" \
+            '{version:1,episodeDate:$episodeDate,specSha256:$specSha256,runId:($runId|tonumber),url:$url,status:"dispatched",finalAuthorized:false}' \
+            > "preview-status/$EPISODE_DATE/post_repair_preview_dispatch.json"
+          git add "preview-status/$EPISODE_DATE/post_repair_preview_dispatch.json"
+          git commit -m "Record repaired Preview dispatch"
           git pull --rebase origin main
           git push origin HEAD:main
