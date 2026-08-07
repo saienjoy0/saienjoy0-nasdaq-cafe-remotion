@@ -5,10 +5,7 @@ EPISODE_ID="${1:?episode id is required}"
 SPEC_PATH="${2:?spec path is required}"
 EXPECTED_SHA_RAW="${3:?expected SHA-256 is required}"
 INBOX_PATH="handoff-inbox/${EPISODE_ID}/render_spec.json.gz.b64"
-
-if [[ ! -s "$INBOX_PATH" ]]; then
-  exit 0
-fi
+PARTS_DIR="handoff-inbox/${EPISODE_ID}/parts"
 
 EXPECTED_SHA="$(printf '%s' "$EXPECTED_SHA_RAW" | tr '[:upper:]' '[:lower:]')"
 if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-f]{64}$ ]]; then
@@ -18,7 +15,24 @@ fi
 
 mkdir -p "$(dirname "$SPEC_PATH")"
 TMP_PATH="${SPEC_PATH}.handoff.tmp"
-base64 --decode "$INBOX_PATH" | gzip -dc > "$TMP_PATH"
+rm -f "$TMP_PATH"
+
+if [[ -d "$PARTS_DIR" ]]; then
+  shopt -s nullglob
+  PARTS=("$PARTS_DIR"/[0-9][0-9].b64)
+  shopt -u nullglob
+  if [[ "${#PARTS[@]}" -ne 9 ]]; then
+    echo "::error::Story Engine handoff requires exactly 9 payload parts"
+    echo "::error::found=${#PARTS[@]} parts_dir=$PARTS_DIR"
+    exit 1
+  fi
+  cat "${PARTS[@]}" | base64 --decode | gzip -dc > "$TMP_PATH"
+elif [[ -s "$INBOX_PATH" ]]; then
+  base64 --decode "$INBOX_PATH" | gzip -dc > "$TMP_PATH"
+else
+  exit 0
+fi
+
 ACTUAL_SHA="$(sha256sum "$TMP_PATH" | awk '{print $1}')"
 if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
   rm -f "$TMP_PATH"
