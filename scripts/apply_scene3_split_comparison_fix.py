@@ -33,9 +33,12 @@ before = {
     "viewerTexts": beat.get("viewerTexts", []),
     "objectIds": beat.get("objectIds", []),
 }
+# This beat compares two revenue values and a gross-margin percentage. Templates
+# that require one shared unit (such as split-comparison) are invalid here.
+# metric-comparison-board is explicitly registered for 1-4 mixed-unit numbers.
 beat["visualGrammarId"] = "comparison"
-beat["visualTemplate"] = "split-comparison"
-beat["templateConfig"]["variant"] = "two-lane"
+beat["visualTemplate"] = "metric-comparison-board"
+beat["templateConfig"]["variant"] = "default"
 after = {
     "visualGrammarId": beat["visualGrammarId"],
     "visualTemplate": beat["visualTemplate"],
@@ -55,7 +58,7 @@ repair = {
     "beatId": BEAT_ID,
     "before": before,
     "after": after,
-    "reason": "opening-contradiction is Scene 1 only; Scene 3 compares strong revenue outlook against margin caution",
+    "reason": "Scene 3 compares revenue outlook, revenue consensus, and gross margin with mixed units; metric-comparison-board preserves all three values without inventing a shared unit",
     "narrationChanged": False,
     "captionsChanged": False,
     "numbersChanged": False,
@@ -94,8 +97,7 @@ end = min(bounds)
 block = package[start:end]
 for old, new in [
     ("  - Visual Grammar：contradiction / continuation", "  - Visual Grammar：comparison / continuation"),
-    ("  - Visual Template ID：opening-contradiction", "  - Visual Template ID：split-comparison"),
-    ("  - Template Variant：default", "  - Template Variant：two-lane"),
+    ("  - Visual Template ID：opening-contradiction", "  - Visual Template ID：metric-comparison-board"),
 ]:
     if old not in block:
         raise SystemExit(f"episode package field not found: {old}")
