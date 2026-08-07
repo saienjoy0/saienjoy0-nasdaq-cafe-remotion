@@ -31,6 +31,18 @@ jobs:
             echo "::error::expected exactly 9 immutable handoff payload parts"
             exit 1
           fi
+          cat > /tmp/expected-parts.sha256 <<'EOF'
+          5231f8f544119726a71734bea36e3ff10ba138f44f034c3b8904145076672086  handoff-inbox/2026-08-06/parts/00.b64
+          15c2991f280ab12e2bfcc90df9770a42d64575e80668f053c429a4599336ed81  handoff-inbox/2026-08-06/parts/01.b64
+          b07221325e0868eaea8ea529b2ac5a94378c715fff0c69c363de5ea4259bcee3  handoff-inbox/2026-08-06/parts/02.b64
+          f8b079762e92f81ff7e809de6862861f5b443502385a4f2096d86b368419b150  handoff-inbox/2026-08-06/parts/03.b64
+          a86a11101bcd3a3196670647ede8e7ee34f812b2f6882f67691fdae696c73697  handoff-inbox/2026-08-06/parts/04.b64
+          71f48681034ea5f7ae11acc8fd9a8900b7f30fe84d3b9544bb07a2727ad414a3  handoff-inbox/2026-08-06/parts/05.b64
+          31ab190dd00a2ab28a341d7a25b8a771ed87d6f467c1fa0fc5277e85ec730b39  handoff-inbox/2026-08-06/parts/06.b64
+          095b9d6ac653f5577e4d5add1b2b70e5bb866a5073316b01f56a32d63889906b  handoff-inbox/2026-08-06/parts/07.b64
+          86ff353611a36b87e400bedc439fd4188795097bd281a8425e609530b7d3984d  handoff-inbox/2026-08-06/parts/08.b64
+          EOF
+          sha256sum -c /tmp/expected-parts.sha256
           cat "${PARTS[@]}" | base64 --decode | gzip -dc > /tmp/story-engine-render-spec.json
           ACTUAL_SHA="$(sha256sum /tmp/story-engine-render-spec.json | awk '{print $1}')"
           if [[ "$ACTUAL_SHA" != "$EXPECTED_SPEC_SHA256" ]]; then
