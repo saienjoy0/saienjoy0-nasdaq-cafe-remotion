@@ -1,0 +1,42 @@
+name: Story Engine Run Receipt Lookup
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/story-engine-run-receipt.yml"
+      - ".github/workflows/nasdaq-cafe-preview.yml"
+      - ".github/workflows/nasdaq-cafe-scheduled-preview.yml"
+      - "scripts/restore-story-engine-handoff-spec.sh"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  lookup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Read latest official preview run for Story Engine branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_BRANCH: preview/story-engine-2026-08-06
+        run: |
+          set -euo pipefail
+          RESPONSE="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/runs?event=workflow_dispatch&branch=${TARGET_BRANCH}&per_page=5")"
+          RUN_ID="$(jq -r '.workflow_runs[0].id // empty' <<<"$RESPONSE")"
+          STATUS="$(jq -r '.workflow_runs[0].status // empty' <<<"$RESPONSE")"
+          CONCLUSION="$(jq -r '.workflow_runs[0].conclusion // empty' <<<"$RESPONSE")"
+          URL="$(jq -r '.workflow_runs[0].html_url // empty' <<<"$RESPONSE")"
+          if [[ ! "$RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::No official Nasdaq Cafe Preview workflow_dispatch run found for $TARGET_BRANCH"
+            exit 1
+          fi
+          echo "OFFICIAL_PREVIEW_RUN_ID=$RUN_ID"
+          echo "OFFICIAL_PREVIEW_STATUS=$STATUS"
+          echo "OFFICIAL_PREVIEW_CONCLUSION=${CONCLUSION:-pending}"
+          echo "OFFICIAL_PREVIEW_URL=$URL"
