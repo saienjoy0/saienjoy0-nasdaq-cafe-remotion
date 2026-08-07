@@ -1,0 +1,65 @@
+name: Story Engine Render Error Receipt
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/story-engine-render-error-receipt.yml"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  receipt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Extract latest official preview render error
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_BRANCH: preview/story-engine-2026-08-06
+        run: |
+          set -euo pipefail
+          RUNS="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/runs?event=workflow_dispatch&branch=${TARGET_BRANCH}&per_page=10")"
+          RUN_ID="$(jq -r '[.workflow_runs[] | select(.conclusion == "failure")][0].id // empty' <<<"$RUNS")"
+          if [[ ! "$RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::No failed official preview run found"
+            exit 1
+          fi
+          ARTIFACTS="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100")"
+          ARTIFACT_ID="$(jq -r '[.artifacts[] | select(.name | startswith("nasdaq-cafe-preview-failure-"))][0].id // empty' <<<"$ARTIFACTS")"
+          if [[ ! "$ARTIFACT_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::No failure diagnostics artifact found for run $RUN_ID"
+            exit 1
+          fi
+          mkdir -p /tmp/failure
+          gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" > /tmp/failure.zip
+          unzip -q /tmp/failure.zip -d /tmp/failure
+          ERROR_FILE="$(find /tmp/failure -type f -name render_error.json -print -quit)"
+          if [[ -z "$ERROR_FILE" ]]; then
+            echo "::error::render_error.json missing from artifact $ARTIFACT_ID"
+            find /tmp/failure -maxdepth 4 -type f -print
+            exit 1
+          fi
+          ERROR_NAME="$(jq -r '.error.name // "unknown"' "$ERROR_FILE")"
+          ERROR_MESSAGE="$(jq -r '.error.message // "unknown"' "$ERROR_FILE")"
+          STACK_TOP="$(jq -r '.error.stack // ""' "$ERROR_FILE" | head -n 12)"
+          PR_NUMBER="$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")"
+          BODY=$(cat <<EOF
+Story Engine render diagnostic — official preview run \`${RUN_ID}\`:
+
+- error: \`${ERROR_NAME}\`
+- message: \`${ERROR_MESSAGE}\`
+
+\`\`\`text
+${STACK_TOP}
+\`\`\`
+EOF
+          )
+          gh pr comment "$PR_NUMBER" --body "$BODY"
