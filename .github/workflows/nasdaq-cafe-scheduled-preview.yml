@@ -55,9 +55,9 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             EPISODE_DATE="2026-08-06"
             SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
-            PACKAGE_PATH="immutable-handoff:4fff2b1baaec9ebe110e8206d1791a2e89e58df1a9149aa6c82a96ee36e23d9d"
-            SPEC_SHA="0b104b5964285842062e032144858c7f38beeecaabad584524789342886e8d82"
-            PACKAGE_SHA="57f2dcdcf3845e1c37126c179dedf49cb432f4bc627a11e73ef09193c1f0c098"
+            PACKAGE_PATH="immutable-handoff:15fe2dd8941be53535ceb5a31a9b9531f29c6e83460c4f7fdf4356146585978d"
+            SPEC_SHA="7b19ef071026587d559a2a1b9c52bb2c0ba93e138811f401afa2b2b02fe866e0"
+            PACKAGE_SHA="eddf85afd3e8f35960d76dc9cb6af37d649fb8ba5fc3b6cab07a1e82356eb84d"
             INBOX_PATH="handoff-inbox/${EPISODE_DATE}/render_spec.json.gz.b64"
             test -s "$INBOX_PATH"
             base64 --decode "$INBOX_PATH" | gzip -dc > /tmp/story-engine-render-spec.json
@@ -78,7 +78,7 @@ jobs:
               echo "### Story Engine PR preview gate"
               echo "- Episode date: \`$EPISODE_DATE\`"
               echo "- Target ref: \`$TARGET_REF\`"
-              echo "- Bundle ID: \`4fff2b1baaec9ebe110e8206d1791a2e89e58df1a9149aa6c82a96ee36e23d9d\`"
+              echo "- Bundle ID: \`15fe2dd8941be53535ceb5a31a9b9531f29c6e83460c4f7fdf4356146585978d\`"
               echo "- Render spec SHA-256: \`$SPEC_SHA\`"
               echo "- Immutable inbox verification: pass"
             } >> "$GITHUB_STEP_SUMMARY"
