@@ -11,6 +11,8 @@ on:
 permissions:
   actions: read
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   lookup:
@@ -27,15 +29,21 @@ jobs:
           RESPONSE="$(gh api \
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2026-03-10' \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/runs?event=workflow_dispatch&branch=${TARGET_BRANCH}&per_page=5")"
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview.yml/runs?event=workflow_dispatch&branch=${TARGET_BRANCH}&per_page=10")"
           RUN_ID="$(jq -r '.workflow_runs[0].id // empty' <<<"$RESPONSE")"
+          RUN_NUMBER="$(jq -r '.workflow_runs[0].run_number // empty' <<<"$RESPONSE")"
+          RUN_ATTEMPT="$(jq -r '.workflow_runs[0].run_attempt // empty' <<<"$RESPONSE")"
           STATUS="$(jq -r '.workflow_runs[0].status // empty' <<<"$RESPONSE")"
           CONCLUSION="$(jq -r '.workflow_runs[0].conclusion // empty' <<<"$RESPONSE")"
+          HEAD_SHA="$(jq -r '.workflow_runs[0].head_sha // empty' <<<"$RESPONSE")"
           URL="$(jq -r '.workflow_runs[0].html_url // empty' <<<"$RESPONSE")"
           if [[ ! "$RUN_ID" =~ ^[0-9]+$ ]]; then
             echo "::error::No official Nasdaq Cafe Preview workflow_dispatch run found for $TARGET_BRANCH"
             exit 1
           fi
+          PR_NUMBER="$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")"
+          BODY="Story Engine preview receipt: run \`${RUN_ID}\` (run #${RUN_NUMBER}, attempt ${RUN_ATTEMPT}), status \`${STATUS}\`, conclusion \`${CONCLUSION:-pending}\`, head \`${HEAD_SHA}\`. ${URL}"
+          gh pr comment "$PR_NUMBER" --body "$BODY"
           echo "OFFICIAL_PREVIEW_RUN_ID=$RUN_ID"
           echo "OFFICIAL_PREVIEW_STATUS=$STATUS"
           echo "OFFICIAL_PREVIEW_CONCLUSION=${CONCLUSION:-pending}"
