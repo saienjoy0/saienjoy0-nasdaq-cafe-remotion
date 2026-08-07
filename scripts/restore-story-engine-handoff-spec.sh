@@ -5,7 +5,8 @@ EPISODE_ID="${1:?episode id is required}"
 SPEC_PATH="${2:?spec path is required}"
 EXPECTED_SHA_RAW="${3:?expected SHA-256 is required}"
 INBOX_PATH="handoff-inbox/${EPISODE_ID}/render_spec.json.gz.b64"
-PARTS_DIR="handoff-inbox/${EPISODE_ID}/parts"
+PARTS_DIR_V2="handoff-inbox/${EPISODE_ID}/parts-v2"
+PARTS_DIR_V1="handoff-inbox/${EPISODE_ID}/parts"
 
 EXPECTED_SHA="$(printf '%s' "$EXPECTED_SHA_RAW" | tr '[:upper:]' '[:lower:]')"
 if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-f]{64}$ ]]; then
@@ -17,7 +18,15 @@ mkdir -p "$(dirname "$SPEC_PATH")"
 TMP_PATH="${SPEC_PATH}.handoff.tmp"
 rm -f "$TMP_PATH"
 
-if [[ -d "$PARTS_DIR" ]]; then
+if [[ -d "$PARTS_DIR_V2" ]]; then
+  PARTS_DIR="$PARTS_DIR_V2"
+elif [[ -d "$PARTS_DIR_V1" ]]; then
+  PARTS_DIR="$PARTS_DIR_V1"
+else
+  PARTS_DIR=""
+fi
+
+if [[ -n "$PARTS_DIR" ]]; then
   shopt -s nullglob
   PARTS=("$PARTS_DIR"/[0-9][0-9].b64)
   shopt -u nullglob
