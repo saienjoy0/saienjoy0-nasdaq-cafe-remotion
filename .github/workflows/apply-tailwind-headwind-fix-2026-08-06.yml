@@ -1,5 +1,5 @@
 name: Apply Tailwind Headwind Repair 2026-08-06
-# retry-2: Scene 3 uses metric-comparison-board for mixed units
+# retry-3: Scene 3 restores evidence + metric-comparison-board
 
 on:
   push:
@@ -142,7 +142,7 @@ jobs:
           git rm scripts/apply_tailwind_renderer_fix.py
           git rm scripts/apply_scene3_split_comparison_fix.py
           git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
-          git commit -m "Repair Scene 2 lanes and Scene 3 mixed-unit board"
+          git commit -m "Repair Scene 2 lanes and Scene 3 evidence board"
           git pull --rebase origin main
           git push origin HEAD:main
 
