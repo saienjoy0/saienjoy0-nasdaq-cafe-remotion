@@ -24,6 +24,8 @@ if beat["visualTemplate"] != "opening-contradiction":
     raise SystemExit(f"unexpected template: {beat['visualTemplate']}")
 if beat["templateConfig"]["variant"] != "default":
     raise SystemExit(f"unexpected variant: {beat['templateConfig']['variant']}")
+if beat["visualMode"] != "number-comparison":
+    raise SystemExit(f"unexpected visualMode: {beat['visualMode']}")
 
 expected_values = ["会社見通し 130億ドル", "市場予想 125.2億ドル", "粗利率 56%"]
 card_values = [line["value"] for line in card["lines"]]
@@ -33,6 +35,7 @@ if beat.get("viewerTexts") != expected_values:
     raise SystemExit(f"unexpected Scene 3 viewerTexts: {beat.get('viewerTexts')}")
 
 before = {
+    "visualMode": beat["visualMode"],
     "visualGrammarId": beat["visualGrammarId"],
     "visualTemplate": beat["visualTemplate"],
     "variant": beat["templateConfig"]["variant"],
@@ -46,7 +49,9 @@ before = {
 # run, exceeding the 28 s production gate. The existing Scene 3 card contains
 # exactly the same three facts, so reuse it as a two-lane tailwind/headwind
 # board: strong revenue outlook is the tailwind; flat gross margin is the
-# headwind. No narration, number, source, causal claim, or TTS input changes.
+# headwind. text-focus is the generic card/text Beat mode and has no numeric
+# object requirement; the actual rendering remains explicitly tailwind-headwind.
+beat["visualMode"] = "text-focus"
 beat["visualGrammarId"] = "evidence"
 beat["visualTemplate"] = "tailwind-headwind"
 beat["templateConfig"]["variant"] = "two-lane"
@@ -61,6 +66,7 @@ beat["viewerTexts"] = [
 ]
 
 after = {
+    "visualMode": beat["visualMode"],
     "visualGrammarId": beat["visualGrammarId"],
     "visualTemplate": beat["visualTemplate"],
     "variant": beat["templateConfig"]["variant"],
