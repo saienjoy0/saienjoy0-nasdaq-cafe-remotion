@@ -1,4 +1,5 @@
 name: Apply Tailwind Headwind Repair 2026-08-06
+# retry-2: Scene 3 uses metric-comparison-board for mixed units
 
 on:
   push:
@@ -141,7 +142,7 @@ jobs:
           git rm scripts/apply_tailwind_renderer_fix.py
           git rm scripts/apply_scene3_split_comparison_fix.py
           git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
-          git commit -m "Repair Scene 2 lanes and Scene 3 comparison layout"
+          git commit -m "Repair Scene 2 lanes and Scene 3 mixed-unit board"
           git pull --rebase origin main
           git push origin HEAD:main
 
@@ -175,8 +176,6 @@ jobs:
           exit 1
 
       - name: Record Preview dispatch receipt
-        env:
-          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
