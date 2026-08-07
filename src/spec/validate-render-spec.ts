@@ -21,6 +21,89 @@ const requireSourceIds = (ids: string[], sources: Set<string>, path: string) => 
   });
 };
 
+const validateLeadEntityCard = (spec: RenderSpec) => {
+  const plan = spec.editorial.leadEntityPlan;
+  if (plan.mode === "not-required") return;
+
+  const orderedChunks = spec.scenes.flatMap((scene, sceneIndex) =>
+    scene.narrationChunks.map((chunk, chunkIndex) => ({scene, sceneIndex, chunk, chunkIndex})),
+  );
+  const contains = (value: string, needle: string) => value.includes(needle);
+  const cueIndex = orderedChunks.findIndex(({chunk}) =>
+    contains(chunk.speechText, plan.firstMentionCue) || contains(chunk.captionText, plan.firstMentionCue),
+  );
+  if (cueIndex < 0) {
+    fail(
+      "$.editorial.leadEntityPlan.firstMentionCue",
+      "firstMentionCue does not occur in narration: " + plan.firstMentionCue,
+    );
+  }
+
+  const nameIndex = orderedChunks.findIndex(({chunk}) =>
+    contains(chunk.speechText, plan.displayName) || contains(chunk.captionText, plan.displayName),
+  );
+  if (nameIndex >= 0 && nameIndex < cueIndex) {
+    fail(
+      "$.editorial.leadEntityPlan.firstMentionCue",
+      "firstMentionCue must identify the earliest narration mention of " + plan.displayName,
+    );
+  }
+
+  const firstMention = orderedChunks[cueIndex];
+  const chunkOrder = new Map(
+    firstMention.scene.narrationChunks.map((chunk, index) => [chunk.chunkId, index]),
+  );
+  const beatIndex = firstMention.scene.visualBeats.findIndex((beat) => {
+    const start = chunkOrder.get(beat.startChunkId);
+    const end = chunkOrder.get(beat.endChunkId);
+    return start !== undefined && end !== undefined &&
+      start <= firstMention.chunkIndex && firstMention.chunkIndex <= end;
+  });
+  if (beatIndex < 0) {
+    fail(
+      "$.scenes[" + firstMention.sceneIndex + "].visualBeats",
+      "no Visual Beat covers first lead-entity mention chunk " + firstMention.chunk.chunkId,
+    );
+  }
+
+  const beat = firstMention.scene.visualBeats[beatIndex];
+  const beatPath = "$.scenes[" + firstMention.sceneIndex + "].visualBeats[" + beatIndex + "]";
+  if (beat.startChunkId !== firstMention.chunk.chunkId || beat.endChunkId !== firstMention.chunk.chunkId) {
+    fail(
+      beatPath + ".startChunkId",
+      "lead entity card must own exactly the first narration mention chunk",
+    );
+  }
+  if (beat.screenState !== "EntityFocus") {
+    fail(
+      beatPath + ".screenState",
+      "lead entity card must use EntityFocus at the first narration mention",
+    );
+  }
+  if (!beat.entity) {
+    fail(beatPath + ".entity", "lead entity card requires entity metadata");
+  }
+  const entity = beat.entity!;
+  if (
+    entity.subjectType !== plan.subjectType ||
+    entity.displayName !== plan.displayName ||
+    entity.firstMentionCue !== plan.firstMentionCue
+  ) {
+    fail(
+      beatPath + ".entity",
+      "lead entity card metadata must match editorial.leadEntityPlan",
+    );
+  }
+  if (plan.subjectType === "company" && entity.variant !== "company") {
+    fail(beatPath + ".entity.variant", "company lead entity requires company variant");
+  }
+  if (plan.subjectType === "product" && entity.variant !== "product") {
+    fail(beatPath + ".entity.variant", "product lead entity requires product variant");
+  }
+  if (plan.subjectType === "person" && !["photo", "noPhoto"].includes(entity.variant)) {
+    fail(beatPath + ".entity.variant", "person lead entity requires photo or noPhoto variant");
+  }
+};
 export const resolveVoiceProfile = (
   voiceProfileId: string,
   voiceProfiles: VoiceProfilesForSpec,
@@ -66,6 +149,7 @@ export const validateRenderSpecReferences = (
     ...scene.arrows.map((item) => item.arrowId),
     ...scene.assetPlacements.map((item) => item.placementId),
   ]), "$.scenes[*].objects");
+  validateLeadEntityCard(spec);
 
   spec.scenes.forEach((scene, sceneIndex) => {
     const base = `$.scenes[${sceneIndex}]`;
@@ -241,6 +325,9 @@ export const validateRenderSpecReferences = (
 
       if (beat.entity && beat.entity.variant !== "noPhoto") {
         const entityPlacement = beatPlacements.find((placement) => ["entity-card", "main-media"].includes(placement.role));
+        if (beat.entity.assetId !== entityPlacement?.assetId) {
+          fail(path + ".entity.assetId", "entity assetId must match the entity placement assetId");
+        }
         if (beat.entity.variant === "photo") {
           if (entityPlacement?.fit !== "cover" || !entityPlacement.focalPoint) fail(`${path}.entity`, "person photo requires cover and an explicit focalPoint");
         } else if (entityPlacement?.fit !== "contain") {

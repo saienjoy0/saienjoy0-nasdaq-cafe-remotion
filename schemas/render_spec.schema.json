@@ -191,6 +191,57 @@
             }
           ]
         },
+        "leadEntityPlan": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "const": "required"
+                },
+                "subjectType": {
+                  "type": "string",
+                  "enum": [
+                    "person",
+                    "company",
+                    "product"
+                  ]
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "firstMentionCue": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "mode",
+                "subjectType",
+                "displayName",
+                "firstMentionCue"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "const": "not-required"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "mode",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
         "targetIndices": {
           "minItems": 1,
           "type": "array",
@@ -328,6 +379,7 @@
       "required": [
         "leadNews",
         "leadTheme",
+        "leadEntityPlan",
         "targetIndices",
         "storySpine",
         "centralHypothesis",
