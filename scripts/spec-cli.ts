@@ -35,6 +35,7 @@ const buildPath = (id: string) => path.join(workspaceFor(id), "render_data.produ
 const technicalPath = (id: string) => path.join(workspaceFor(id), "technical_report.json");
 const visualGrammarTimingPath = (id: string) =>
   path.join(workspaceFor(id), "visual_grammar_timing_report.json");
+const renderErrorPath = (id: string) => path.join(workspaceFor(id), "render_error.json");
 const mediaPath = (kind: "preview" | "final", id: string) => {
   const directory = isFixture
     ? path.join(PROJECT_DIR, "renders", "tests", "expression-final-verification", kind)
@@ -261,19 +262,39 @@ if (command === "validate") {
   const kind = command;
   const output = mediaPath(kind, spec.episode.id);
   await mkdir(path.dirname(output), {recursive: true});
-  await renderMedia({
-    composition,
-    serveUrl,
-    inputProps,
-    outputLocation: output,
-    codec: "h264",
-    audioCodec: "aac",
-    sampleRate: 48000,
-    imageFormat: "jpeg",
-    pixelFormat: "yuv420p",
-    crf: kind === "preview" ? 30 : 18,
-    scale: kind === "preview" ? 0.5 : 1,
-  });
+  try {
+    await renderMedia({
+      composition,
+      serveUrl,
+      inputProps,
+      outputLocation: output,
+      codec: "h264",
+      audioCodec: "aac",
+      sampleRate: 48000,
+      imageFormat: "jpeg",
+      pixelFormat: "yuv420p",
+      crf: kind === "preview" ? 30 : 18,
+      scale: kind === "preview" ? 0.5 : 1,
+    });
+  } catch (error) {
+    const normalized = error instanceof Error
+      ? {name: error.name, message: error.message, stack: error.stack ?? null}
+      : {name: "NonErrorThrow", message: String(error), stack: null};
+    const diagnostic = {
+      status: "render-failed",
+      command: kind,
+      episodeId: spec.episode.id,
+      inputSpecPath: path.resolve(input),
+      output,
+      error: normalized,
+      recordedAt: new Date().toISOString(),
+    };
+    const diagnosticPath = renderErrorPath(spec.episode.id);
+    await writeFile(diagnosticPath, `${JSON.stringify(diagnostic, null, 2)}\n`, "utf8");
+    console.error(`render diagnostic: ${diagnosticPath}`);
+    console.error(normalized.stack ?? `${normalized.name}: ${normalized.message}`);
+    throw error;
+  }
   const existing = JSON.parse(
     await readFile(reportPath, "utf8"),
   ) as Record<string, unknown>;
