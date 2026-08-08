@@ -1,0 +1,10 @@
+name: Historical Scene 8 Verification Cleanup Target
+
+on:
+  workflow_dispatch:
+
+jobs:
+  noop:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "cleanup target for rerun only"
