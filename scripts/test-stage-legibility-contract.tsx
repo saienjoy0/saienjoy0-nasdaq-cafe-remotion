@@ -73,7 +73,6 @@ test("Shot choreography stays fast and leaves a readable hold", () => {
   }
 });
 
-
 test("semantic Stage shells change the whole composition, not only the card skin", () => {
   assert.equal(getStageLayoutProfileForShell("MetricBoardStage"), "host-left");
   assert.equal(getStageLayoutProfileForShell("MatrixStage"), "host-right");
@@ -94,6 +93,13 @@ test("public subtitle chrome preserves more visual stage area", () => {
   assert(Number(SUBTITLE_FRAME_STYLE.width) <= 1360);
   assert(Number(SUBTITLE_FRAME_STYLE.fontSize) <= 44);
   assert(Number(SUBTITLE_FRAME_STYLE.top) >= 900);
+});
+
+test("verification gate shell follows the two-lane verification contract", () => {
+  const source = readFileSync("src/components/spec/stages/VerificationGateStage.tsx", "utf8");
+  assert.match(source, /calc\(50% - 48px\)/);
+  assert.match(source, /left: "50%"/);
+  assert.doesNotMatch(source, /33\.333%/);
 });
 
 test("legacy white-on-dark constants are routed through semantic CSS tokens", () => {
