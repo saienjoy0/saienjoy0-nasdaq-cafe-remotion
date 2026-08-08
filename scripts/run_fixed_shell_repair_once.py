@@ -6,6 +6,17 @@ from pathlib import Path
 # Apply the authored renderer/test repair before tsc runs.
 runpy.run_path("scripts/apply_fixed_shell_composition_repair.py", run_name="__main__")
 
+# The fixed-shell composition still needs the stage-mode type for the legacy border-radius branch.
+composition_path = Path("src/compositions/NasdaqCafeSpecEpisode.tsx")
+composition = composition_path.read_text(encoding="utf-8")
+stage_mode_import = 'import type {VisualGrammarStageMode} from "../spec/visual-grammar-stage-mode";\n'
+if stage_mode_import not in composition:
+    anchor = 'import {getStageChromeModeForShell, type StageChromeMode} from "../spec/stage-theme-contract";\n'
+    if anchor not in composition:
+        raise SystemExit("stage-mode import anchor not found")
+    composition = composition.replace(anchor, anchor + stage_mode_import, 1)
+    composition_path.write_text(composition, encoding="utf-8")
+
 # Remove the temporary npm lifecycle hook from the final branch state.
 package_path = Path("package.json")
 package = json.loads(package_path.read_text(encoding="utf-8"))
@@ -35,4 +46,4 @@ subprocess.run([
     "scripts/run_fixed_shell_repair_once.py",
 ], check=True)
 
-print("fixed-shell repair applied, temporary hook removed, intended changes staged")
+print("fixed-shell repair applied, stage-mode type preserved, temporary hook removed, intended changes staged")
