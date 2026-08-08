@@ -1,0 +1,160 @@
+name: Fixed Shell Composition Repair 2026-08-06
+
+on:
+  push:
+    branches:
+      - fix/visual-rhythm-2026-08-06
+    paths:
+      - .github/workflows/fixed-shell-composition-repair-2026-08-06.yml
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  repair-and-preview:
+    if: github.event.head_commit.message == 'chore: run fixed-shell composition repair'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    env:
+      CI: "true"
+      SPEC_PATH: render-specs/2026-08-06/render_spec.json
+      EXPECTED_SPEC_SHA: 2a3bf3f418062f358ea1f7dd237c7ab765e882ebfe7e55f5f3260e653b3d5184
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+      SPEC_TTS_CACHE_ONLY: "1"
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/visual-rhythm-2026-08-06
+          fetch-depth: 0
+
+      - name: Verify immutable Aug 6 render input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$SPEC_PATH"
+          ACTUAL="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          echo "render_spec_sha=$ACTUAL"
+          test "$ACTUAL" = "$EXPECTED_SPEC_SHA"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply fixed-shell composition repair
+        run: python3 scripts/apply_fixed_shell_composition_repair.py
+
+      - name: Typecheck and run visual contracts
+        run: |
+          npm run typecheck
+          npm run test:stage-legibility
+          npm run test:visual-story
+          npm run episode:spec:validate -- "$SPEC_PATH"
+          npm run build
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+
+      - name: Compute exact TTS input identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          TTS_INPUT_SHA="$(python3 - "$SPEC_PATH" <<'PY'
+          import hashlib, json, os, sys
+          spec_path = sys.argv[1]
+          value = json.load(open(spec_path, encoding='utf-8'))
+          blocks=[]
+          for block_id, first_scene, last_scene in (("scenes-01-04",1,4),("scenes-05-09",5,9)):
+              speech=[]
+              for scene in value['scenes']:
+                  if first_scene <= scene['sceneNumber'] <= last_scene:
+                      speech.extend(chunk['speechText'] for chunk in scene['narrationChunks'])
+              blocks.append({'id':block_id,'speechText':speech})
+          payload={
+              'synthesisVersion':'gemini-two-block-v1',
+              'model':os.environ['GEMINI_TTS_MODEL'],
+              'voice':os.environ['GEMINI_TTS_VOICE'],
+              'voiceProfileId':value.get('voiceProfileId'),
+              'pronunciations':value.get('pronunciations'),
+              'blocks':blocks,
+          }
+          encoded=json.dumps(payload,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')
+          print(hashlib.sha256(encoded).hexdigest())
+          PY
+          )"
+          echo "TTS_INPUT_SHA=$TTS_INPUT_SHA" >> "$GITHUB_ENV"
+          echo "tts_input_sha=$TTS_INPUT_SHA"
+
+      - name: Restore exact Gemini two-block TTS cache
+        id: tts-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
+
+      - name: Require exact TTS cache hit
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "cache-hit=${{ steps.tts-cache.outputs.cache-hit }}"
+          test "${{ steps.tts-cache.outputs.cache-hit }}" = "true"
+
+      - name: Render repaired Preview without new TTS calls
+        run: npm run episode:spec:preview -- "$SPEC_PATH"
+
+      - name: Full-decode and probe Preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          MP4="renders/preview/2026-08-06_nasdaq-cafe-spec-preview.mp4"
+          test -s "$MP4"
+          ffmpeg -v error -i "$MP4" -f null -
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,width,height,r_frame_rate -of json "$MP4"
+
+      - name: Upload repaired Preview
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-fixed-shell-composition-preview-2026-08-06-${{ github.run_id }}
+          path: |
+            renders/preview/2026-08-06_nasdaq-cafe-spec-preview.mp4
+            build/2026-08-06/technical_report.json
+            build/2026-08-06/render_data.production.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+      - name: Commit tested renderer repair and remove one-shot machinery
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f scripts/apply_fixed_shell_composition_repair.py
+          rm -f .github/workflows/fixed-shell-composition-repair-2026-08-06.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            src/compositions/NasdaqCafeSpecEpisode.tsx \
+            src/components/spec/VisualTemplateRenderer.tsx \
+            src/components/spec/SpecVisualModes.tsx \
+            scripts/test-stage-legibility-contract.tsx \
+            scripts/test-shot-story.ts \
+            scripts/apply_fixed_shell_composition_repair.py \
+            .github/workflows/fixed-shell-composition-repair-2026-08-06.yml
+          git diff --cached --check
+          git commit -m "fix: enforce fixed shell and adaptive visual composition"
+          git push origin HEAD:fix/visual-rhythm-2026-08-06
