@@ -105,6 +105,8 @@ test("verification and evidence templates have distinct renderers and persistent
   assert.match(renderer, /case "verification-checklist": return <VerificationChecklist/);
   assert.match(renderer, /case "verification-matrix": return <VerificationMatrix/);
   assert.match(renderer, /case "evidence-boundary": return <EvidenceBoundary/);
+  assert.match(renderer, /case "metric-comparison-board":\n    case "index-return-bars":\n    case "analogy-steps":/);
+  assert.doesNotMatch(renderer, /case "metric-comparison-board":\n    case "index-return-bars":\n    case "evidence-boundary":/);
   assert.match(renderer, /data-verification-lane/);
   assert.match(renderer, /data-evidence-row/);
   assert.doesNotMatch(renderer, /case "verification-checklist": return <VerificationMatrix/);

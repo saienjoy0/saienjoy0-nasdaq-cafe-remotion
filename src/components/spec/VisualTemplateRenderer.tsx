@@ -386,10 +386,10 @@ const renderSelectedVisualTemplate = (content: PublicMainContent): React.ReactNo
     case "diverging-stock-bars": return <DivergingBars content={content}/>;
     case "verification-matrix": return <VerificationMatrix content={content}/>;
     case "verification-checklist": return <VerificationChecklist content={content}/>;
+    case "evidence-boundary": return <EvidenceBoundary content={content}/>;
     case "conclusion-card":
     case "metric-comparison-board":
     case "index-return-bars":
-    case "evidence-boundary": return <EvidenceBoundary content={content}/>;
     case "analogy-steps":
     case "news-media":
     case "text-focus":
