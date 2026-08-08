@@ -279,7 +279,10 @@ export const toPublicSceneViewModel = (
 
   const beatPlacementIds = new Set(beat.assetPlacementIds);
   const activeBeatPlacements = scene.assetPlacements.filter(
-    (placement) => beatPlacementIds.has(placement.placementId) && isPlacementActive(scene, placement, state),
+    (placement) =>
+      beatPlacementIds.has(placement.placementId) &&
+      isPlacementActive(scene, placement, state) &&
+      (placement.role !== "entity-card" || beat.screenState === "EntityFocus"),
   );
   const entityPlacement = beat.screenState === "EntityFocus"
     ? activeBeatPlacements.find((placement) => placement.role === "entity-card") ??
