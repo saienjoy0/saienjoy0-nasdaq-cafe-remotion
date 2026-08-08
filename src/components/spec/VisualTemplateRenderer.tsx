@@ -285,7 +285,11 @@ const CausalLane: React.FC<{content: PublicMainContent}> = ({content}) => {
 
 const TailwindHeadwind: React.FC<{content: PublicMainContent}> = ({content}) => {
   const labels = content.templateConfig.laneLabels.length === 2 ? content.templateConfig.laneLabels : ["追い風", "向かい風"];
-  const texts = content.cards.length > 0 ? content.cards.map((card) => card.lines[0]?.value ?? card.title) : content.texts;
+  const texts = content.cards.length > 0
+    ? content.cards.flatMap((card) => card.lines.length > 0
+      ? card.lines.map((line) => line.value)
+      : [card.title])
+    : content.texts;
   const left = texts.filter((_, index) => index % 2 === 0);
   const right = texts.filter((_, index) => index % 2 === 1);
   const lane = (items: string[], label: string, tone: Tone, offset: number) => <div style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 16}}><div style={{textAlign: "center"}}><Tag tone={tone}>{label}</Tag></div><div style={{display: "grid", gap: 14, alignContent: "center"}}>{items.map((text, index) => <div key={text} style={{...timedStyle(content, content.beatStartMs + (offset + index) * 620, "x"), padding: "19px 22px", borderRadius: 19, background: `${toneColor(tone)}0f`, border: `3px solid ${toneColor(tone)}`, textAlign: "center", fontSize: 30, lineHeight: 1.23, fontWeight: 930}}>{text}</div>)}</div></div>;

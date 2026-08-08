@@ -62,12 +62,15 @@ const buildPages = (speechText?: string) => {
 };
 
 const findLineBreak = (characters: string[]) => {
-  const minimum = Math.max(10, Math.ceil(characters.length / 2) - 4);
+  // A subtitle page can contain up to two 22-character lines. Prefer a
+  // punctuation boundary only when BOTH resulting lines fit the public safe
+  // area; otherwise a punctuation-first split can leave a 23+ character tail.
+  const minimum = Math.max(1, characters.length - MAX_LINE_CHARS);
   const maximum = Math.min(MAX_LINE_CHARS, characters.length - 1);
   for (let index = maximum; index >= minimum; index--) {
     if (/[、，,。！？!?]/u.test(characters[index - 1] ?? "")) return index;
   }
-  return Math.min(MAX_LINE_CHARS, Math.ceil(characters.length / 2));
+  return Math.min(maximum, Math.max(minimum, Math.ceil(characters.length / 2)));
 };
 
 const formatPage = (value: string) => {

@@ -62,6 +62,11 @@ assert.doesNotMatch(composition, /<SpecVisualMode content=/);
 assert.match(renderer, /ExpectedActualFlow/);
 assert.match(renderer, /CausalLane/);
 assert.match(renderer, /TailwindHeadwind/);
+assert.match(
+  renderer,
+  /content\.cards\.flatMap\(\(card\) => card\.lines\.length > 0/,
+  "tailwind-headwind must render every visible card line rather than only the first line",
+);
 assert.match(renderer, /DivergingBars/);
 assert.match(renderer, /VerificationMatrix/);
 assert.match(renderer, /FinalAssembly/);

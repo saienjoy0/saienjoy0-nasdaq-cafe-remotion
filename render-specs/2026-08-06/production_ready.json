@@ -2,11 +2,11 @@
   "consistencyStatus": "pass",
   "episodeDate": "2026-08-06",
   "episodePackagePath": "episode-packages/2026-08-06/episode_package_2026-08-06.md",
-  "episodePackageSha256": "706d12355ba7bf2cb02261257eb54278cb6ad5abd5d4e757f4d5418809667d59",
+  "episodePackageSha256": "8797e17b628bf8cd6fdcf0734b6cf0c291c79529dc9704649011589a50cfc759",
   "finalAuthorized": false,
   "previewOnly": true,
   "renderSpecPath": "render-specs/2026-08-06/render_spec.json",
-  "renderSpecSha256": "56362777f841e5594e01a3f19a1c7051e1950fe8b6e67a679d839893e4693362",
+  "renderSpecSha256": "2a3bf3f418062f358ea1f7dd237c7ab765e882ebfe7e55f5f3260e653b3d5184",
   "rendererNormalization": {
     "duplicateNonNumericSelectionsRemoved": true,
     "expectedActualGapTextChanged": false,
@@ -231,6 +231,62 @@
         "to": "confirmed-vs-unconfirmed"
       }
     ],
+    "scene3LayoutCompatibilityRepair": {
+      "after": {
+        "laneLabels": [
+          "追い風",
+          "向かい風"
+        ],
+        "objectIds": [
+          "scene-03-card-002"
+        ],
+        "variant": "two-lane",
+        "viewerTexts": [
+          "追い風｜会社見通し 130億ドル",
+          "追い風｜市場予想 125.2億ドル",
+          "向かい風｜粗利率 56%"
+        ],
+        "visualGrammarId": "evidence",
+        "visualMode": "text-focus",
+        "visualTemplate": "tailwind-headwind"
+      },
+      "beatId": "scene-03-beat-002",
+      "before": {
+        "laneLabels": [],
+        "objectIds": [
+          "scene-03-beat-002-number-01",
+          "scene-03-beat-002-number-02",
+          "scene-03-beat-002-number-03"
+        ],
+        "variant": "default",
+        "viewerTexts": [
+          "会社見通し 130億ドル",
+          "市場予想 125.2億ドル",
+          "粗利率 56%"
+        ],
+        "visualGrammarId": "contradiction",
+        "visualMode": "number-comparison",
+        "visualTemplate": "opening-contradiction"
+      },
+      "captionsChanged": false,
+      "marketMeaningChanged": false,
+      "measuredTimingBasis": {
+        "combinedMetricBoardRunMs": 29098,
+        "sameAppearanceRunMaxMs": 28000,
+        "scene03Beat01Ms": 14885,
+        "scene03Beat02Ms": 14213
+      },
+      "narrationChanged": false,
+      "numbersChanged": false,
+      "reason": "post-TTS measured timing showed Scene 3 metric-board would run 29.098 seconds; reuse the existing Q3 fact card as tailwind/headwind to preserve all three facts while breaking the same-appearance run",
+      "sceneOrderChanged": false,
+      "sourcesChanged": false,
+      "status": "PASS",
+      "ttsIdentityChanged": false,
+      "unresolvedStateCount": 0,
+      "validationBasis": "formal-validator-cached-tts-production-layout",
+      "viewerLaneLabelsChanged": true
+    },
     "scene3MetricDeduplicationChanges": [
       {
         "beatId": "scene-03-beat-001",
@@ -280,12 +336,118 @@
       }
     ],
     "scene3MetricDuplicatesResolved": true,
+    "scene7CardTitleWrap": {
+      "beatLaneLabels": {
+        "after": [
+          "仮説を支える",
+          "断定を弱める"
+        ],
+        "beatId": "scene-07-beat-002",
+        "before": [],
+        "viewerTextsAfter": [
+          "仮説を支える｜半導体：採用証拠の差",
+          "断定を弱める｜NASDAQ：大型テック安も重なる",
+          "断定を弱める｜Dow +0.5%の混合相場"
+        ],
+        "viewerTextsBefore": [
+          "半導体：採用証拠の差",
+          "NASDAQ：大型テック安も重なる",
+          "Dow +0.5%の混合相場"
+        ]
+      },
+      "captionsChanged": false,
+      "cardTitle": {
+        "after": "NVIDIA・AMD・\nAlphabet比較",
+        "before": "NVIDIA・AMD・Alphabet比較",
+        "cardId": "scene-07-card-001"
+      },
+      "marketMeaningChanged": false,
+      "narrationChanged": false,
+      "numbersChanged": false,
+      "sceneId": "scene-07",
+      "sourcesChanged": false,
+      "wordingChanged": false
+    },
+    "scene8VerificationLaneRepair": {
+      "after": {
+        "laneLabels": [
+          "AMD側",
+          "市場側"
+        ],
+        "viewerTexts": [
+          "AMD側｜大型顧客の獲得",
+          "AMD側｜粗利率・供給制約",
+          "市場側｜SOXXへの広がり"
+        ]
+      },
+      "beatId": "scene-08-beat-001",
+      "before": {
+        "laneLabels": [],
+        "viewerTexts": [
+          "大型顧客の獲得",
+          "粗利率・供給制約",
+          "SOXXへの広がり"
+        ]
+      },
+      "captionsChanged": false,
+      "marketMeaningChanged": false,
+      "narrationChanged": false,
+      "numbersChanged": false,
+      "reason": "verification-matrix requires two conceptual lanes; the existing checks separate into AMD-specific evidence and market-breadth evidence",
+      "sceneId": "scene-08",
+      "sourcesChanged": false
+    },
     "scene9TransitionNormalized": true,
     "sceneOrderChanged": false,
     "sequencePolicyChangeCount": 8,
     "sequencePolicyResolved": true,
     "sourceRenderSpecSha256": "0b4d094bfc5325602d42e955a281bd16d2e358a150afa04ad9e3d765ee75a515",
     "status": "pass",
+    "tailwindHeadwindLaneRepair": {
+      "after": {
+        "laneLabels": [
+          "追い風",
+          "向かい風"
+        ],
+        "objectIds": [
+          "scene-02-card-002"
+        ],
+        "variant": "two-lane",
+        "viewerTexts": [
+          "追い風｜Q2売上 115.4億ドル",
+          "向かい風｜AMD -7.04%"
+        ],
+        "visualGrammarId": "evidence",
+        "visualTemplate": "tailwind-headwind"
+      },
+      "beatId": "scene-02-beat-002",
+      "before": {
+        "laneLabels": [
+          "Q2売上 115.4億ドル",
+          "AMD -7.04%"
+        ],
+        "objectIds": [
+          "scene-02-card-002"
+        ],
+        "variant": "two-lane",
+        "viewerTexts": [
+          "Q2売上 115.4億ドル",
+          "AMD -7.04%"
+        ],
+        "visualGrammarId": "evidence",
+        "visualTemplate": "tailwind-headwind"
+      },
+      "captionsChanged": false,
+      "narrationChanged": false,
+      "numbersChanged": false,
+      "reason": "tailwind-headwind uses conceptual lane headers and preserves both card-line facts",
+      "sceneOrderChanged": false,
+      "sourcesChanged": false,
+      "status": "PASS",
+      "ttsIdentityChanged": false,
+      "unresolvedStateCount": 0,
+      "validationBasis": "formal-validator-cached-tts-production-layout"
+    },
     "templateContractChanges": [
       {
         "beatId": "scene-02-beat-002",

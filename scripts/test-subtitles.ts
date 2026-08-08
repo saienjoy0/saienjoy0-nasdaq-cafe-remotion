@@ -23,6 +23,18 @@ assert.equal(getSubtitleTextAtTime(speech, 0, 19_219, -1), null, "subtitle is hi
 assert.equal(getSubtitleTextAtTime(speech, 0, 19_219, 19_219), null, "subtitle is hidden after audio ends");
 assert.equal(getSubtitleTextAtTime(speech, 0, 19_219, cues[1].startMs), cues[1].text, "subtitle changes exactly at its cue boundary");
 
+const scene8Regression = "僕たちが次に見るのは三点です。第一に、AMDがSpaceX級の大型導入を新たに取れるか。第二に、粗利率が五十六パーセントから上向き、N3やCoWoSの供給制約が緩むか。第三に、半導体の上昇がNVIDIA一社からSOXX全体へ広がるかです。";
+const scene8RegressionCues = createSubtitleCues(scene8Regression, 0, 18_211);
+assert.ok(
+  scene8RegressionCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)),
+  "punctuation-aware wrapping must never leave a subtitle tail wider than 22 characters",
+);
+assert.equal(
+  scene8RegressionCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  scene8Regression,
+  "Scene 8 regression wrapping must preserve every narration character",
+);
+
 const unpunctuated = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const hardSplitCues = createSubtitleCues(unpunctuated, 500, 6_500);
 assert.equal(hardSplitCues[0].startMs, 500);

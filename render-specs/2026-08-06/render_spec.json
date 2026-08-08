@@ -625,8 +625,8 @@
               "scene-02-card-002"
             ],
             "laneLabels": [
-              "Q2売上 115.4億ドル",
-              "AMD -7.04%"
+              "追い風",
+              "向かい風"
             ],
             "nodeOrder": [],
             "outcomeNodeId": null,
@@ -635,8 +635,8 @@
           "templateVariant": "two-lane",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "Q2売上 115.4億ドル",
-            "AMD -7.04%"
+            "追い風｜Q2売上 115.4億ドル",
+            "向かい風｜AMD -7.04%"
           ],
           "visualGrammarId": "evidence",
           "visualMode": "text-focus",
@@ -965,9 +965,7 @@
           "narrationEndCue": "八億ドル上回りました。一方、調整後粗利率の見通しは五十六パーセントで、第二四半期から横ばいです。",
           "narrationStartCue": "さらに第三四半期の売上見通しは約百三十億ドル。Reutersが示した市場予想百二十五・二億ドルを",
           "objectIds": [
-            "scene-03-beat-002-number-01",
-            "scene-03-beat-002-number-02",
-            "scene-03-beat-002-number-03"
+            "scene-03-card-002"
           ],
           "pictureBook": null,
           "primaryElement": "Q3売上見通しと粗利率",
@@ -978,28 +976,29 @@
           "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-03-chunk-002",
           "templateConfig": {
-            "comparisonBasis": null,
+            "comparisonBasis": "売上見通しの強さと粗利率の慎重材料",
             "dataBasis": "会社発表と主要報道の決算数値",
             "displayOrder": [
-              "scene-03-beat-002-number-01",
-              "scene-03-beat-002-number-02",
-              "scene-03-beat-002-number-03"
+              "scene-03-card-002"
             ],
-            "laneLabels": [],
+            "laneLabels": [
+              "追い風",
+              "向かい風"
+            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
-            "variant": "default"
+            "variant": "two-lane"
           },
           "templateVariant": "default",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "会社見通し 130億ドル",
-            "市場予想 125.2億ドル",
-            "粗利率 56%"
+            "追い風｜会社見通し 130億ドル",
+            "追い風｜市場予想 125.2億ドル",
+            "向かい風｜粗利率 56%"
           ],
-          "visualGrammarId": "contradiction",
-          "visualMode": "number-comparison",
-          "visualTemplate": "opening-contradiction"
+          "visualGrammarId": "evidence",
+          "visualMode": "text-focus",
+          "visualTemplate": "tailwind-headwind"
         }
       ],
       "visualEvents": [
@@ -2037,7 +2036,7 @@
             }
           ],
           "role": null,
-          "title": "NVIDIA・AMD・Alphabet比較"
+          "title": "NVIDIA・AMD・\nAlphabet比較"
         },
         {
           "cardId": "scene-07-card-002",
@@ -2277,7 +2276,10 @@
               "scene-07-beat-002-number-01-02",
               "scene-07-beat-002-number-01-03"
             ],
-            "laneLabels": [],
+            "laneLabels": [
+              "仮説を支える",
+              "断定を弱める"
+            ],
             "metricIds": [],
             "nodeOrder": [],
             "outcomeNodeId": null,
@@ -2286,9 +2288,9 @@
           "templateVariant": "two-lane",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "半導体：採用証拠の差",
-            "NASDAQ：大型テック安も重なる",
-            "Dow +0.5%の混合相場"
+            "仮説を支える｜半導体：採用証拠の差",
+            "断定を弱める｜NASDAQ：大型テック安も重なる",
+            "断定を弱める｜Dow +0.5%の混合相場"
           ],
           "visualGrammarId": "evidence",
           "visualMode": "text-focus",
@@ -2467,7 +2469,10 @@
           "templateConfig": {
             "comparisonBasis": null,
             "dataBasis": "今後の会社発表、決算、セクター終値で検証",
-            "laneLabels": [],
+            "laneLabels": [
+              "AMD側",
+              "市場側"
+            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
             "variant": "strengthen-vs-weaken"
@@ -2475,9 +2480,9 @@
           "templateVariant": "strengthen-vs-weaken",
           "transitionRole": "major-shift",
           "viewerTexts": [
-            "大型顧客の獲得",
-            "粗利率・供給制約",
-            "SOXXへの広がり"
+            "AMD側｜大型顧客の獲得",
+            "AMD側｜粗利率・供給制約",
+            "市場側｜SOXXへの広がり"
           ],
           "visualGrammarId": "verification",
           "visualMode": "verification-points",

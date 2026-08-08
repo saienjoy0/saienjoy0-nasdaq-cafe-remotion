@@ -160,13 +160,13 @@
   - 終了合図：られる。市場、要求が多いです。ここで決算が悪かったと読み替えると、昨夜の本当の矛盾を見失います。
   - 主要視覚機能：Explain
   - 画面状態：Chart
-  - Visual Grammar：comparison / continuation
-  - Visual Template ID：diverging-stock-bars
-  - Template Variant：default
+  - Visual Grammar：evidence / continuation
+  - Visual Template ID：tailwind-headwind
+  - Template Variant：two-lane
   - 入力構造：Q2売上 115.4億ドル / AMD -7.04%
   - 画面の問い：業績と株価は同じ方向だったか
   - 主要要素：好決算と株価下落
-  - 視聴者向けテキスト：Q2売上 115.4億ドル / AMD -7.04%
+  - 視聴者向けテキスト：追い風｜Q2売上 115.4億ドル / 向かい風｜AMD -7.04%
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -226,13 +226,13 @@
   - 終了合図：八億ドル上回りました。一方、調整後粗利率の見通しは五十六パーセントで、第二四半期から横ばいです。
   - 主要視覚機能：Explain
   - 画面状態：Chart
-  - Visual Grammar：contradiction / continuation
-  - Visual Template ID：opening-contradiction
-  - Template Variant：default
+  - Visual Grammar：evidence / continuation
+  - Visual Template ID：tailwind-headwind
+  - Template Variant：two-lane
   - 入力構造：会社見通し 130億ドル / 市場予想 125.2億ドル / 粗利率 56%
   - 画面の問い：Q3見通しは市場予想を超えたか
   - 主要要素：Q3売上見通しと粗利率
-  - 視聴者向けテキスト：会社見通し 130億ドル / 市場予想 125.2億ドル / 粗利率 56%
+  - 視聴者向けテキスト：追い風｜会社見通し 130億ドル / 追い風｜市場予想 125.2億ドル / 向かい風｜粗利率 56%
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -519,7 +519,7 @@
   - 入力構造：半導体：採用証拠の差 / NASDAQ：大型テック安も重なる / Dow +0.5%の混合相場
   - 画面の問い：どこまで因果を言えるか
   - 主要要素：半導体の相対評価とNASDAQ別要因
-  - 視聴者向けテキスト：半導体：採用証拠の差 / NASDAQ：大型テック安も重なる / Dow +0.5%の混合相場
+  - 視聴者向けテキスト：仮説を支える｜半導体：採用証拠の差 / 断定を弱める｜NASDAQ：大型テック安も重なる / 断定を弱める｜Dow +0.5%の混合相場
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -566,7 +566,7 @@
   - 入力構造：大型顧客の獲得 / 粗利率・供給制約 / SOXXへの広がり
   - 画面の問い：仮説を何で検証するか
   - 主要要素：三つの検証軸
-  - 視聴者向けテキスト：大型顧客の獲得 / 粗利率・供給制約 / SOXXへの広がり
+  - 視聴者向けテキスト：AMD側｜大型顧客の獲得 / AMD側｜粗利率・供給制約 / 市場側｜SOXXへの広がり
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
