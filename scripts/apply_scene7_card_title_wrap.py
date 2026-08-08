@@ -83,12 +83,12 @@ repair = {
 
 ready = json.loads(READY_PATH.read_text(encoding="utf-8"))
 ready["renderSpecSha256"] = spec_sha
-ready.setdefault("rendererNormalization", {})["scene7LayoutRepair"] = repair
+ready.setdefault("rendererNormalization", {})["scene7CardTitleWrap"] = repair
 READY_PATH.write_text(json.dumps(ready, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 report = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
 report["normalizedRenderSpecSha256"] = spec_sha
-report["scene7LayoutRepair"] = repair
+report["scene7CardTitleWrap"] = repair
 REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 package = PACKAGE_PATH.read_text(encoding="utf-8")
