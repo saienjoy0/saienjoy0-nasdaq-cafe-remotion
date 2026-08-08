@@ -1,5 +1,5 @@
 name: Apply Tailwind Headwind Repair 2026-08-06
-# retry-3: Scene 3 restores evidence + metric-comparison-board
+# retry-4: includes measured Scene 3 appearance repair and Scene 7 title wrap
 
 on:
   push:
@@ -52,11 +52,12 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Apply lane, renderer, and Scene 3 layout repairs
+      - name: Apply lane, Scene 3 timing, renderer, and Scene 7 layout repairs
         run: |
           python3 scripts/apply_tailwind_headwind_lane_fix.py
           python3 scripts/apply_tailwind_renderer_fix.py
           python3 scripts/apply_scene3_split_comparison_fix.py
+          python3 scripts/apply_scene7_card_title_wrap.py
 
       - name: Run formal validator and complete contracts
         shell: bash
@@ -121,7 +122,8 @@ jobs:
           PY
           test "$(jq -r '.rendererNormalization.ttsInputSha256After' "$READY_PATH")" = "$EXPECTED_TTS_INPUT_SHA256"
           jq -e '.rendererNormalization.tailwindHeadwindLaneRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
-          jq -e '.rendererNormalization.scene3LayoutCompatibilityRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false' "$READY_PATH"
+          jq -e '.rendererNormalization.scene3LayoutCompatibilityRepair | .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .sceneOrderChanged == false and .ttsIdentityChanged == false and .marketMeaningChanged == false' "$READY_PATH"
+          jq -e '.rendererNormalization.scene7CardTitleWrap | .wordingChanged == false and .narrationChanged == false and .captionsChanged == false and .numbersChanged == false and .sourcesChanged == false and .marketMeaningChanged == false' "$READY_PATH"
           test "$(jq -r '.renderSpecSha256' "$READY_PATH")" = "$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
           test "$(jq -r '.episodePackageSha256' "$READY_PATH")" = "$(sha256sum "$PACKAGE_PATH" | awk '{print $1}')"
 
@@ -141,8 +143,9 @@ jobs:
           git rm scripts/apply_tailwind_headwind_lane_fix.py
           git rm scripts/apply_tailwind_renderer_fix.py
           git rm scripts/apply_scene3_split_comparison_fix.py
+          git rm scripts/apply_scene7_card_title_wrap.py
           git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
-          git commit -m "Repair Scene 2 lanes and Scene 3 evidence board"
+          git commit -m "Repair 2026-08-06 preview layout contracts"
           git pull --rebase origin main
           git push origin HEAD:main
 
