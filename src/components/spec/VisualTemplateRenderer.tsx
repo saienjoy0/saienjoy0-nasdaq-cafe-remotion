@@ -303,17 +303,18 @@ const DivergingBars: React.FC<{content: PublicMainContent}> = ({content}) => {
 };
 
 const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => {
-  const items = content.cards.length > 0
-    ? content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title])
-    : content.texts;
-  return <Surface accent={color.emphasis} style={{padding: "34px 42px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 22}}>
+  const items = content.texts.length > 0
+    ? content.texts
+    : content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title]);
+  const columns = items.length === 1 ? "1fr" : "repeat(2,minmax(0,1fr))";
+  return <Surface accent={color.emphasis} style={{padding: "32px 38px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 22}}>
     <div style={{fontSize: 28, color: color.muted, fontWeight: 900}}>{content.screenQuestion}</div>
-    <div style={{display: "grid", gridTemplateRows: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 18}}>
+    <div style={{display: "grid", gridTemplateColumns: columns, gridAutoRows: "minmax(0,1fr)", gap: "22px 42px", alignItems: "stretch"}}>
       {items.map((item, index) => {
         const active = index === items.length - 1;
-        return <div key={`${index}-${item}`} data-evidence-row={index + 1} style={{position: "relative", display: "flex", alignItems: "center", minHeight: 0, padding: "22px 30px 22px 84px", borderRadius: 22, background: active ? "rgba(112,70,168,.10)" : "rgba(82,118,145,.08)", border: `3px solid ${active ? "rgba(112,70,168,.42)" : "rgba(82,118,145,.28)"}`, overflow: "hidden"}}>
-          <div style={{position: "absolute", left: 24, top: "50%", translate: "0 -50%", width: 40, height: 40, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: active ? color.emphasis : color.cyan, fontSize: 23, fontWeight: 950}}>{index + 1}</div>
-          <div style={{...timedStyle(content, content.beatStartMs + index * 680, "x"), fontSize: active ? 46 : 38, lineHeight: 1.22, color: active ? color.emphasis : color.ink, fontWeight: 950}}>{item}</div>
+        return <div key={`${index}-${item}`} data-evidence-lane={index + 1} style={{position: "relative", minWidth: 0, minHeight: 0, display: "flex", alignItems: "center", padding: "28px 28px 28px 82px", borderRadius: 24, background: active ? "rgba(112,70,168,.10)" : "rgba(7,142,174,.07)", border: `3px solid ${active ? "rgba(112,70,168,.38)" : "rgba(7,142,174,.25)"}`, overflow: "hidden"}}>
+          <div style={{position: "absolute", left: 24, top: 24, width: 40, height: 40, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: active ? color.emphasis : color.cyan, fontSize: 23, fontWeight: 950}}>{index + 1}</div>
+          <div style={{...timedStyle(content, content.beatStartMs + index * 680, "x"), fontSize: active ? 41 : 36, lineHeight: 1.24, color: active ? color.emphasis : color.ink, fontWeight: 950}}>{item}</div>
         </div>;
       })}
     </div>
@@ -336,7 +337,7 @@ const VerificationChecklist: React.FC<{content: PublicMainContent}> = ({content}
 
 const VerificationMatrix: React.FC<{content: PublicMainContent}> = ({content}) => {
   const labels = content.templateConfig.laneLabels.length === 2 ? content.templateConfig.laneLabels : ["強まる", "弱まる"];
-  const items = content.cards.length > 0 ? content.cards.map((card) => card.lines[0]?.value ?? card.title) : content.texts;
+  const items = content.texts.length > 0 ? content.texts : content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title]);
   const midpoint = Math.ceil(items.length / 2);
   const parsedItems = items.map((text, index) => {
     const delimiter = text.indexOf("｜");

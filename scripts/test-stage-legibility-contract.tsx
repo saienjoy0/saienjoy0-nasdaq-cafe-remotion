@@ -108,7 +108,8 @@ test("verification and evidence templates have distinct renderers and persistent
   assert.match(renderer, /case "metric-comparison-board":\n    case "index-return-bars":\n    case "analogy-steps":/);
   assert.doesNotMatch(renderer, /case "metric-comparison-board":\n    case "index-return-bars":\n    case "evidence-boundary":/);
   assert.match(renderer, /data-verification-lane/);
-  assert.match(renderer, /data-evidence-row/);
+  assert.match(renderer, /content\.texts\.length > 0 \? content\.texts : content\.cards\.flatMap/);
+  assert.match(renderer, /data-evidence-lane/);
   assert.doesNotMatch(renderer, /case "verification-checklist": return <VerificationMatrix/);
 });
 
@@ -117,6 +118,7 @@ test("text focus has occupancy-aware hero and duo modes", () => {
   assert.match(renderer, /data-text-focus-size/);
   assert.match(renderer, /count === 1 \? 66/);
   assert.match(renderer, /count === 2/);
+  assert.match(renderer, /#e8f4ff/);
 });
 
 test("legacy white-on-dark constants are routed through semantic CSS tokens", () => {
