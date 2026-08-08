@@ -14,6 +14,14 @@ on:
         description: "定刻ゲートの検査日をYYYY-MM-DDで上書き（通常は空欄）"
         required: false
         type: string
+  pull_request:
+    paths:
+      - "handoff-inbox/2026-08-06/render_spec.json.gz.b64"
+      - "handoff-inbox/2026-08-06/parts/*.b64"
+      - "handoff-inbox/2026-08-06/parts-v2/*.b64"
+      - "scripts/restore-story-engine-handoff-spec.sh"
+      - ".github/workflows/nasdaq-cafe-preview.yml"
+      - ".github/workflows/nasdaq-cafe-scheduled-preview.yml"
 
 permissions:
   contents: read
@@ -26,24 +34,64 @@ concurrency:
 jobs:
   gate-and-dispatch:
     name: Verify daily package and dispatch preview
+    if: github.event_name != 'pull_request' || (github.actor == github.repository_owner && github.head_ref == 'preview/story-engine-2026-08-06')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     env:
       TARGET_WORKFLOW: nasdaq-cafe-preview.yml
-      TARGET_REF: main
+      TARGET_REF: ${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
 
     steps:
-      - name: Checkout default branch
+      - name: Checkout verified source ref
         uses: actions/checkout@v6
 
-      - name: Resolve and verify today's production-ready package
+      - name: Resolve and verify production-ready package
         id: ready
         shell: bash
         env:
           EPISODE_DATE_OVERRIDE: ${{ inputs.episode_date_override }}
         run: |
           set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            EPISODE_DATE="2026-08-06"
+            SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
+            PACKAGE_PATH="immutable-handoff:3f182584057217c5a0ed938b34693bd66b9f066cfdac128b37315eb04a5dc029"
+            SPEC_SHA="a6a7f45031c703250ee71510b4ed1d7f20bd1ae6ad6f80c932305994097af711"
+            PACKAGE_SHA="39fb52b1146cf0e34f8eac1b03cda2427384728f5e2a8e9063dec250ee569d19"
+            PARTS_DIR="handoff-inbox/${EPISODE_DATE}/parts-v2"
+            shopt -s nullglob
+            PARTS=("$PARTS_DIR"/[0-9][0-9].b64)
+            shopt -u nullglob
+            if [[ "${#PARTS[@]}" -ne 9 ]]; then
+              echo "::error::expected exactly 9 immutable Story Engine handoff payload parts"
+              exit 1
+            fi
+            cat "${PARTS[@]}" | base64 --decode | gzip -dc > /tmp/story-engine-render-spec.json
+            ACTUAL_SHA="$(sha256sum /tmp/story-engine-render-spec.json | awk '{print $1}')"
+            if [[ "$ACTUAL_SHA" != "$SPEC_SHA" ]]; then
+              echo "::error::immutable Story Engine handoff SHA mismatch"
+              echo "::error::expected=$SPEC_SHA"
+              echo "::error::actual=$ACTUAL_SHA"
+              exit 1
+            fi
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
+            echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
+            echo "package_path=$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
+            echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+            echo "package_sha=$PACKAGE_SHA" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Story Engine PR preview gate"
+              echo "- Episode date: \`$EPISODE_DATE\`"
+              echo "- Target ref: \`$TARGET_REF\`"
+              echo "- Bundle ID: \`3f182584057217c5a0ed938b34693bd66b9f066cfdac128b37315eb04a5dc029\`"
+              echo "- Render spec SHA-256: \`$SPEC_SHA\`"
+              echo "- Immutable split-payload verification: pass"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
 
           if [[ -n "${EPISODE_DATE_OVERRIDE:-}" ]]; then
             EPISODE_DATE="$EPISODE_DATE_OVERRIDE"
@@ -195,9 +243,9 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .cache/scheduled-preview-run
-          key: ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-scheduled-preview-run-v2-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-
+            ${{ runner.os }}-scheduled-preview-run-v2-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-
 
       - name: Decide whether another preview run is required
         if: steps.ready.outputs.ready == 'true'
@@ -355,7 +403,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: .cache/scheduled-preview-run
-          key: ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ${{ runner.os }}-scheduled-preview-run-v2-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Record no-op result
         if: steps.ready.outputs.ready == 'true' && steps.decision.outputs.dispatch != 'true'

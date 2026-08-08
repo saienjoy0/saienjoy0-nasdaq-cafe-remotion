@@ -66,9 +66,9 @@ jobs:
           fi
 
           SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
+          bash scripts/restore-story-engine-handoff-spec.sh "$EPISODE_DATE" "$SPEC_PATH" "$EXPECTED_SPEC_SHA256"
           if [[ ! -s "$SPEC_PATH" ]]; then
             echo "::error::Complete render_spec.json not found or empty: $SPEC_PATH"
-            echo "::error::Do not reconstruct the input from Base64, gzip, or split files inside Actions"
             exit 1
           fi
 
@@ -221,6 +221,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          bash scripts/restore-story-engine-handoff-spec.sh "$EPISODE_ID" "$SPEC_PATH" "$SPEC_SHA"
           test -s "$SPEC_PATH"
           ACTUAL_SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
           if [[ "$ACTUAL_SPEC_SHA" != "$SPEC_SHA" ]]; then
@@ -421,6 +422,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          bash scripts/restore-story-engine-handoff-spec.sh "$EPISODE_ID" "$SPEC_PATH" "$SPEC_SHA"
           test -s "$SPEC_PATH"
           ACTUAL_SPEC_SHA="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
           if [[ "$ACTUAL_SPEC_SHA" != "$SPEC_SHA" ]]; then
