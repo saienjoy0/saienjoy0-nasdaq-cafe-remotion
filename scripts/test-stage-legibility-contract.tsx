@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {renderToStaticMarkup} from "react-dom/server";
 import {getStageMotionStyle} from "../src/components/spec/ShotStageRenderer";
+import {SUBTITLE_FRAME_STYLE, getStageLayoutProfileForShell, getMainStageFrameStyle, getFoxFrameStyle} from "../src/compositions/NasdaqCafeSpecEpisode";
 import {VisualGrammarStageHost} from "../src/components/spec/VisualGrammarStageHost";
 import {
   STAGE_THEMES,
@@ -60,7 +61,7 @@ test("closing and major-shift motion are visibly distinct", () => {
   assert.equal(getStageMotionRoleForShell("OpenHeroStage"), "major-shift");
   assert.equal(getStageMotionRoleForShell("AssemblyStage"), "closing");
   assert.notDeepEqual(getStageMotionStyle("major-shift", .04), getStageMotionStyle("closing", .04));
-  assert.deepEqual(getStageMotionStyle("continuation", .04), {opacity: 1, transform: "none"});
+  assert.match(String(getStageMotionStyle("continuation", .04).transform), /scale\(1\.00032\)/);
 });
 
 test("Shot choreography stays fast and leaves a readable hold", () => {
@@ -70,6 +71,29 @@ test("Shot choreography stays fast and leaves a readable hold", () => {
     assert(profile.holdMinMs >= 600, `${recipe}: hold ${profile.holdMinMs}`);
     assert(profile.staggerMs <= 300, `${recipe}: stagger ${profile.staggerMs}`);
   }
+});
+
+
+test("semantic Stage shells change the whole composition, not only the card skin", () => {
+  assert.equal(getStageLayoutProfileForShell("MetricBoardStage"), "host-left");
+  assert.equal(getStageLayoutProfileForShell("MatrixStage"), "host-right");
+  assert.equal(getStageLayoutProfileForShell("CausalPathStage"), "immersive");
+  assert.equal(getStageLayoutProfileForShell("TimelineStage"), "immersive");
+  assert.equal(getStageLayoutProfileForShell("VerificationGateStage"), "host-right");
+  const leftMain = getMainStageFrameStyle("host-left", "candidate");
+  const rightMain = getMainStageFrameStyle("host-right", "candidate");
+  const immersiveMain = getMainStageFrameStyle("immersive", "candidate");
+  assert.notEqual(leftMain.left, rightMain.left);
+  assert(Number(immersiveMain.width) > Number(leftMain.width));
+  assert.equal(getFoxFrameStyle("immersive", 1).opacity, 0);
+  assert.notEqual(getFoxFrameStyle("host-left", 1).left, getFoxFrameStyle("host-right", 1).left);
+});
+
+test("public subtitle chrome preserves more visual stage area", () => {
+  assert(Number(SUBTITLE_FRAME_STYLE.height) <= 126);
+  assert(Number(SUBTITLE_FRAME_STYLE.width) <= 1360);
+  assert(Number(SUBTITLE_FRAME_STYLE.fontSize) <= 44);
+  assert(Number(SUBTITLE_FRAME_STYLE.top) >= 900);
 });
 
 test("legacy white-on-dark constants are routed through semantic CSS tokens", () => {

@@ -63,7 +63,11 @@ export const getStageMotionStyle = (
     opacity: reveal,
     transform: `scale(${.965 + reveal * .035})`,
   };
-  return {opacity: 1, transform: "none"};
+  const drift = clampUnit(beatProgress);
+  return {
+    opacity: 1,
+    transform: `translateY(${-drift * 5}px) scale(${1 + drift * .008})`,
+  };
 };
 
 export const ShotStageRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
