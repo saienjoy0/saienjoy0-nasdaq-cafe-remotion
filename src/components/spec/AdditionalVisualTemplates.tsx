@@ -95,10 +95,28 @@ export const FocusMatrixTemplate: React.FC<{content: PublicMainContent}> = ({con
   return <Surface accent={palette.cyan} style={{padding: "28px 38px", display: "grid", gridTemplateRows: "auto 1fr", gap: 20}}><div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}><div><div style={{fontSize: 24, color: palette.cyan, fontWeight: 950}}>波及の強さ</div><div style={{marginTop: 8, fontSize: 36, fontWeight: 950}}>{content.screenQuestion}</div></div><div style={{fontSize: 27, color: palette.muted, fontWeight: 850}}>話している対象だけを明るくする</div></div><div style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 16}}>{content.numbers.map((number, index) => {const progress = progressAt(content, number.enterMotion?.startedAtMs ?? number.revealAtMs, number.enterMotion?.durationMs ?? 720); const ratio = clamp((values[index] / max) * progress); const focused = number.highlighted || number.highlightMotion != null; return <div key={number.key} style={{...revealStyle(content, number.revealAtMs), opacity: focused ? 1 : content.numbers.some((item) => item.highlighted) ? .38 : 1, padding: "20px 22px", borderRadius: 20, background: `${toneColor(number.tone)}0d`, border: `${focused ? 5 : 2}px solid ${toneColor(number.tone)}`, display: "grid", gridTemplateColumns: "180px 1fr 118px", alignItems: "center", gap: 16}}><div style={{fontSize: 29, fontWeight: 950}}>{number.label}</div><div style={{height: 34, borderRadius: 99, background: "rgba(82,118,145,.13)", overflow: "hidden"}}><div style={{height: "100%", width: `${ratio * 100}%`, borderRadius: 99, background: toneColor(number.tone)}}/></div><div style={{textAlign: "right", color: toneColor(number.tone), fontSize: 34, fontWeight: 950}}>{number.value}{number.unit}</div></div>;})}</div></Surface>;
 };
 
+const INTERNAL_ENTITY_CARD_LABEL = /(?:企業|人物|製品)カード$/u;
+
+type EntityFocusTextSource = Pick<PublicMainContent, "texts" | "primaryElement" | "headline" | "entity">;
+
+export const getEntityFocusPublicPoint = (content: EntityFocusTextSource): string => {
+  const displayName = content.entity?.displayName.trim() ?? "";
+  const role = content.entity?.role.trim() ?? "";
+  const isMachineOnly = (value: string) => INTERNAL_ENTITY_CARD_LABEL.test(value.trim());
+  const viewerText = content.texts
+    .map((value) => value.trim())
+    .find((value) => value.length > 0 && value !== displayName && value !== role && !isMachineOnly(value));
+  if (viewerText) return viewerText;
+  const primary = content.primaryElement.trim();
+  if (primary && primary !== displayName && primary !== role && !isMachineOnly(primary)) return primary;
+  return content.headline;
+};
+
 export const EntityFocusStoryTemplate: React.FC<{content: PublicMainContent}> = ({content}) => {
   const number = content.numbers[0];
   const entityStart = number?.revealAtMs ?? content.beatStartMs;
-  return <Surface accent={palette.cyan} style={{position: "relative", padding: "42px 48px", display: "grid", gridTemplateColumns: "1.15fr .85fr", gap: 30}}><div style={{...revealStyle(content, entityStart, "left"), display: "flex", flexDirection: "column", justifyContent: "center"}}><div style={{fontSize: 25, color: palette.cyan, fontWeight: 950}}>{content.entity?.subjectType === "company" ? "企業" : content.entity?.subjectType === "person" ? "人物" : "主役"}</div><div style={{marginTop: 16, fontSize: 66, lineHeight: 1.08, fontWeight: 950}}>{content.entity?.displayName ?? content.primaryElement}</div><div style={{marginTop: 20, color: palette.muted, fontSize: 31, lineHeight: 1.32, fontWeight: 850}}>{content.entity?.role ?? content.screenQuestion}</div></div><div style={{...revealStyle(content, number?.revealAtMs ?? entityStart + 500, "right"), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRadius: 24, background: "rgba(7,142,174,.09)", border: `3px solid ${palette.cyan}`, textAlign: "center"}}>{number ? <><div style={{fontSize: 28, color: palette.muted, fontWeight: 900}}>{number.label}</div><div style={{marginTop: 18}}><Value content={content} number={number} size={88}/></div></> : <><div style={{fontSize: 27, color: palette.muted, fontWeight: 900}}>画面の論点</div><div style={{marginTop: 18, fontSize: 45, lineHeight: 1.2, color: palette.emphasis, fontWeight: 950}}>{content.primaryElement}</div></>}</div></Surface>;
+  const publicPoint = getEntityFocusPublicPoint(content);
+  return <Surface accent={palette.cyan} style={{position: "relative", padding: "42px 48px", display: "grid", gridTemplateColumns: "1.15fr .85fr", gap: 30}}><div style={{...revealStyle(content, entityStart, "left"), display: "flex", flexDirection: "column", justifyContent: "center"}}><div style={{fontSize: 25, color: palette.cyan, fontWeight: 950}}>{content.entity?.subjectType === "company" ? "企業" : content.entity?.subjectType === "person" ? "人物" : "主役"}</div><div style={{marginTop: 16, fontSize: 66, lineHeight: 1.08, fontWeight: 950}}>{content.entity?.displayName ?? content.headline}</div><div style={{marginTop: 20, color: palette.muted, fontSize: 31, lineHeight: 1.32, fontWeight: 850}}>{content.entity?.role ?? content.screenQuestion}</div></div><div style={{...revealStyle(content, number?.revealAtMs ?? entityStart + 500, "right"), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderRadius: 24, background: "rgba(7,142,174,.09)", border: `3px solid ${palette.cyan}`, textAlign: "center"}}>{number ? <><div style={{fontSize: 28, color: palette.muted, fontWeight: 900}}>{number.label}</div><div style={{marginTop: 18}}><Value content={content} number={number} size={88}/></div></> : <><div style={{fontSize: 27, color: palette.muted, fontWeight: 900}}>今朝のポイント</div><div style={{marginTop: 18, fontSize: 45, lineHeight: 1.2, color: palette.emphasis, fontWeight: 950}}>{publicPoint}</div></>}</div></Surface>;
 };
 
 export const FinalAssemblyTemplate: React.FC<{content: PublicMainContent}> = ({content}) => {
