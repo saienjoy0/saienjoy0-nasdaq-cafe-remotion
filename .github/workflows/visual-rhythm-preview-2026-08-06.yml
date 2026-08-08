@@ -37,6 +37,23 @@ jobs:
           ref: fix/visual-rhythm-2026-08-06
           fetch-depth: 0
 
+      - name: Record run receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p preview-status/2026-08-06
+          jq -n \
+            --arg runId "$GITHUB_RUN_ID" \
+            --arg runAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg headSha "$GITHUB_SHA" \
+            '{runId:($runId|tonumber),runAttempt:($runAttempt|tonumber),headSha:$headSha,status:"started"}' \
+            > preview-status/2026-08-06/visual_rhythm_run.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- preview-status/2026-08-06/visual_rhythm_run.json
+          git commit -m "Record visual rhythm Preview run" || true
+          git push origin HEAD:fix/visual-rhythm-2026-08-06
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
