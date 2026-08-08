@@ -99,9 +99,10 @@ validateProductionShotTimingContract(timingData(9_000, [
 ], 9));
 
 const composition = await readFile("src/compositions/NasdaqCafeSpecEpisode.tsx", "utf8");
-assert.match(composition, /left: 416, top: 144, width: 1440, height: 648/, "Main Stage geometry must stay fixed");
-assert.match(composition, /left: 64, top: 176, width: 320, height: 720/, "fox geometry must stay fixed");
-assert.match(composition, /left: 208, top: 812, width: 1664, height: 208/, "subtitle geometry must stay fixed");
+assert.match(composition, /getStageLayoutProfileForShell/, "Main Stage geometry must be selected by semantic Stage shell");
+assert.match(composition, /data-stage-layout=\{layoutProfile\}/, "Main Stage must expose the semantic layout profile");
+assert.match(composition, /getFoxFrameStyle\(layoutProfile, view\.fox\.opacity\)/, "fox placement must follow the semantic layout profile");
+assert.match(composition, /data-subtitle-chrome="compact"/, "subtitle chrome must use the compact public layout");
 assert.doesNotMatch(composition, /ShotStageRenderer[^\n]*subtitle/, "Shot camera must not wrap subtitles");
 
 console.log(`Visual Story Engine v3 shot tests: pass (${shots.length} Shots)`);
