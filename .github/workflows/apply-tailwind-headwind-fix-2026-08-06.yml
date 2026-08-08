@@ -1,5 +1,5 @@
 name: Apply Tailwind Headwind Repair 2026-08-06
-# retry-4: includes measured Scene 3 appearance repair and Scene 7 title wrap
+# retry-5: includes measured Scene 3, Scene 7 layout, and subtitle safe-wrap repairs
 
 on:
   push:
@@ -52,12 +52,13 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Apply lane, Scene 3 timing, renderer, and Scene 7 layout repairs
+      - name: Apply lane, Scene 3 timing, renderer, Scene 7, and subtitle repairs
         run: |
           python3 scripts/apply_tailwind_headwind_lane_fix.py
           python3 scripts/apply_tailwind_renderer_fix.py
           python3 scripts/apply_scene3_split_comparison_fix.py
           python3 scripts/apply_scene7_card_title_wrap.py
+          python3 scripts/apply_subtitle_wrap_fix.py
 
       - name: Run formal validator and complete contracts
         shell: bash
@@ -139,11 +140,14 @@ jobs:
             "$PACKAGE_PATH" \
             preview-status/2026-08-06/normalization_report.json \
             src/components/spec/VisualTemplateRenderer.tsx \
-            scripts/test-visual-templates.ts
+            src/spec/subtitle-cues.ts \
+            scripts/test-visual-templates.ts \
+            scripts/test-subtitles.ts
           git rm scripts/apply_tailwind_headwind_lane_fix.py
           git rm scripts/apply_tailwind_renderer_fix.py
           git rm scripts/apply_scene3_split_comparison_fix.py
           git rm scripts/apply_scene7_card_title_wrap.py
+          git rm scripts/apply_subtitle_wrap_fix.py
           git rm .github/workflows/apply-tailwind-headwind-fix-2026-08-06.yml
           git commit -m "Repair 2026-08-06 preview layout contracts"
           git pull --rebase origin main
