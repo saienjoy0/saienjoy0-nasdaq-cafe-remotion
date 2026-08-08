@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {renderToStaticMarkup} from "react-dom/server";
 import {getStageMotionStyle} from "../src/components/spec/ShotStageRenderer";
-import {SUBTITLE_FRAME_STYLE, getStageLayoutProfileForShell, getMainStageFrameStyle, getFoxFrameStyle} from "../src/compositions/NasdaqCafeSpecEpisode";
+import {FOX_FRAME_STYLE, MAIN_STAGE_FRAME_STYLE, SUBTITLE_FRAME_STYLE} from "../src/compositions/NasdaqCafeSpecEpisode";
 import {VisualGrammarStageHost} from "../src/components/spec/VisualGrammarStageHost";
 import {
   STAGE_THEMES,
@@ -73,26 +73,23 @@ test("Shot choreography stays fast and leaves a readable hold", () => {
   }
 });
 
-test("semantic Stage shells change the whole composition, not only the card skin", () => {
-  assert.equal(getStageLayoutProfileForShell("MetricBoardStage"), "host-left");
-  assert.equal(getStageLayoutProfileForShell("MatrixStage"), "host-right");
-  assert.equal(getStageLayoutProfileForShell("CausalPathStage"), "immersive");
-  assert.equal(getStageLayoutProfileForShell("TimelineStage"), "immersive");
-  assert.equal(getStageLayoutProfileForShell("VerificationGateStage"), "host-right");
-  const leftMain = getMainStageFrameStyle("host-left", "candidate");
-  const rightMain = getMainStageFrameStyle("host-right", "candidate");
-  const immersiveMain = getMainStageFrameStyle("immersive", "candidate");
-  assert.notEqual(leftMain.left, rightMain.left);
-  assert(Number(immersiveMain.width) > Number(leftMain.width));
-  assert.equal(getFoxFrameStyle("immersive", 1).opacity, 0);
-  assert.notEqual(getFoxFrameStyle("host-left", 1).left, getFoxFrameStyle("host-right", 1).left);
+test("production shell geometry stays fixed across every Stage shell", () => {
+  assert.deepEqual(
+    {left: MAIN_STAGE_FRAME_STYLE.left, top: MAIN_STAGE_FRAME_STYLE.top, width: MAIN_STAGE_FRAME_STYLE.width, height: MAIN_STAGE_FRAME_STYLE.height},
+    {left: 416, top: 144, width: 1440, height: 648},
+  );
+  assert.deepEqual(
+    {left: FOX_FRAME_STYLE.left, top: FOX_FRAME_STYLE.top, width: FOX_FRAME_STYLE.width, height: FOX_FRAME_STYLE.height},
+    {left: 64, top: 176, width: 320, height: 720},
+  );
 });
 
-test("public subtitle chrome preserves more visual stage area", () => {
-  assert(Number(SUBTITLE_FRAME_STYLE.height) <= 126);
-  assert(Number(SUBTITLE_FRAME_STYLE.width) <= 1360);
-  assert(Number(SUBTITLE_FRAME_STYLE.fontSize) <= 44);
-  assert(Number(SUBTITLE_FRAME_STYLE.top) >= 900);
+test("public subtitle chrome follows the production-spec fixed region", () => {
+  assert.deepEqual(
+    {left: SUBTITLE_FRAME_STYLE.left, top: SUBTITLE_FRAME_STYLE.top, width: SUBTITLE_FRAME_STYLE.width, height: SUBTITLE_FRAME_STYLE.height},
+    {left: 416, top: 824, width: 1440, height: 176},
+  );
+  assert.equal(SUBTITLE_FRAME_STYLE.fontSize, 34);
 });
 
 test("verification gate shell follows the two-lane verification contract", () => {
@@ -100,6 +97,24 @@ test("verification gate shell follows the two-lane verification contract", () =>
   assert.match(source, /calc\(50% - 48px\)/);
   assert.match(source, /left: "50%"/);
   assert.doesNotMatch(source, /33\.333%/);
+});
+
+test("verification and evidence templates have distinct renderers and persistent structure", () => {
+  const renderer = readFileSync("src/components/spec/VisualTemplateRenderer.tsx", "utf8");
+  assert.match(renderer, /const VerificationChecklist/);
+  assert.match(renderer, /case "verification-checklist": return <VerificationChecklist/);
+  assert.match(renderer, /case "verification-matrix": return <VerificationMatrix/);
+  assert.match(renderer, /case "evidence-boundary": return <EvidenceBoundary/);
+  assert.match(renderer, /data-verification-lane/);
+  assert.match(renderer, /data-evidence-row/);
+  assert.doesNotMatch(renderer, /case "verification-checklist": return <VerificationMatrix/);
+});
+
+test("text focus has occupancy-aware hero and duo modes", () => {
+  const renderer = readFileSync("src/components/spec/SpecVisualModes.tsx", "utf8");
+  assert.match(renderer, /data-text-focus-size/);
+  assert.match(renderer, /count === 1 \? 66/);
+  assert.match(renderer, /count === 2/);
 });
 
 test("legacy white-on-dark constants are routed through semantic CSS tokens", () => {

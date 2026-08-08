@@ -13,7 +13,6 @@ import type {RenderProductionData, RenderSpecScene} from "../spec/render-spec";
 import {getSceneRenderState, getSpecDurationInFrames, getTransitionDurationInFrames} from "../spec/render-state";
 import {getStageChromeModeForShell, type StageChromeMode} from "../spec/stage-theme-contract";
 import type {VisualGrammarStageMode} from "../spec/visual-grammar-stage-mode";
-import type {StageShellId} from "../spec/visual-grammar-contract";
 import {toPublicSceneViewModel} from "../spec/public-view-model";
 import {assertSpecLayoutFits} from "../spec/validate-render-layout";
 import {fontFamily} from "../fonts";
@@ -67,92 +66,45 @@ const headlineStyle = (mode: StageChromeMode): React.CSSProperties => mode === "
       textShadow: "0 3px 10px rgba(0,0,0,.72)",
     };
 
-export type StageLayoutProfile = "host-left" | "host-right" | "immersive";
-
-const IMMERSIVE_STAGE_SHELLS = new Set<StageShellId>([
-  "DocumentMediaStage",
-  "ProgressiveChartStage",
-  "CausalPathStage",
-  "TimelineStage",
-  "AssemblyStage",
-]);
-
-const HOST_RIGHT_STAGE_SHELLS = new Set<StageShellId>([
-  "DualLaneStage",
-  "SplitComparisonStage",
-  "MatrixStage",
-  "VerificationGateStage",
-]);
-
-export const getStageLayoutProfileForShell = (stageShellId: StageShellId | null): StageLayoutProfile => {
-  if (stageShellId && IMMERSIVE_STAGE_SHELLS.has(stageShellId)) return "immersive";
-  if (stageShellId && HOST_RIGHT_STAGE_SHELLS.has(stageShellId)) return "host-right";
-  return "host-left";
+export const MAIN_STAGE_FRAME_STYLE: React.CSSProperties = {
+  position: "absolute",
+  left: 416,
+  top: 144,
+  width: 1440,
+  height: 648,
+  zIndex: 10,
+  overflow: "hidden",
 };
 
-export const getMainStageFrameStyle = (
-  profile: StageLayoutProfile,
-  stageMode: VisualGrammarStageMode,
-): React.CSSProperties => {
-  const frame = profile === "immersive"
-    ? {left: 72, top: 118, width: 1776, height: 744}
-    : profile === "host-right"
-      ? {left: 72, top: 144, width: 1452, height: 670}
-      : {left: 396, top: 144, width: 1452, height: 670};
-  return {
-    position: "absolute",
-    ...frame,
-    zIndex: 10,
-    overflow: "hidden",
-    borderRadius: stageMode === "legacy" ? 30 : 0,
-  };
-};
-
-export const getFoxFrameStyle = (
-  profile: StageLayoutProfile,
-  opacity: number,
-): React.CSSProperties => {
-  if (profile === "immersive") return {
-    position: "absolute",
-    left: 52,
-    top: 656,
-    width: 180,
-    height: 300,
-    zIndex: 30,
-    opacity: 0,
-    overflow: "visible",
-  };
-  return {
-    position: "absolute",
-    left: profile === "host-right" ? 1560 : 64,
-    top: 180,
-    width: profile === "host-right" ? 296 : 300,
-    height: 700,
-    zIndex: 30,
-    opacity,
-    overflow: "visible",
-  };
+export const FOX_FRAME_STYLE: React.CSSProperties = {
+  position: "absolute",
+  left: 64,
+  top: 176,
+  width: 320,
+  height: 720,
+  zIndex: 30,
+  overflow: "visible",
 };
 
 export const SUBTITLE_FRAME_STYLE: React.CSSProperties = {
   position: "absolute",
-  left: 280,
-  top: 914,
-  width: 1360,
-  height: 126,
+  left: 416,
+  top: 824,
+  width: 1440,
+  height: 176,
   zIndex: 60,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: "8px 32px",
+  padding: "12px 32px",
   boxSizing: "border-box",
   overflow: "hidden",
   borderRadius: 16,
-  background: "rgba(2,7,16,.76)",
-  borderTop: "2px solid rgba(255,199,74,.76)",
+  background: "rgba(0,0,0,.84)",
+  borderTop: "3px solid rgba(255,199,74,.86)",
   color: "#fff7df",
-  fontSize: 44,
-  lineHeight: 1.18,
+  fontSize: 34,
+  lineHeight: 1.3,
   fontWeight: 900,
   letterSpacing: "0.01em",
   textAlign: "center",
@@ -179,21 +131,20 @@ export const SpecSceneFrame: React.FC<{
   const chromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
     ? getStageChromeModeForShell(stageShellId)
     : "full";
-  const layoutProfile = getStageLayoutProfileForShell(stageMode === "candidate" ? stageShellId : null);
 
   return <AbsoluteFill style={sceneStyle} data-stage-chrome={chromeMode}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
-    <div data-stage-layout={layoutProfile} style={getMainStageFrameStyle(layoutProfile, stageMode)}>
+    <div data-stage-layout="fixed" style={{...MAIN_STAGE_FRAME_STYLE, borderRadius: stageMode === "legacy" ? 30 : 0}}>
       <SpecAssetLayer assets={view.mainAssets} zIndex={10}/>
       {view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><ShotStageRenderer content={view.mainContent}/></div> : null}
     </div>
-    <div data-fox-layout={layoutProfile} style={getFoxFrameStyle(layoutProfile, view.fox.opacity)}>
+    <div data-fox-layout="fixed" style={{...FOX_FRAME_STYLE, opacity: view.fox.opacity}}>
       <FoxExpressionLayer fox={view.fox} previousFox={view.previousFox} transitionProgress={view.foxTransitionProgress}/>
     </div>
     <SpecAssetLayer assets={view.overlays} zIndex={40}/>
     {chromeMode !== "none" ? <div style={headlineStyle(chromeMode)}>{view.headline}</div> : null}
-    {view.sourceLabel ? <div style={{position: "absolute", left: 972, top: 860, width: 852, height: 28, zIndex: 50, overflow: "hidden", whiteSpace: "nowrap", color: "#b6cad9", fontSize: 20, lineHeight: "28px", textAlign: "right"}}>{view.sourceLabel}</div> : null}
-    {state.subtitleText ? <div data-subtitle-chrome="compact" style={SUBTITLE_FRAME_STYLE}>{state.subtitleText}</div> : null}
+    {view.sourceLabel ? <div style={{position: "absolute", left: 1016, top: 744, width: 808, height: 32, zIndex: 50, overflow: "hidden", whiteSpace: "nowrap", color: "#b6cad9", fontSize: 22, lineHeight: "32px", textAlign: "right"}}>{view.sourceLabel}</div> : null}
+    {state.subtitleText ? <div data-subtitle-chrome="fixed" style={SUBTITLE_FRAME_STYLE}>{state.subtitleText}</div> : null}
   </AbsoluteFill>;
 };
 

@@ -99,10 +99,13 @@ validateProductionShotTimingContract(timingData(9_000, [
 ], 9));
 
 const composition = await readFile("src/compositions/NasdaqCafeSpecEpisode.tsx", "utf8");
-assert.match(composition, /getStageLayoutProfileForShell/, "Main Stage geometry must be selected by semantic Stage shell");
-assert.match(composition, /data-stage-layout=\{layoutProfile\}/, "Main Stage must expose the semantic layout profile");
-assert.match(composition, /getFoxFrameStyle\(layoutProfile, view\.fox\.opacity\)/, "fox placement must follow the semantic layout profile");
-assert.match(composition, /data-subtitle-chrome="compact"/, "subtitle chrome must use the compact public layout");
+assert.match(composition, /left: 416,\n  top: 144,\n  width: 1440,\n  height: 648/, "Main Stage geometry must stay fixed");
+assert.match(composition, /left: 64,\n  top: 176,\n  width: 320,\n  height: 720/, "fox geometry must stay fixed");
+assert.match(composition, /left: 416,\n  top: 824,\n  width: 1440,\n  height: 176/, "subtitle geometry must stay fixed");
+assert.match(composition, /data-stage-layout="fixed"/, "Main Stage must expose fixed shell mode");
+assert.match(composition, /data-fox-layout="fixed"/, "fox must expose fixed shell mode");
+assert.match(composition, /data-subtitle-chrome="fixed"/, "subtitle must expose fixed shell mode");
+assert.doesNotMatch(composition, /getStageLayoutProfileForShell/, "daily Stage shells must not re-layout the production shell");
 assert.doesNotMatch(composition, /ShotStageRenderer[^\n]*subtitle/, "Shot camera must not wrap subtitles");
 
 console.log(`Visual Story Engine v3 shot tests: pass (${shots.length} Shots)`);

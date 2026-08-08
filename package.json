@@ -36,7 +36,6 @@
     "dev": "remotion studio src/index.ts",
     "build": "remotion bundle src/index.ts dist/remotion",
     "upgrade": "remotion upgrade",
-    "pretypecheck": "python3 scripts/run_fixed_shell_repair_once.py",
     "typecheck": "tsc",
     "lint": "eslint src scripts && tsc",
     "validate:sample": "tsx scripts/validate-episode.ts samples/episode_data.sample.json",

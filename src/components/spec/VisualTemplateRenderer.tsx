@@ -302,12 +302,61 @@ const DivergingBars: React.FC<{content: PublicMainContent}> = ({content}) => {
   return <Surface accent={color.emphasis} style={{padding: "26px 40px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 14}}>{content.numbers.map((number, index) => {const value = values[index]; const width = `${clamp((Math.abs(value) / max) * numberProgress(content, number)) * 47}%`; return <div key={number.key} style={{...motionStyle(content, number), display: "grid", gridTemplateColumns: "235px 1fr 190px", gap: 20, alignItems: "center", minHeight: 91}}><div style={{fontSize: 30, fontWeight: 950}}>{number.label}</div><div style={{position: "relative", height: 55, borderRadius: 14, background: "rgba(82,118,145,.12)", border: "2px solid rgba(82,118,145,.23)", overflow: "hidden"}}><div style={{position: "absolute", left: "50%", top: 0, bottom: 0, width: 3, background: color.muted}}/><div style={{position: "absolute", top: 5, bottom: 5, ...(value < 0 ? {right: "50%", width} : {left: "50%", width}), borderRadius: 10, background: toneColor(number.tone)}}/></div><div style={{color: toneColor(number.tone), textAlign: "right"}}><AnimatedNumber content={content} number={number} size={48}/></div></div>;})}</Surface>;
 };
 
+const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => {
+  const items = content.cards.length > 0
+    ? content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title])
+    : content.texts;
+  return <Surface accent={color.emphasis} style={{padding: "34px 42px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 22}}>
+    <div style={{fontSize: 28, color: color.muted, fontWeight: 900}}>{content.screenQuestion}</div>
+    <div style={{display: "grid", gridTemplateRows: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 18}}>
+      {items.map((item, index) => {
+        const active = index === items.length - 1;
+        return <div key={`${index}-${item}`} data-evidence-row={index + 1} style={{position: "relative", display: "flex", alignItems: "center", minHeight: 0, padding: "22px 30px 22px 84px", borderRadius: 22, background: active ? "rgba(112,70,168,.10)" : "rgba(82,118,145,.08)", border: `3px solid ${active ? "rgba(112,70,168,.42)" : "rgba(82,118,145,.28)"}`, overflow: "hidden"}}>
+          <div style={{position: "absolute", left: 24, top: "50%", translate: "0 -50%", width: 40, height: 40, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: active ? color.emphasis : color.cyan, fontSize: 23, fontWeight: 950}}>{index + 1}</div>
+          <div style={{...timedStyle(content, content.beatStartMs + index * 680, "x"), fontSize: active ? 46 : 38, lineHeight: 1.22, color: active ? color.emphasis : color.ink, fontWeight: 950}}>{item}</div>
+        </div>;
+      })}
+    </div>
+    <div style={{textAlign: "right", color: color.emphasis, fontSize: 29, fontWeight: 950}}>{content.primaryElement}</div>
+  </Surface>;
+};
+
+const VerificationChecklist: React.FC<{content: PublicMainContent}> = ({content}) => {
+  const items = content.cards.length > 0
+    ? content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title])
+    : content.texts;
+  return <Surface accent={color.warning} style={{padding: "32px 42px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 18}}>
+    <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}><Tag tone="warning">検証ポイント</Tag><div style={{fontSize: 28, color: color.muted, fontWeight: 900}}>{content.screenQuestion}</div></div>
+    <div data-verification-checklist="true" style={{display: "grid", gridTemplateRows: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 15}}>
+      {items.map((item, index) => <div key={`${index}-${item}`} style={{position: "relative", display: "grid", gridTemplateColumns: "58px 1fr", gap: 18, alignItems: "center", minHeight: 0, padding: "18px 24px", borderRadius: 20, background: "rgba(186,107,0,.07)", border: "2px solid rgba(186,107,0,.28)"}}><div style={{width: 42, height: 42, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: color.warning, fontSize: 24, fontWeight: 950}}>{index + 1}</div><div style={{...timedStyle(content, content.beatStartMs + index * 620, "x"), fontSize: 35, lineHeight: 1.22, fontWeight: 930}}>{item}</div></div>)}
+    </div>
+    <div style={{textAlign: "center", color: color.emphasis, fontSize: 32, fontWeight: 950}}>{content.primaryElement}</div>
+  </Surface>;
+};
+
 const VerificationMatrix: React.FC<{content: PublicMainContent}> = ({content}) => {
   const labels = content.templateConfig.laneLabels.length === 2 ? content.templateConfig.laneLabels : ["強まる", "弱まる"];
   const items = content.cards.length > 0 ? content.cards.map((card) => card.lines[0]?.value ?? card.title) : content.texts;
   const midpoint = Math.ceil(items.length / 2);
-  const lanes = [items.slice(0, midpoint), items.slice(midpoint)];
-  return <Surface accent={color.warning} style={{padding: "28px 34px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 18}}><div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20}}><div style={{textAlign: "center"}}><Tag tone="positive">{labels[0]}</Tag></div><div style={{textAlign: "center"}}><Tag tone="warning">{labels[1]}</Tag></div></div><div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20}}>{lanes.map((laneItems, laneIndex) => <div key={labels[laneIndex]} style={{display: "grid", gap: 15, alignContent: "center"}}>{laneItems.map((text, index) => <div key={text} style={{...timedStyle(content, content.beatStartMs + (laneIndex * midpoint + index) * 620), display: "grid", gridTemplateColumns: "44px 1fr", gap: 14, alignItems: "center", padding: "18px 20px", borderRadius: 18, background: laneIndex === 0 ? "rgba(7,134,95,.09)" : "rgba(186,107,0,.09)", border: `2px solid ${laneIndex === 0 ? "rgba(7,134,95,.30)" : "rgba(186,107,0,.30)"}`, fontSize: 29, lineHeight: 1.23, fontWeight: 900}}><div style={{width: 34, height: 34, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: laneIndex === 0 ? color.positive : color.warning, fontSize: 23, fontWeight: 950}}>{laneIndex === 0 ? "+" : "−"}</div>{text}</div>)}</div>)}</div><div style={{textAlign: "center", color: color.emphasis, fontSize: 33, fontWeight: 950}}>{content.primaryElement}</div></Surface>;
+  const parsedItems = items.map((text, index) => {
+    const delimiter = text.indexOf("｜");
+    const prefix = delimiter >= 0 ? text.slice(0, delimiter).trim() : "";
+    const body = delimiter >= 0 ? text.slice(delimiter + 1).trim() : text;
+    const exactLane = labels.findIndex((label) => label === prefix);
+    return {text: body, sourceIndex: index, laneIndex: exactLane >= 0 ? exactLane : index < midpoint ? 0 : 1};
+  });
+  const lanes = labels.map((_, laneIndex) => parsedItems.filter((item) => item.laneIndex === laneIndex));
+  return <Surface accent={color.warning} style={{padding: "28px 34px", display: "grid", gridTemplateRows: "1fr auto", gap: 18}}>
+    <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20}}>
+      {lanes.map((laneItems, laneIndex) => <div key={labels[laneIndex]} data-verification-lane={laneIndex} style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 16, minWidth: 0, padding: "18px 18px 20px", borderRadius: 24, background: laneIndex === 0 ? "rgba(7,134,95,.055)" : "rgba(186,107,0,.055)", border: `3px solid ${laneIndex === 0 ? "rgba(7,134,95,.24)" : "rgba(186,107,0,.24)"}`}}>
+        <div style={{textAlign: "center"}}><Tag tone={laneIndex === 0 ? "positive" : "warning"}>{labels[laneIndex]}</Tag></div>
+        <div style={{display: "grid", gridTemplateRows: `repeat(${Math.max(1, laneItems.length)},minmax(0,1fr))`, gap: 15, alignContent: "stretch"}}>
+          {laneItems.map((item) => <div key={`${item.sourceIndex}-${item.text}`} style={{position: "relative", display: "grid", gridTemplateColumns: "44px 1fr", gap: 14, alignItems: "center", minHeight: 0, padding: "18px 20px", borderRadius: 18, background: laneIndex === 0 ? "rgba(7,134,95,.09)" : "rgba(186,107,0,.09)", border: `2px solid ${laneIndex === 0 ? "rgba(7,134,95,.30)" : "rgba(186,107,0,.30)"}`, fontSize: 29, lineHeight: 1.23, fontWeight: 900}}><div style={{width: 34, height: 34, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: laneIndex === 0 ? color.positive : color.warning, fontSize: 23, fontWeight: 950}}>{laneIndex === 0 ? "+" : "−"}</div><div style={timedStyle(content, content.beatStartMs + item.sourceIndex * 620, "x")}>{item.text}</div></div>)}
+        </div>
+      </div>)}
+    </div>
+    <div style={{textAlign: "center", color: color.emphasis, fontSize: 33, fontWeight: 950}}>{content.primaryElement}</div>
+  </Surface>;
 };
 
 const FinalAssembly: React.FC<{content: PublicMainContent}> = ({content}) => {
@@ -336,11 +385,11 @@ const renderSelectedVisualTemplate = (content: PublicMainContent): React.ReactNo
     case "tailwind-headwind": return <TailwindHeadwind content={content}/>;
     case "diverging-stock-bars": return <DivergingBars content={content}/>;
     case "verification-matrix": return <VerificationMatrix content={content}/>;
-    case "verification-checklist": return <VerificationMatrix content={content}/>;
+    case "verification-checklist": return <VerificationChecklist content={content}/>;
     case "conclusion-card":
     case "metric-comparison-board":
     case "index-return-bars":
-    case "evidence-boundary":
+    case "evidence-boundary": return <EvidenceBoundary content={content}/>;
     case "analogy-steps":
     case "news-media":
     case "text-focus":

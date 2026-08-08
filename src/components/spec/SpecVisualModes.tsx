@@ -285,10 +285,14 @@ const VerificationPoints: React.FC<{content: PublicMainContent}> = ({content}) =
 const TextFocus: React.FC<{content: PublicMainContent}> = ({content}) => {
   const {fps} = useVideoConfig();
   const beatDuration = Math.max(1, content.beatEndMs - content.beatStartMs);
-  return <Surface accent={colors.emphasis} style={{padding: "42px 54px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 26}}>
+  const count = Math.max(1, content.texts.length);
+  return <Surface accent={colors.emphasis} style={{padding: "34px 48px", display: "grid", gridTemplateRows: `repeat(${count},minmax(0,1fr))`, gap: count <= 2 ? 20 : 16}}>
     {content.texts.map((text, index) => {
-      const item: MotionItem = {revealAtMs: content.beatStartMs + Math.min(index * 800, beatDuration * 0.65), highlighted: index === content.texts.length - 1, highlightedAtMs: content.beatStartMs + Math.min(index * 800, beatDuration * 0.65)};
-      return <div key={`${index}-${text}`} style={{...motionStyle(content, item, fps), position: "relative", padding: "22px 18px 22px 30px", fontSize: index === content.texts.length - 1 ? 54 : 42, lineHeight: 1.28, color: index === content.texts.length - 1 ? colors.emphasis : colors.ink, fontWeight: 950}}><span style={{position: "absolute", left: 0, top: 12, bottom: 12, width: 9, borderRadius: 99, background: index === content.texts.length - 1 ? colors.emphasis : colors.cyan}}/>{text}</div>;
+      const revealAtMs = content.beatStartMs + Math.min(index * 800, beatDuration * 0.65);
+      const highlighted = index === content.texts.length - 1;
+      const item: MotionItem = {revealAtMs, highlighted, highlightedAtMs: revealAtMs};
+      const fontSize = count === 1 ? 66 : count === 2 ? (highlighted ? 58 : 48) : highlighted ? 52 : 40;
+      return <div key={`${index}-${text}`} data-text-focus-size={count === 1 ? "hero" : count === 2 ? "duo" : "stack"} style={{...motionStyle(content, item, fps), position: "relative", minHeight: 0, display: "flex", alignItems: "center", padding: "22px 28px 22px 42px", borderRadius: 22, background: highlighted ? "rgba(112,70,168,.08)" : "rgba(7,142,174,.055)", border: `2px solid ${highlighted ? "rgba(112,70,168,.26)" : "rgba(7,142,174,.20)"}`, fontSize, lineHeight: 1.2, color: highlighted ? colors.emphasis : colors.ink, fontWeight: 950}}><span style={{position: "absolute", left: 16, top: 18, bottom: 18, width: 9, borderRadius: 99, background: highlighted ? colors.emphasis : colors.cyan}}/>{text}</div>;
     })}
   </Surface>;
 };
