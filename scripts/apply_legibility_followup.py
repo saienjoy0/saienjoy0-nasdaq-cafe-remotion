@@ -33,8 +33,8 @@ replace_once(
 )
 replace_once(
     "scripts/test-stage-legibility-contract.tsx",
-    r'assert.match(renderer, /const heroSize = Array\\.from\\(hero\\)\\.length <= 10 \\? 70/);',
-    r'assert.match(renderer, /const heroSize = Array\\.from\\(hero\\)\\.length <= 10 \\? 58/);',
+    r'assert.match(renderer, /const heroSize = Array\.from\(hero\)\.length <= 10 \? 70/);',
+    r'assert.match(renderer, /const heroSize = Array\.from\(hero\)\.length <= 10 \? 58/);',
 )
 replace_once(
     "scripts/test-stage-legibility-contract.tsx",
