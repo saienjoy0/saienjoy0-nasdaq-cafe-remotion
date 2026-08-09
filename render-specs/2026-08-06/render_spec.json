@@ -1923,7 +1923,7 @@
           "returnScreenState": null,
           "screenQuestion": "AMD一社でNASDAQ全体を説明できるか",
           "screenState": "Data",
-          "sequencePolicy": "explicit",
+          "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-06-chunk-002",
           "templateConfig": {
             "causalStepIds": [],
@@ -1963,42 +1963,6 @@
           "motionPreset": "rise-soft",
           "offsetMs": 0,
           "targetId": "scene-06-card-001",
-          "timing": "chunk-start"
-        },
-        {
-          "action": "show",
-          "atChunkId": "scene-06-chunk-002",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-013",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 0,
-          "targetId": "scene-06-beat-002-number-01",
-          "timing": "chunk-start"
-        },
-        {
-          "action": "show",
-          "atChunkId": "scene-06-chunk-002",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-090",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 900,
-          "targetId": "scene-06-beat-002-number-02",
-          "timing": "chunk-start"
-        },
-        {
-          "action": "show",
-          "atChunkId": "scene-06-chunk-002",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-091",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 1800,
-          "targetId": "scene-06-beat-002-number-03",
           "timing": "chunk-start"
         }
       ],

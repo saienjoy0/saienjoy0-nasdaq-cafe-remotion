@@ -471,7 +471,7 @@
 - 大テロップ：発表順と終値
 - 補助テロップ：AMD 引け後 約-9% / 翌日 AMD -7.04% / NVDA +3.43%
 - 使用する数字：AMD 引け後 約-9% / 翌日 AMD -7.04% / NVDA +3.43%
-- 画面で見せる内容：SpaceX→AMD→翌日終値; SOXX→Alphabet→Microsoftの順に市場要因を段階表示
+- 画面で見せる内容：SpaceX→AMD→翌日終値; SOXX→Alphabet→Microsoftの順に市場要因をフェード表示
 - 根拠：AMD IR / SpaceX IR / Reuters / 当日の市場データ
 - 時系列の根拠：SpaceX IR、AMD IR、Reuters、Longbridge終値。分足データなし
 - 不確実性：分足がないため発言ごとの瞬間的寄与は断定しない
@@ -515,7 +515,7 @@
   - 画面状態：Data
   - Visual Grammar：evidence / continuation
   - Visual Template ID：evidence-boundary
-  - Template Variant：default
+  - Template Variant：confirmed-vs-unconfirmed
   - 入力構造：AI全面安ではない / NVIDIAだけでNASDAQ全体は説明できない / 大型テック安とDow高が単一原因への断定を弱める
   - 画面の問い：どこまで因果を言えるか
   - 主要要素：AI全面安でも、単一原因でもない
@@ -2744,7 +2744,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "returnScreenState": null,
             "screenQuestion": "AMD一社でNASDAQ全体を説明できるか",
             "screenState": "Data",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-06-chunk-002",
             "templateConfig": {
               "causalStepIds": [],
@@ -2784,42 +2784,6 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "motionPreset": "rise-soft",
             "offsetMs": 0,
             "targetId": "scene-06-card-001",
-            "timing": "chunk-start"
-          },
-          {
-            "action": "show",
-            "atChunkId": "scene-06-chunk-002",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-013",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-06-beat-002-number-01",
-            "timing": "chunk-start"
-          },
-          {
-            "action": "show",
-            "atChunkId": "scene-06-chunk-002",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-090",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 900,
-            "targetId": "scene-06-beat-002-number-02",
-            "timing": "chunk-start"
-          },
-          {
-            "action": "show",
-            "atChunkId": "scene-06-chunk-002",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-091",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 1800,
-            "targetId": "scene-06-beat-002-number-03",
             "timing": "chunk-start"
           }
         ],
