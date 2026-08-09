@@ -17,6 +17,11 @@ new_timeline = '...content.numbers.map((item) => [item.key, [item] as TimelineOb
 if old_timeline not in text:
     raise SystemExit("timeline mutability anchor missing")
 text = text.replace(old_timeline, new_timeline, 1)
+old_label = '{parts.time || `STEP ${index + 1}`}'
+new_label = '{parts.time || item.label}'
+if old_label not in text:
+    raise SystemExit("timeline visible-label anchor missing")
+text = text.replace(old_label, new_label, 1)
 old_rm = 'subprocess.run(["git", "rm", "--", "scripts/apply_legibility_pass_v1.py"], cwd=ROOT, check=True)'
 new_rm = 'subprocess.run(["git", "rm", "-f", "--", "scripts/apply_legibility_pass_v1.py"], cwd=ROOT, check=True)'
 if old_rm not in text:
