@@ -1,0 +1,58 @@
+name: Cache-only TTS probe 20260809
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cache-only-probe-20260809.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      TTS_INPUT_SHA: f9573c2bdbce69251c78e7d98b879422b9b184351f373053e80dcf835914086f
+      SPEC_TTS_CACHE_ONLY: '1'
+    steps:
+      - name: Checkout fixed renderer head only
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          clean: true
+      - name: Verify fixed renderer commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_PARENT=750f993bd00cf2f67fdb4ab18907e82ed0dc68df
+          git merge-base --is-ancestor "$EXPECTED_PARENT" HEAD
+          test -z "${GEMINI_API_KEY_1:-}"
+          test -z "${GEMINI_API_KEY_2:-}"
+          test -z "${GEMINI_API_KEY_3:-}"
+      - name: Prepare cache directory
+        run: mkdir -p .cache/spec-tts-blocks
+      - name: Restore exact production TTS cache
+        id: restore
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/spec-tts-blocks
+          key: ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}
+          restore-keys: |
+            ${{ runner.os }}-spec-tts-block-v2-${{ hashFiles('package-lock.json', 'config/voice-profiles.json', 'scripts/spec-audio.ts', 'src/tts/providers/gemini-tts-provider.ts') }}-${{ env.TTS_INPUT_SHA }}-partial-
+      - name: Report cache availability without synthesis
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t AUDIO < <(find .cache/spec-tts-blocks -type f -name audio.wav -print | sort)
+          echo "cache_hit=${{ steps.restore.outputs.cache-hit }}"
+          echo "audio_count=${#AUDIO[@]}"
+          printf '%s\n' "${AUDIO[@]}"
+          if [[ "${#AUDIO[@]}" -ne 2 ]]; then
+            echo "::error::CACHE_ONLY_MISS: exact two-block narration cache unavailable; Gemini synthesis was not called"
+            exit 42
+          fi
+          echo "CACHE_ONLY_HIT: both narration blocks are available; no Gemini API call occurred"
