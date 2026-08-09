@@ -49,11 +49,11 @@
 |---|---|---|
 | 1 | Data → Data | 方向、矛盾、中心仮説を30秒以内に提示する |
 | 2 | EntityFocus → Chart | AMDの好決算と株価下落を分けて示す |
-| 3 | Data → Chart | AMD決算の確認済み数値を解釈前に置く |
+| 3 | Data → Chart | Q2実績をHero表示し、Q3の追い風・向かい風へ進む |
 | 4 | Chart → Data | 通常の予想超過と高まったAI期待の未達を分ける |
 | 5 | EntityFocus → Chart → Data | SpaceXの採用判断が半導体競争へ届く経路を示す |
-| 6 | Chart → Data | 発表順と終値を使い、主役反応とNASDAQ全体を分ける |
-| 7 | Chart → Data | 仮説の限界を三銘柄比較で示す |
+| 6 | Chart → Data | 発表順の後、SOXX→Alphabet→Microsoftの順に市場要因を段階表示する |
+| 7 | Chart → Data | 三銘柄差の後、単一原因へ断定できない境界を大きく回収する |
 | 8 | Data → Data | 仮説が強まる条件と弱まる条件を対で示す |
 | 9 | Data | 中心結論を回収し固定エンディングへつなぐ |
 
@@ -208,12 +208,12 @@
   - 主要視覚機能：Explain
   - 画面状態：Data
   - Visual Grammar：evidence / major-shift
-  - Visual Template ID：metric-comparison-board
+  - Visual Template ID：hero-number
   - Template Variant：default
-  - 入力構造：会社見通し中心 112億ドル / 実績 115.4億ドル / 差 +3.4億ドル
+  - 入力構造：実績 115.4億ドル / 会社見通し中心 112億ドル / 差 +3.4億ドル
   - 画面の問い：Q2実績は会社見通しを超えたか
-  - 主要要素：Q2会社見通しと実績
-  - 視聴者向けテキスト：会社見通し中心 112億ドル / 実績 115.4億ドル / 差 +3.4億ドル
+  - 主要要素：Q2実績 115.4億ドル
+  - 視聴者向けテキスト：Q2実績 115.4億ドル / 会社見通し中心 112億ドル / 差 +3.4億ドル
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -251,7 +251,7 @@
 - 大テロップ：Q3見通し 130億ドル
 - 補助テロップ：市場予想 125.2億ドル / Q2売上 115.4億ドル
 - 使用する数字：市場予想 125.2億ドル / Q2売上 115.4億ドル
-- 画面で見せる内容：Q2会社見通しと実績; Q3売上見通しと粗利率
+- 画面で見せる内容：Q2実績115.4億ドルをHero表示し会社見通しとの差を一目で示す; Q3売上見通しと粗利率
 - 根拠：AMD IR / Reuters
 - 不確実性：非GAAP粗利率とGAAP数値を混同しない
 
@@ -449,10 +449,10 @@
   - Visual Grammar：reaction / continuation
   - Visual Template ID：market-pulse-grid
   - Template Variant：default
-  - 入力構造：SOXX -2.12% / Alphabet -4.03% / Microsoft -1.09%
-  - 画面の問い：AMDとNASDAQ全体をどう分けるか
-  - 主要要素：主役反応と大型テック別要因
-  - 視聴者向けテキスト：SOXX -2.12% / Alphabet -4.03% / Microsoft -1.09%
+  - 入力構造：①半導体 SOXX -2.12% / ②大型テック Alphabet -4.03% / ③大型テック Microsoft -1.09%
+  - 画面の問い：AMD一社でNASDAQ全体を説明できるか
+  - 主要要素：半導体 → 大型テックの別要因
+  - 視聴者向けテキスト：① 半導体｜SOXX -2.12% / ② 大型テック｜Alphabet -4.03% / ③ 大型テック｜Microsoft -1.09%
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -471,7 +471,7 @@
 - 大テロップ：発表順と終値
 - 補助テロップ：AMD 引け後 約-9% / 翌日 AMD -7.04% / NVDA +3.43%
 - 使用する数字：AMD 引け後 約-9% / 翌日 AMD -7.04% / NVDA +3.43%
-- 画面で見せる内容：SpaceX→AMD→翌日終値; 主役反応と大型テック別要因
+- 画面で見せる内容：SpaceX→AMD→翌日終値; SOXX→Alphabet→Microsoftの順に市場要因を段階表示
 - 根拠：AMD IR / SpaceX IR / Reuters / 当日の市場データ
 - 時系列の根拠：SpaceX IR、AMD IR、Reuters、Longbridge終値。分足データなし
 - 不確実性：分足がないため発言ごとの瞬間的寄与は断定しない
@@ -513,13 +513,13 @@
   - 終了合図：oftの下落も重なったことです。Dowが上昇した混合相場だった点も、単一原因への断定を弱めます。
   - 主要視覚機能：Explain
   - 画面状態：Data
-  - Visual Grammar：comparison / continuation
-  - Visual Template ID：dual-asset-split
+  - Visual Grammar：evidence / continuation
+  - Visual Template ID：evidence-boundary
   - Template Variant：default
-  - 入力構造：半導体：採用証拠の差 / NASDAQ：大型テック安も重なる / Dow +0.5%の混合相場
+  - 入力構造：AI全面安ではない / NVIDIAだけでNASDAQ全体は説明できない / 大型テック安とDow高が単一原因への断定を弱める
   - 画面の問い：どこまで因果を言えるか
-  - 主要要素：半導体の相対評価とNASDAQ別要因
-  - 視聴者向けテキスト：仮説を支える｜半導体：採用証拠の差 / 断定を弱める｜NASDAQ：大型テック安も重なる / 断定を弱める｜Dow +0.5%の混合相場
+  - 主要要素：AI全面安でも、単一原因でもない
+  - 視聴者向けテキスト：AI全面安ではない / NVIDIAだけでNASDAQ全体は説明できない / 大型テック安とDow高が、単一原因への断定を弱める
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -538,7 +538,7 @@
 - 大テロップ：AI株は一方向ではない
 - 補助テロップ：NVIDIA +3.43% / AMD -7.04% / Alphabet -4.03%
 - 使用する数字：NVIDIA +3.43% / AMD -7.04% / Alphabet -4.03%
-- 画面で見せる内容：NVIDIA・AMD・Alphabet比較; 半導体の相対評価とNASDAQ別要因
+- 画面で見せる内容：NVIDIA・AMD・Alphabet比較; AI全面安でも単一原因でもないという因果の境界を回収
 - 根拠：当日の市場データ / AP
 - 不確実性：Alphabet安の全要因をAI人事だけへ帰属しない
 
@@ -699,7 +699,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
 - 狐らしさ：4
 - 最後まで見る理由：5
 - 最大の離脱候補：Scene 4で数値コンセンサスと高まった期待を混同する可能性。
-- 必須修正と反映結果：『数字のGapはプラス、期待のGapはマイナス』へ分離。Scene 6でAMDとNASDAQ全体を分離。
+- 必須修正と反映結果：『数字のGapはプラス、期待のGapはマイナス』へ分離。Scene 6でAMDとNASDAQ全体を分離。追加Visual審問としてScene 3をHero化、Scene 6を段階表示、Scene 7後半を因果境界の回収へ変更。事実・ナレーション・TTSは変更なし。
 - タイトル・サムネイルの約束と回収：Scene 2〜5で『好決算でも7%安』『NVIDIAだけ上昇』を回収。
 - 即時不合格条件：該当なし。
 - 実行正本整合ゲート：ローカルpass。正式CIで再検証する。
@@ -893,10 +893,14 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
       "targetDate": "2026-08-06",
       "width": 1920
     },
-    "expectedConfirmed": true,
-    "imageSelection": {
-      "reason": "登録済み企業カードと固定Visual Templatesだけで因果と比較を表現でき、当日固有画像を加えると意味上の追加がないため。",
-      "selectedPath": "not-required"
+    "financialVisualContract": {
+      "contractVersion": "1.0.0",
+      "finalEpisodeContractVersion": "1.0.0",
+      "intentVersion": "1.1.0",
+      "recipePlanSha256": "e9b7f051db63e23ba8d2284c93f719bbd32e42cefaa4d9c8dde47fa39c744457",
+      "recipePlanVersion": "1.0.0",
+      "recipeRegistryVersion": "1.0.0",
+      "selectionCount": 1
     },
     "pronunciations": [
       {
@@ -944,7 +948,10 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
       "changesApplied": [
         "『数字のGapはプラス、期待のGapはマイナス』へ整理",
         "AlphabetとMicrosoft安を独立したNASDAQ要因として残した",
-        "分足欠損をScene 6で明示した"
+        "分足欠損をScene 6で明示した",
+        "Scene 3のQ2実績を単一Heroへ変更し、数字の優先順位を明確化",
+        "Scene 6の市場要因をSOXX→Alphabet→Microsoftの順に段階表示",
+        "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更"
       ],
       "largestDropoffRisk": "Scene 4で通常コンセンサスと高まった期待の二層を混同する可能性",
       "requiredChanges": [
@@ -1119,18 +1126,14 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "outcomeNodeId": null,
               "variant": "default"
             },
+            "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "NASDAQ -0.83%",
               "SOXX -2.12%",
               "NVIDIA +3.43% / AMD -7.04%"
             ],
-            "visualBeatId": "scene-01-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "contradiction",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "contradiction",
             "visualMode": "conclusion-card",
             "visualTemplate": "opening-contradiction"
           },
@@ -1169,21 +1172,17 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "confirmed-vs-unconfirmed"
             },
+            "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "AI需要の有無ではない",
               "次の巨大需要を誰が取るか"
             ],
-            "visualBeatId": "scene-01-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "evidence",
             "visualMode": "conclusion-card",
-            "visualTemplate": "hero-number"
+            "visualTemplate": "evidence-boundary"
           }
         ],
         "visualEvents": [
@@ -1320,7 +1319,28 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           }
         ],
         "nodes": [],
-        "numbers": [],
+        "numbers": [
+          {
+            "comparison": null,
+            "label": "Q2売上",
+            "numberId": "scene-02-beat-002-number-01",
+            "numericValue": 115.4,
+            "precision": 1,
+            "tone": "neutral",
+            "unit": "億ドル",
+            "value": "115.4億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "AMD",
+            "numberId": "scene-02-beat-002-number-02",
+            "numericValue": -7.04,
+            "precision": 2,
+            "tone": "neutral",
+            "unit": "%",
+            "value": "-7.04%"
+          }
+        ],
         "performanceIntent": "企業カードで対象を固定し、悪決算という誤読を防ぐ",
         "purpose": "AMDの好決算と株価下落を分けて示す",
         "sceneId": "scene-02",
@@ -1371,10 +1391,10 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "pictureBook": null,
             "primaryElement": "AMD企業カード",
             "primaryFunction": "Anchor",
-            "returnScreenState": "Data",
+            "returnScreenState": "Chart",
             "screenQuestion": "主役企業は誰か",
             "screenState": "EntityFocus",
-            "sequencePolicy": "static",
+            "sequencePolicy": "explicit",
             "startChunkId": "scene-02-chunk-001",
             "templateConfig": {
               "comparisonBasis": null,
@@ -1384,17 +1404,13 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "outcomeNodeId": null,
               "variant": "prebuilt-card"
             },
+            "templateVariant": "prebuilt-card",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "AMD",
               "CPUとGPUを設計する半導体会社"
             ],
-            "visualBeatId": "scene-02-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "entity",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "entity",
             "visualMode": "text-focus",
             "visualTemplate": "entity-card-full"
           },
@@ -1429,24 +1445,26 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "templateConfig": {
               "comparisonBasis": "業績と株価は同じ方向だったか",
               "dataBasis": "8月4日引け後決算、8月5日通常取引終値",
-              "laneLabels": [],
+              "displayOrder": [
+                "scene-02-card-002"
+              ],
+              "laneLabels": [
+                "追い風",
+                "向かい風"
+              ],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "two-lane"
             },
+            "templateVariant": "two-lane",
+            "transitionRole": "continuation",
             "viewerTexts": [
-              "Q2売上 115.4億ドル",
-              "AMD -7.04%"
+              "追い風｜Q2売上 115.4億ドル",
+              "向かい風｜AMD -7.04%"
             ],
-            "visualBeatId": "scene-02-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "comparison",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "evidence",
             "visualMode": "text-focus",
-            "visualTemplate": "diverging-stock-bars"
+            "visualTemplate": "tailwind-headwind"
           }
         ],
         "visualEvents": [
@@ -1573,7 +1591,116 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           }
         ],
         "nodes": [],
-        "numbers": [],
+        "numbers": [
+          {
+            "comparison": null,
+            "label": "会社見通し中心",
+            "numberId": "scene-03-beat-001-number-01-01",
+            "tone": "neutral",
+            "unit": "",
+            "value": "112億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "実績",
+            "numberId": "scene-03-beat-001-number-01-02",
+            "tone": "neutral",
+            "unit": "",
+            "value": "115.4億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "差",
+            "numberId": "scene-03-beat-001-number-01-03",
+            "tone": "neutral",
+            "unit": "",
+            "value": "+3.4億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "会社見通し",
+            "numberId": "scene-03-beat-002-number-01-01",
+            "tone": "neutral",
+            "unit": "",
+            "value": "130億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "市場予想",
+            "numberId": "scene-03-beat-002-number-01-02",
+            "tone": "neutral",
+            "unit": "",
+            "value": "125.2億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "粗利率",
+            "numberId": "scene-03-beat-002-number-01-03",
+            "tone": "neutral",
+            "unit": "",
+            "value": "56%"
+          },
+          {
+            "comparison": null,
+            "label": "会社見通し中心",
+            "numberId": "scene-03-beat-001-number-01",
+            "numericValue": 112.0,
+            "precision": 0,
+            "tone": "neutral",
+            "unit": "億ドル",
+            "value": "112億ドル"
+          },
+          {
+            "comparison": "会社見通し中心112億ドルを+3.4億ドル上回る",
+            "label": "実績",
+            "numberId": "scene-03-beat-001-number-02",
+            "numericValue": 115.4,
+            "precision": 1,
+            "tone": "positive",
+            "unit": "億ドル",
+            "value": "115.4億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "差",
+            "numberId": "scene-03-beat-001-number-03",
+            "numericValue": 3.4,
+            "precision": 1,
+            "tone": "neutral",
+            "unit": "億ドル",
+            "value": "+3.4億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "会社見通し",
+            "numberId": "scene-03-beat-002-number-01",
+            "numericValue": 130.0,
+            "precision": 0,
+            "tone": "neutral",
+            "unit": "億ドル",
+            "value": "130億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "市場予想",
+            "numberId": "scene-03-beat-002-number-02",
+            "numericValue": 125.2,
+            "precision": 1,
+            "tone": "neutral",
+            "unit": "億ドル",
+            "value": "125.2億ドル"
+          },
+          {
+            "comparison": null,
+            "label": "粗利率",
+            "numberId": "scene-03-beat-002-number-03",
+            "numericValue": 56.0,
+            "precision": 0,
+            "tone": "neutral",
+            "unit": "%",
+            "value": "56%"
+          }
+        ],
         "performanceIntent": "数字を落ち着いて並べ、評価を急がない",
         "purpose": "AMD決算の確認済み数値を解釈前に置く",
         "sceneId": "scene-03",
@@ -1596,7 +1723,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "assetState": "not-required",
             "beatId": "scene-03-beat-001",
             "changeCue": "会社見通し中心 112億ドル",
-            "contentType": "metric-comparison-board",
+            "contentType": "hero-number",
             "endChunkId": "scene-03-chunk-001",
             "entity": null,
             "evidenceSourceIds": [
@@ -1609,10 +1736,10 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "narrationEndCue": "、中心値を三・四億ドル上回りました。データセンター売上の六十七・二億ドルも、前年から二倍超です。",
             "narrationStartCue": "確認できた数字を置きます。前の四半期にAMDが示していた第二四半期売上の中心値は百十二億ドルでし",
             "objectIds": [
-              "scene-03-card-001"
+              "scene-03-beat-001-number-02"
             ],
             "pictureBook": null,
-            "primaryElement": "Q2会社見通しと実績",
+            "primaryElement": "Q2実績 115.4億ドル",
             "primaryFunction": "Evidence",
             "returnScreenState": null,
             "screenQuestion": "Q2実績は会社見通しを超えたか",
@@ -1622,25 +1749,24 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "templateConfig": {
               "comparisonBasis": null,
               "dataBasis": "会社発表と主要報道の決算数値",
+              "displayOrder": [
+                "scene-03-beat-001-number-02"
+              ],
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
               "variant": "default"
             },
+            "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
+              "Q2実績 115.4億ドル",
               "会社見通し中心 112億ドル",
-              "実績 115.4億ドル",
               "差 +3.4億ドル"
             ],
-            "visualBeatId": "scene-03-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
-            "visualMode": "number-comparison",
-            "visualTemplate": "metric-comparison-board"
+            "visualGrammarId": "evidence",
+            "visualMode": "text-focus",
+            "visualTemplate": "hero-number"
           },
           {
             "assetPlacementIds": [],
@@ -1667,30 +1793,32 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "returnScreenState": null,
             "screenQuestion": "Q3見通しは市場予想を超えたか",
             "screenState": "Chart",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-03-chunk-002",
             "templateConfig": {
-              "comparisonBasis": null,
+              "comparisonBasis": "売上見通しの強さと粗利率の慎重材料",
               "dataBasis": "会社発表と主要報道の決算数値",
-              "laneLabels": [],
+              "displayOrder": [
+                "scene-03-card-002"
+              ],
+              "laneLabels": [
+                "追い風",
+                "向かい風"
+              ],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "two-lane"
             },
+            "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
-              "会社見通し 130億ドル",
-              "市場予想 125.2億ドル",
-              "粗利率 56%"
+              "追い風｜会社見通し 130億ドル",
+              "追い風｜市場予想 125.2億ドル",
+              "向かい風｜粗利率 56%"
             ],
-            "visualBeatId": "scene-03-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "number-comparison",
-            "visualTemplate": "metric-comparison-board"
+            "visualGrammarId": "evidence",
+            "visualMode": "text-focus",
+            "visualTemplate": "tailwind-headwind"
           }
         ],
         "visualEvents": [
@@ -1703,7 +1831,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-03-card-001",
+            "targetId": "scene-03-beat-001-number-02",
             "timing": "chunk-start"
           },
           {
@@ -1715,11 +1843,11 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-03-card-002",
+            "targetId": "scene-03-beat-002-number-01",
             "timing": "chunk-start"
           }
         ],
-        "visualMode": "number-comparison"
+        "visualMode": "text-focus"
       },
       {
         "arrows": [],
@@ -1757,43 +1885,40 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         ],
         "cards": [
           {
-            "cardId": "scene-04-card-001",
+            "cardId": "scene-04-card-expected",
             "lines": [
               {
                 "label": "1",
                 "tone": "neutral",
                 "value": "Expected 125.2億ドル"
-              },
+              }
+            ],
+            "role": "expected",
+            "title": "Expected"
+          },
+          {
+            "cardId": "scene-04-card-actual",
+            "lines": [
               {
                 "label": "2",
                 "tone": "neutral",
                 "value": "Actual 130億ドル"
-              },
+              }
+            ],
+            "role": "actual",
+            "title": "Actual"
+          },
+          {
+            "cardId": "scene-04-card-gap",
+            "lines": [
               {
                 "label": "3",
                 "tone": "neutral",
                 "value": "Gap +4.8億ドル"
               }
             ],
-            "role": null,
-            "title": "Expected / Actual / Gap"
-          },
-          {
-            "cardId": "scene-04-card-002",
-            "lines": [
-              {
-                "label": "1",
-                "tone": "neutral",
-                "value": "確認済み：売上・見通しは上振れ"
-              },
-              {
-                "label": "2",
-                "tone": "neutral",
-                "value": "報道解釈：AIの追加証拠が不足"
-              }
-            ],
-            "role": null,
-            "title": "数値超過と期待未達の境界"
+            "role": "gap",
+            "title": "Gap"
           }
         ],
         "causalScope": "lead-stock",
@@ -1857,7 +1982,9 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "narrationEndCue": "。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
             "narrationStartCue": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの",
             "objectIds": [
-              "scene-04-card-001"
+              "scene-04-card-expected",
+              "scene-04-card-actual",
+              "scene-04-card-gap"
             ],
             "pictureBook": null,
             "primaryElement": "Expected / Actual / Gap",
@@ -1875,18 +2002,14 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "outcomeNodeId": null,
               "variant": "default"
             },
+            "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "Expected 125.2億ドル",
               "Actual 130億ドル",
               "Gap +4.8億ドル"
             ],
-            "visualBeatId": "scene-04-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "gap",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "gap",
             "visualMode": "expected-actual-gap",
             "visualTemplate": "expected-actual-gap-flow"
           },
@@ -1907,16 +2030,14 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "finalHoldMs": 500,
             "narrationEndCue": "。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。",
             "narrationStartCue": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めて",
-            "objectIds": [
-              "scene-04-card-002"
-            ],
+            "objectIds": [],
             "pictureBook": null,
             "primaryElement": "数値超過と期待未達の境界",
             "primaryFunction": "Evidence",
             "returnScreenState": null,
             "screenQuestion": "確認済みと市場解釈をどう分けるか",
             "screenState": "Data",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "static",
             "startChunkId": "scene-04-chunk-002",
             "templateConfig": {
               "comparisonBasis": null,
@@ -1924,20 +2045,16 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "confirmed-vs-unconfirmed"
             },
+            "templateVariant": "confirmed-vs-unconfirmed",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "確認済み：売上・見通しは上振れ",
               "報道解釈：AIの追加証拠が不足"
             ],
-            "visualBeatId": "scene-04-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "expected-actual-gap",
+            "visualGrammarId": "evidence",
+            "visualMode": "text-focus",
             "visualTemplate": "evidence-boundary"
           }
         ],
@@ -1951,26 +2068,51 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-04-card-001",
+            "targetId": "scene-04-card-expected",
             "timing": "chunk-start"
           },
           {
             "action": "show",
-            "atChunkId": "scene-04-chunk-002",
+            "atChunkId": "scene-04-chunk-001",
             "durationMs": 560,
             "easingPreset": "smooth-out",
             "eventId": "event-008",
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-04-card-002",
+            "targetId": "scene-04-card-actual",
+            "timing": "chunk-start"
+          },
+          {
+            "action": "show",
+            "atChunkId": "scene-04-chunk-001",
+            "durationMs": 560,
+            "easingPreset": "smooth-out",
+            "eventId": "event-019",
+            "expression": null,
+            "motionPreset": "rise-soft",
+            "offsetMs": 0,
+            "targetId": "scene-04-card-gap",
             "timing": "chunk-start"
           }
         ],
         "visualMode": "expected-actual-gap"
       },
       {
-        "arrows": [],
+        "arrows": [
+          {
+            "arrowId": "scene-05-arrow-001",
+            "fromNodeId": "scene-05-node-001",
+            "label": "",
+            "toNodeId": "scene-05-node-002"
+          },
+          {
+            "arrowId": "scene-05-arrow-002",
+            "fromNodeId": "scene-05-node-002",
+            "label": "",
+            "toNodeId": "scene-05-node-003"
+          }
+        ],
         "assetPlacements": [
           {
             "assetId": "mainBackground",
@@ -2105,7 +2247,20 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "speechText": "このニュースはAMDの売上成長を消しません。ただ、同じ夜にNVIDIAへ具体的な顧客証拠が加わったため、AMDには『成長している』より一段強い証明が要求されました。"
           }
         ],
-        "nodes": [],
+        "nodes": [
+          {
+            "label": "SpaceX計算増設",
+            "nodeId": "scene-05-node-001"
+          },
+          {
+            "label": "NVIDIA専属採用",
+            "nodeId": "scene-05-node-002"
+          },
+          {
+            "label": "将来需要の具体化",
+            "nodeId": "scene-05-node-003"
+          }
+        ],
         "numbers": [],
         "performanceIntent": "NVIDIAカードで世界ニュースを実体化する",
         "purpose": "SpaceXの採用判断が半導体競争へ届く経路を示す",
@@ -2157,10 +2312,10 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "pictureBook": null,
             "primaryElement": "NVIDIA企業カード",
             "primaryFunction": "Anchor",
-            "returnScreenState": "Data",
+            "returnScreenState": "Chart",
             "screenQuestion": "比較対象の勝者候補は誰か",
             "screenState": "EntityFocus",
-            "sequencePolicy": "static",
+            "sequencePolicy": "explicit",
             "startChunkId": "scene-05-chunk-001",
             "templateConfig": {
               "comparisonBasis": null,
@@ -2170,17 +2325,13 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "outcomeNodeId": null,
               "variant": "prebuilt-card"
             },
+            "templateVariant": "prebuilt-card",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "NVIDIA",
               "SpaceXがGPUを専属採用"
             ],
-            "visualBeatId": "scene-05-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "entity",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "entity",
             "visualMode": "text-focus",
             "visualTemplate": "entity-card-full"
           },
@@ -2202,7 +2353,11 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "narrationEndCue": "広げる計画を示しました。大規模な利用者が、次の増設先をNVIDIAへ固定したという採用証拠です。",
             "narrationStartCue": "重要なのは、有名人の一言だけではありません。SpaceXは計算能力を年末の二ギガワットから、二〇",
             "objectIds": [
-              "scene-05-card-002"
+              "scene-05-node-001",
+              "scene-05-node-002",
+              "scene-05-arrow-001",
+              "scene-05-node-003",
+              "scene-05-arrow-002"
             ],
             "pictureBook": null,
             "primaryElement": "顧客採用から受注期待への経路",
@@ -2210,29 +2365,29 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "returnScreenState": null,
             "screenQuestion": "SpaceXの発言はどう半導体評価へ届くか",
             "screenState": "Chart",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-05-chunk-002",
             "templateConfig": {
               "comparisonBasis": null,
               "dataBasis": "SpaceX説明会は8月4日16:30 ET、AMD説明会は17:00 ET",
               "laneLabels": [],
-              "nodeOrder": [],
-              "outcomeNodeId": null,
-              "variant": "default"
+              "nodeOrder": [
+                "scene-05-node-001",
+                "scene-05-node-002",
+                "scene-05-node-003"
+              ],
+              "outcomeNodeId": "scene-05-node-003",
+              "variant": "left-to-right"
             },
+            "templateVariant": "left-to-right",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "SpaceX計算増設",
               "NVIDIA専属採用",
               "将来需要の具体化"
             ],
-            "visualBeatId": "scene-05-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "causal",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "text-focus",
+            "visualGrammarId": "causal",
+            "visualMode": "causal-diagram",
             "visualTemplate": "causal-lane"
           },
           {
@@ -2272,17 +2427,13 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "outcomeNodeId": null,
               "variant": "default"
             },
+            "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "AMDの成長は事実",
               "相対評価ではNVIDIAが優位"
             ],
-            "visualBeatId": "scene-05-beat-003",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "bridge-text",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "bridge-text",
             "visualMode": "text-focus",
             "visualTemplate": "text-focus"
           }
@@ -2309,7 +2460,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-05-card-002",
+            "targetId": "scene-05-node-001",
             "timing": "chunk-start"
           },
           {
@@ -2436,7 +2587,38 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           }
         ],
         "nodes": [],
-        "numbers": [],
+        "numbers": [
+          {
+            "comparison": null,
+            "label": "SOXX",
+            "numberId": "scene-06-beat-002-number-01",
+            "numericValue": -2.12,
+            "precision": 2,
+            "tone": "negative",
+            "unit": "%",
+            "value": "-2.12%"
+          },
+          {
+            "comparison": null,
+            "label": "Alphabet",
+            "numberId": "scene-06-beat-002-number-02",
+            "numericValue": -4.03,
+            "precision": 2,
+            "tone": "negative",
+            "unit": "%",
+            "value": "-4.03%"
+          },
+          {
+            "comparison": null,
+            "label": "Microsoft",
+            "numberId": "scene-06-beat-002-number-03",
+            "numericValue": -1.09,
+            "precision": 2,
+            "tone": "negative",
+            "unit": "%",
+            "value": "-1.09%"
+          }
+        ],
         "performanceIntent": "時系列の限界を明示しながら結論を絞る",
         "purpose": "発表順と終値を使い、主役反応とNASDAQ全体を分ける",
         "sceneId": "scene-06",
@@ -2490,20 +2672,23 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "reactionTimeline": {
+                "eventOrderIds": [
+                  "scene-06-card-001"
+                ],
+                "precision": "official-time-plus-close",
+                "seriesObjectIds": []
+              },
+              "variant": "official-time-plus-close"
             },
+            "templateVariant": "official-time-plus-close",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "16:30 ET SpaceX説明会",
               "17:00 ET AMD説明会",
               "翌日 AMD -7.04% / NVDA +3.43%"
             ],
-            "visualBeatId": "scene-06-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "reaction",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "reaction",
             "visualMode": "timeline",
             "visualTemplate": "event-reaction-timeline"
           },
@@ -2522,40 +2707,69 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expressionChange": null,
             "fallback": null,
             "finalHoldMs": 500,
+            "financialReturnTarget": "SOXX -2.12%",
+            "financialVisualTrace": {
+              "causalStepIds": [],
+              "comparisonBasis": "8月4日16:30 ET SpaceX、17:00 ET AMD、8月5日通常取引終値",
+              "contractVersion": "1.0.0",
+              "displayOrder": [
+                "scene-06-beat-002-number-01",
+                "scene-06-beat-002-number-02",
+                "scene-06-beat-002-number-03"
+              ],
+              "finalEpisodeContractSha256": "706d12355ba7bf2cb02261257eb54278cb6ad5abd5d4e757f4d5418809667d59",
+              "intentId": "fvi-scene-06-beat-002",
+              "metricIds": [],
+              "reasonCodes": [],
+              "recipeId": "market-pulse-grid",
+              "recipePlanSha256": "e9b7f051db63e23ba8d2284c93f719bbd32e42cefaa4d9c8dde47fa39c744457",
+              "selectedPath": "preferred",
+              "selectedPlanId": "fvp-scene-06-beat-002",
+              "selectedPlanSha256": "45b911aa59f24d7e9a2843cec3c58db150b62f8fd033c413256c0c6d49d59297",
+              "sourceIds": [
+                "source-001",
+                "source-008"
+              ]
+            },
             "narrationEndCue": "三パーセント安、Microsoftも一・〇九パーセント安で、大型テックの別の弱さが重なりました。",
             "narrationStartCue": "ただし、分足データがないので、どの発言が何分に何パーセント動かしたとは言えません。またNASDA",
             "objectIds": [
-              "scene-06-card-002"
+              "scene-06-beat-002-number-01",
+              "scene-06-beat-002-number-02",
+              "scene-06-beat-002-number-03"
             ],
             "pictureBook": null,
-            "primaryElement": "主役反応と大型テック別要因",
+            "primaryElement": "半導体 → 大型テックの別要因",
             "primaryFunction": "Explain",
             "returnScreenState": null,
-            "screenQuestion": "AMDとNASDAQ全体をどう分けるか",
+            "screenQuestion": "AMD一社でNASDAQ全体を説明できるか",
             "screenState": "Data",
             "sequencePolicy": "explicit",
             "startChunkId": "scene-06-chunk-002",
             "templateConfig": {
-              "comparisonBasis": null,
+              "causalStepIds": [],
+              "comparisonBasis": "8月4日16:30 ET SpaceX、17:00 ET AMD、8月5日通常取引終値",
               "dataBasis": "8月4日16:30 ET SpaceX、17:00 ET AMD、8月5日通常取引終値",
+              "displayOrder": [
+                "scene-06-beat-002-number-01",
+                "scene-06-beat-002-number-02",
+                "scene-06-beat-002-number-03"
+              ],
               "laneLabels": [],
+              "metricIds": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "grid"
             },
+            "templateVariant": "grid",
+            "transitionRole": "continuation",
             "viewerTexts": [
-              "SOXX -2.12%",
-              "Alphabet -4.03%",
-              "Microsoft -1.09%"
+              "① 半導体｜SOXX -2.12%",
+              "② 大型テック｜Alphabet -4.03%",
+              "③ 大型テック｜Microsoft -1.09%"
             ],
-            "visualBeatId": "scene-06-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "reaction",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "timeline",
+            "visualGrammarId": "reaction",
+            "visualMode": "number-comparison",
             "visualTemplate": "market-pulse-grid"
           }
         ],
@@ -2581,7 +2795,31 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-06-card-002",
+            "targetId": "scene-06-beat-002-number-01",
+            "timing": "chunk-start"
+          },
+          {
+            "action": "show",
+            "atChunkId": "scene-06-chunk-002",
+            "durationMs": 560,
+            "easingPreset": "smooth-out",
+            "eventId": "event-090",
+            "expression": null,
+            "motionPreset": "rise-soft",
+            "offsetMs": 900,
+            "targetId": "scene-06-beat-002-number-02",
+            "timing": "chunk-start"
+          },
+          {
+            "action": "show",
+            "atChunkId": "scene-06-chunk-002",
+            "durationMs": 560,
+            "easingPreset": "smooth-out",
+            "eventId": "event-091",
+            "expression": null,
+            "motionPreset": "rise-soft",
+            "offsetMs": 1800,
+            "targetId": "scene-06-beat-002-number-03",
             "timing": "chunk-start"
           }
         ],
@@ -2642,7 +2880,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               }
             ],
             "role": null,
-            "title": "NVIDIA・AMD・Alphabet比較"
+            "title": "NVIDIA・AMD・\nAlphabet比較"
           },
           {
             "cardId": "scene-07-card-002",
@@ -2672,7 +2910,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           "source-001",
           "source-008"
         ],
-        "expectedBasisType": "not-applicable",
+        "expectedBasisType": null,
         "formalName": "反対材料と銘柄差",
         "headline": "AI株は一方向ではない",
         "initialExpression": "困惑",
@@ -2693,7 +2931,86 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           }
         ],
         "nodes": [],
-        "numbers": [],
+        "numbers": [
+          {
+            "comparison": null,
+            "label": "NVIDIA",
+            "numberId": "scene-07-beat-001-number-01-01",
+            "tone": "neutral",
+            "unit": "",
+            "value": "+3.43%"
+          },
+          {
+            "comparison": null,
+            "label": "AMD",
+            "numberId": "scene-07-beat-001-number-01-02",
+            "tone": "neutral",
+            "unit": "",
+            "value": "-7.04%"
+          },
+          {
+            "comparison": null,
+            "label": "Alphabet",
+            "numberId": "scene-07-beat-001-number-01-03",
+            "tone": "neutral",
+            "unit": "",
+            "value": "-4.03%"
+          },
+          {
+            "comparison": null,
+            "label": "半導体の相対評価とNASDAQ別要因",
+            "numberId": "scene-07-beat-002-number-01-01",
+            "tone": "neutral",
+            "unit": "",
+            "value": "半導体：採用証拠の差"
+          },
+          {
+            "comparison": null,
+            "label": "半導体の相対評価とNASDAQ別要因",
+            "numberId": "scene-07-beat-002-number-01-02",
+            "tone": "neutral",
+            "unit": "",
+            "value": "NASDAQ：大型テック安も重なる"
+          },
+          {
+            "comparison": null,
+            "label": "Dow",
+            "numberId": "scene-07-beat-002-number-01-03",
+            "tone": "neutral",
+            "unit": "",
+            "value": "+0.5%の混合相場"
+          },
+          {
+            "comparison": null,
+            "label": "NVIDIA",
+            "numberId": "scene-07-beat-001-number-01",
+            "numericValue": 3.43,
+            "precision": 2,
+            "tone": "positive",
+            "unit": "%",
+            "value": "+3.43%"
+          },
+          {
+            "comparison": null,
+            "label": "AMD",
+            "numberId": "scene-07-beat-001-number-02",
+            "numericValue": -7.04,
+            "precision": 2,
+            "tone": "negative",
+            "unit": "%",
+            "value": "-7.04%"
+          },
+          {
+            "comparison": null,
+            "label": "Alphabet",
+            "numberId": "scene-07-beat-001-number-03",
+            "numericValue": -4.03,
+            "precision": 2,
+            "tone": "negative",
+            "unit": "%",
+            "value": "-4.03%"
+          }
+        ],
         "performanceIntent": "選別という言葉を断定せず、確認範囲を示す",
         "purpose": "仮説の限界を三銘柄比較で示す",
         "sceneId": "scene-07",
@@ -2729,7 +3046,9 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "narrationEndCue": "phabetは四・〇三パーセント安でした。AIという共通語だけでは、この三方向を説明できません。",
             "narrationStartCue": "三つだけ並べます。NVIDIAは三・四三パーセント高。AMDは七・〇四パーセント安。Alphab",
             "objectIds": [
-              "scene-07-card-001"
+              "scene-07-beat-001-number-01",
+              "scene-07-beat-001-number-02",
+              "scene-07-beat-001-number-03"
             ],
             "pictureBook": null,
             "primaryElement": "NVIDIA・AMD・Alphabet比較",
@@ -2737,28 +3056,29 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "returnScreenState": null,
             "screenQuestion": "三銘柄の反応差は何を示すか",
             "screenState": "Chart",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-07-chunk-001",
             "templateConfig": {
               "comparisonBasis": "三銘柄の反応差は何を示すか",
               "dataBasis": "8月5日通常取引終値",
+              "displayOrder": [
+                "scene-07-beat-001-number-01",
+                "scene-07-beat-001-number-02",
+                "scene-07-beat-001-number-03"
+              ],
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "center-zero"
             },
+            "templateVariant": "center-zero",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "NVIDIA +3.43%",
               "AMD -7.04%",
               "Alphabet -4.03%"
             ],
-            "visualBeatId": "scene-07-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "comparison",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "comparison",
             "visualMode": "number-comparison",
             "visualTemplate": "diverging-stock-bars"
           },
@@ -2767,7 +3087,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "assetState": "not-required",
             "beatId": "scene-07-beat-002",
             "changeCue": "半導体：採用証拠の差",
-            "contentType": "dual-asset-split",
+            "contentType": "verification-checklist",
             "endChunkId": "scene-07-chunk-002",
             "entity": null,
             "evidenceSourceIds": [
@@ -2783,35 +3103,36 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "scene-07-card-002"
             ],
             "pictureBook": null,
-            "primaryElement": "半導体の相対評価とNASDAQ別要因",
-            "primaryFunction": "Compare",
+            "primaryElement": "AI全面安でも、単一原因でもない",
+            "primaryFunction": "Explain",
             "returnScreenState": null,
             "screenQuestion": "どこまで因果を言えるか",
             "screenState": "Data",
             "sequencePolicy": "explicit",
             "startChunkId": "scene-07-chunk-002",
             "templateConfig": {
-              "comparisonBasis": "どこまで因果を言えるか",
+              "causalStepIds": [],
+              "comparisonBasis": null,
               "dataBasis": "8月5日通常取引終値",
+              "displayOrder": [
+                "scene-07-card-002"
+              ],
               "laneLabels": [],
+              "metricIds": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "confirmed-vs-unconfirmed"
             },
+            "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
-              "半導体：採用証拠の差",
-              "NASDAQ：大型テック安も重なる",
-              "Dow +0.5%の混合相場"
+              "AI全面安ではない",
+              "NVIDIAだけでNASDAQ全体は説明できない",
+              "大型テック安とDow高が、単一原因への断定を弱める"
             ],
-            "visualBeatId": "scene-07-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "comparison",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "number-comparison",
-            "visualTemplate": "dual-asset-split"
+            "visualGrammarId": "evidence",
+            "visualMode": "verification-points",
+            "visualTemplate": "evidence-boundary"
           }
         ],
         "visualEvents": [
@@ -2824,7 +3145,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-07-card-001",
+            "targetId": "scene-07-beat-001-number-01",
             "timing": "chunk-start"
           },
           {
@@ -2914,7 +3235,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           "source-005",
           "source-007"
         ],
-        "expectedBasisType": "not-applicable",
+        "expectedBasisType": null,
         "formalName": "今夜の検証ポイント",
         "headline": "次に見る3点",
         "initialExpression": "通常",
@@ -2986,24 +3307,23 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "templateConfig": {
               "comparisonBasis": null,
               "dataBasis": "今後の会社発表、決算、セクター終値で検証",
-              "laneLabels": [],
+              "laneLabels": [
+                "AMD側",
+                "市場側"
+              ],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "strengthen-vs-weaken"
             },
+            "templateVariant": "strengthen-vs-weaken",
+            "transitionRole": "major-shift",
             "viewerTexts": [
-              "大型顧客の獲得",
-              "粗利率・供給制約",
-              "SOXXへの広がり"
+              "AMD側｜大型顧客の獲得",
+              "AMD側｜粗利率・供給制約",
+              "市場側｜SOXXへの広がり"
             ],
-            "visualBeatId": "scene-08-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "verification",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
-            "visualMode": "verification",
+            "visualGrammarId": "verification",
+            "visualMode": "verification-points",
             "visualTemplate": "verification-matrix"
           },
           {
@@ -3040,21 +3360,17 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "confirmed-vs-unconfirmed"
             },
+            "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "弱まる：AMDの受注・利益率・セクター反応が改善",
               "強まる：大型採用がNVIDIAへ集中"
             ],
-            "visualBeatId": "scene-08-beat-002",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "verification",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "verification",
-            "visualTemplate": "verification-checklist"
+            "visualGrammarId": "evidence",
+            "visualMode": "verification-points",
+            "visualTemplate": "evidence-boundary"
           }
         ],
         "visualEvents": [
@@ -3083,7 +3399,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "timing": "chunk-start"
           }
         ],
-        "visualMode": "verification"
+        "visualMode": "verification-points"
       },
       {
         "arrows": [],
@@ -3116,15 +3432,25 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
               {
                 "label": "1",
                 "tone": "neutral",
-                "value": "AMD：予想超過でも下落"
+                "value": "確認済み：売上・見通しは上振れ"
               },
               {
                 "label": "2",
                 "tone": "neutral",
-                "value": "NVIDIA：SpaceX採用で上昇"
+                "value": "SpaceXがGPUを専属採用"
               },
               {
-                "label": "3",
+                "label": "1",
+                "tone": "neutral",
+                "value": "大型顧客の獲得"
+              },
+              {
+                "label": "2",
+                "tone": "neutral",
+                "value": "粗利率・供給制約"
+              },
+              {
+                "label": "2",
                 "tone": "neutral",
                 "value": "NASDAQ：大型テック安も重なる"
               }
@@ -3141,7 +3467,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           "source-007",
           "source-008"
         ],
-        "expectedBasisType": "not-applicable",
+        "expectedBasisType": null,
         "formalName": "いってらっしゃい、おやすみ",
         "headline": "数字より、次の受注証拠",
         "initialExpression": "眠そう",
@@ -3160,7 +3486,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         "purpose": "中心結論を回収し固定エンディングへつなぐ",
         "sceneId": "scene-09",
         "sceneNumber": 9,
-        "sceneRole": "fixed-ending",
+        "sceneRole": "closing-recap-sendoff-goodnight",
         "sourceLabel": "本編の回収",
         "supportingTexts": [
           "AMDは予想超過でも下落",
@@ -3169,8 +3495,8 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         ],
         "timelineBasis": "not-applicable",
         "transition": {
-          "durationMs": 300,
-          "type": "fade"
+          "durationMs": 0,
+          "type": "none"
         },
         "uncertainty": "新情報は追加しない",
         "visualBeats": [
@@ -3208,25 +3534,24 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "templateConfig": {
               "comparisonBasis": null,
               "dataBasis": "not-applicable",
+              "displayOrder": [
+                "scene-09-card-001"
+              ],
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
               "variant": "default"
             },
+            "templateVariant": "default",
+            "transitionRole": "closing",
             "viewerTexts": [
               "AMD：予想超過でも下落",
               "NVIDIA：SpaceX採用で上昇",
               "NASDAQ：大型テック安も重なる"
             ],
-            "visualBeatId": "scene-09-beat-001",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "assembly",
-              "returnTargetBeatId": null,
-              "transitionRole": "closing"
-            },
-            "visualMode": "closing-recap",
-            "visualTemplate": "closing-recap"
+            "visualGrammarId": "assembly",
+            "visualMode": "conclusion-card",
+            "visualTemplate": "final-assembly"
           }
         ],
         "visualEvents": [
@@ -3243,7 +3568,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "timing": "chunk-start"
           }
         ],
-        "visualMode": "closing-recap"
+        "visualMode": "conclusion-card"
       }
     ],
     "schemaVersion": "2.4.0",
@@ -3269,7 +3594,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         "publisher": "AMD Investor Relations",
         "reference": "https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results",
         "sourceId": "source-002",
-        "sourceType": "company-ir",
+        "sourceType": "company",
         "title": "AMD Reports First Quarter 2026 Financial Results",
         "usedFor": [
           "Q2会社ガイダンス110〜115億ドル、中心112億ドル",
@@ -3283,7 +3608,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         "publisher": "AMD Investor Relations",
         "reference": "https://ir.amd.com/news-events/press-releases/detail/1289/amd-to-report-fiscal-second-quarter-2026-financial-results",
         "sourceId": "source-003",
-        "sourceType": "company-ir",
+        "sourceType": "company",
         "title": "AMD to Report Fiscal Second Quarter 2026 Financial Results",
         "usedFor": [
           "AMD決算発表が8月4日引け後、説明会が17時ET"
@@ -3325,7 +3650,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         "publisher": "SpaceX Investor Relations",
         "reference": "https://ir.spacex.com/updates/releases-details/2026/SpaceX-to-Post-Second-Quarter-2026-Results-and-Host-Webcast-on-August-4-2026-2026-g8layJlbFm/default.aspx",
         "sourceId": "source-006",
-        "sourceType": "company-ir",
+        "sourceType": "company",
         "title": "SpaceX to Post Second Quarter 2026 Results and Host Webcast on August 4, 2026",
         "usedFor": [
           "SpaceX説明会が8月4日16時30分ET"
@@ -3362,39 +3687,25 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
       },
       {
         "accessedAt": "2026-08-06T04:31:00Z",
-        "narrationAttribution": null,
+        "narrationAttribution": "過去回の編集記憶（現在証拠として不使用）",
         "publishedAt": "2026-07-31T00:00:00Z",
         "publisher": "nasdaq-plot-creator editorial memory",
         "reference": "editorial-memory/claim_ledger.json#ai-capex-evaluation-axis",
-        "sourceId": "memory-001",
-        "sourceType": "historical-memory",
+        "sourceId": "source-009",
+        "sourceType": "other",
         "title": "Claim ledger: AI設備投資の評価軸",
         "usedFor": [
           "過去回との差分確認のみ。現在証拠として不使用"
         ]
       }
     ],
-    "tts": {
-      "blockA": {
-        "sceneIds": [
-          "scene-01",
-          "scene-02",
-          "scene-03",
-          "scene-04"
-        ]
-      },
-      "blockB": {
-        "sceneIds": [
-          "scene-05",
-          "scene-06",
-          "scene-07",
-          "scene-08",
-          "scene-09"
-        ]
-      },
-      "retryPolicy": "failed-block-only"
+    "visualGrammarContract": {
+      "beatCount": 18,
+      "contractVersion": "1.0.0",
+      "finalEpisodeContractSha256": "706d12355ba7bf2cb02261257eb54278cb6ad5abd5d4e757f4d5418809667d59",
+      "rendererCompatibilitySha256": "563bc71c58120552c3f601cab662a4f4287e44c149e46268ef5678d279b1adb6",
+      "semanticsSha256": "863038fa5afbb604e2ac7d5e132b568c95031f1b4f158d562f644b0233bd8c95"
     },
-    "visualGrammarContractVersion": "1.0.0",
     "voiceProfileId": "gemini-charon"
   },
   "renderer_contract": {

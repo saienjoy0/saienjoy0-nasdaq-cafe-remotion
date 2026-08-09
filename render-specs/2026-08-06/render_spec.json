@@ -127,7 +127,10 @@
     "changesApplied": [
       "『数字のGapはプラス、期待のGapはマイナス』へ整理",
       "AlphabetとMicrosoft安を独立したNASDAQ要因として残した",
-      "分足欠損をScene 6で明示した"
+      "分足欠損をScene 6で明示した",
+      "Scene 3のQ2実績を単一Heroへ変更し、数字の優先順位を明確化",
+      "Scene 6の市場要因をSOXX→Alphabet→Microsoftの順に段階表示",
+      "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更"
     ],
     "largestDropoffRisk": "Scene 4で通常コンセンサスと高まった期待の二層を混同する可能性",
     "requiredChanges": [
@@ -827,12 +830,12 @@
           "value": "112億ドル"
         },
         {
-          "comparison": null,
+          "comparison": "会社見通し中心112億ドルを+3.4億ドル上回る",
           "label": "実績",
           "numberId": "scene-03-beat-001-number-02",
           "numericValue": 115.4,
           "precision": 1,
-          "tone": "neutral",
+          "tone": "positive",
           "unit": "億ドル",
           "value": "115.4億ドル"
         },
@@ -899,7 +902,7 @@
           "assetState": "not-required",
           "beatId": "scene-03-beat-001",
           "changeCue": "会社見通し中心 112億ドル",
-          "contentType": "metric-comparison-board",
+          "contentType": "hero-number",
           "endChunkId": "scene-03-chunk-001",
           "entity": null,
           "evidenceSourceIds": [
@@ -912,25 +915,21 @@
           "narrationEndCue": "、中心値を三・四億ドル上回りました。データセンター売上の六十七・二億ドルも、前年から二倍超です。",
           "narrationStartCue": "確認できた数字を置きます。前の四半期にAMDが示していた第二四半期売上の中心値は百十二億ドルでし",
           "objectIds": [
-            "scene-03-beat-001-number-01",
-            "scene-03-beat-001-number-02",
-            "scene-03-beat-001-number-03"
+            "scene-03-beat-001-number-02"
           ],
           "pictureBook": null,
-          "primaryElement": "Q2会社見通しと実績",
+          "primaryElement": "Q2実績 115.4億ドル",
           "primaryFunction": "Evidence",
           "returnScreenState": null,
           "screenQuestion": "Q2実績は会社見通しを超えたか",
           "screenState": "Data",
-          "sequencePolicy": "object-order-fallback",
+          "sequencePolicy": "explicit",
           "startChunkId": "scene-03-chunk-001",
           "templateConfig": {
             "comparisonBasis": null,
             "dataBasis": "会社発表と主要報道の決算数値",
             "displayOrder": [
-              "scene-03-beat-001-number-01",
-              "scene-03-beat-001-number-02",
-              "scene-03-beat-001-number-03"
+              "scene-03-beat-001-number-02"
             ],
             "laneLabels": [],
             "nodeOrder": [],
@@ -940,13 +939,13 @@
           "templateVariant": "default",
           "transitionRole": "major-shift",
           "viewerTexts": [
+            "Q2実績 115.4億ドル",
             "会社見通し中心 112億ドル",
-            "実績 115.4億ドル",
             "差 +3.4億ドル"
           ],
           "visualGrammarId": "evidence",
-          "visualMode": "number-comparison",
-          "visualTemplate": "metric-comparison-board"
+          "visualMode": "text-focus",
+          "visualTemplate": "hero-number"
         },
         {
           "assetPlacementIds": [],
@@ -1011,7 +1010,7 @@
           "expression": null,
           "motionPreset": "rise-soft",
           "offsetMs": 0,
-          "targetId": "scene-03-beat-001-number-01",
+          "targetId": "scene-03-beat-001-number-02",
           "timing": "chunk-start"
         },
         {
@@ -1027,7 +1026,7 @@
           "timing": "chunk-start"
         }
       ],
-      "visualMode": "number-comparison"
+      "visualMode": "text-focus"
     },
     {
       "arrows": [],
@@ -1774,7 +1773,7 @@
           "numberId": "scene-06-beat-002-number-01",
           "numericValue": -2.12,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-2.12%"
         },
@@ -1784,7 +1783,7 @@
           "numberId": "scene-06-beat-002-number-02",
           "numericValue": -4.03,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-4.03%"
         },
@@ -1794,7 +1793,7 @@
           "numberId": "scene-06-beat-002-number-03",
           "numericValue": -1.09,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-1.09%"
         }
@@ -1919,12 +1918,12 @@
             "scene-06-beat-002-number-03"
           ],
           "pictureBook": null,
-          "primaryElement": "主役反応と大型テック別要因",
+          "primaryElement": "半導体 → 大型テックの別要因",
           "primaryFunction": "Explain",
           "returnScreenState": null,
-          "screenQuestion": "AMDとNASDAQ全体をどう分けるか",
+          "screenQuestion": "AMD一社でNASDAQ全体を説明できるか",
           "screenState": "Data",
-          "sequencePolicy": "object-order-fallback",
+          "sequencePolicy": "explicit",
           "startChunkId": "scene-06-chunk-002",
           "templateConfig": {
             "causalStepIds": [],
@@ -1944,9 +1943,9 @@
           "templateVariant": "grid",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "SOXX -2.12%",
-            "Alphabet -4.03%",
-            "Microsoft -1.09%"
+            "① 半導体｜SOXX -2.12%",
+            "② 大型テック｜Alphabet -4.03%",
+            "③ 大型テック｜Microsoft -1.09%"
           ],
           "visualGrammarId": "reaction",
           "visualMode": "number-comparison",
@@ -1976,6 +1975,30 @@
           "motionPreset": "rise-soft",
           "offsetMs": 0,
           "targetId": "scene-06-beat-002-number-01",
+          "timing": "chunk-start"
+        },
+        {
+          "action": "show",
+          "atChunkId": "scene-06-chunk-002",
+          "durationMs": 560,
+          "easingPreset": "smooth-out",
+          "eventId": "event-090",
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "offsetMs": 900,
+          "targetId": "scene-06-beat-002-number-02",
+          "timing": "chunk-start"
+        },
+        {
+          "action": "show",
+          "atChunkId": "scene-06-chunk-002",
+          "durationMs": 560,
+          "easingPreset": "smooth-out",
+          "eventId": "event-091",
+          "expression": null,
+          "motionPreset": "rise-soft",
+          "offsetMs": 1800,
+          "targetId": "scene-06-beat-002-number-03",
           "timing": "chunk-start"
         }
       ],
@@ -2142,7 +2165,7 @@
           "numberId": "scene-07-beat-001-number-01",
           "numericValue": 3.43,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "positive",
           "unit": "%",
           "value": "+3.43%"
         },
@@ -2152,7 +2175,7 @@
           "numberId": "scene-07-beat-001-number-02",
           "numericValue": -7.04,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-7.04%"
         },
@@ -2162,7 +2185,7 @@
           "numberId": "scene-07-beat-001-number-03",
           "numericValue": -4.03,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-4.03%"
         }
@@ -2243,7 +2266,7 @@
           "assetState": "not-required",
           "beatId": "scene-07-beat-002",
           "changeCue": "半導体：採用証拠の差",
-          "contentType": "dual-asset-split",
+          "contentType": "verification-checklist",
           "endChunkId": "scene-07-chunk-002",
           "entity": null,
           "evidenceSourceIds": [
@@ -2259,8 +2282,8 @@
             "scene-07-card-002"
           ],
           "pictureBook": null,
-          "primaryElement": "半導体の相対評価とNASDAQ別要因",
-          "primaryFunction": "Compare",
+          "primaryElement": "AI全面安でも、単一原因でもない",
+          "primaryFunction": "Explain",
           "returnScreenState": null,
           "screenQuestion": "どこまで因果を言えるか",
           "screenState": "Data",
@@ -2268,33 +2291,27 @@
           "startChunkId": "scene-07-chunk-002",
           "templateConfig": {
             "causalStepIds": [],
-            "comparisonBasis": "どこまで因果を言えるか",
+            "comparisonBasis": null,
             "dataBasis": "8月5日通常取引終値",
             "displayOrder": [
-              "scene-07-card-002",
-              "scene-07-beat-002-number-01-01",
-              "scene-07-beat-002-number-01-02",
-              "scene-07-beat-002-number-01-03"
+              "scene-07-card-002"
             ],
-            "laneLabels": [
-              "仮説を支える",
-              "断定を弱める"
-            ],
+            "laneLabels": [],
             "metricIds": [],
             "nodeOrder": [],
             "outcomeNodeId": null,
-            "variant": "two-lane"
+            "variant": "confirmed-vs-unconfirmed"
           },
-          "templateVariant": "two-lane",
+          "templateVariant": "default",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "仮説を支える｜半導体：採用証拠の差",
-            "断定を弱める｜NASDAQ：大型テック安も重なる",
-            "断定を弱める｜Dow +0.5%の混合相場"
+            "AI全面安ではない",
+            "NVIDIAだけでNASDAQ全体は説明できない",
+            "大型テック安とDow高が、単一原因への断定を弱める"
           ],
           "visualGrammarId": "evidence",
-          "visualMode": "text-focus",
-          "visualTemplate": "tailwind-headwind"
+          "visualMode": "verification-points",
+          "visualTemplate": "evidence-boundary"
         }
       ],
       "visualEvents": [
