@@ -130,7 +130,8 @@
       "分足欠損をScene 6で明示した",
       "Scene 3のQ2実績を単一Heroへ変更し、数字の優先順位を明確化",
       "Scene 6の市場要因をSOXX→Alphabet→Microsoftの順に段階表示",
-      "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更"
+      "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更",
+      "Scene 3のScene見出しをQ2実績とQ3見通しの両Beatを包む表現へ統一"
     ],
     "largestDropoffRisk": "Scene 4で通常コンセンサスと高まった期待の二層を混同する可能性",
     "requiredChanges": [
@@ -751,7 +752,7 @@
       ],
       "expectedBasisType": "major-reporting",
       "formalName": "何が起きた？",
-      "headline": "Q3見通し 130億ドル",
+      "headline": "AMD決算｜実績と見通し",
       "initialExpression": "分析",
       "narrationChunks": [
         {

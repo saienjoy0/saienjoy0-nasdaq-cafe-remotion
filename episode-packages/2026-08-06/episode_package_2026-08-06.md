@@ -248,7 +248,7 @@
 
 
 - ナレーションで示す出典主体・媒体：AMD IR / Reuters
-- 大テロップ：Q3見通し 130億ドル
+- 大テロップ：AMD決算｜実績と見通し
 - 補助テロップ：市場予想 125.2億ドル / Q2売上 115.4億ドル
 - 使用する数字：市場予想 125.2億ドル / Q2売上 115.4億ドル
 - 画面で見せる内容：Q2実績115.4億ドルをHero表示し会社見通しとの差を一目で示す; Q3売上見通しと粗利率
@@ -951,7 +951,8 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         "分足欠損をScene 6で明示した",
         "Scene 3のQ2実績を単一Heroへ変更し、数字の優先順位を明確化",
         "Scene 6の市場要因をSOXX→Alphabet→Microsoftの順に段階表示",
-        "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更"
+        "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更",
+        "Scene 3のScene見出しをQ2実績とQ3見通しの両Beatを包む表現へ統一"
       ],
       "largestDropoffRisk": "Scene 4で通常コンセンサスと高まった期待の二層を混同する可能性",
       "requiredChanges": [
@@ -1572,7 +1573,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         ],
         "expectedBasisType": "major-reporting",
         "formalName": "何が起きた？",
-        "headline": "Q3見通し 130億ドル",
+        "headline": "AMD決算｜実績と見通し",
         "initialExpression": "分析",
         "narrationChunks": [
           {
