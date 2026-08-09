@@ -255,7 +255,7 @@
 - 根拠：AMD IR / Reuters
 - 不確実性：非GAAP粗利率とGAAP数値を混同しない
 
-## Scene 4｜Expected / Actual / Gap
+## Scene 4｜予想 / 実績 / 差
 
 - 目的：通常の予想超過と高まったAI期待の未達を分ける
 - 目安時間：執筆目安のみ。実測はTTS後
@@ -264,22 +264,22 @@
 - 狐の表情：分析
 - 表情切り替え：『ところが』で警戒へ
 - 画面モード：expected-actual-gap
-- 前後の接続文：普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。
+- 前後の接続文：普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。
 
 ### Visual Beats
 
 - **scene-04-beat-001**
-  - 開始合図：普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの
-  - 終了合図：。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。
+  - 開始合図：普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。実績の
+  - 終了合図：。数字の差はプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。
   - 主要視覚機能：Explain
   - 画面状態：Chart
   - Visual Grammar：gap / major-shift
   - Visual Template ID：expected-actual-gap-flow
   - Template Variant：default
-  - 入力構造：Expected 125.2億ドル / Actual 130億ドル / Gap +4.8億ドル
-  - 画面の問い：通常予想とのGapは何か
-  - 主要要素：Expected / Actual / Gap
-  - 視聴者向けテキスト：Expected 125.2億ドル / Actual 130億ドル / Gap +4.8億ドル
+  - 入力構造：予想 125.2億ドル / 実績 130億ドル / 差 +4.8億ドル
+  - 画面の問い：通常予想との差は何か
+  - 主要要素：予想 / 実績 / 差
+  - 視聴者向けテキスト：予想 125.2億ドル / 実績 130億ドル / 差 +4.8億ドル
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -289,7 +289,7 @@
 
 - **scene-04-beat-002**
   - 開始合図：ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めて
-  - 終了合図：。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。
+  - 終了合図：。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。
   - 主要視覚機能：Explain
   - 画面状態：Data
   - Visual Grammar：evidence / continuation
@@ -308,18 +308,18 @@
 
 ### 完成ナレーション
 
-普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの会社見通しは百三十億ドル。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。
+普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。実際に会社が示した見通しは百三十億ドル。差はプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。
 
-ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。
+ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。
 
 
 - ナレーションで示す出典主体・媒体：Reuters / AMD IR
-- 大テロップ：数字のGapはプラス
-- 補助テロップ：期待のGapはマイナス / 普通の合格点では足りなかった
+- 大テロップ：数字の差はプラス
+- 補助テロップ：期待とのズレはマイナス / 普通の合格点では足りなかった
 - 使用する数字：なし
-- 画面で見せる内容：Expected / Actual / Gap; 数値超過と期待未達の境界
+- 画面で見せる内容：予想 / 実績 / 差; 数値超過と期待未達の境界
 - 根拠：Reuters / AMD IR
-- Expectedの根拠区分：アナリストコンセンサス＋主要報道の市場解釈。数値Expectedと高まった期待を混在させない
+- 予想の根拠区分：アナリストコンセンサス＋主要報道の市場解釈。数値予想と高まった期待を混在させない
 - 不確実性：『高まった期待』は主要報道による市場解釈で、公式コンセンサス値ではない
 
 ## Scene 5｜世界からNASDAQへの経路
@@ -665,7 +665,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
 
 ## E. 概要欄
 
-昨夜のNasdaq Compositeは0.83%下落し、SOXXは2.12%安でした。AMDは売上と次四半期見通しで通常予想を上回ったのに7.04%下落し、NVIDIAはSpaceXの専属採用方針を材料に3.43%上昇しました。動画では、AMDの決算数値、Expected / Actual / Gap、SpaceXから半導体競争への経路、Alphabet・Microsoft安を含むNASDAQ全体の別要因を分けて確認します。今後はAMDの大型顧客、粗利率と供給制約、SOXXへの広がりを検証します。本動画はニュース解説であり、個別銘柄の売買を勧めるものではありません。
+昨夜のNasdaq Compositeは0.83%下落し、SOXXは2.12%安でした。AMDは売上と次四半期見通しで通常予想を上回ったのに7.04%下落し、NVIDIAはSpaceXの専属採用方針を材料に3.43%上昇しました。動画では、AMDの決算数値、予想 / 実績 / 差、SpaceXから半導体競争への経路、Alphabet・Microsoft安を含むNASDAQ全体の別要因を分けて確認します。今後はAMDの大型顧客、粗利率と供給制約、SOXXへの広がりを検証します。本動画はニュース解説であり、個別銘柄の売買を勧めるものではありません。
 
 ## F. 制作上の注意
 - アセット完成ゲート：mainBackground、狐7表情、company_amd、company_nvdaは既存レジストリready。
@@ -929,7 +929,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
       }
     ],
     "publishing": {
-      "description": "昨夜のNasdaq Compositeは0.83%下落し、SOXXは2.12%安でした。AMDは売上と次四半期見通しで通常予想を上回ったのに7.04%下落し、NVIDIAはSpaceXの専属採用方針を材料に3.43%上昇しました。動画では、AMDの決算数値、Expected / Actual / Gap、SpaceXから半導体競争への経路、Alphabet・Microsoft安を含むNASDAQ全体の別要因を分けて確認します。今後はAMDの大型顧客、粗利率と供給制約、SOXXへの広がりを検証します。本動画はニュース解説であり、個別銘柄の売買を勧めるものではありません。",
+      "description": "昨夜のNasdaq Compositeは0.83%下落し、SOXXは2.12%安でした。AMDは売上と次四半期見通しで通常予想を上回ったのに7.04%下落し、NVIDIAはSpaceXの専属採用方針を材料に3.43%上昇しました。動画では、AMDの決算数値、予想 / 実績 / 差、SpaceXから半導体競争への経路、Alphabet・Microsoft安を含むNASDAQ全体の別要因を分けて確認します。今後はAMDの大型顧客、粗利率と供給制約、SOXXへの広がりを検証します。本動画はニュース解説であり、個別銘柄の売買を勧めるものではありません。",
       "recommendedThumbnailText": "好決算でも7%安",
       "recommendedTitle": "AMD好決算でも7%安　NVIDIAだけ上がったAI半導体の採点表",
       "thumbnailTextCandidates": [
@@ -952,7 +952,8 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
         "Scene 3のQ2実績を単一Heroへ変更し、数字の優先順位を明確化",
         "Scene 6の市場要因をSOXX→Alphabet→Microsoftの順に段階表示",
         "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更",
-        "Scene 3のScene見出しをQ2実績とQ3見通しの両Beatを包む表現へ統一"
+        "Scene 3のScene見出しをQ2実績とQ3見通しの両Beatを包む表現へ統一",
+        "Scene 4の視聴者向けExpected / Actual / Gap表現を『予想 / 実績 / 差・ズレ』へ日本語化"
       ],
       "largestDropoffRisk": "Scene 4で通常コンセンサスと高まった期待の二層を混同する可能性",
       "requiredChanges": [
@@ -1928,23 +1929,23 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
           "source-005"
         ],
         "expectedBasisType": "major-reporting",
-        "formalName": "Expected / Actual / Gap",
-        "headline": "数字のGapはプラス",
+        "formalName": "予想・実績・差",
+        "headline": "数字の差はプラス",
         "initialExpression": "分析",
         "narrationChunks": [
           {
-            "captionText": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの会社見通しは百三十億ドル。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
+            "captionText": "普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。実際に会社が示した見通しは百三十億ドル。差はプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
             "chunkId": "scene-04-chunk-001",
             "expression": "分析",
             "pauseAfterMs": 120,
-            "speechText": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの会社見通しは百三十億ドル。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。"
+            "speechText": "普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。実際に会社が示した見通しは百三十億ドル。差はプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。"
           },
           {
-            "captionText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。",
+            "captionText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。",
             "chunkId": "scene-04-chunk-002",
             "expression": "警戒",
             "pauseAfterMs": 200,
-            "speechText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。"
+            "speechText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。"
           }
         ],
         "nodes": [],
@@ -1970,7 +1971,7 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "assetPlacementIds": [],
             "assetState": "not-required",
             "beatId": "scene-04-beat-001",
-            "changeCue": "Expected 125.2億ドル",
+            "changeCue": "予想 125.2億ドル",
             "contentType": "expected-actual-gap-flow",
             "endChunkId": "scene-04-chunk-001",
             "entity": null,
@@ -1980,18 +1981,18 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expressionChange": null,
             "fallback": null,
             "finalHoldMs": 500,
-            "narrationEndCue": "。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
-            "narrationStartCue": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの",
+            "narrationEndCue": "第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
+            "narrationStartCue": "普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。",
             "objectIds": [
               "scene-04-card-expected",
               "scene-04-card-actual",
               "scene-04-card-gap"
             ],
             "pictureBook": null,
-            "primaryElement": "Expected / Actual / Gap",
+            "primaryElement": "予想 / 実績 / 差",
             "primaryFunction": "Evidence",
             "returnScreenState": null,
-            "screenQuestion": "通常予想とのGapは何か",
+            "screenQuestion": "通常予想との差は何か",
             "screenState": "Chart",
             "sequencePolicy": "explicit",
             "startChunkId": "scene-04-chunk-001",
@@ -2006,9 +2007,9 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "templateVariant": "default",
             "transitionRole": "major-shift",
             "viewerTexts": [
-              "Expected 125.2億ドル",
-              "Actual 130億ドル",
-              "Gap +4.8億ドル"
+              "予想 125.2億ドル",
+              "実績 130億ドル",
+              "差 +4.8億ドル"
             ],
             "visualGrammarId": "gap",
             "visualMode": "expected-actual-gap",
@@ -2029,8 +2030,8 @@ AMDの顧客獲得と利益率が改善し、半導体全体が反応すれば�
             "expressionChange": null,
             "fallback": null,
             "finalHoldMs": 500,
-            "narrationEndCue": "。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。",
-            "narrationStartCue": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めて",
+            "narrationEndCue": "つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。",
+            "narrationStartCue": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。",
             "objectIds": [],
             "pictureBook": null,
             "primaryElement": "数値超過と期待未達の境界",

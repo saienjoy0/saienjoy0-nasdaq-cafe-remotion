@@ -67,4 +67,16 @@ assert.equal(getEntityFocusPublicPoint({
   entity: {subjectType: "company", displayName: "AMD", role: "CPUとGPUを設計する半導体会社", variant: "company"},
 }), "大型顧客の獲得", "public primaryElement must remain usable");
 
+const spec = JSON.parse(await readFile(path.join(project, "render-specs/2026-08-06/render_spec.json"), "utf8"));
+const scene4 = spec.scenes.find((scene: {sceneId: string}) => scene.sceneId === "scene-04");
+const scene4ViewerCopy = [
+  scene4.headline,
+  ...scene4.narrationChunks.flatMap((chunk: {speechText: string; captionText: string}) => [chunk.speechText, chunk.captionText]),
+  ...scene4.visualBeats.flatMap((beat: {screenQuestion: string; primaryElement: string; viewerTexts: string[]}) => [beat.screenQuestion, beat.primaryElement, ...beat.viewerTexts]),
+].join("\n");
+assert.doesNotMatch(scene4ViewerCopy, /\b(?:Expected|Actual|Gap)\b/i, "Scene 4 viewer copy must use natural Japanese labels");
+assert.match(renderedSource, /const labels = \{expected: "予想", actual: "実績", gap: "差"\} as const;/, "comparison card labels must be Japanese");
+assert.doesNotMatch(renderedSource, /story-template-arrow/, "causal lane must not render arrowhead markers");
+assert.match(renderedSource, /strokeWidth=\{arrow.highlighted \? 6 : 4\} strokeLinecap="round"/, "causal lane must use thin rounded connector lines");
+
 console.log("PASS: 視聴者向け画面から制作・デバッグ表示を除去");

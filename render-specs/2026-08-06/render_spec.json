@@ -108,7 +108,7 @@
     }
   ],
   "publishing": {
-    "description": "昨夜のNasdaq Compositeは0.83%下落し、SOXXは2.12%安でした。AMDは売上と次四半期見通しで通常予想を上回ったのに7.04%下落し、NVIDIAはSpaceXの専属採用方針を材料に3.43%上昇しました。動画では、AMDの決算数値、Expected / Actual / Gap、SpaceXから半導体競争への経路、Alphabet・Microsoft安を含むNASDAQ全体の別要因を分けて確認します。今後はAMDの大型顧客、粗利率と供給制約、SOXXへの広がりを検証します。本動画はニュース解説であり、個別銘柄の売買を勧めるものではありません。",
+    "description": "昨夜のNasdaq Compositeは0.83%下落し、SOXXは2.12%安でした。AMDは売上と次四半期見通しで通常予想を上回ったのに7.04%下落し、NVIDIAはSpaceXの専属採用方針を材料に3.43%上昇しました。動画では、AMDの決算数値、予想 / 実績 / 差、SpaceXから半導体競争への経路、Alphabet・Microsoft安を含むNASDAQ全体の別要因を分けて確認します。今後はAMDの大型顧客、粗利率と供給制約、SOXXへの広がりを検証します。本動画はニュース解説であり、個別銘柄の売買を勧めるものではありません。",
     "recommendedThumbnailText": "好決算でも7%安",
     "recommendedTitle": "AMD好決算でも7%安　NVIDIAだけ上がったAI半導体の採点表",
     "thumbnailTextCandidates": [
@@ -131,7 +131,8 @@
       "Scene 3のQ2実績を単一Heroへ変更し、数字の優先順位を明確化",
       "Scene 6の市場要因をSOXX→Alphabet→Microsoftの順に段階表示",
       "Scene 7後半を比較カードの反復から因果境界のテキスト回収へ変更",
-      "Scene 3のScene見出しをQ2実績とQ3見通しの両Beatを包む表現へ統一"
+      "Scene 3のScene見出しをQ2実績とQ3見通しの両Beatを包む表現へ統一",
+      "Scene 4の視聴者向けExpected / Actual / Gap表現を『予想 / 実績 / 差・ズレ』へ日本語化"
     ],
     "largestDropoffRisk": "Scene 4で通常コンセンサスと高まった期待の二層を混同する可能性",
     "requiredChanges": [
@@ -1107,23 +1108,23 @@
         "source-005"
       ],
       "expectedBasisType": "major-reporting",
-      "formalName": "Expected / Actual / Gap",
-      "headline": "数字のGapはプラス",
+      "formalName": "予想・実績・差",
+      "headline": "数字の差はプラス",
       "initialExpression": "分析",
       "narrationChunks": [
         {
-          "captionText": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの会社見通しは百三十億ドル。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
+          "captionText": "普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。実際に会社が示した見通しは百三十億ドル。差はプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
           "chunkId": "scene-04-chunk-001",
           "expression": "分析",
           "pauseAfterMs": 120,
-          "speechText": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの会社見通しは百三十億ドル。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。"
+          "speechText": "普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。実際に会社が示した見通しは百三十億ドル。差はプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。"
         },
         {
-          "captionText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。",
+          "captionText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。",
           "chunkId": "scene-04-chunk-002",
           "expression": "警戒",
           "pauseAfterMs": 200,
-          "speechText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。"
+          "speechText": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。実際には粗利率見通しが横ばいで、供給制約も残りました。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。"
         }
       ],
       "nodes": [],
@@ -1149,7 +1150,7 @@
           "assetPlacementIds": [],
           "assetState": "not-required",
           "beatId": "scene-04-beat-001",
-          "changeCue": "Expected 125.2億ドル",
+          "changeCue": "予想 125.2億ドル",
           "contentType": "expected-actual-gap-flow",
           "endChunkId": "scene-04-chunk-001",
           "entity": null,
@@ -1159,18 +1160,18 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "。数字のGapはプラスです。第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
-          "narrationStartCue": "普通のExpectedは、第三四半期売上が百二十五・二億ドル前後になることでした。Actualの",
+          "narrationEndCue": "第二四半期実績も会社の事前見通しを上回りました。ここまでは合格です。",
+          "narrationStartCue": "普通の予想は、第三四半期売上が百二十五・二億ドル前後になることでした。",
           "objectIds": [
             "scene-04-card-expected",
             "scene-04-card-actual",
             "scene-04-card-gap"
           ],
           "pictureBook": null,
-          "primaryElement": "Expected / Actual / Gap",
+          "primaryElement": "予想 / 実績 / 差",
           "primaryFunction": "Evidence",
           "returnScreenState": null,
-          "screenQuestion": "通常予想とのGapは何か",
+          "screenQuestion": "通常予想との差は何か",
           "screenState": "Chart",
           "sequencePolicy": "explicit",
           "startChunkId": "scene-04-chunk-001",
@@ -1185,9 +1186,9 @@
           "templateVariant": "default",
           "transitionRole": "major-shift",
           "viewerTexts": [
-            "Expected 125.2億ドル",
-            "Actual 130億ドル",
-            "Gap +4.8億ドル"
+            "予想 125.2億ドル",
+            "実績 130億ドル",
+            "差 +4.8億ドル"
           ],
           "visualGrammarId": "gap",
           "visualMode": "expected-actual-gap",
@@ -1208,8 +1209,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "。つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのGapです。",
-          "narrationStartCue": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めて",
+          "narrationEndCue": "つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。",
+          "narrationStartCue": "ところがReutersは、最近の大型AI提携と株価上昇で、投資家がさらに大きなAIの回収を求めていたと伝えています。",
           "objectIds": [],
           "pictureBook": null,
           "primaryElement": "数値超過と期待未達の境界",
