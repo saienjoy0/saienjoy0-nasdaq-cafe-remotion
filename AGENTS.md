@@ -4,11 +4,13 @@
 
 このリポジトリは、Remotionで「朝のNASDAQカフェ」の公開用動画を生成する実行環境です。
 
-本番Compositionは`NasdaqCafeSpec`です。日次実行の正本は次のファイルだけです。
+本番Compositionは`NasdaqCafeSpec`です。日次の**編集内容の正本**は次のファイルだけです。
 
 ```text
 render-specs/YYYY-MM-DD/render_spec.json
 ```
+
+Plot側からRendererへ渡す正式な輸送単位は、SHA固定されたimmutable renderer handoff bundleです。bundleは`render_spec.json`と、そのrender_specが参照する日次binary assetを機械的に運ぶだけで、編集上の新しい正本にはなりません。
 
 Remotion、Codex、GitHub Actionsは、episode packageや過去資料を読み直して内容を判断しません。PrimaryまたはApproved Fallbackの一方へ解決済みで、正式validatorを通過した`render_spec.json`だけを機械的に描画します。
 
@@ -76,7 +78,7 @@ Codex、GitHub Actions、Remotionは次を推測・補完・要約・短縮・�
 
 ## 5. Visual Story Engine v2契約
 
-本番入力スキーマは`2.2.0`です。生成データ識別子は既存実行系との互換性のため`2.1.0-production`を維持します。旧入力`2.1.0`を本番へ戻してはいけません。
+現在の本番入力スキーマは`2.4.0`です。`2.2.0`と`2.3.0`の受理コードは既存fixture・互換検査・移行用であり、新しい日次本番入力を旧schemaへ戻してはいけません。生成データ識別子は既存実行系との互換性を必要とする場所だけ維持します。
 
 ### 5.1 テンプレート
 
@@ -120,11 +122,32 @@ RendererはScene番号、文章、数値、オブジェクト件数からテン�
 
 ## 6. 本番の日次コマンド
 
+static-only互換経路では従来どおり次を使用できます。
+
 ```bash
 npm run episode:spec:validate -- render-specs/YYYY-MM-DD/render_spec.json
 npm run episode:spec:compile -- render-specs/YYYY-MM-DD/render_spec.json
 npm run episode:spec:preview -- render-specs/YYYY-MM-DD/render_spec.json
 ```
+
+日次handoff assetを含む正式経路では、まずimmutable bundleを検証してruntime asset registryを生成します。
+
+```bash
+npm run handoff:intake -- \
+  --download-root=<artifact-root> \
+  --expected-bundle-id=<sha256> \
+  --expected-manifest-sha256=<sha256> \
+  --episode-date=YYYY-MM-DD \
+  --renderer-commit=<40-hex> \
+  --renderer-contract-version=2.4.0 \
+  --registry-output=build/handoff/runtime_asset_registry.json
+
+export NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY=build/handoff/runtime_asset_registry.json
+npm run episode:spec:validate -- <verified-bundle-render-spec>
+npm run episode:spec:preview -- <verified-bundle-render-spec>
+```
+
+validatorとcompileは同じruntime asset registryを使用します。片方だけへ日次assetを注入してはいけません。
 
 preview生成後はユーザーが見た目を確認します。明示依頼なしにfinalへ進みません。
 
@@ -146,7 +169,10 @@ npm run episode:spec:inspect -- render-specs/YYYY-MM-DD/render_spec.json
 
 ```text
 checkout
-→ npm ci
+→ immutable handoff Artifact取得
+→ bundle / manifest / 全file SHA検証
+→ daily asset staging
+→ static + daily runtime asset registry構築
 → render_spec検証
 → Gemini TTS 2ブロック
 → compile
@@ -164,6 +190,7 @@ Actionsが行わないこと：
 - 表示順の自動変更
 - 画像検索・画像生成
 - Primary / Fallbackの再判断
+- 日次asset IDの自動推測
 - AIによる代表フレーム検査
 - AIによる完成動画視聴
 - 自動commit / push
@@ -177,6 +204,7 @@ npm run typecheck
 npm run lint
 npm run test:spec
 npm run test:public-screen
+npm run test:handoff-intake
 npm run build
 ```
 
@@ -231,6 +259,9 @@ validatorやテストを弱めて不正入力を通しません。契約変更�
 - Actionsへ渡す時点で採用経路を一つだけ残す
 - Actionsは`selected_path`を判断し直さない
 - 不足・寸法・SHA・ID不一致時は停止
+- 日次assetはhandoffに含まれた検証済みbinaryだけを`public/generated/handoff-assets/`へstageする
+- static asset IDと同一ID・同一SHAならstaticを再利用し、別SHAなら`E_ASSET_ID_COLLISION`相当で停止する
+- validatorとcompileは必ず同一のResolved Runtime Asset Registryを見る
 
 ## 12. TTS契約
 
