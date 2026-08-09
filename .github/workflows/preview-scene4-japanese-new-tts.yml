@@ -1,0 +1,109 @@
+name: One-time Scene 4 Japanese New TTS Preview
+
+on:
+  push:
+    branches:
+      - fix/visual-rhythm-2026-08-06
+    paths:
+      - preview-requests/scene4-japanese-new-tts.json
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    env:
+      CI: "true"
+      EPISODE_DATE: "2026-08-06"
+      SPEC_PATH: render-specs/2026-08-06/render_spec.json
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+      GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
+      GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
+      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/visual-rhythm-2026-08-06
+          fetch-depth: 0
+
+      - name: Record Preview run receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p preview-status/2026-08-06
+          jq -n \
+            --argjson runId "$GITHUB_RUN_ID" \
+            --argjson runAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg headSha "$GITHUB_SHA" \
+            '{runId:$runId,runAttempt:$runAttempt,headSha:$headSha,status:"scene4-japanese-new-tts-started"}' \
+            > preview-status/2026-08-06/scene4_japanese_new_tts_run.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add preview-status/2026-08-06/scene4_japanese_new_tts_run.json
+          git commit -m "Record Scene 4 Japanese new TTS Preview run" || true
+          git push origin HEAD:fix/visual-rhythm-2026-08-06
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies and ffmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Validate production contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run test:runtime-stability
+          npm run episode:spec:validate -- "$SPEC_PATH"
+
+      - name: Render Preview with new Gemini TTS
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset SPEC_TTS_CACHE_ONLY || true
+          npm run episode:spec:preview -- "$SPEC_PATH"
+          test "$(jq -r '.visualGrammarTiming.status' "build/${EPISODE_DATE}/technical_report.json")" = "PASS"
+          test "$(jq -r '.visualGrammarTiming.unresolvedStateCount' "build/${EPISODE_DATE}/technical_report.json")" = "0"
+
+      - name: Inspect Preview MP4
+        shell: bash
+        run: |
+          set -euo pipefail
+          MP4="renders/preview/${EPISODE_DATE}_nasdaq-cafe-spec-preview.mp4"
+          test -s "$MP4"
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration -of json "$MP4" > "build/${EPISODE_DATE}/scene4_japanese_new_tts_ffprobe.json"
+          ffmpeg -v error -i "$MP4" -f null -
+
+      - name: Upload Preview artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-scene4-japanese-new-tts-${{ github.run_id }}
+          path: |
+            renders/preview/2026-08-06_nasdaq-cafe-spec-preview.mp4
+            build/2026-08-06/technical_report.json
+            build/2026-08-06/render_data.production.json
+            build/2026-08-06/scene4_japanese_new_tts_ffprobe.json
+            public/spec-audio/2026-08-06/tts-block-state.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
