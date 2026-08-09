@@ -1,19 +1,6 @@
 name: Nasdaq Cafe Scheduled Preview Gate
 
 on:
-  schedule:
-    - cron: "17 7 * * *"
-      timezone: "Asia/Tokyo"
-    - cron: "37 7 * * *"
-      timezone: "Asia/Tokyo"
-    - cron: "57 7 * * *"
-      timezone: "Asia/Tokyo"
-  workflow_dispatch:
-    inputs:
-      episode_date_override:
-        description: "定刻ゲートの検査日をYYYY-MM-DDで上書き（通常は空欄）"
-        required: false
-        type: string
   push:
     branches:
       - fix/visual-rhythm-2026-08-06
@@ -22,248 +9,33 @@ on:
 
 permissions:
   contents: write
-  actions: write
-
-concurrency:
-  group: nasdaq-cafe-scheduled-preview-gate
-  cancel-in-progress: false
 
 jobs:
-  gate-and-dispatch:
-    name: Verify daily package and dispatch preview
+  restore-preview-gate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
-
-    env:
-      TARGET_WORKFLOW: nasdaq-cafe-preview.yml
-      FEATURE_REQUEST: preview-requests/formal-scene4-japanese-preview.json
-
+    timeout-minutes: 5
     steps:
-      - name: Checkout requested source ref
+      - name: Checkout feature branch
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'push' && github.ref_name || 'main' }}
+          ref: fix/visual-rhythm-2026-08-06
           fetch-depth: 0
 
-      - name: Resolve and verify Preview input
-        id: ready
+      - name: Restore normal scheduled gate and remove one-off request state
         shell: bash
-        env:
-          EPISODE_DATE_OVERRIDE: ${{ inputs.episode_date_override }}
         run: |
           set -euo pipefail
-
-          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            if [[ "$GITHUB_ACTOR" != "$GITHUB_REPOSITORY_OWNER" ]]; then
-              echo "::error::feature Preview request must be pushed by repository owner"
-              exit 1
-            fi
-            test -s "$FEATURE_REQUEST"
-            EPISODE_DATE="$(jq -r '.episodeDate // empty' "$FEATURE_REQUEST")"
-            CONFIRMATION="$(jq -r '.confirmation // empty' "$FEATURE_REQUEST")"
-            if [[ "$CONFIRMATION" != "PREVIEW" ]]; then
-              echo "::error::feature Preview request confirmation must be PREVIEW"
-              exit 1
-            fi
-            TARGET_REF="$GITHUB_REF_NAME"
-            FEATURE_MODE=true
-          else
-            if [[ -n "${EPISODE_DATE_OVERRIDE:-}" ]]; then
-              EPISODE_DATE="$EPISODE_DATE_OVERRIDE"
-            else
-              EPISODE_DATE="$(TZ=Asia/Tokyo date +%F)"
-            fi
-            TARGET_REF=main
-            FEATURE_MODE=false
-          fi
-
-          if [[ ! "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
-            echo "::error::episode date must match YYYY-MM-DD"
-            exit 1
-          fi
-
-          SPEC_PATH="render-specs/${EPISODE_DATE}/render_spec.json"
-          PACKAGE_PATH="episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
-          if [[ ! -s "$SPEC_PATH" || ! -s "$PACKAGE_PATH" ]]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
-            echo "::notice::Preview input is not ready"
-            exit 0
-          fi
-
-          if [[ "$FEATURE_MODE" == "true" ]]; then
-            mapfile -t VERIFIED < <(
-              python3 - "$SPEC_PATH" "$PACKAGE_PATH" "$EPISODE_DATE" <<'PY'
-          import hashlib
-          import json
-          import re
-          import sys
-          from pathlib import Path
-
-          spec_path = Path(sys.argv[1])
-          package_path = Path(sys.argv[2])
-          episode_date = sys.argv[3]
-          spec_bytes = spec_path.read_bytes()
-          package_bytes = package_path.read_bytes()
-          spec = json.loads(spec_bytes.decode("utf-8"))
-          episode = spec.get("episode")
-          if not isinstance(episode, dict):
-              raise SystemExit("render_spec is missing episode object")
-          if episode.get("id") != episode_date or episode.get("targetDate") != episode_date:
-              raise SystemExit("render_spec episode date mismatch")
-          package_text = package_bytes.decode("utf-8")
-          match = re.search(
-              r"<!--BEGIN_FINAL_PRODUCTION_SOURCE-->\s*```json\s*(.*?)\s*```\s*<!--END_FINAL_PRODUCTION_SOURCE-->",
-              package_text,
-              re.S,
-          )
-          if not match:
-              raise SystemExit("episode package is missing FINAL_PRODUCTION_SOURCE")
-          source = json.loads(match.group(1))
-          if source.get("render_spec") != spec:
-              raise SystemExit("episode package embedded render_spec does not match render_spec.json")
-          print(hashlib.sha256(spec_bytes).hexdigest())
-          print(hashlib.sha256(package_bytes).hexdigest())
-          PY
-            )
-            SPEC_SHA="${VERIFIED[0]:-}"
-            PACKAGE_SHA="${VERIFIED[1]:-}"
-          else
-            READY_PATH="render-specs/${EPISODE_DATE}/production_ready.json"
-            if [[ ! -s "$READY_PATH" ]]; then
-              echo "ready=false" >> "$GITHUB_OUTPUT"
-              echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
-              echo "::notice::Missing $READY_PATH; Preview was not dispatched"
-              exit 0
-            fi
-            mapfile -t VERIFIED < <(
-              python3 - "$READY_PATH" "$SPEC_PATH" "$PACKAGE_PATH" "$EPISODE_DATE" <<'PY'
-          import hashlib
-          import json
-          import sys
-          from pathlib import Path
-
-          ready_path, spec_path, package_path = map(Path, sys.argv[1:4])
-          episode_date = sys.argv[4]
-          ready = json.loads(ready_path.read_text(encoding="utf-8"))
-          required = {
-              "version": 1,
-              "status": "ready",
-              "episodeDate": episode_date,
-              "renderSpecPath": spec_path.as_posix(),
-              "episodePackagePath": package_path.as_posix(),
-              "validatorStatus": "pass",
-              "consistencyStatus": "pass",
-              "unresolvedStateCount": 0,
-          }
-          for key, expected in required.items():
-              if ready.get(key) != expected:
-                  raise SystemExit(f"production_ready.{key} mismatch")
-          spec_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
-          package_sha = hashlib.sha256(package_path.read_bytes()).hexdigest()
-          if ready.get("renderSpecSha256") != spec_sha:
-              raise SystemExit("render spec SHA mismatch")
-          if ready.get("episodePackageSha256") != package_sha:
-              raise SystemExit("episode package SHA mismatch")
-          print(spec_sha)
-          print(package_sha)
-          PY
-            )
-            SPEC_SHA="${VERIFIED[0]:-}"
-            PACKAGE_SHA="${VERIFIED[1]:-}"
-          fi
-
-          if [[ ! "$SPEC_SHA" =~ ^[0-9a-f]{64}$ || ! "$PACKAGE_SHA" =~ ^[0-9a-f]{64}$ ]]; then
-            echo "::error::verification did not return valid SHA-256 values"
-            exit 1
-          fi
-
-          echo "ready=true" >> "$GITHUB_OUTPUT"
-          echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
-          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
-          echo "package_sha=$PACKAGE_SHA" >> "$GITHUB_OUTPUT"
-          echo "target_ref=$TARGET_REF" >> "$GITHUB_OUTPUT"
-
-          {
-            echo "### Scheduled Preview gate"
-            echo "- Episode: \`$EPISODE_DATE\`"
-            echo "- Target ref: \`$TARGET_REF\`"
-            echo "- Spec SHA-256: \`$SPEC_SHA\`"
-            echo "- Package SHA-256: \`$PACKAGE_SHA\`"
-            echo "- Feature request mode: \`$FEATURE_MODE\`"
-            echo "- Result: pass"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Dispatch the verified preview workflow
-        if: steps.ready.outputs.ready == 'true'
-        id: dispatch
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EPISODE_DATE: ${{ steps.ready.outputs.episode_date }}
-          SPEC_SHA: ${{ steps.ready.outputs.spec_sha }}
-          PACKAGE_SHA: ${{ steps.ready.outputs.package_sha }}
-          TARGET_REF: ${{ steps.ready.outputs.target_ref }}
-        run: |
-          set -euo pipefail
-
-          REQUEST_BODY="$(jq -n \
-            --arg ref "$TARGET_REF" \
-            --arg episode_date "$EPISODE_DATE" \
-            --arg spec_sha "$SPEC_SHA" \
-            '{ref:$ref,inputs:{episode_date:$episode_date,expected_spec_sha256:$spec_sha,confirmation:"PREVIEW"}}')"
-
-          gh api \
-            --method POST \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2026-03-10' \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/${TARGET_WORKFLOW}/dispatches" \
-            --input - <<<"$REQUEST_BODY" >/tmp/dispatch-response.json
-
-          HEAD_SHA="$(git rev-parse HEAD)"
-          RUN_ID=""
-          RUN_URL=""
-          for attempt in 1 2 3 4 5 6 7 8; do
-            sleep 3
-            RUN_ID="$(gh run list \
-              --workflow "$TARGET_WORKFLOW" \
-              --branch "$TARGET_REF" \
-              --event workflow_dispatch \
-              --limit 20 \
-              --json databaseId,headSha,url \
-              --jq ".[] | select(.headSha == \"$HEAD_SHA\") | .databaseId" | head -n 1)"
-            if [[ "$RUN_ID" =~ ^[0-9]+$ ]]; then
-              RUN_URL="$(gh run view "$RUN_ID" --json url --jq '.url')"
-              break
-            fi
-          done
-
-          if [[ ! "$RUN_ID" =~ ^[0-9]+$ ]]; then
-            echo "::error::Preview dispatch succeeded but run ID could not be resolved"
-            exit 1
-          fi
-
-          echo "workflow_run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
-
-          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            mkdir -p preview-status/2026-08-06
-            jq -n \
-              --argjson runId "$RUN_ID" \
-              --arg headSha "$HEAD_SHA" \
-              --arg specSha "$SPEC_SHA" \
-              --arg packageSha "$PACKAGE_SHA" \
-              '{runId:$runId,headSha:$headSha,specSha256:$specSha,packageSha256:$packageSha,status:"formal-preview-dispatched"}' \
-              > preview-status/2026-08-06/scene4_japanese_new_tts_formal_run.json
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add preview-status/2026-08-06/scene4_japanese_new_tts_formal_run.json
-            git commit -m "Record Scene 4 Japanese formal Preview run" || true
-            git push origin HEAD:fix/visual-rhythm-2026-08-06
-          fi
-
-          {
-            echo "### Preview dispatched"
-            echo "- Workflow run ID: \`$RUN_ID\`"
-            echo "- Run URL: $RUN_URL"
-          } >> "$GITHUB_STEP_SUMMARY"
+          test "$(jq -r '.action // empty' preview-requests/formal-scene4-japanese-preview.json)" = "cleanup"
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/nasdaq-cafe-scheduled-preview.yml
+          git rm -f \
+            preview-requests/formal-scene4-japanese-preview.json \
+            preview-requests/scene4-japanese-new-tts.json \
+            preview-status/2026-08-06/scene4_japanese_new_tts_formal_run.json \
+            preview-status/2026-08-06/scene4_japanese_new_tts_run.json || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/nasdaq-cafe-scheduled-preview.yml
+          git diff --cached --check
+          git commit -m "Clean up Scene 4 Preview trigger"
+          git push origin HEAD:fix/visual-rhythm-2026-08-06
