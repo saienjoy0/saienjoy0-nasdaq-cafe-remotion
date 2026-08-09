@@ -24,12 +24,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
           clean: true
-      - name: Verify fixed renderer commit
+      - name: Verify fixed renderer commit and no Gemini credentials
         shell: bash
         run: |
           set -euo pipefail
           EXPECTED_PARENT=750f993bd00cf2f67fdb4ab18907e82ed0dc68df
-          git merge-base --is-ancestor "$EXPECTED_PARENT" HEAD
+          ACTUAL_PARENT="$(git show -s --format=%P HEAD)"
+          [[ "$ACTUAL_PARENT" == "$EXPECTED_PARENT" ]] || {
+            echo "::error::unexpected renderer parent expected=$EXPECTED_PARENT actual=$ACTUAL_PARENT"
+            exit 1
+          }
           test -z "${GEMINI_API_KEY_1:-}"
           test -z "${GEMINI_API_KEY_2:-}"
           test -z "${GEMINI_API_KEY_3:-}"
