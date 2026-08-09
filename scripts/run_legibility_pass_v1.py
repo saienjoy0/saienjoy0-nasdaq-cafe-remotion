@@ -22,6 +22,11 @@ new_label = '{parts.time || item.label}'
 if old_label not in text:
     raise SystemExit("timeline visible-label anchor missing")
 text = text.replace(old_label, new_label, 1)
+old_subtitle_patch = "text = text.replace('''      text: formatPage(page),\\n''', '''      text: normalizeSubtitleDisplayNumerals(formatPage(page)),\\n''', 1)"
+new_subtitle_patch = "text = text.replace('''  const normalizedSpeech = normalizeSpeech(speechText);\\n''', '''  const normalizedSpeech = normalizeSubtitleDisplayNumerals(normalizeSpeech(speechText));\\n''', 1)"
+if old_subtitle_patch not in text:
+    raise SystemExit("subtitle pre-pagination normalization anchor missing")
+text = text.replace(old_subtitle_patch, new_subtitle_patch, 1)
 old_rm = 'subprocess.run(["git", "rm", "--", "scripts/apply_legibility_pass_v1.py"], cwd=ROOT, check=True)'
 new_rm = 'subprocess.run(["git", "rm", "-f", "--", "scripts/apply_legibility_pass_v1.py"], cwd=ROOT, check=True)'
 if old_rm not in text:
