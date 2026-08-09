@@ -275,10 +275,10 @@ const ExpectedActualFlow: React.FC<{content: PublicMainContent}> = ({content}) =
   return <Surface accent={color.emphasis} style={{padding: "26px 30px", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 20}}>{cards.map((card) => {
     const tone: Tone = card.role === "gap" ? "emphasis" : card.role === "actual" ? "positive" : "neutral";
     const hero = expectedActualHero(card);
-    const heroSize = Array.from(hero).length <= 10 ? 70 : Array.from(hero).length <= 16 ? 58 : 48;
+    const heroSize = Array.from(hero).length <= 10 ? 58 : Array.from(hero).length <= 16 ? 50 : 44;
     return <div key={card.key} data-expected-actual-card={card.role ?? "unknown"} style={{...motionStyle(content, card), minWidth: 0, minHeight: 0, padding: "24px 22px 26px", borderRadius: 24, background: "rgba(248,251,253,.95)", border: `${card.highlighted ? 6 : 3}px solid ${toneColor(tone)}`, boxShadow: card.highlighted ? `0 0 0 7px ${toneColor(tone)}22` : "0 14px 28px rgba(16,32,51,.13)", display: "grid", gridTemplateRows: "auto 1fr auto", alignItems: "center", textAlign: "center"}}>
       <div><Tag tone={tone}>{card.role ? labels[card.role] : card.title}</Tag></div>
-      <div style={{display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0, padding: "18px 6px", color: toneColor(tone), fontSize: heroSize, lineHeight: 1.08, fontWeight: 950, overflowWrap: "anywhere"}}>{hero}</div>
+      <div style={{display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0, padding: "18px 6px", color: toneColor(tone), fontSize: heroSize, lineHeight: 1.08, fontWeight: 950, whiteSpace: "nowrap"}}>{hero}</div>
       <div style={{fontSize: 30, lineHeight: 1.2, color: color.muted, fontWeight: 900}}>{expectedActualNote(card)}</div>
     </div>;
   })}</Surface>;
@@ -345,7 +345,7 @@ const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => 
         </div>;
       })}
     </div>
-    <div style={{textAlign: "right", color: color.emphasis, fontSize: 31, fontWeight: 950}}>{content.primaryElement}</div>
+    <div data-evidence-summary="true" style={{justifySelf: "end", maxWidth: "72%", textAlign: "right", color: color.emphasis, fontSize: 27, lineHeight: 1.16, fontWeight: 950, overflowWrap: "anywhere"}}>{content.primaryElement}</div>
   </Surface>;
 };
 

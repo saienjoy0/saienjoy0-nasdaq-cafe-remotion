@@ -117,10 +117,12 @@ test("main-stage legibility pass protects dense financial copy", () => {
   const renderer = readFileSync("src/components/spec/VisualTemplateRenderer.tsx", "utf8");
   const timeline = readFileSync("src/components/spec/EventReactionTimelineTemplate.tsx", "utf8");
   assert.match(renderer, /data-expected-actual-card/);
-  assert.match(renderer, /const heroSize = Array\.from\(hero\)\.length <= 10 \? 70/);
+  assert.match(renderer, /const heroSize = Array\.from\(hero\)\.length <= 10 \? 58/);
   assert.match(renderer, /adaptiveEvidenceFontSize/);
   assert.match(renderer, /rgba\(248,251,253,\.94\)/);
   assert.match(renderer, /overflowWrap: "anywhere"/);
+  assert.match(renderer, /whiteSpace: "nowrap"/);
+  assert.match(renderer, /data-evidence-summary/);
   assert.match(timeline, /data-timeline-count/);
   assert.match(timeline, /splitTimelineValue/);
   assert.match(timeline, /const bodySize = items\.length <= 3 \? 38 : 32/);
