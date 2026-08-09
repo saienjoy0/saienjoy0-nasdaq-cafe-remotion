@@ -4,10 +4,11 @@ import path from "node:path";
 import {bundle} from "@remotion/bundler";
 import {getCompositions, renderMedia, renderStill} from "@remotion/renderer";
 import voiceProfilesJson from "../config/voice-profiles.json";
-import {productionAssetPaths} from "../src/config/production-assets";
+import {loadRuntimeAssetContext} from "../src/config/runtime-assets";
 import {compileRenderSpec, type SynthesizedChunk} from "../src/spec/compile-render-spec";
 import {getTransitionDurationInFrames} from "../src/spec/render-state";
 import {measureVisualGrammarTiming} from "../src/spec/measure-visual-grammar";
+import {addVisualStagnationWarnings} from "../src/spec/visual-stagnation";
 import {assertProductionTextSafe, resolveVoiceProfile} from "../src/spec/validate-render-spec";
 import {
   evaluateDurationContract,
@@ -26,7 +27,8 @@ if (!command || !input) {
   );
 }
 const isFixture = path.resolve(input).includes(`${path.sep}fixtures${path.sep}`);
-const publicAssets = productionAssetPaths;
+const runtimeAssets = await loadRuntimeAssetContext();
+const publicAssets = runtimeAssets.paths;
 const workspaceFor = (id: string) =>
   isFixture
     ? path.join(PROJECT_DIR, "build", "tests", "expression-final-verification", id)
@@ -46,7 +48,7 @@ const mediaPath = (kind: "preview" | "final", id: string) => {
 };
 
 const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
-  const loaded = await loadRenderSpecForProduction(input);
+  const loaded = await loadRenderSpecForProduction(input, runtimeAssets.manifest);
   const {spec, sha256, expressionPreflight} = loaded;
   const profile = resolveVoiceProfile(spec.voiceProfileId, voiceProfilesJson);
   const audioDiagnostics: Array<{
@@ -80,12 +82,22 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
   const reportPath = technicalPath(spec.episode.id);
   await mkdir(path.dirname(output), {recursive: true});
   await writeFile(output, `${JSON.stringify(data, null, 2)}\n`, "utf8");
-  const visualGrammarTimingReport = measureVisualGrammarTiming(spec, data);
+  const measuredVisualGrammarTimingReport = measureVisualGrammarTiming(spec, data);
+  const visualGrammarTimingReport = measuredVisualGrammarTimingReport
+    ? addVisualStagnationWarnings(spec, measuredVisualGrammarTimingReport)
+    : null;
   const visualGrammarTimingReportPath = visualGrammarTimingReport
     ? visualGrammarTimingPath(spec.episode.id)
     : null;
   let visualGrammarTimingReportSha256: string | null = null;
   if (visualGrammarTimingReport && visualGrammarTimingReportPath) {
+    for (const warning of visualGrammarTimingReport.warnings) {
+      if (warning.code === "W_VISUAL_STAGNATION") {
+        console.warn(
+          `::warning title=Visual stagnation::${warning.durationMs}ms across ${warning.beatIds.join(", ")} (${warning.signature})`,
+        );
+      }
+    }
     const timingJson = `${JSON.stringify(visualGrammarTimingReport, null, 2)}\n`;
     await writeFile(visualGrammarTimingReportPath, timingJson, "utf8");
     visualGrammarTimingReportSha256 = createHash("sha256").update(timingJson).digest("hex");
@@ -132,6 +144,12 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
     styleName: profile.styleName,
     sceneCount: data.scenes.length,
     chunkCount: chunks.length,
+    runtimeAssets: {
+      source: runtimeAssets.bundleId ? "handoff" : "static-only",
+      bundleId: runtimeAssets.bundleId,
+      episodeDate: runtimeAssets.episodeDate,
+      resolvedAssetCount: Object.keys(publicAssets).length,
+    },
     expressionPreflight: {
       status: "valid",
       checked: expressionPreflight.checked.length,
@@ -165,6 +183,9 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
           selectedFallbackBeatIds: visualGrammarTimingReport.selectedFallbackBeatIds,
           unresolvedStateCount: visualGrammarTimingReport.unresolvedStateCount,
           failureCodes: visualGrammarTimingReport.failures.map((failure) => failure.code),
+          stagnationStatus: visualGrammarTimingReport.visualStagnation.status,
+          stagnationWarningCount: visualGrammarTimingReport.visualStagnation.warningCount,
+          longestVisualStagnationRunMs: visualGrammarTimingReport.visualStagnation.longestRunMs,
         }
       : null,
     totalProductionDuration: {
@@ -219,10 +240,10 @@ const prepare = async (
 };
 
 if (command === "validate") {
-  const {spec} = await loadRenderSpec(input);
+  const {spec} = await loadRenderSpec(input, runtimeAssets.manifest);
   console.log(`render_spec valid: ${spec.episode.id}`);
 } else if (command === "fixture-compile") {
-  const {spec, sha256} = await loadRenderSpec(input);
+  const {spec, sha256} = await loadRenderSpec(input, runtimeAssets.manifest);
   if (!isFixture) {
     throw new Error("fixture-compile accepts only render-specs/fixtures inputs");
   }
@@ -292,7 +313,7 @@ if (command === "validate") {
   );
   console.log(`${kind}: ${output}`);
 } else if (command === "still") {
-  const {spec} = await loadRenderSpec(input);
+  const {spec} = await loadRenderSpec(input, runtimeAssets.manifest);
   const inputProps = {scene: spec.scenes[0], assets: publicAssets};
   const {serveUrl, composition} = await prepare(
     "NasdaqCafeSpecDebugStill",
@@ -315,7 +336,7 @@ if (command === "validate") {
   });
   console.log(`fixture still: ${output}`);
 } else if (command === "inspect") {
-  const {spec} = await loadRenderSpec(input);
+  const {spec} = await loadRenderSpec(input, runtimeAssets.manifest);
   const productionPath = buildPath(spec.episode.id);
   const data = await loadProductionData(productionPath);
   assertProductionTextSafe(data);

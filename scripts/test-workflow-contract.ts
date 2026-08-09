@@ -21,6 +21,7 @@ const shotPlanScript = await readFile(
 );
 
 const previewName = "nasdaq-cafe-preview.yml";
+const handoffPreviewName = "nasdaq-cafe-preview-handoff.yml";
 const scheduledName = "nasdaq-cafe-scheduled-preview.yml";
 const statusName = "nasdaq-cafe-preview-status.yml";
 const motionPreviewName = "nasdaq-cafe-motion-preview.yml";
@@ -28,6 +29,7 @@ const motionRequestName = "nasdaq-cafe-motion-preview-request.yml";
 const shotPlanName = "nasdaq-cafe-shot-plan-apply.yml";
 for (const required of [
   previewName,
+  handoffPreviewName,
   scheduledName,
   statusName,
   motionPreviewName,
@@ -45,16 +47,20 @@ for (const file of workflowFiles) {
 const automaticEvents = ["push", "pull_request", "issues", "schedule", "workflow_run"];
 const hasEvent = (text: string, event: string) =>
   new RegExp(`^\\s{2}${event}:`, "m").test(text);
+const officialPreviewWorkflows = new Set([previewName, handoffPreviewName]);
 
 for (const [file, text] of contents) {
   const startsPreview =
     text.includes("episode:spec:preview") || text.includes("GEMINI_API_KEY_");
   if (startsPreview) {
-    assert.equal(
-      file,
-      previewName,
-      `only ${previewName} may call Gemini TTS or render a preview: ${file}`,
+    assert(
+      officialPreviewWorkflows.has(file),
+      `only official manual preview workflows may call Gemini TTS or render a preview: ${file}`,
     );
+    assert(hasEvent(text, "workflow_dispatch"), `${file}: preview must be manual-only`);
+    for (const event of automaticEvents) {
+      assert(!hasEvent(text, event), `${file}: preview cannot use automatic event ${event}`);
+    }
   }
 
   const dispatchesPreview =
@@ -65,7 +71,7 @@ for (const [file, text] of contents) {
     assert.equal(
       file,
       scheduledName,
-      `only ${scheduledName} may dispatch the preview workflow: ${file}`,
+      `only ${scheduledName} may dispatch the legacy preview workflow: ${file}`,
     );
   }
 
@@ -94,7 +100,33 @@ assert(
   preview.includes("nasdaq-cafe-preview-raw-${{ needs.input-preflight.outputs.episode_id }}-${{ github.run_id }}"),
   `${previewName}: raw artifact name must be stable across failed-job reruns`,
 );
-console.log("PASS: preview rendering and inspection are separate, replayable jobs");
+console.log("PASS: legacy preview rendering and inspection remain separate and replayable");
+
+const handoffPreview = contents.get(handoffPreviewName)!;
+assert(hasEvent(handoffPreview, "workflow_dispatch"));
+for (const event of automaticEvents) {
+  assert(!hasEvent(handoffPreview, event), `${handoffPreviewName}: unexpected automatic event ${event}`);
+}
+assert(
+  handoffPreview.includes("actions/download-artifact@v4") &&
+    handoffPreview.includes("repository: saienjoy0/nasdaq-plot-creator-") &&
+    handoffPreview.includes("run-id: ${{ inputs.plot_run_id }}"),
+  `${handoffPreviewName}: cross-repository immutable handoff Artifact download is required`,
+);
+assert(
+  handoffPreview.includes("npm run handoff:intake") &&
+    handoffPreview.includes("expected-bundle-id") &&
+    handoffPreview.includes("expected-manifest-sha256"),
+  `${handoffPreviewName}: bundle identity and manifest SHA must be verified before preview`,
+);
+assert(
+  handoffPreview.includes("NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY") &&
+    handoffPreview.indexOf("handoff:intake") < handoffPreview.indexOf("episode:spec:validate") &&
+    handoffPreview.indexOf("episode:spec:validate") < handoffPreview.indexOf("episode:spec:preview"),
+  `${handoffPreviewName}: runtime assets must be staged before validation and preview`,
+);
+assert(!handoffPreview.includes("episode:spec:final"));
+console.log("PASS: handoff preview is manual-only, immutable-input-driven, and preview-only");
 
 const scheduled = contents.get(scheduledName)!;
 assert(hasEvent(scheduled, "schedule"));
