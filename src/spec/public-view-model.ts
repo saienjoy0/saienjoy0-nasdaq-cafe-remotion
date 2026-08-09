@@ -56,7 +56,7 @@ export type PublicArrow = PublicMotion & {
 export type PublicPlacedAsset = {
   key: string;
   src: string;
-  slot: "full" | "focus-media" | "primary" | "entity" | "lower";
+  slot: "full" | "focus-media" | "primary" | "entity" | "entity-card" | "lower";
   fit: PublicFit;
   objectPosition: string;
   opacity: number;
@@ -295,7 +295,11 @@ export const toPublicSceneViewModel = (
   const mainAssets = activeBeatPlacements.map((placement) => publicAsset(
     placement,
     assets,
-    beat.screenState === "EntityFocus" ? "full" : undefined,
+    beat.screenState === "EntityFocus" && placement.role === "entity-card"
+      ? "entity-card"
+      : beat.screenState === "EntityFocus"
+        ? "full"
+        : undefined,
   ));
   const overlays = scene.assetPlacements
     .filter((placement) => placement.role === "overlay" && isPlacementActive(scene, placement, state))

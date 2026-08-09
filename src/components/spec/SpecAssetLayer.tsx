@@ -6,6 +6,7 @@ const slotStyle: Record<PublicPlacedAsset["slot"], React.CSSProperties> = {
   "focus-media": {position: "absolute", left: 32, top: 32, width: 520, height: 520},
   primary: {position: "absolute", left: 32, top: 32, width: 920, height: 584},
   entity: {position: "absolute", right: 32, top: 32, width: 424, height: 584},
+  "entity-card": {position: "absolute", right: 38, top: 34, width: 620, height: 349, borderRadius: 22, boxShadow: "0 18px 42px rgba(16,32,51,.24)", background: "rgba(249,252,254,.98)"},
   lower: {position: "absolute", left: 0, right: 0, bottom: 0, height: 135},
 };
 

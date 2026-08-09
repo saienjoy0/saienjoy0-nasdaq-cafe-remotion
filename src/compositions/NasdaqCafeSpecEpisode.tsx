@@ -131,12 +131,15 @@ export const SpecSceneFrame: React.FC<{
   const chromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
     ? getStageChromeModeForShell(stageShellId)
     : "full";
+  const foregroundEntityAssets = view.mainAssets.filter((asset) => asset.slot === "entity-card");
+  const backgroundMainAssets = view.mainAssets.filter((asset) => asset.slot !== "entity-card");
 
   return <AbsoluteFill style={sceneStyle} data-stage-chrome={chromeMode}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
     <div data-stage-layout="fixed" style={{...MAIN_STAGE_FRAME_STYLE, borderRadius: stageMode === "legacy" ? 30 : 0}}>
-      <SpecAssetLayer assets={view.mainAssets} zIndex={10}/>
+      <SpecAssetLayer assets={backgroundMainAssets} zIndex={10}/>
       {view.mainContent ? <div style={{position: "absolute", inset: 0, zIndex: 20}}><ShotStageRenderer content={view.mainContent}/></div> : null}
+      <SpecAssetLayer assets={foregroundEntityAssets} zIndex={30}/>
     </div>
     <div data-fox-layout="fixed" style={{...FOX_FRAME_STYLE, opacity: view.fox.opacity}}>
       <FoxExpressionLayer fox={view.fox} previousFox={view.previousFox} transitionProgress={view.foxTransitionProgress}/>

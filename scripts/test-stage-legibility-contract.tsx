@@ -161,3 +161,16 @@ for (const item of tests) {
 }
 if (failed > 0) process.exit(1);
 console.log(`Stage legibility contract tests: ${tests.length} passed`);
+
+test("prebuilt entity cards use a dedicated foreground slot", () => {
+  const viewModel = readFileSync("src/spec/public-view-model.ts", "utf8");
+  const assetLayer = readFileSync("src/components/spec/SpecAssetLayer.tsx", "utf8");
+  const episode = readFileSync("src/compositions/NasdaqCafeSpecEpisode.tsx", "utf8");
+  const templates = readFileSync("src/components/spec/AdditionalVisualTemplates.tsx", "utf8");
+  assert.match(viewModel, /placement\.role === "entity-card"[\s\S]*\? "entity-card"/);
+  assert.match(assetLayer, /"entity-card": \{position: "absolute", right: 38, top: 34, width: 620, height: 349/);
+  assert.match(episode, /const foregroundEntityAssets = view\.mainAssets\.filter/);
+  assert.match(episode, /<SpecAssetLayer assets=\{foregroundEntityAssets\} zIndex=\{30\}\/>/);
+  assert.match(templates, /const prebuiltCard = content\.entityPresentation === "prebuilt-card"/);
+  assert.match(templates, /data-entity-point-panel="true"/);
+});
