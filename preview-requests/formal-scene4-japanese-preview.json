@@ -1,6 +1,5 @@
 {
   "episodeDate": "2026-08-06",
   "confirmation": "PREVIEW",
-  "purpose": "Regenerate Scene 1-4 TTS after approved Scene 4 Japanese wording and render Preview",
-  "attempt": 2
+  "action": "cleanup"
 }
