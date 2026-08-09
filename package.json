@@ -36,7 +36,7 @@
     "dev": "remotion studio src/index.ts",
     "build": "remotion bundle src/index.ts dist/remotion",
     "upgrade": "remotion upgrade",
-    "pretypecheck": "python3 scripts/apply_visual_beat_rhythm_patch.py",
+    "pretypecheck": "python3 -c \"p='scripts/apply_visual_beat_rhythm_patch.py'; s=open(p, encoding='utf-8').read(); open(p,'w',encoding='utf-8').write(s.replace('\\\"sequencePolicy\\\": \\\"static\\\"','\\\"sequencePolicy\\\": \\\"explicit\\\"'))\" && python3 scripts/apply_visual_beat_rhythm_patch.py",
     "typecheck": "tsc",
     "lint": "eslint src scripts && tsc",
     "validate:sample": "tsx scripts/validate-episode.ts samples/episode_data.sample.json",
