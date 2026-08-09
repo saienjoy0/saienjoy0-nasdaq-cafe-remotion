@@ -21,7 +21,7 @@ on:
       - preview-requests/formal-scene4-japanese-preview.json
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 concurrency:
@@ -103,7 +103,6 @@ jobs:
           spec_path = Path(sys.argv[1])
           package_path = Path(sys.argv[2])
           episode_date = sys.argv[3]
-
           spec_bytes = spec_path.read_bytes()
           package_bytes = package_path.read_bytes()
           spec = json.loads(spec_bytes.decode("utf-8"))
@@ -112,7 +111,6 @@ jobs:
               raise SystemExit("render_spec is missing episode object")
           if episode.get("id") != episode_date or episode.get("targetDate") != episode_date:
               raise SystemExit("render_spec episode date mismatch")
-
           package_text = package_bytes.decode("utf-8")
           match = re.search(
               r"<!--BEGIN_FINAL_PRODUCTION_SOURCE-->\s*```json\s*(.*?)\s*```\s*<!--END_FINAL_PRODUCTION_SOURCE-->",
@@ -124,7 +122,6 @@ jobs:
           source = json.loads(match.group(1))
           if source.get("render_spec") != spec:
               raise SystemExit("episode package embedded render_spec does not match render_spec.json")
-
           print(hashlib.sha256(spec_bytes).hexdigest())
           print(hashlib.sha256(package_bytes).hexdigest())
           PY
@@ -205,6 +202,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EPISODE_DATE: ${{ steps.ready.outputs.episode_date }}
           SPEC_SHA: ${{ steps.ready.outputs.spec_sha }}
+          PACKAGE_SHA: ${{ steps.ready.outputs.package_sha }}
           TARGET_REF: ${{ steps.ready.outputs.target_ref }}
         run: |
           set -euo pipefail
@@ -213,14 +211,7 @@ jobs:
             --arg ref "$TARGET_REF" \
             --arg episode_date "$EPISODE_DATE" \
             --arg spec_sha "$SPEC_SHA" \
-            '{
-              ref: $ref,
-              inputs: {
-                episode_date: $episode_date,
-                expected_spec_sha256: $spec_sha,
-                confirmation: "PREVIEW"
-              }
-            }')"
+            '{ref:$ref,inputs:{episode_date:$episode_date,expected_spec_sha256:$spec_sha,confirmation:"PREVIEW"}}')"
 
           gh api \
             --method POST \
@@ -254,6 +245,23 @@ jobs:
 
           echo "workflow_run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
           echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            mkdir -p preview-status/2026-08-06
+            jq -n \
+              --argjson runId "$RUN_ID" \
+              --arg headSha "$HEAD_SHA" \
+              --arg specSha "$SPEC_SHA" \
+              --arg packageSha "$PACKAGE_SHA" \
+              '{runId:$runId,headSha:$headSha,specSha256:$specSha,packageSha256:$packageSha,status:"formal-preview-dispatched"}' \
+              > preview-status/2026-08-06/scene4_japanese_new_tts_formal_run.json
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add preview-status/2026-08-06/scene4_japanese_new_tts_formal_run.json
+            git commit -m "Record Scene 4 Japanese formal Preview run" || true
+            git push origin HEAD:fix/visual-rhythm-2026-08-06
+          fi
+
           {
             echo "### Preview dispatched"
             echo "- Workflow run ID: \`$RUN_ID\`"
