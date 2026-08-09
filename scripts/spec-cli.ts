@@ -4,7 +4,7 @@ import path from "node:path";
 import {bundle} from "@remotion/bundler";
 import {getCompositions, renderMedia, renderStill} from "@remotion/renderer";
 import voiceProfilesJson from "../config/voice-profiles.json";
-import {productionAssetPaths} from "../src/config/production-assets";
+import {loadRuntimeAssetContext} from "../src/config/runtime-assets";
 import {compileRenderSpec, type SynthesizedChunk} from "../src/spec/compile-render-spec";
 import {getTransitionDurationInFrames} from "../src/spec/render-state";
 import {measureVisualGrammarTiming} from "../src/spec/measure-visual-grammar";
@@ -26,7 +26,8 @@ if (!command || !input) {
   );
 }
 const isFixture = path.resolve(input).includes(`${path.sep}fixtures${path.sep}`);
-const publicAssets = productionAssetPaths;
+const runtimeAssets = await loadRuntimeAssetContext();
+const publicAssets = runtimeAssets.paths;
 const workspaceFor = (id: string) =>
   isFixture
     ? path.join(PROJECT_DIR, "build", "tests", "expression-final-verification", id)
@@ -46,7 +47,7 @@ const mediaPath = (kind: "preview" | "final", id: string) => {
 };
 
 const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
-  const loaded = await loadRenderSpecForProduction(input);
+  const loaded = await loadRenderSpecForProduction(input, runtimeAssets.manifest);
   const {spec, sha256, expressionPreflight} = loaded;
   const profile = resolveVoiceProfile(spec.voiceProfileId, voiceProfilesJson);
   const audioDiagnostics: Array<{
@@ -132,6 +133,12 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
     styleName: profile.styleName,
     sceneCount: data.scenes.length,
     chunkCount: chunks.length,
+    runtimeAssets: {
+      source: runtimeAssets.bundleId ? "handoff" : "static-only",
+      bundleId: runtimeAssets.bundleId,
+      episodeDate: runtimeAssets.episodeDate,
+      resolvedAssetCount: Object.keys(publicAssets).length,
+    },
     expressionPreflight: {
       status: "valid",
       checked: expressionPreflight.checked.length,
@@ -219,10 +226,10 @@ const prepare = async (
 };
 
 if (command === "validate") {
-  const {spec} = await loadRenderSpec(input);
+  const {spec} = await loadRenderSpec(input, runtimeAssets.manifest);
   console.log(`render_spec valid: ${spec.episode.id}`);
 } else if (command === "fixture-compile") {
-  const {spec, sha256} = await loadRenderSpec(input);
+  const {spec, sha256} = await loadRenderSpec(input, runtimeAssets.manifest);
   if (!isFixture) {
     throw new Error("fixture-compile accepts only render-specs/fixtures inputs");
   }
@@ -292,7 +299,7 @@ if (command === "validate") {
   );
   console.log(`${kind}: ${output}`);
 } else if (command === "still") {
-  const {spec} = await loadRenderSpec(input);
+  const {spec} = await loadRenderSpec(input, runtimeAssets.manifest);
   const inputProps = {scene: spec.scenes[0], assets: publicAssets};
   const {serveUrl, composition} = await prepare(
     "NasdaqCafeSpecDebugStill",
@@ -315,7 +322,7 @@ if (command === "validate") {
   });
   console.log(`fixture still: ${output}`);
 } else if (command === "inspect") {
-  const {spec} = await loadRenderSpec(input);
+  const {spec} = await loadRenderSpec(input, runtimeAssets.manifest);
   const productionPath = buildPath(spec.episode.id);
   const data = await loadProductionData(productionPath);
   assertProductionTextSafe(data);
