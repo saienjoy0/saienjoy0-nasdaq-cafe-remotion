@@ -122,7 +122,7 @@ test("main-stage legibility pass protects dense financial copy", () => {
   assert.match(renderer, /rgba\(248,251,253,\.94\)/);
   assert.match(renderer, /overflowWrap: "anywhere"/);
   assert.match(renderer, /whiteSpace: "nowrap"/);
-  assert.match(renderer, /data-evidence-summary/);
+  assert.doesNotMatch(renderer, /data-evidence-summary/);
   assert.match(timeline, /data-timeline-count/);
   assert.match(timeline, /splitTimelineValue/);
   assert.match(timeline, /const bodySize = items\.length <= 3 \? 38 : 32/);

@@ -33,7 +33,6 @@
     "typescript": "5.9.3"
   },
   "scripts": {
-    "pretypecheck": "python3 scripts/apply_evidence_summary_cleanup.py",
     "dev": "remotion studio src/index.ts",
     "build": "remotion bundle src/index.ts dist/remotion",
     "upgrade": "remotion upgrade",

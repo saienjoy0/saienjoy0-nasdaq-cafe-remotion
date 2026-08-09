@@ -333,7 +333,7 @@ const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => 
     ? content.texts
     : content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title]);
   const columns = items.length === 1 ? "1fr" : "repeat(2,minmax(0,1fr))";
-  return <Surface accent={color.emphasis} style={{padding: "30px 36px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
+  return <Surface accent={color.emphasis} style={{padding: "30px 36px", display: "grid", gridTemplateRows: "auto 1fr", gap: 20}}>
     <div style={{fontSize: 31, color: color.muted, fontWeight: 900}}>{content.screenQuestion}</div>
     <div style={{display: "grid", gridTemplateColumns: columns, gridAutoRows: "minmax(0,1fr)", gap: "20px 34px", alignItems: "stretch"}}>
       {items.map((item, index) => {
@@ -345,7 +345,6 @@ const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => 
         </div>;
       })}
     </div>
-    <div data-evidence-summary="true" style={{justifySelf: "end", maxWidth: "72%", textAlign: "right", color: color.emphasis, fontSize: 27, lineHeight: 1.16, fontWeight: 950, overflowWrap: "anywhere"}}>{content.primaryElement}</div>
   </Surface>;
 };
 
