@@ -15,7 +15,7 @@
     "@remotion/media": "4.0.487",
     "@remotion/renderer": "4.0.487",
     "@remotion/transitions": "4.0.487",
-    "mdast-util-from-markdown": "^0.0.166",
+    "mdast-util-from-markdown": "^2.0.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "remotion": "4.0.487",
