@@ -67,6 +67,7 @@ before_narration = narration_fingerprint(data)
 
 # Scene 3: stop treating three Q2 values as equal-weight cards. Make the actual result the single focal point.
 s3 = scene(data, "scene-03")
+s3["visualMode"] = "text-focus"
 s3_actual = number(s3, "scene-03-beat-001-number-02")
 s3_actual["tone"] = "positive"
 s3_actual["comparison"] = "会社見通し中心112億ドルを+3.4億ドル上回る"
@@ -86,7 +87,7 @@ s3b1.update({
         "差 +3.4億ドル",
     ],
     "visualGrammarId": "evidence",
-    "visualMode": "number-comparison",
+    "visualMode": "text-focus",
     "visualTemplate": "hero-number",
 })
 s3b1["templateConfig"]["displayOrder"] = ["scene-03-beat-001-number-02"]
