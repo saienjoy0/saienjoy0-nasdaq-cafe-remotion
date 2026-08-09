@@ -33,6 +33,7 @@
     "typescript": "5.9.3"
   },
   "scripts": {
+    "pretypecheck": "python3 scripts/apply_legibility_pass_v1.py",
     "dev": "remotion studio src/index.ts",
     "build": "remotion bundle src/index.ts dist/remotion",
     "upgrade": "remotion upgrade",
