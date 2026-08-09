@@ -108,7 +108,7 @@
     "test:stage-legibility": "tsx scripts/test-stage-legibility-contract.tsx",
     "test:event-reaction-timeline": "tsx scripts/test-event-reaction-timeline.tsx",
     "test:visual-grammar-motion": "tsx scripts/test-visual-grammar-motion-language.ts",
-    "test:visual-grammar-timing": "tsx scripts/test-visual-grammar-timing.ts"
+    "test:visual-grammar-timing": "tsx scripts/test-visual-grammar-timing.ts && tsx scripts/test-visual-stagnation.ts"
   },
   "sideEffects": [
     "*.css"
