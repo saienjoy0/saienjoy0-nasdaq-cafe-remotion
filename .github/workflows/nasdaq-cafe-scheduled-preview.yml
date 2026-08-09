@@ -1,41 +1,369 @@
 name: Nasdaq Cafe Scheduled Preview Gate
 
 on:
-  push:
-    branches:
-      - fix/visual-rhythm-2026-08-06
-    paths:
-      - preview-requests/formal-scene4-japanese-preview.json
+  schedule:
+    - cron: "17 7 * * *"
+      timezone: "Asia/Tokyo"
+    - cron: "37 7 * * *"
+      timezone: "Asia/Tokyo"
+    - cron: "57 7 * * *"
+      timezone: "Asia/Tokyo"
+  workflow_dispatch:
+    inputs:
+      episode_date_override:
+        description: "定刻ゲートの検査日をYYYY-MM-DDで上書き（通常は空欄）"
+        required: false
+        type: string
 
 permissions:
-  contents: write
+  contents: read
+  actions: write
+
+concurrency:
+  group: nasdaq-cafe-scheduled-preview-gate
+  cancel-in-progress: false
 
 jobs:
-  restore-preview-gate:
+  gate-and-dispatch:
+    name: Verify daily package and dispatch preview
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: Checkout feature branch
-        uses: actions/checkout@v6
-        with:
-          ref: fix/visual-rhythm-2026-08-06
-          fetch-depth: 0
+    timeout-minutes: 10
 
-      - name: Restore normal scheduled gate and remove one-off request state
+    env:
+      TARGET_WORKFLOW: nasdaq-cafe-preview.yml
+      TARGET_REF: main
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v6
+
+      - name: Resolve and verify today's production-ready package
+        id: ready
         shell: bash
+        env:
+          EPISODE_DATE_OVERRIDE: ${{ inputs.episode_date_override }}
         run: |
           set -euo pipefail
-          test "$(jq -r '.action // empty' preview-requests/formal-scene4-japanese-preview.json)" = "cleanup"
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/nasdaq-cafe-scheduled-preview.yml
-          git rm -f \
-            preview-requests/formal-scene4-japanese-preview.json \
-            preview-requests/scene4-japanese-new-tts.json \
-            preview-status/2026-08-06/scene4_japanese_new_tts_formal_run.json \
-            preview-status/2026-08-06/scene4_japanese_new_tts_run.json || true
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/nasdaq-cafe-scheduled-preview.yml
-          git diff --cached --check
-          git commit -m "Clean up Scene 4 Preview trigger"
-          git push origin HEAD:fix/visual-rhythm-2026-08-06
+
+          if [[ -n "${EPISODE_DATE_OVERRIDE:-}" ]]; then
+            EPISODE_DATE="$EPISODE_DATE_OVERRIDE"
+          else
+            EPISODE_DATE="$(TZ=Asia/Tokyo date +%F)"
+          fi
+
+          if [[ ! "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::episode date must match YYYY-MM-DD"
+            exit 1
+          fi
+
+          READY_PATH="render-specs/${EPISODE_DATE}/production_ready.json"
+          if [[ ! -s "$READY_PATH" ]]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Scheduled preview gate"
+              echo "- Episode date: \`$EPISODE_DATE\`"
+              echo "- Result: not-ready"
+              echo "- Missing: \`$READY_PATH\`"
+              echo "- TTS and Remotion were not started."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          mapfile -t VERIFIED < <(
+            python3 - "$READY_PATH" "$EPISODE_DATE" <<'PY'
+          import hashlib
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          ready_path = Path(sys.argv[1])
+          episode_date = sys.argv[2]
+          expected_spec_path = Path(f"render-specs/{episode_date}/render_spec.json")
+          expected_package_path = Path(
+              f"episode-packages/{episode_date}/episode_package_{episode_date}.md"
+          )
+
+          def sha256(path: Path) -> str:
+              digest = hashlib.sha256()
+              with path.open("rb") as handle:
+                  for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                      digest.update(chunk)
+              return digest.hexdigest()
+
+          try:
+              ready = json.loads(ready_path.read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError) as exc:
+              raise SystemExit(f"Invalid production_ready.json: {exc}")
+
+          required = {
+              "version": 1,
+              "status": "ready",
+              "episodeDate": episode_date,
+              "renderSpecPath": expected_spec_path.as_posix(),
+              "episodePackagePath": expected_package_path.as_posix(),
+              "validatorStatus": "pass",
+              "consistencyStatus": "pass",
+              "unresolvedStateCount": 0,
+          }
+          for key, expected in required.items():
+              actual = ready.get(key)
+              if actual != expected:
+                  raise SystemExit(
+                      f"production_ready.{key} mismatch: {actual!r} != {expected!r}"
+                  )
+
+          if not expected_spec_path.is_file() or expected_spec_path.stat().st_size == 0:
+              raise SystemExit(f"Missing or empty render spec: {expected_spec_path}")
+          if not expected_package_path.is_file() or expected_package_path.stat().st_size == 0:
+              raise SystemExit(f"Missing or empty episode package: {expected_package_path}")
+
+          spec_sha = sha256(expected_spec_path)
+          package_sha = sha256(expected_package_path)
+          sha_pattern = re.compile(r"[0-9a-f]{64}")
+          declared_spec_sha = ready.get("renderSpecSha256")
+          declared_package_sha = ready.get("episodePackageSha256")
+          if not isinstance(declared_spec_sha, str) or not sha_pattern.fullmatch(declared_spec_sha):
+              raise SystemExit("production_ready.renderSpecSha256 is invalid")
+          if not isinstance(declared_package_sha, str) or not sha_pattern.fullmatch(declared_package_sha):
+              raise SystemExit("production_ready.episodePackageSha256 is invalid")
+          if spec_sha != declared_spec_sha:
+              raise SystemExit(
+                  f"render spec SHA mismatch: actual={spec_sha} declared={declared_spec_sha}"
+              )
+          if package_sha != declared_package_sha:
+              raise SystemExit(
+                  f"episode package SHA mismatch: actual={package_sha} declared={declared_package_sha}"
+              )
+
+          try:
+              spec = json.loads(expected_spec_path.read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError) as exc:
+              raise SystemExit(f"Invalid render_spec.json: {exc}")
+          episode = spec.get("episode")
+          if not isinstance(episode, dict):
+              raise SystemExit("render_spec is missing episode object")
+          if episode.get("id") != episode_date:
+              raise SystemExit("render_spec episode.id does not match the scheduled date")
+          if episode.get("targetDate") != episode_date:
+              raise SystemExit("render_spec episode.targetDate does not match the scheduled date")
+
+          print(expected_spec_path.as_posix())
+          print(expected_package_path.as_posix())
+          print(spec_sha)
+          print(package_sha)
+          PY
+          )
+
+          SPEC_PATH="${VERIFIED[0]:-}"
+          PACKAGE_PATH="${VERIFIED[1]:-}"
+          SPEC_SHA="${VERIFIED[2]:-}"
+          PACKAGE_SHA="${VERIFIED[3]:-}"
+
+          if [[ ! "$SPEC_SHA" =~ ^[0-9a-f]{64}$ || ! "$PACKAGE_SHA" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::daily package verification did not return valid SHA-256 values"
+            exit 1
+          fi
+
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          echo "episode_date=$EPISODE_DATE" >> "$GITHUB_OUTPUT"
+          echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
+          echo "package_path=$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
+          echo "spec_sha=$SPEC_SHA" >> "$GITHUB_OUTPUT"
+          echo "package_sha=$PACKAGE_SHA" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Scheduled preview gate"
+            echo "- Episode date: \`$EPISODE_DATE\`"
+            echo "- Render spec: \`$SPEC_PATH\`"
+            echo "- Episode package: \`$PACKAGE_PATH\`"
+            echo "- Render spec SHA-256: \`$SPEC_SHA\`"
+            echo "- Episode package SHA-256: \`$PACKAGE_SHA\`"
+            echo "- Ready contract: pass"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare previous-dispatch marker directory
+        if: steps.ready.outputs.ready == 'true'
+        shell: bash
+        run: mkdir -p .cache/scheduled-preview-run
+
+      - name: Restore latest dispatch marker for this exact input
+        if: steps.ready.outputs.ready == 'true'
+        id: marker_restore
+        continue-on-error: true
+        uses: actions/cache/restore@v5
+        with:
+          path: .cache/scheduled-preview-run
+          key: ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-
+
+      - name: Decide whether another preview run is required
+        if: steps.ready.outputs.ready == 'true'
+        id: decision
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.ready.outputs.episode_date }}
+          SPEC_SHA: ${{ steps.ready.outputs.spec_sha }}
+        run: |
+          set -euo pipefail
+
+          MARKER=".cache/scheduled-preview-run/dispatch.json"
+          SHOULD_DISPATCH=true
+          REASON="no-prior-dispatch"
+          PRIOR_RUN_ID=""
+          PRIOR_STATUS=""
+          PRIOR_CONCLUSION=""
+
+          if [[ -s "$MARKER" ]]; then
+            PRIOR_RUN_ID="$(jq -r '.workflowRunId // empty' "$MARKER")"
+            MARKER_DATE="$(jq -r '.episodeDate // empty' "$MARKER")"
+            MARKER_SHA="$(jq -r '.renderSpecSha256 // empty' "$MARKER")"
+            if [[ "$MARKER_DATE" != "$EPISODE_DATE" || "$MARKER_SHA" != "$SPEC_SHA" ]]; then
+              echo "::error::restored dispatch marker does not match the verified input"
+              exit 1
+            fi
+          fi
+
+          if [[ -n "$PRIOR_RUN_ID" ]]; then
+            set +e
+            RUN_JSON="$(gh api \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2026-03-10' \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${PRIOR_RUN_ID}" 2>/tmp/prior-run-error.txt)"
+            API_STATUS=$?
+            set -e
+
+            if [[ "$API_STATUS" -eq 0 ]]; then
+              PRIOR_STATUS="$(jq -r '.status // "unknown"' <<<"$RUN_JSON")"
+              PRIOR_CONCLUSION="$(jq -r '.conclusion // ""' <<<"$RUN_JSON")"
+              case "$PRIOR_STATUS" in
+                queued|in_progress|pending|waiting|requested)
+                  SHOULD_DISPATCH=false
+                  REASON="prior-run-active"
+                  ;;
+                completed)
+                  if [[ "$PRIOR_CONCLUSION" == "success" ]]; then
+                    SHOULD_DISPATCH=false
+                    REASON="prior-run-succeeded"
+                  else
+                    SHOULD_DISPATCH=true
+                    REASON="prior-run-${PRIOR_CONCLUSION:-completed-without-conclusion}"
+                  fi
+                  ;;
+                *)
+                  SHOULD_DISPATCH=true
+                  REASON="prior-run-status-${PRIOR_STATUS}"
+                  ;;
+              esac
+            else
+              SHOULD_DISPATCH=true
+              REASON="prior-run-not-readable"
+            fi
+          fi
+
+          echo "dispatch=$SHOULD_DISPATCH" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          echo "prior_run_id=$PRIOR_RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "prior_status=$PRIOR_STATUS" >> "$GITHUB_OUTPUT"
+          echo "prior_conclusion=$PRIOR_CONCLUSION" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Duplicate/retry decision"
+            echo "- Dispatch required: \`$SHOULD_DISPATCH\`"
+            echo "- Reason: \`$REASON\`"
+            if [[ -n "$PRIOR_RUN_ID" ]]; then
+              echo "- Prior workflow run: \`$PRIOR_RUN_ID\`"
+              echo "- Prior status: \`${PRIOR_STATUS:-unknown}\`"
+              echo "- Prior conclusion: \`${PRIOR_CONCLUSION:-none}\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Dispatch the verified preview workflow
+        if: steps.ready.outputs.ready == 'true' && steps.decision.outputs.dispatch == 'true'
+        id: dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.ready.outputs.episode_date }}
+          SPEC_SHA: ${{ steps.ready.outputs.spec_sha }}
+          PACKAGE_SHA: ${{ steps.ready.outputs.package_sha }}
+        run: |
+          set -euo pipefail
+
+          REQUEST_BODY="$(jq -n \
+            --arg ref "$TARGET_REF" \
+            --arg episode_date "$EPISODE_DATE" \
+            --arg spec_sha "$SPEC_SHA" \
+            '{
+              ref: $ref,
+              inputs: {
+                episode_date: $episode_date,
+                expected_spec_sha256: $spec_sha,
+                confirmation: "PREVIEW"
+              }
+            }')"
+
+          RESPONSE="$(gh api \
+            --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/${TARGET_WORKFLOW}/dispatches" \
+            --input - <<<"$REQUEST_BODY")"
+
+          WORKFLOW_RUN_ID="$(jq -r '.workflow_run_id // empty' <<<"$RESPONSE")"
+          RUN_URL="$(jq -r '.html_url // empty' <<<"$RESPONSE")"
+          if [[ ! "$WORKFLOW_RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::workflow dispatch did not return workflow_run_id"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          mkdir -p .cache/scheduled-preview-run
+          jq -n \
+            --argjson workflow_run_id "$WORKFLOW_RUN_ID" \
+            --arg run_url "$RUN_URL" \
+            --arg episode_date "$EPISODE_DATE" \
+            --arg spec_sha "$SPEC_SHA" \
+            --arg package_sha "$PACKAGE_SHA" \
+            --arg dispatched_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg source_schedule "${{ github.event.schedule }}" \
+            '{
+              version: 1,
+              workflowRunId: $workflow_run_id,
+              workflowRunUrl: $run_url,
+              episodeDate: $episode_date,
+              renderSpecSha256: $spec_sha,
+              episodePackageSha256: $package_sha,
+              dispatchedAt: $dispatched_at,
+              sourceSchedule: $source_schedule
+            }' > .cache/scheduled-preview-run/dispatch.json
+
+          echo "workflow_run_id=$WORKFLOW_RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Preview dispatched"
+            echo "- Workflow run ID: \`$WORKFLOW_RUN_ID\`"
+            echo "- Run URL: $RUN_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save latest dispatch marker
+        if: steps.dispatch.outputs.workflow_run_id != ''
+        uses: actions/cache/save@v5
+        with:
+          path: .cache/scheduled-preview-run
+          key: ${{ runner.os }}-scheduled-preview-run-v1-${{ steps.ready.outputs.episode_date }}-${{ steps.ready.outputs.spec_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Record no-op result
+        if: steps.ready.outputs.ready == 'true' && steps.decision.outputs.dispatch != 'true'
+        shell: bash
+        run: |
+          {
+            echo "### No new preview dispatched"
+            echo "- Reason: \`${{ steps.decision.outputs.reason }}\`"
+            echo "- Existing workflow run: \`${{ steps.decision.outputs.prior_run_id }}\`"
+            echo "- No Gemini API call was made by this gate."
+          } >> "$GITHUB_STEP_SUMMARY"
