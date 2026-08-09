@@ -1,6 +1,6 @@
 {
-  "runId": 31314590699,
-  "runAttempt": 1,
-  "headSha": "e2ababdf04c887671036e43cd18cbe11b437e39c",
-  "status": "scene4-japanese-new-tts-started"
+  "runId": 31314760055,
+  "headSha": "12673ce2a62aa26e0735e4cd1d895594559b89b2",
+  "specSha256": "a653416dc8a3e93b57ed2b8cb6f32240ccff7dacb155d1c9df569371e592c643",
+  "status": "formal-preview-dispatched"
 }
