@@ -8,6 +8,7 @@ import {loadRuntimeAssetContext} from "../src/config/runtime-assets";
 import {compileRenderSpec, type SynthesizedChunk} from "../src/spec/compile-render-spec";
 import {getTransitionDurationInFrames} from "../src/spec/render-state";
 import {measureVisualGrammarTiming} from "../src/spec/measure-visual-grammar";
+import {addVisualStagnationWarnings} from "../src/spec/visual-stagnation";
 import {assertProductionTextSafe, resolveVoiceProfile} from "../src/spec/validate-render-spec";
 import {
   evaluateDurationContract,
@@ -81,12 +82,22 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
   const reportPath = technicalPath(spec.episode.id);
   await mkdir(path.dirname(output), {recursive: true});
   await writeFile(output, `${JSON.stringify(data, null, 2)}\n`, "utf8");
-  const visualGrammarTimingReport = measureVisualGrammarTiming(spec, data);
+  const measuredVisualGrammarTimingReport = measureVisualGrammarTiming(spec, data);
+  const visualGrammarTimingReport = measuredVisualGrammarTimingReport
+    ? addVisualStagnationWarnings(spec, measuredVisualGrammarTimingReport)
+    : null;
   const visualGrammarTimingReportPath = visualGrammarTimingReport
     ? visualGrammarTimingPath(spec.episode.id)
     : null;
   let visualGrammarTimingReportSha256: string | null = null;
   if (visualGrammarTimingReport && visualGrammarTimingReportPath) {
+    for (const warning of visualGrammarTimingReport.warnings) {
+      if (warning.code === "W_VISUAL_STAGNATION") {
+        console.warn(
+          `::warning title=Visual stagnation::${warning.durationMs}ms across ${warning.beatIds.join(", ")} (${warning.signature})`,
+        );
+      }
+    }
     const timingJson = `${JSON.stringify(visualGrammarTimingReport, null, 2)}\n`;
     await writeFile(visualGrammarTimingReportPath, timingJson, "utf8");
     visualGrammarTimingReportSha256 = createHash("sha256").update(timingJson).digest("hex");
@@ -172,6 +183,9 @@ const compile = async (durationPolicyCommand: DurationPolicyCommand) => {
           selectedFallbackBeatIds: visualGrammarTimingReport.selectedFallbackBeatIds,
           unresolvedStateCount: visualGrammarTimingReport.unresolvedStateCount,
           failureCodes: visualGrammarTimingReport.failures.map((failure) => failure.code),
+          stagnationStatus: visualGrammarTimingReport.visualStagnation.status,
+          stagnationWarningCount: visualGrammarTimingReport.visualStagnation.warningCount,
+          longestVisualStagnationRunMs: visualGrammarTimingReport.visualStagnation.longestRunMs,
         }
       : null,
     totalProductionDuration: {
