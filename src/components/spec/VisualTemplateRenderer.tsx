@@ -256,12 +256,31 @@ const OpeningContradiction: React.FC<{content: PublicMainContent}> = ({content})
   </Surface>;
 };
 
+const expectedActualHero = (card: PublicCard) => {
+  const raw = card.lines[0]?.value ?? card.title;
+  return raw.replace(/^(Expected|Actual|Gap)\s*/iu, "");
+};
+
+const expectedActualNote = (card: PublicCard) => card.role === "expected"
+  ? "事前期待"
+  : card.role === "actual"
+    ? "実績・発表"
+    : card.role === "gap"
+      ? "差分"
+      : card.title;
+
 const ExpectedActualFlow: React.FC<{content: PublicMainContent}> = ({content}) => {
   const cards = [...content.cards].sort((a, b) => a.revealAtMs - b.revealAtMs);
   const labels = {expected: "EXPECTED", actual: "ACTUAL", gap: "GAP"} as const;
-  return <Surface accent={color.emphasis} style={{padding: "28px 32px", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 20}}>{cards.map((card) => {
+  return <Surface accent={color.emphasis} style={{padding: "26px 30px", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 20}}>{cards.map((card) => {
     const tone: Tone = card.role === "gap" ? "emphasis" : card.role === "actual" ? "positive" : "neutral";
-    return <div key={card.key} style={{...motionStyle(content, card), display: "grid", gridTemplateRows: "auto 1fr", gap: 14, minWidth: 0}}><div style={{textAlign: "center"}}><Tag tone={tone}>{card.role ? labels[card.role] : card.title}</Tag></div><div style={{borderRadius: 23, padding: 24, background: `${toneColor(tone)}0d`, border: `${card.highlighted ? 6 : 3}px solid ${toneColor(tone)}`, boxShadow: card.highlighted ? `0 0 0 7px ${toneColor(tone)}22` : "0 12px 24px rgba(16,32,51,.10)"}}><div style={{fontSize: 32, fontWeight: 950}}>{card.title}</div><div style={{display: "grid", gap: 13, marginTop: 18}}>{card.lines.map((line) => <div key={`${line.label}-${line.value}`} style={{borderLeft: `7px solid ${toneColor(line.tone)}`, paddingLeft: 14}}><div style={{fontSize: 22, color: color.muted, fontWeight: 850}}>{line.label}</div><div style={{marginTop: 5, fontSize: 29, lineHeight: 1.2, fontWeight: 950}}>{line.value}</div></div>)}</div></div></div>;
+    const hero = expectedActualHero(card);
+    const heroSize = Array.from(hero).length <= 10 ? 70 : Array.from(hero).length <= 16 ? 58 : 48;
+    return <div key={card.key} data-expected-actual-card={card.role ?? "unknown"} style={{...motionStyle(content, card), minWidth: 0, minHeight: 0, padding: "24px 22px 26px", borderRadius: 24, background: "rgba(248,251,253,.95)", border: `${card.highlighted ? 6 : 3}px solid ${toneColor(tone)}`, boxShadow: card.highlighted ? `0 0 0 7px ${toneColor(tone)}22` : "0 14px 28px rgba(16,32,51,.13)", display: "grid", gridTemplateRows: "auto 1fr auto", alignItems: "center", textAlign: "center"}}>
+      <div><Tag tone={tone}>{card.role ? labels[card.role] : card.title}</Tag></div>
+      <div style={{display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0, padding: "18px 6px", color: toneColor(tone), fontSize: heroSize, lineHeight: 1.08, fontWeight: 950, overflowWrap: "anywhere"}}>{hero}</div>
+      <div style={{fontSize: 30, lineHeight: 1.2, color: color.muted, fontWeight: 900}}>{expectedActualNote(card)}</div>
+    </div>;
   })}</Surface>;
 };
 
@@ -302,23 +321,31 @@ const DivergingBars: React.FC<{content: PublicMainContent}> = ({content}) => {
   return <Surface accent={color.emphasis} style={{padding: "26px 40px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 14}}>{content.numbers.map((number, index) => {const value = values[index]; const width = `${clamp((Math.abs(value) / max) * numberProgress(content, number)) * 47}%`; return <div key={number.key} style={{...motionStyle(content, number), display: "grid", gridTemplateColumns: "235px 1fr 190px", gap: 20, alignItems: "center", minHeight: 91}}><div style={{fontSize: 30, fontWeight: 950}}>{number.label}</div><div style={{position: "relative", height: 55, borderRadius: 14, background: "rgba(82,118,145,.12)", border: "2px solid rgba(82,118,145,.23)", overflow: "hidden"}}><div style={{position: "absolute", left: "50%", top: 0, bottom: 0, width: 3, background: color.muted}}/><div style={{position: "absolute", top: 5, bottom: 5, ...(value < 0 ? {right: "50%", width} : {left: "50%", width}), borderRadius: 10, background: toneColor(number.tone)}}/></div><div style={{color: toneColor(number.tone), textAlign: "right"}}><AnimatedNumber content={content} number={number} size={48}/></div></div>;})}</Surface>;
 };
 
+const adaptiveEvidenceFontSize = (value: string, active: boolean) => {
+  const length = Array.from(value).length;
+  if (length <= 18) return active ? 42 : 39;
+  if (length <= 30) return active ? 36 : 34;
+  return 31;
+};
+
 const EvidenceBoundary: React.FC<{content: PublicMainContent}> = ({content}) => {
   const items = content.texts.length > 0
     ? content.texts
     : content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title]);
   const columns = items.length === 1 ? "1fr" : "repeat(2,minmax(0,1fr))";
-  return <Surface accent={color.emphasis} style={{padding: "32px 38px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 22}}>
-    <div style={{fontSize: 28, color: color.muted, fontWeight: 900}}>{content.screenQuestion}</div>
-    <div style={{display: "grid", gridTemplateColumns: columns, gridAutoRows: "minmax(0,1fr)", gap: "22px 42px", alignItems: "stretch"}}>
+  return <Surface accent={color.emphasis} style={{padding: "30px 36px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
+    <div style={{fontSize: 31, color: color.muted, fontWeight: 900}}>{content.screenQuestion}</div>
+    <div style={{display: "grid", gridTemplateColumns: columns, gridAutoRows: "minmax(0,1fr)", gap: "20px 34px", alignItems: "stretch"}}>
       {items.map((item, index) => {
         const active = index === items.length - 1;
-        return <div key={`${index}-${item}`} data-evidence-lane={index + 1} style={{position: "relative", minWidth: 0, minHeight: 0, display: "flex", alignItems: "center", padding: "28px 28px 28px 82px", borderRadius: 24, background: active ? "rgba(112,70,168,.10)" : "rgba(7,142,174,.07)", border: `3px solid ${active ? "rgba(112,70,168,.38)" : "rgba(7,142,174,.25)"}`, overflow: "hidden"}}>
+        const fontSize = adaptiveEvidenceFontSize(item, active);
+        return <div key={`${index}-${item}`} data-evidence-lane={index + 1} data-evidence-font-size={fontSize} style={{position: "relative", minWidth: 0, minHeight: 0, display: "flex", alignItems: "center", padding: "28px 28px 28px 82px", borderRadius: 24, background: active ? "rgba(248,244,255,.96)" : "rgba(248,251,253,.94)", border: `3px solid ${active ? "rgba(112,70,168,.58)" : "rgba(7,142,174,.46)"}`, boxShadow: "0 14px 28px rgba(16,32,51,.12)"}}>
           <div style={{position: "absolute", left: 24, top: 24, width: 40, height: 40, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: color.white, background: active ? color.emphasis : color.cyan, fontSize: 23, fontWeight: 950}}>{index + 1}</div>
-          <div style={{...timedStyle(content, content.beatStartMs + index * 680, "x"), fontSize: active ? 41 : 36, lineHeight: 1.24, color: active ? color.emphasis : color.ink, fontWeight: 950}}>{item}</div>
+          <div style={{...timedStyle(content, content.beatStartMs + index * 680, "x"), maxWidth: "100%", fontSize, lineHeight: 1.22, color: active ? color.emphasis : color.ink, fontWeight: 950, overflowWrap: "anywhere", wordBreak: "normal"}}>{item}</div>
         </div>;
       })}
     </div>
-    <div style={{textAlign: "right", color: color.emphasis, fontSize: 29, fontWeight: 950}}>{content.primaryElement}</div>
+    <div style={{textAlign: "right", color: color.emphasis, fontSize: 31, fontWeight: 950}}>{content.primaryElement}</div>
   </Surface>;
 };
 

@@ -113,6 +113,19 @@ test("verification and evidence templates have distinct renderers and persistent
   assert.doesNotMatch(renderer, /case "verification-checklist": return <VerificationMatrix/);
 });
 
+test("main-stage legibility pass protects dense financial copy", () => {
+  const renderer = readFileSync("src/components/spec/VisualTemplateRenderer.tsx", "utf8");
+  const timeline = readFileSync("src/components/spec/EventReactionTimelineTemplate.tsx", "utf8");
+  assert.match(renderer, /data-expected-actual-card/);
+  assert.match(renderer, /const heroSize = Array\.from\(hero\)\.length <= 10 \? 70/);
+  assert.match(renderer, /adaptiveEvidenceFontSize/);
+  assert.match(renderer, /rgba\(248,251,253,\.94\)/);
+  assert.match(renderer, /overflowWrap: "anywhere"/);
+  assert.match(timeline, /data-timeline-count/);
+  assert.match(timeline, /splitTimelineValue/);
+  assert.match(timeline, /const bodySize = items\.length <= 3 \? 38 : 32/);
+});
+
 test("text focus has occupancy-aware hero and duo modes", () => {
   const renderer = readFileSync("src/components/spec/SpecVisualModes.tsx", "utf8");
   assert.match(renderer, /data-text-focus-size/);

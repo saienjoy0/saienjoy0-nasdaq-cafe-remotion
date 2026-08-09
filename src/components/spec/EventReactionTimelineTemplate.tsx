@@ -19,23 +19,24 @@ const revealStyle = (content: PublicMainContent, revealAtMs: number): React.CSSP
   };
 };
 
-const orderedTimelineObjects = (content: PublicMainContent) => {
+type TimelineObject = PublicNumber | {key: string; label: string; value: string; revealAtMs: number; tone: string};
+
+const orderedTimelineObjects = (content: PublicMainContent): TimelineObject[] => {
   const config = content.templateConfig.reactionTimeline;
   if (!config) return [];
-  const byId = new Map<string, PublicNumber | {key: string; label: string; value: string; revealAtMs: number; tone: string}>([
-    ...content.numbers.map((item) => [item.key, item] as const),
-    ...content.cards.map((item) => [item.key, {
-      key: item.key,
-      label: item.title,
-      value: item.lines.map((line) => line.value).join(" / "),
-      revealAtMs: item.revealAtMs,
-      tone: item.lines[0]?.tone ?? "neutral",
-    }] as const),
+  const byId = new Map<string, TimelineObject[]>([
+    ...content.numbers.map((item) => [item.key, [item] as TimelineObject[]] as const),
+    ...content.cards.map((item) => [item.key, item.lines.length > 0
+      ? item.lines.map((line, index) => ({
+          key: `${item.key}-${index + 1}`,
+          label: line.label,
+          value: line.value,
+          revealAtMs: item.revealAtMs + index * 620,
+          tone: line.tone,
+        }))
+      : [{key: item.key, label: item.title, value: item.title, revealAtMs: item.revealAtMs, tone: "neutral"}]] as const),
   ]);
-  return config.eventOrderIds.flatMap((id) => {
-    const value = byId.get(id);
-    return value ? [value] : [];
-  });
+  return config.eventOrderIds.flatMap((id) => byId.get(id) ?? []);
 };
 
 const toneColor = (tone: string) =>
@@ -80,21 +81,30 @@ const SeriesView: React.FC<{content: PublicMainContent}> = ({content}) => {
   </div>;
 };
 
+const splitTimelineValue = (value: string) => {
+  const match = value.match(/^(翌日|(?:[0-2]?\d:[0-5]\d)\s*ET)\s*(.*)$/u);
+  return match ? {time: match[1], body: match[2]} : {time: "", body: value};
+};
+
 const SequenceView: React.FC<{content: PublicMainContent}> = ({content}) => {
   const items = orderedTimelineObjects(content);
   const precision = content.templateConfig.reactionTimeline!.precision;
-  return <div style={{height: "100%", display: "grid", gridTemplateRows: "auto 1fr", padding: "34px 40px 40px", boxSizing: "border-box"}}>
+  const bodySize = items.length <= 3 ? 38 : 32;
+  return <div style={{height: "100%", display: "grid", gridTemplateRows: "auto 1fr", padding: "32px 38px 38px", boxSizing: "border-box"}}>
     <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24}}>
-      <div style={{fontSize: 31, fontWeight: 950, color: palette.ink}}>{content.screenQuestion}</div>
-      <div style={{fontSize: 18, fontWeight: 850, color: palette.muted}}>{content.primaryElement}</div>
+      <div style={{fontSize: 34, fontWeight: 950, color: palette.ink}}>{content.screenQuestion}</div>
+      <div style={{fontSize: 22, fontWeight: 850, color: palette.muted}}>{content.primaryElement}</div>
     </div>
-    <div style={{position: "relative", display: "grid", gridTemplateColumns: `repeat(${Math.max(1, items.length)},1fr)`, gap: 18, alignItems: "center"}}>
-      <div aria-hidden="true" style={{position: "absolute", left: "5%", right: "5%", top: "50%", height: 5, borderRadius: 99, background: "rgba(7,142,174,.35)"}}/>
-      {items.map((item, index) => <div key={item.key} data-timeline-item={precision} style={{...revealStyle(content, item.revealAtMs), position: "relative", zIndex: 2, alignSelf: index % 2 === 0 ? "start" : "end", padding: "18px 18px 20px", borderRadius: 14, background: palette.paper, border: `2px solid ${toneColor(item.tone)}55`, boxShadow: "0 12px 25px rgba(0,0,0,.13)"}}>
-        <div style={{position: "absolute", left: "calc(50% - 8px)", [index % 2 === 0 ? "bottom" : "top"]: -34, width: 16, height: 16, borderRadius: 99, background: toneColor(item.tone), boxShadow: `0 0 0 7px ${toneColor(item.tone)}20`}}/>
-        <div style={{fontSize: 21, fontWeight: 850, color: palette.muted}}>{item.label}</div>
-        <div style={{marginTop: 8, fontSize: 28, lineHeight: 1.18, fontWeight: 950, color: palette.ink}}>{item.value}</div>
-      </div>)}
+    <div data-timeline-count={items.length} style={{position: "relative", display: "grid", gridTemplateColumns: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 22, alignItems: "center", minHeight: 0}}>
+      {items.length > 1 ? <div aria-hidden="true" style={{position: "absolute", left: "8%", right: "8%", top: "50%", height: 4, borderRadius: 99, background: "rgba(7,142,174,.28)"}}/> : null}
+      {items.map((item, index) => {
+        const parts = splitTimelineValue(item.value);
+        return <div key={item.key} data-timeline-item={precision} style={{...revealStyle(content, item.revealAtMs), position: "relative", zIndex: 2, minWidth: 0, minHeight: 250, padding: "24px 22px", borderRadius: 22, background: "rgba(248,251,253,.96)", border: `3px solid ${toneColor(item.tone)}66`, boxShadow: "0 14px 28px rgba(0,0,0,.14)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}}>
+          <div style={{position: "absolute", left: "calc(50% - 10px)", top: "calc(50% - 10px)", width: 20, height: 20, borderRadius: 99, background: toneColor(item.tone), boxShadow: `0 0 0 8px ${toneColor(item.tone)}20`, zIndex: -1}}/>
+          <div style={{minHeight: 40, fontSize: 28, lineHeight: 1.15, fontWeight: 950, color: toneColor(item.tone)}}>{parts.time || item.label}</div>
+          <div style={{marginTop: 18, fontSize: bodySize, lineHeight: 1.18, fontWeight: 950, color: palette.ink, overflowWrap: "anywhere"}}>{parts.body}</div>
+        </div>;
+      })}
     </div>
   </div>;
 };

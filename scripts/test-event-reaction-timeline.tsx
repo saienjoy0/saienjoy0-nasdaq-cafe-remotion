@@ -95,4 +95,33 @@ for (const [variant, precision] of variants) {
   console.log(`PASS: ${variant} timeline rendering`);
 }
 
-console.log("event reaction timeline renderer tests: 4 passed");
+
+const cardContent = content("official-time-plus-close", "official-time-plus-close");
+cardContent.numbers = [];
+cardContent.cards = [{
+  key: "events",
+  title: "SpaceX→AMD→翌日終値",
+  role: null,
+  lines: [
+    {label: "1", value: "16:30 ET SpaceX説明会", tone: "neutral"},
+    {label: "2", value: "17:00 ET AMD説明会", tone: "neutral"},
+    {label: "3", value: "翌日 AMD -7.04% / NVDA +3.43%", tone: "neutral"},
+  ],
+  highlighted: false,
+  revealAtMs: 0,
+  highlightedAtMs: null,
+  enterMotion: null,
+  exitMotion: null,
+  highlightMotion: null,
+  unhighlightMotion: null,
+}];
+cardContent.templateConfig.reactionTimeline!.eventOrderIds = ["events"];
+const cardMarkup = renderToStaticMarkup(<EventReactionTimelineTemplate content={cardContent}/>);
+assert.match(cardMarkup, /data-timeline-count="3"/);
+assert.match(cardMarkup, /16:30 ET/);
+assert.match(cardMarkup, /17:00 ET/);
+assert.match(cardMarkup, /翌日/);
+assert.match(cardMarkup, /SpaceX説明会/);
+assert.match(cardMarkup, /AMD -7.04%/);
+
+console.log("event reaction timeline renderer tests: 5 passed");

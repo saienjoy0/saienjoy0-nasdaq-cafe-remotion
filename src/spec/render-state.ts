@@ -185,7 +185,7 @@ export const getSceneRenderState = (
     nextShot: shotState.nextShot,
     captionText: activeChunk?.caption.text ?? null,
     subtitleText: activeChunk
-      ? getSubtitleTextAtTime(activeChunk.speechText, activeChunk.startMs, activeChunk.endMs, timeMs)
+      ? getSubtitleTextAtTime(activeChunk.caption.text || activeChunk.speechText, activeChunk.startMs, activeChunk.endMs, timeMs)
       : null,
     expression,
     previousExpression,

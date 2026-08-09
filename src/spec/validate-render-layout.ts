@@ -42,9 +42,9 @@ export const assertNarrationChunkSubtitleLayoutFits = (
   chunk: SubtitleLayoutChunk,
   path: string,
 ) => {
-  // The public subtitle layer renders time-sliced speechText cues. caption.text
-  // remains production metadata and must not be treated as one visible page.
-  const cues = createSubtitleCues(chunk.speechText, chunk.startMs, chunk.endMs);
+  // The public subtitle layer renders time-sliced caption text. speechText stays
+  // TTS-facing; caption text may use display-friendly Arabic numerals.
+  const cues = createSubtitleCues(chunk.caption.text || chunk.speechText, chunk.startMs, chunk.endMs);
   cues.forEach((cue, cueIndex) =>
     assertSubtitleCueTextFits(cue.text, `${path}.subtitleCues[${cueIndex}].text`),
   );
