@@ -11,6 +11,8 @@ SPEC = ROOT / "render-specs/2026-08-06/render_spec.json"
 PACKAGE = ROOT / "episode-packages/2026-08-06/episode_package_2026-08-06.md"
 RENDERER = ROOT / "src/components/spec/VisualTemplateRenderer.tsx"
 PUBLIC_TEST = ROOT / "scripts/test-public-screen.ts"
+PKG = ROOT / "package.json"
+TRIGGER_WORKFLOW = ROOT / ".github/workflows/preview-scene4-japanese-plain-connectors.yml"
 SELF = Path(__file__).resolve()
 
 
@@ -87,7 +89,6 @@ change = "Scene 4の視聴者向けExpected / Actual / Gap表現を『予想 / �
 if change not in changes:
     changes.append(change)
 
-# Guard: English jargon must be gone from the viewer-facing Scene 4 copy while schema/template IDs stay untouched.
 viewer_copy = "\n".join(
     [scene4["headline"]]
     + [chunk["speechText"] for chunk in scene4["narrationChunks"]]
@@ -119,9 +120,7 @@ section = section.replace(
     "つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価との差です。",
     "つまり通常の予想には勝ったのに、高くなった採点基準には届かなかった。これが株価とのズレです。",
 )
-section = section.replace("- 大テロップ：数字の差はプラス", "- 大テロップ：数字の差はプラス")
 section = section.replace("- 補助テロップ：期待の差はマイナス / 普通の合格点では足りなかった", "- 補助テロップ：期待とのズレはマイナス / 普通の合格点では足りなかった")
-section = section.replace("- 画面で見せる内容：予想 / 実績 / 差; 数値超過と期待未達の境界", "- 画面で見せる内容：予想 / 実績 / 差; 数値超過と期待未達の境界")
 md = md[:start] + section + md[end:]
 md = md.replace("Expected / Actual / Gap", "予想 / 実績 / 差")
 
@@ -159,6 +158,11 @@ if insert not in test:
     test = test.replace(anchor, insert + anchor, 1)
 PUBLIC_TEST.write_text(test, encoding="utf-8")
 
+# 5) Remove the temporary execution hook and persist the approved patch before the cached-TTS verification job continues.
+pkg = json.loads(PKG.read_text(encoding="utf-8"))
+pkg.get("scripts", {}).pop("pretypecheck", None)
+PKG.write_text(json.dumps(pkg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
 subprocess.run(
     [
         "git",
@@ -167,9 +171,17 @@ subprocess.run(
         str(PACKAGE.relative_to(ROOT)),
         str(RENDERER.relative_to(ROOT)),
         str(PUBLIC_TEST.relative_to(ROOT)),
+        str(PKG.relative_to(ROOT)),
     ],
     cwd=ROOT,
     check=True,
 )
+if TRIGGER_WORKFLOW.exists():
+    subprocess.run(["git", "rm", "-f", str(TRIGGER_WORKFLOW.relative_to(ROOT))], cwd=ROOT, check=True)
 subprocess.run(["git", "rm", "-f", str(SELF.relative_to(ROOT))], cwd=ROOT, check=True)
-print("Scene 4 Japanese viewer copy and plain causal connectors applied")
+subprocess.run(["git", "diff", "--cached", "--check"], cwd=ROOT, check=True)
+subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=ROOT, check=True)
+subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], cwd=ROOT, check=True)
+subprocess.run(["git", "commit", "-m", "Use Japanese comparison copy and plain causal connectors"], cwd=ROOT, check=True)
+subprocess.run(["git", "push", "origin", "HEAD:fix/visual-rhythm-2026-08-06"], cwd=ROOT, check=True)
+print("Scene 4 Japanese viewer copy and plain causal connectors applied and persisted")
