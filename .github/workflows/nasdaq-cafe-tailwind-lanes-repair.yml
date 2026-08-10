@@ -1,0 +1,155 @@
+name: Nasdaq Cafe Tailwind Lanes Repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tailwind-lanes-repair-requests/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasdaq-cafe-tailwind-lanes-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Resolve exactly one request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'tailwind-lanes-repair-requests/*.json')
+          test "${#CHANGED[@]}" = 1 || { echo '::error::Exactly one lane repair request must change'; exit 1; }
+          python3 - "${CHANGED[0]}" <<'PY'
+          import json,os,re,sys
+          from pathlib import Path
+          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          required={'contractVersion','episodeDate','expectedRenderSpecSha256','expectedEpisodePackageSha256','confirmation'}
+          if set(v)!=required: raise SystemExit(f'fields mismatch: {sorted(v)}')
+          if v['contractVersion']!='1.0.0' or v['confirmation']!='PATCH_TAILWIND_LANES_ONLY': raise SystemExit('bad request contract')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',v['episodeDate']): raise SystemExit('bad date')
+          for k in ('expectedRenderSpecSha256','expectedEpisodePackageSha256'):
+              if not re.fullmatch(r'[0-9a-f]{64}',v[k]): raise SystemExit(f'bad {k}')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f"date={v['episodeDate']}\nrender_sha={v['expectedRenderSpecSha256']}\npackage_sha={v['expectedEpisodePackageSha256']}\n")
+          PY
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply exact two-lane authoring repair
+        id: repair
+        shell: bash
+        env:
+          DATE: ${{ steps.request.outputs.date }}
+          EXPECTED_RENDER_SHA: ${{ steps.request.outputs.render_sha }}
+          EXPECTED_PACKAGE_SHA: ${{ steps.request.outputs.package_sha }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import copy,hashlib,json,os
+          from pathlib import Path
+          date=os.environ['DATE']
+          sp=Path(f'render-specs/{date}/render_spec.json')
+          pp=Path(f'episode-packages/{date}/episode_package_{date}.md')
+          rp=Path(f'render-specs/{date}/production_ready.json')
+          sha=lambda b: hashlib.sha256(b).hexdigest()
+          sb=sp.read_bytes(); pb=pp.read_bytes()
+          if sha(sb)!=os.environ['EXPECTED_RENDER_SHA']: raise SystemExit('render SHA drift')
+          if sha(pb)!=os.environ['EXPECTED_PACKAGE_SHA']: raise SystemExit('package SHA drift')
+          old=json.loads(sb.decode('utf-8')); spec=copy.deepcopy(old)
+          scene=next(s for s in spec['scenes'] if s.get('sceneId')=='scene-07')
+          beat=next(b for b in scene['visualBeats'] if b.get('beatId')=='vb-07-02')
+          expected_viewer=['広い金利追い風','個別材料で差','Microsoft +0.03%']
+          if beat.get('visualTemplate')!='tailwind-headwind': raise SystemExit('Scene7 Beat2 template drift')
+          if beat.get('templateConfig',{}).get('variant')!='two-lane': raise SystemExit('Scene7 Beat2 variant drift')
+          if beat.get('templateConfig',{}).get('laneLabels')!=[]: raise SystemExit('laneLabels no longer empty')
+          if beat.get('viewerTexts')!=expected_viewer: raise SystemExit(f'viewerTexts drift: {beat.get("viewerTexts")!r}')
+          beat['templateConfig']['laneLabels']=['追い風','個別差']
+          beat['viewerTexts']=['追い風｜広い金利追い風','個別差｜個別材料で差','個別差｜Microsoft +0.03%']
+
+          # Fail closed: only laneLabels and viewerTexts of vb-07-02 may change.
+          check=copy.deepcopy(old)
+          cs=next(s for s in check['scenes'] if s.get('sceneId')=='scene-07')
+          cb=next(b for b in cs['visualBeats'] if b.get('beatId')=='vb-07-02')
+          cb['templateConfig']['laneLabels']=['追い風','個別差']
+          cb['viewerTexts']=['追い風｜広い金利追い風','個別差｜個別材料で差','個別差｜Microsoft +0.03%']
+          if spec!=check: raise SystemExit('unexpected render mutation')
+          for a,b in zip(old['scenes'],spec['scenes']):
+              if a.get('narrationChunks')!=b.get('narrationChunks'): raise SystemExit('narration/caption mutation forbidden')
+          text=json.dumps(spec,ensure_ascii=False,indent=2,sort_keys=True)+'\n'
+          sp.write_text(text,encoding='utf-8')
+          new_render_sha=sha(text.encode())
+
+          md=pb.decode('utf-8')
+          marker='<!--VISUAL_BEAT:scene-07:vb-07-02-->'
+          start=md.index(marker); end=md.find('<!--VISUAL_BEAT:',start+len(marker))
+          if end<0: end=md.find('### 完成ナレーション',start)
+          block=md[start:end]
+          old_line='  - 視聴者向けテキスト：広い金利追い風 / 個別材料で差 / Microsoft +0.03%'
+          new_line='  - 視聴者向けテキスト：追い風｜広い金利追い風 / 個別差｜個別材料で差 / 個別差｜Microsoft +0.03%'
+          if block.count(old_line)!=1: raise SystemExit('human viewer text precondition failed')
+          block=block.replace(old_line,new_line,1)
+          md=md[:start]+block+md[end:]
+          fm='<!--BEGIN_FINAL_PRODUCTION_SOURCE-->'; m=md.index(fm); js=md.index('```json',m)+len('```json'); je=md.index('```',js)
+          source=json.loads(md[js:je].strip()); source['render_spec']=spec
+          md=md[:js]+'\n'+json.dumps(source,ensure_ascii=False,indent=2)+'\n'+md[je:]
+          pp.write_text(md,encoding='utf-8')
+          new_package_sha=sha(md.encode())
+          if rp.exists(): rp.unlink()
+          out=Path(f'preview-status/{date}/tailwind_lanes_repair.json'); out.parent.mkdir(parents=True,exist_ok=True)
+          receipt={'status':'patched-awaiting-validator','episodeDate':date,'sceneId':'scene-07','beatId':'vb-07-02','laneLabels':['追い風','個別差'],'viewerTexts':['追い風｜広い金利追い風','個別差｜個別材料で差','個別差｜Microsoft +0.03%'],'editorialChanged':False,'narrationChanged':False,'captionChanged':False,'numbersChanged':False,'newRenderSpecSha256':new_render_sha,'newEpisodePackageSha256':new_package_sha}
+          out.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f'new_render_sha={new_render_sha}\nnew_package_sha={new_package_sha}\n')
+          PY
+
+      - name: Run formal validator and layout regressions
+        run: |
+          npm run episode:spec:validate -- "render-specs/${{ steps.request.outputs.date }}/render_spec.json"
+          npm run test:public-screen
+          npm run test:visual-validator
+          npm run test:visual-templates
+
+      - name: Recreate readiness
+        run: npm run episode:spec:ready -- "${{ steps.request.outputs.date }}" --consistency-pass
+
+      - name: Finalize receipt and commit
+        shell: bash
+        env:
+          DATE: ${{ steps.request.outputs.date }}
+        run: |
+          set -euo pipefail
+          python3 - "$DATE" <<'PY'
+          import json,sys
+          from pathlib import Path
+          d=sys.argv[1]; p=Path(f'preview-status/{d}/tailwind_lanes_repair.json'); v=json.loads(p.read_text())
+          v.update({'status':'validated-ready','formalValidator':'pass','layoutRegressions':'pass','productionReady':'pass'})
+          p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "render-specs/${DATE}/render_spec.json" "render-specs/${DATE}/production_ready.json" "episode-packages/${DATE}/episode_package_${DATE}.md" "preview-status/${DATE}/tailwind_lanes_repair.json"
+          git commit -m "fix: bind ${DATE} Scene 7 tailwind lanes"
+          git pull --rebase origin main
+          git push origin HEAD:main
