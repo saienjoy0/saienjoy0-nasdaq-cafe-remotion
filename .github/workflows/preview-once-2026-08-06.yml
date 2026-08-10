@@ -27,6 +27,7 @@ jobs:
       RENDERER_CONTRACT_VERSION: "2.4.0"
       HANDOFF_DOWNLOAD_ROOT: ${{ github.workspace }}/.handoff-download
       RUNTIME_ASSET_REGISTRY: ${{ github.workspace }}/build/handoff/runtime_asset_registry.json
+      HANDOFF_URL: "https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-afa4-8206-92f3-344e0b4c263a/raw?se=2026-08-10T00%3A44%3A24Z&sp=r&sv=2026-02-06&sr=b&scid=fba53a31-37d1-5eb7-a3d3-25654f701967&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A20%3A23Z&ske=2026-08-10T02%3A20%3A23Z&sks=b&skv=2026-02-06&sig=jyYUICzH3BiATEw3KLUuK3l7DlEXI6pzvSbYzovlYgQ%3D"
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
@@ -37,15 +38,6 @@ jobs:
       GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
 
     steps:
-      - name: Require immutable handoff token
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -z "${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}" ]]; then
-            echo "::error::NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN is required"
-            exit 1
-          fi
-
       - name: Checkout pinned renderer
         uses: actions/checkout@v6
         with:
@@ -58,14 +50,13 @@ jobs:
           ACTUAL="$(git rev-parse HEAD)"
           test "$ACTUAL" = "$EXPECTED_RENDERER_COMMIT"
 
-      - name: Download immutable Plot handoff Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nasdaq-cafe-handoff-2026-08-06-31340874518
-          path: .handoff-download
-          repository: saienjoy0/nasdaq-plot-creator-
-          run-id: 31340874518
-          github-token: ${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}
+      - name: Download immutable Plot handoff Artifact bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HANDOFF_DOWNLOAD_ROOT"
+          curl -fL --retry 3 --retry-delay 2 "$HANDOFF_URL" -o /tmp/handoff.zip
+          unzip -q /tmp/handoff.zip -d "$HANDOFF_DOWNLOAD_ROOT"
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
