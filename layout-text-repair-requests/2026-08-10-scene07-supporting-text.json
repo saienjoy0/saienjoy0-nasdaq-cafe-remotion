@@ -1,0 +1,11 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "expectedRenderSpecSha256": "3a5180495ed573e40a71c3aa081d650e6582d66a0685952a1df9795b07fba29b",
+  "expectedEpisodePackageSha256": "34fa9b28ec5e51bae763e3521a4a3955b6fc724edfade662cf92dd7b2a543e27",
+  "sceneId": "scene-07",
+  "supportingTextIndex": 1,
+  "oldText": "Alphabet -0.96% / MSFT +0.03%",
+  "newText": "Alphabet -0.96%/MSFT +0.03%",
+  "confirmation": "PATCH_DISPLAY_TEXT_ONLY"
+}
