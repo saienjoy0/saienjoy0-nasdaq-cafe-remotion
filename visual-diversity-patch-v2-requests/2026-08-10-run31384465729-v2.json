@@ -1,0 +1,8 @@
+{
+  "contractVersion": "2.0.0",
+  "episodeDate": "2026-08-10",
+  "failedPreviewRunId": 31384465729,
+  "expectedRenderSpecSha256": "63f18c1ba5c0c0118b6f8ff68345a1b1c21f06f0d87844869248e64b9768cceb",
+  "expectedEpisodePackageSha256": "ffc610d6daa3e67cbe1f9c037d4e1efce222c3836bcfe918abb88b5ee68d4170",
+  "confirmation": "PATCH_VISUAL_DIVERSITY_ONLY"
+}
