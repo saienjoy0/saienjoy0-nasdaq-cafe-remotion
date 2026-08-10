@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import type {ProductionScene} from "../src/spec/render-spec";
+import {getSceneRenderState} from "../src/spec/render-state";
 import {createSubtitleCues, getSubtitleTextAtTime} from "../src/spec/subtitle-cues";
 import {assertNarrationChunkSubtitleLayoutFits, assertSubtitleCueTextFits} from "../src/spec/validate-render-layout";
 
@@ -61,5 +63,33 @@ assert.throws(
   () => assertSubtitleCueTextFits("一行目\n二行目\n三行目", "$.too-tall"),
   /subtitle exceeds 2 lines/u,
 );
+
+const captionSurfaceScene = {
+  sceneNumber: 1,
+  initialExpression: "通常",
+  narrationChunks: [{
+    chunkId: "scene-01-chunk-001",
+    speechText: "SOXXは二・〇二パーセント高でした。",
+    startMs: 0,
+    endMs: 2_000,
+    pauseAfterMs: 0,
+    caption: {text: "SOXXは2.02%高でした。"},
+    expression: "通常",
+  }],
+  visualBeats: [{startMs: 0, endMs: 2_000}],
+  visualEvents: [],
+  cards: [],
+  numbers: [],
+  nodes: [],
+  arrows: [],
+  assetPlacements: [],
+  durationMs: 2_000,
+  durationInFrames: 60,
+  transition: {type: "none", durationMs: 0},
+} as unknown as ProductionScene;
+const captionSurfaceState = getSceneRenderState(captionSurfaceScene, 500);
+assert.equal(captionSurfaceState.captionText, "SOXXは2.02%高でした。");
+assert.ok(captionSurfaceState.subtitleText?.includes("2.02%"), "subtitle must use caption text");
+assert.ok(!captionSurfaceState.subtitleText?.includes("二・〇二パーセント"), "subtitle must not reuse TTS speech text");
 
 console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);
