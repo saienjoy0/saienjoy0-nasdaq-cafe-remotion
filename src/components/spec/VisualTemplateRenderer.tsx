@@ -257,7 +257,11 @@ const OpeningContradiction: React.FC<{content: PublicMainContent}> = ({content})
 };
 
 const ExpectedActualFlow: React.FC<{content: PublicMainContent}> = ({content}) => {
-  const cards = [...content.cards].sort((a, b) => a.revealAtMs - b.revealAtMs);
+  const roles = ["expected", "actual", "gap"] as const;
+  const cards = roles
+    .map((role) => content.cards.find((card) => card.role === role))
+    .filter((card): card is PublicCard => Boolean(card));
+  if (cards.length !== 3) throw new Error("expected-actual-gap-flow requires expected, actual, and gap cards");
   const labels = {expected: "EXPECTED", actual: "ACTUAL", gap: "GAP"} as const;
   return <Surface accent={color.emphasis} style={{padding: "28px 32px", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 20}}>{cards.map((card) => {
     const tone: Tone = card.role === "gap" ? "emphasis" : card.role === "actual" ? "positive" : "neutral";
