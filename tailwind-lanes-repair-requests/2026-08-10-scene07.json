@@ -1,0 +1,7 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "expectedRenderSpecSha256": "8d56cc812d55948ec556e8884e67fb67f154e7056fadce5ed2d7fdd40d51ba78",
+  "expectedEpisodePackageSha256": "1f58b331bbe284296b8e1ddcb726e8ba2056781e0bb0f3cb2c90dd1ab2e4797f",
+  "confirmation": "PATCH_TAILWIND_LANES_ONLY"
+}
