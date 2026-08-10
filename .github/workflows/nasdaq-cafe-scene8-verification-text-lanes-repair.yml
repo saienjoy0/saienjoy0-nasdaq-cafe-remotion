@@ -74,19 +74,18 @@ jobs:
           if beat['visualTemplate']!='verification-matrix' or beat['templateConfig']['variant']!='strengthen-vs-weaken': raise SystemExit('Scene 8 beat drift')
           if beat['templateConfig']['laneLabels']!=['強まる','弱まる']: raise SystemExit('laneLabels drift')
           before=[
-            'QQQ・SOXX・NVIDIAは8:30 ETに上向いた。',
-            'MCHPは同じ1分ではほぼ横ばいだった。',
-            '1分足は時系列整合の証拠で、因果だけを証明しない。',
+            '8:30 ET：QQQ・SOXX・NVDAは上向き',
+            'MCHPは同じ1分でほぼ横ばい',
+            '1分足だけで因果は証明しない',
           ]
           after=[
-            '強まる｜QQQ・SOXX・NVIDIAは8:30 ETに上向いた。',
-            '弱まる｜MCHPは同じ1分ではほぼ横ばいだった。',
-            '弱まる｜1分足は時系列整合の証拠で、因果だけを証明しない。',
+            '強まる｜8:30 ET：QQQ・SOXX・NVDAは上向き',
+            '弱まる｜MCHPは同じ1分でほぼ横ばい',
+            '弱まる｜1分足だけで因果は証明しない',
           ]
           if beat.get('viewerTexts')!=before: raise SystemExit(f'viewerTexts drift: {beat.get("viewerTexts")!r}')
           beat['viewerTexts']=after
-          stripped=[x.split('｜',1)[1] for x in after]
-          if stripped!=before: raise SystemExit('viewer text meaning changed')
+          if [x.split('｜',1)[1] for x in after]!=before: raise SystemExit('viewer text meaning changed')
           check=copy.deepcopy(old); cs=next(s for s in check['scenes'] if s['sceneId']=='scene-08'); cb=next(b for b in cs['visualBeats'] if b['beatId']=='scene-08-beat-001'); cb['viewerTexts']=after
           if spec!=check: raise SystemExit('unexpected render mutation')
           text=json.dumps(spec,ensure_ascii=False,indent=2,sort_keys=True)+'\n'; sp.write_text(text,encoding='utf-8')
