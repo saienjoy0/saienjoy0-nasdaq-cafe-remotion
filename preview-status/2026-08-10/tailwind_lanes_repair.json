@@ -1,0 +1,24 @@
+{
+  "status": "validated-ready",
+  "episodeDate": "2026-08-10",
+  "sceneId": "scene-07",
+  "beatId": "vb-07-02",
+  "laneLabels": [
+    "追い風",
+    "個別差"
+  ],
+  "viewerTexts": [
+    "追い風｜広い金利追い風",
+    "個別差｜個別材料で差",
+    "個別差｜Microsoft +0.03%"
+  ],
+  "editorialChanged": false,
+  "narrationChanged": false,
+  "captionChanged": false,
+  "numbersChanged": false,
+  "newRenderSpecSha256": "a93895006d22da2291a19eca90d7da009aa4da1db653063d89c0b3c44f1b2c9c",
+  "newEpisodePackageSha256": "2ad6c1acc81f5cc4f477ed5e2d4a780fa36a81b5fbdd23d99899261907113f66",
+  "formalValidator": "pass",
+  "layoutRegressions": "pass",
+  "productionReady": "pass"
+}

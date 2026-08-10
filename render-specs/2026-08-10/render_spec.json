@@ -2011,7 +2011,10 @@
           "templateConfig": {
             "comparisonBasis": "どこまで因果を言えるか",
             "dataBasis": "8月7日通常取引終値とReuters",
-            "laneLabels": [],
+            "laneLabels": [
+              "追い風",
+              "個別差"
+            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
             "variant": "two-lane"
@@ -2019,9 +2022,9 @@
           "templateVariant": "two-lane",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "広い金利追い風",
-            "個別材料で差",
-            "Microsoft +0.03%"
+            "追い風｜広い金利追い風",
+            "個別差｜個別材料で差",
+            "個別差｜Microsoft +0.03%"
           ],
           "visualGrammarId": "evidence",
           "visualMode": "text-focus",

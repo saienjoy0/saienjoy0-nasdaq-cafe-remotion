@@ -491,7 +491,7 @@
   - 入力構造：広い金利追い風 / 個別材料で差 / Microsoft +0.03%
   - 画面の問い：広い追い風と個別差をどう両立するか
   - 主要要素：マクロと個別の二層
-  - 視聴者向けテキスト：広い金利追い風 / 個別材料で差 / Microsoft +0.03%
+  - 視聴者向けテキスト：追い風｜広い金利追い風 / 個別差｜個別材料で差 / 個別差｜Microsoft +0.03%
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -3286,7 +3286,10 @@
             "templateConfig": {
               "comparisonBasis": "どこまで因果を言えるか",
               "dataBasis": "8月7日通常取引終値とReuters",
-              "laneLabels": [],
+              "laneLabels": [
+                "追い風",
+                "個別差"
+              ],
               "nodeOrder": [],
               "outcomeNodeId": null,
               "variant": "two-lane"
@@ -3294,9 +3297,9 @@
             "templateVariant": "two-lane",
             "transitionRole": "continuation",
             "viewerTexts": [
-              "広い金利追い風",
-              "個別材料で差",
-              "Microsoft +0.03%"
+              "追い風｜広い金利追い風",
+              "個別差｜個別材料で差",
+              "個別差｜Microsoft +0.03%"
             ],
             "visualGrammarId": "evidence",
             "visualMode": "text-focus",
