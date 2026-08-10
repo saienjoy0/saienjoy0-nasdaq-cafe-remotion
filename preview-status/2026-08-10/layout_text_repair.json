@@ -1,0 +1,20 @@
+{
+  "contractVersion": "1.0.0",
+  "status": "validated-ready",
+  "episodeDate": "2026-08-10",
+  "sceneId": "scene-07",
+  "supportingTextIndex": 1,
+  "oldText": "Alphabet -0.96% / MSFT +0.03%",
+  "newText": "Alphabet -0.96%/MSFT +0.03%",
+  "oldLength": 29,
+  "newLength": 27,
+  "narrationChanged": false,
+  "captionChanged": false,
+  "editorialChanged": false,
+  "numbersChanged": false,
+  "newRenderSpecSha256": "8d56cc812d55948ec556e8884e67fb67f154e7056fadce5ed2d7fdd40d51ba78",
+  "newEpisodePackageSha256": "1f58b331bbe284296b8e1ddcb726e8ba2056781e0bb0f3cb2c90dd1ab2e4797f",
+  "formalValidator": "pass",
+  "layoutVisualRegressions": "pass",
+  "productionReady": "pass"
+}
