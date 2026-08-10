@@ -1,0 +1,27 @@
+{
+  "contractVersion": "1.0.0",
+  "status": "validated-awaiting-owner-readiness",
+  "episodeDate": "2026-08-10",
+  "oldRenderSpecSha256": "63f18c1ba5c0c0118b6f8ff68345a1b1c21f06f0d87844869248e64b9768cceb",
+  "newRenderSpecSha256": "9f514d2a2d81595a88cb5df9d94427fc0912d731649f7e2bc6008204c4358b4b",
+  "oldEpisodePackageSha256": "ffc610d6daa3e67cbe1f9c037d4e1efce222c3836bcfe918abb88b5ee68d4170",
+  "newEpisodePackageSha256": "3c216466b6b38e5d9dbfcd11ae92452f8af70932be05a3c3b599d01ed58fe39c",
+  "narrationWordingChanged": false,
+  "captionWordingChanged": false,
+  "editorialChanged": false,
+  "numbersChanged": false,
+  "sourcesChanged": false,
+  "explicitPauseBudgetChanged": false,
+  "chunkBoundariesChanged": true,
+  "visualGrammarBeatCount": 21,
+  "changedExistingBeatIds": [
+    "vb-01-02",
+    "vb-04-02"
+  ],
+  "splitSceneIds": [
+    "scene-08"
+  ],
+  "formalValidator": "pass",
+  "staticVisualRegressions": "pass",
+  "productionReadyCreated": false
+}

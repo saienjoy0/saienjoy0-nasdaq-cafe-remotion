@@ -1,0 +1,38 @@
+{
+  "contractVersion": "1.0.0",
+  "status": "validated-awaiting-owner-readiness",
+  "episodeDate": "2026-08-10",
+  "eventCopies": [
+    {
+      "sceneId": "scene-08",
+      "sourceEventId": "event-016",
+      "newEventId": "event-024",
+      "atChunkId": "scene-08-chunk-003",
+      "targetId": "scene-08-card-001"
+    },
+    {
+      "sceneId": "scene-08",
+      "sourceEventId": "event-017",
+      "newEventId": "event-025",
+      "atChunkId": "scene-08-chunk-004",
+      "targetId": "scene-08-card-002"
+    },
+    {
+      "sceneId": "scene-08",
+      "sourceEventId": "event-017",
+      "newEventId": "event-026",
+      "atChunkId": "scene-08-chunk-005",
+      "targetId": "scene-08-card-002"
+    }
+  ],
+  "finalRenderSpecSha256": "3a5180495ed573e40a71c3aa081d650e6582d66a0685952a1df9795b07fba29b",
+  "finalEpisodePackageSha256": "34fa9b28ec5e51bae763e3521a4a3955b6fc724edfade662cf92dd7b2a543e27",
+  "editorialChanged": false,
+  "narrationWordingChanged": false,
+  "captionWordingChanged": false,
+  "numbersChanged": false,
+  "sourcesChanged": false,
+  "formalValidator": "pass",
+  "staticVisualRegressions": "pass",
+  "productionReadyCreated": false
+}
