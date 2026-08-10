@@ -2210,7 +2210,10 @@
           "templateConfig": {
             "comparisonBasis": null,
             "dataBasis": "確認済み情報と2 wave追加取得結果",
-            "laneLabels": [],
+            "laneLabels": [
+              "強まる",
+              "弱まる"
+            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
             "variant": "strengthen-vs-weaken"

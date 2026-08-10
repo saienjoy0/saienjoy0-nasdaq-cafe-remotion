@@ -3,11 +3,11 @@
   "status": "ready",
   "episodeDate": "2026-08-10",
   "renderSpecPath": "render-specs/2026-08-10/render_spec.json",
-  "renderSpecSha256": "a93895006d22da2291a19eca90d7da009aa4da1db653063d89c0b3c44f1b2c9c",
+  "renderSpecSha256": "4d53b8bce42bbae8edd28eb55ff39d8f3ad22e09dead4c6c50cd433d53fb74eb",
   "episodePackagePath": "episode-packages/2026-08-10/episode_package_2026-08-10.md",
-  "episodePackageSha256": "2ad6c1acc81f5cc4f477ed5e2d4a780fa36a81b5fbdd23d99899261907113f66",
+  "episodePackageSha256": "ac78a4796011a8ce6cedfa5b786c4bbcb225039e5b0b2a847591c362460a3a0b",
   "validatorStatus": "pass",
   "consistencyStatus": "pass",
   "unresolvedStateCount": 0,
-  "createdAt": "2026-08-10T12:49:24.553Z"
+  "createdAt": "2026-08-10T13:33:52.651Z"
 }
