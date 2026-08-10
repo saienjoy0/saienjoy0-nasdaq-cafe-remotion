@@ -1,0 +1,164 @@
+name: ChatGPT NASDAQ Cafe handoff preview request
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+concurrency:
+  group: chatgpt-nasdaq-cafe-handoff-preview
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: >-
+      github.event.issue.user.login == github.repository_owner &&
+      github.event.issue.author_association == 'OWNER' &&
+      startsWith(github.event.issue.title, '[NASDAQ Cafe Handoff Preview]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      TARGET_WORKFLOW: nasdaq-cafe-preview-handoff.yml
+
+    steps:
+      - name: Parse and validate preview request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import re
+
+          body = os.environ.get('ISSUE_BODY', '')
+          marker = '<!-- nasdaq-cafe-handoff-preview-request -->'
+          if marker not in body:
+              raise SystemExit('preview request marker is missing')
+
+          fields = {}
+          for key in (
+              'episode_date', 'plot_run_id', 'handoff_artifact_name',
+              'expected_bundle_id', 'expected_manifest_sha256',
+              'expected_renderer_commit', 'renderer_ref', 'confirmation',
+          ):
+              m = re.search(rf'(?m)^\s*{key}:\s*(\S+)\s*$', body)
+              if not m:
+                  raise SystemExit(f'missing field: {key}')
+              fields[key] = m.group(1)
+
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', fields['episode_date']):
+              raise SystemExit('episode_date must be YYYY-MM-DD')
+          if not re.fullmatch(r'\d+', fields['plot_run_id']):
+              raise SystemExit('plot_run_id must be numeric')
+          if not re.fullmatch(r'[A-Za-z0-9._-]+', fields['handoff_artifact_name']):
+              raise SystemExit('unsafe handoff_artifact_name')
+          for key in ('expected_bundle_id', 'expected_manifest_sha256'):
+              if not re.fullmatch(r'[0-9a-f]{64}', fields[key]):
+                  raise SystemExit(f'{key} must be SHA-256')
+          if not re.fullmatch(r'[0-9a-f]{40}', fields['expected_renderer_commit']):
+              raise SystemExit('expected_renderer_commit must be 40-hex')
+          if not re.fullmatch(r'[A-Za-z0-9._/-]+', fields['renderer_ref']):
+              raise SystemExit('unsafe renderer_ref')
+          if fields['confirmation'] != 'PREVIEW':
+              raise SystemExit('confirmation must be PREVIEW')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              for key, value in fields.items():
+                  out.write(f'{key}={value}\n')
+          PY
+
+      - name: Dispatch pinned handoff preview
+        id: child
+        shell: bash
+        env:
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+          PLOT_RUN_ID: ${{ steps.request.outputs.plot_run_id }}
+          HANDOFF_ARTIFACT_NAME: ${{ steps.request.outputs.handoff_artifact_name }}
+          EXPECTED_BUNDLE_ID: ${{ steps.request.outputs.expected_bundle_id }}
+          EXPECTED_MANIFEST_SHA256: ${{ steps.request.outputs.expected_manifest_sha256 }}
+          EXPECTED_RENDERER_COMMIT: ${{ steps.request.outputs.expected_renderer_commit }}
+          RENDERER_REF: ${{ steps.request.outputs.renderer_ref }}
+          CONFIRMATION: ${{ steps.request.outputs.confirmation }}
+        run: |
+          set -euo pipefail
+          previous_run_id="$(
+            gh run list --repo "$GITHUB_REPOSITORY" --workflow "$TARGET_WORKFLOW" \
+              --limit 1 --json databaseId --jq '.[0].databaseId // 0'
+          )"
+
+          gh workflow run "$TARGET_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref "$RENDERER_REF" \
+            -f episode_date="$EPISODE_DATE" \
+            -f plot_run_id="$PLOT_RUN_ID" \
+            -f handoff_artifact_name="$HANDOFF_ARTIFACT_NAME" \
+            -f expected_bundle_id="$EXPECTED_BUNDLE_ID" \
+            -f expected_manifest_sha256="$EXPECTED_MANIFEST_SHA256" \
+            -f expected_renderer_commit="$EXPECTED_RENDERER_COMMIT" \
+            -f confirmation="$CONFIRMATION"
+
+          child_run_id=""
+          child_run_url=""
+          for _ in $(seq 1 60); do
+            run_json="$(
+              gh run list --repo "$GITHUB_REPOSITORY" --workflow "$TARGET_WORKFLOW" \
+                --limit 20 --json databaseId,url,headBranch \
+                --jq ". | map(select(.databaseId > $previous_run_id and .headBranch == \"$RENDERER_REF\")) | sort_by(.databaseId) | first // {}"
+            )"
+            child_run_id="$(printf '%s' "$run_json" | python -c 'import json,sys; print(json.load(sys.stdin).get("databaseId", ""))')"
+            child_run_url="$(printf '%s' "$run_json" | python -c 'import json,sys; print(json.load(sys.stdin).get("url", ""))')"
+            if [[ -n "$child_run_id" ]]; then break; fi
+            sleep 5
+          done
+          if [[ -z "$child_run_id" ]]; then
+            echo '::error::dispatched preview workflow run could not be located'
+            exit 1
+          fi
+          echo "run_id=$child_run_id" >> "$GITHUB_OUTPUT"
+          echo "run_url=$child_run_url" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for preview
+        id: wait
+        shell: bash
+        env:
+          CHILD_RUN_ID: ${{ steps.child.outputs.run_id }}
+        run: |
+          set +e
+          gh run watch "$CHILD_RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
+          watch_status=$?
+          set -e
+          conclusion="$(gh run view "$CHILD_RUN_ID" --repo "$GITHUB_REPOSITORY" --json conclusion --jq '.conclusion // "unknown"')"
+          echo "conclusion=$conclusion" >> "$GITHUB_OUTPUT"
+          echo "watch_status=$watch_status" >> "$GITHUB_OUTPUT"
+
+      - name: Report preview result
+        if: ${{ always() }}
+        shell: bash
+        env:
+          CHILD_RUN_ID: ${{ steps.child.outputs.run_id }}
+          CHILD_RUN_URL: ${{ steps.child.outputs.run_url }}
+          CHILD_CONCLUSION: ${{ steps.wait.outputs.conclusion }}
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+        run: |
+          set -euo pipefail
+          conclusion="${CHILD_CONCLUSION:-failure}"
+          cat > "$RUNNER_TEMP/result.md" <<EOF
+          <!-- nasdaq-cafe-handoff-preview-result -->
+
+          status: $conclusion
+          episode_date: ${EPISODE_DATE:-unknown}
+          run_id: ${CHILD_RUN_ID:-unknown}
+          run_url: ${CHILD_RUN_URL:-https://github.com/$GITHUB_REPOSITORY/actions}
+          EOF
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/result.md"
+          if [[ "$conclusion" == "success" ]]; then
+            gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed
+          else
+            exit 1
+          fi
