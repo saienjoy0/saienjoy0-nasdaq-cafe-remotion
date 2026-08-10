@@ -47,13 +47,13 @@ const layoutCues = assertNarrationChunkSubtitleLayoutFits({
   speechText: speech,
   startMs: 0,
   endMs: 19_219,
-  caption: {text: "あ".repeat(156)},
+  caption: {text: speech},
 }, "$.scenes[0].narrationChunks[0]");
 assert.deepEqual(layoutCues, cues, "validator and renderer must use the same subtitle cues");
 assert.equal(
   layoutCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
   speech,
-  "layout-only paging must preserve every narration character",
+  "layout-only paging must preserve every caption character",
 );
 assert.throws(
   () => assertSubtitleCueTextFits("あ".repeat(23), "$.too-wide"),
@@ -91,5 +91,10 @@ const captionSurfaceState = getSceneRenderState(captionSurfaceScene, 500);
 assert.equal(captionSurfaceState.captionText, "SOXXは2.02%高でした。");
 assert.ok(captionSurfaceState.subtitleText?.includes("2.02%"), "subtitle must use caption text");
 assert.ok(!captionSurfaceState.subtitleText?.includes("二・〇二パーセント"), "subtitle must not reuse TTS speech text");
+const captionLayoutCues = assertNarrationChunkSubtitleLayoutFits(
+  captionSurfaceScene.narrationChunks[0],
+  "$.caption-surface",
+);
+assert.ok(captionLayoutCues.some((cue) => cue.text.includes("2.02%")), "layout validator must validate the caption surface too");
 
 console.log(`subtitle contract tests: ${cues.length + hardSplitCues.length} cues passed`);
