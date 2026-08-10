@@ -1,0 +1,73 @@
+name: Nasdaq Cafe Scheduled Preview Request
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scheduled-preview-requests/*.json"
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: nasdaq-cafe-scheduled-preview-request
+  cancel-in-progress: false
+
+jobs:
+  request:
+    name: Dispatch official scheduled preview gate
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout request
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Resolve exactly one request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'scheduled-preview-requests/*.json')
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one scheduled preview request must change"
+            exit 1
+          fi
+          python3 - "${CHANGED[0]}" <<'PY'
+          import json, os, re, sys
+          from pathlib import Path
+          value=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          required={'contractVersion','episodeDate','confirmation'}
+          if set(value)!=required: raise SystemExit(f'request fields mismatch: {sorted(value)}')
+          if value['contractVersion']!='1.0.0': raise SystemExit('contractVersion must be 1.0.0')
+          if value['confirmation']!='DISPATCH_OFFICIAL_SCHEDULED_GATE': raise SystemExit('bad confirmation')
+          date=value['episodeDate']
+          if not isinstance(date,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}',date): raise SystemExit('bad episodeDate')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f'episode_date={date}\n')
+          PY
+
+      - name: Dispatch official Scheduled Preview Gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+        run: |
+          set -euo pipefail
+          gh api \
+            --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-scheduled-preview.yml/dispatches" \
+            -f ref=main \
+            -F "inputs[episode_date_override]=${EPISODE_DATE}"
+          echo "Official Scheduled Preview Gate dispatched for ${EPISODE_DATE}." >> "$GITHUB_STEP_SUMMARY"
