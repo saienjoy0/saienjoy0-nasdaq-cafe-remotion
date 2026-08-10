@@ -21,13 +21,13 @@ jobs:
     env:
       CI: "true"
       EPISODE_DATE: "2026-08-06"
-      EXPECTED_BUNDLE_ID: "c8f3be30aad368680e7369ea435686c0702d856f29e8ed4810f1dcb7ccf5f1c2"
-      EXPECTED_MANIFEST_SHA256: "745fb75ca6a163b74927ed663fedaee49bbd71afe2e5a0b00b3aa2c15fe24883"
+      EXPECTED_BUNDLE_ID: "f99c0718cbf0d762c2ed22de8e859ffb157132cc4a4802af98913da65a3f976f"
+      EXPECTED_MANIFEST_SHA256: "37ffa2c7af586a52f2c3328a69ea20fff6c371128c300f4855973b0ab9f3b74c"
       EXPECTED_RENDERER_COMMIT: "36440cbe84331d020d4fe808d5c2fcbcac20833c"
       RENDERER_CONTRACT_VERSION: "2.4.0"
       HANDOFF_DOWNLOAD_ROOT: ${{ github.workspace }}/.handoff-download
       RUNTIME_ASSET_REGISTRY: ${{ github.workspace }}/build/handoff/runtime_asset_registry.json
-      HANDOFF_URL: "https://sdmntprseasia.oaiusercontent.com/files/00000000-ce9c-8207-9ae4-de0822aa55ef/raw?se=2026-08-10T00%3A47%3A36Z&sp=r&sv=2026-02-06&sr=b&scid=cf6643e7-741d-59d9-b9b7-739c306f9497&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T23%3A45%3A59Z&ske=2026-08-10T23%3A45%3A59Z&sks=b&skv=2026-02-06&sig=MrzsDWS4bfl2TwbS2HVSIjJRD25XwtnGk7oxIggarQA%3D"
+      HANDOFF_URL: "https://sdmntprwestus3.oaiusercontent.com/files/00000000-a294-81fd-9a3a-a4ae720b4d0d/raw?se=2026-08-10T01%3A05%3A06Z&sp=r&sv=2026-02-06&sr=b&scid=21e13b99-c4ac-542c-a557-dbdc6337f082&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T23%3A15%3A24Z&ske=2026-08-10T23%3A15%3A24Z&sks=b&skv=2026-02-06&sig=a3TrcWz/hG7/XyKcMK%2BBUr%2BydPTyNjjtOHTThDGjgsw%3D"
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
