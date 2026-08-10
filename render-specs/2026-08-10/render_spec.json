@@ -2221,9 +2221,9 @@
           "templateVariant": "strengthen-vs-weaken",
           "transitionRole": "major-shift",
           "viewerTexts": [
-            "8:30 ET：QQQ・SOXX・NVDAは上向き",
-            "MCHPは同じ1分でほぼ横ばい",
-            "1分足だけで因果は証明しない"
+            "強まる｜8:30 ET：QQQ・SOXX・NVDAは上向き",
+            "弱まる｜MCHPは同じ1分でほぼ横ばい",
+            "弱まる｜1分足だけで因果は証明しない"
           ],
           "visualGrammarId": "verification",
           "visualMode": "verification-points",

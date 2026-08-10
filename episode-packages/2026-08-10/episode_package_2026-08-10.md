@@ -537,7 +537,7 @@
   - 入力構造：8:30 ET：QQQ・SOXX・NVDAは上向き / MCHPは同じ1分でほぼ横ばい / 1分足だけで因果は証明しない
   - 画面の問い：発表時刻の初動は市場解釈と整合した？
   - 主要要素：8:30 ETの実分足と因果の境界
-  - 視聴者向けテキスト：8:30 ET：QQQ・SOXX・NVDAは上向き / MCHPは同じ1分でほぼ横ばい / 1分足だけで因果は証明しない
+  - 視聴者向けテキスト：強まる｜8:30 ET：QQQ・SOXX・NVDAは上向き / 弱まる｜MCHPは同じ1分でほぼ横ばい / 弱まる｜1分足だけで因果は証明しない
   - 使用アセットID：not-required
   - アセット状態：not-required
   - 表示後の復帰先：該当なし
@@ -3496,9 +3496,9 @@
             "templateVariant": "strengthen-vs-weaken",
             "transitionRole": "major-shift",
             "viewerTexts": [
-              "8:30 ET：QQQ・SOXX・NVDAは上向き",
-              "MCHPは同じ1分でほぼ横ばい",
-              "1分足だけで因果は証明しない"
+              "強まる｜8:30 ET：QQQ・SOXX・NVDAは上向き",
+              "弱まる｜MCHPは同じ1分でほぼ横ばい",
+              "弱まる｜1分足だけで因果は証明しない"
             ],
             "visualGrammarId": "verification",
             "visualMode": "verification-points",
