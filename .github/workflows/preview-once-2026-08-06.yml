@@ -27,7 +27,7 @@ jobs:
       RENDERER_CONTRACT_VERSION: "2.4.0"
       HANDOFF_DOWNLOAD_ROOT: ${{ github.workspace }}/.handoff-download
       RUNTIME_ASSET_REGISTRY: ${{ github.workspace }}/build/handoff/runtime_asset_registry.json
-      HANDOFF_URL: "https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-afa4-8206-92f3-344e0b4c263a/raw?se=2026-08-10T00%3A44%3A24Z&sp=r&sv=2026-02-06&sr=b&scid=fba53a31-37d1-5eb7-a3d3-25654f701967&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T02%3A20%3A23Z&ske=2026-08-10T02%3A20%3A23Z&sks=b&skv=2026-02-06&sig=jyYUICzH3BiATEw3KLUuK3l7DlEXI6pzvSbYzovlYgQ%3D"
+      HANDOFF_URL: "https://sdmntprseasia.oaiusercontent.com/files/00000000-ce9c-8207-9ae4-de0822aa55ef/raw?se=2026-08-10T00%3A47%3A36Z&sp=r&sv=2026-02-06&sr=b&scid=cf6643e7-741d-59d9-b9b7-739c306f9497&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-09T23%3A45%3A59Z&ske=2026-08-10T23%3A45%3A59Z&sks=b&skv=2026-02-06&sig=MrzsDWS4bfl2TwbS2HVSIjJRD25XwtnGk7oxIggarQA%3D"
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
@@ -95,9 +95,6 @@ jobs:
           NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: ${{ steps.intake.outputs.registry_path }}
         run: npm run episode:spec:validate -- "${{ steps.intake.outputs.spec_path }}"
 
-      - name: Run deterministic runtime stability tests
-        run: npm run test:runtime-stability
-
       - name: Ensure ffmpeg is available
         shell: bash
         run: |
@@ -106,6 +103,9 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y ffmpeg
           fi
+
+      - name: Run deterministic runtime stability tests
+        run: npm run test:runtime-stability
 
       - name: Prepare TTS cache directory
         run: mkdir -p .cache/spec-tts-blocks
