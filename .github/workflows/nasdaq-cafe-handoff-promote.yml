@@ -1,0 +1,214 @@
+name: Nasdaq Cafe Handoff Promote
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "handoff-promote-requests/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasdaq-cafe-handoff-promote
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Promote verified handoff inputs
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Resolve exactly one immutable promotion request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(
+            git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'handoff-promote-requests/*.json'
+          )
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one handoff promotion request JSON must change per push"
+            exit 1
+          fi
+          REQUEST_PATH="${CHANGED[0]}"
+          python3 - "$REQUEST_PATH" <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          path = Path(sys.argv[1])
+          value = json.loads(path.read_text(encoding='utf-8'))
+          required = {
+              'contractVersion', 'episodeDate', 'artifactDownloadUrl', 'artifactDigestSha256',
+              'expectedBundleId', 'expectedManifestSha256', 'expectedRenderSpecSha256',
+              'expectedEpisodePackageSha256', 'expectedRendererCommit', 'confirmation'
+          }
+          if set(value) != required:
+              raise SystemExit(f'request fields mismatch: {sorted(value)}')
+          if value['contractVersion'] != '1.0.0':
+              raise SystemExit('contractVersion must be 1.0.0')
+          if value['confirmation'] != 'PROMOTE_PREVIEW_INPUTS':
+              raise SystemExit('confirmation must be PROMOTE_PREVIEW_INPUTS')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', str(value['episodeDate'])):
+              raise SystemExit('episodeDate must be YYYY-MM-DD')
+          for key in ('artifactDigestSha256', 'expectedBundleId', 'expectedManifestSha256',
+                      'expectedRenderSpecSha256', 'expectedEpisodePackageSha256'):
+              if not re.fullmatch(r'[0-9a-f]{64}', str(value[key])):
+                  raise SystemExit(f'{key} must be lowercase SHA-256')
+          if not re.fullmatch(r'[0-9a-f]{40}', str(value['expectedRendererCommit'])):
+              raise SystemExit('expectedRendererCommit must be 40 lowercase hex characters')
+          parsed = urlparse(str(value['artifactDownloadUrl']))
+          if parsed.scheme != 'https' or not parsed.hostname or not parsed.hostname.endswith('.oaiusercontent.com'):
+              raise SystemExit('artifactDownloadUrl must be an HTTPS oaiusercontent.com signed URL')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              for key, output_key in (
+                  ('episodeDate', 'episode_date'),
+                  ('artifactDownloadUrl', 'artifact_url'),
+                  ('artifactDigestSha256', 'artifact_digest'),
+                  ('expectedBundleId', 'bundle_id'),
+                  ('expectedManifestSha256', 'manifest_sha'),
+                  ('expectedRenderSpecSha256', 'render_sha'),
+                  ('expectedEpisodePackageSha256', 'package_sha'),
+                  ('expectedRendererCommit', 'renderer_commit'),
+              ):
+                  out.write(f'{output_key}={value[key]}\n')
+          PY
+
+      - name: Download and verify immutable H4 artifact
+        shell: bash
+        env:
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+          ARTIFACT_URL: ${{ steps.request.outputs.artifact_url }}
+          ARTIFACT_DIGEST: ${{ steps.request.outputs.artifact_digest }}
+          BUNDLE_ID: ${{ steps.request.outputs.bundle_id }}
+          MANIFEST_SHA: ${{ steps.request.outputs.manifest_sha }}
+          RENDER_SHA: ${{ steps.request.outputs.render_sha }}
+          PACKAGE_SHA: ${{ steps.request.outputs.package_sha }}
+          RENDERER_COMMIT: ${{ steps.request.outputs.renderer_commit }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/nasdaq-handoff /tmp/nasdaq-handoff.zip
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors \
+            "$ARTIFACT_URL" -o /tmp/nasdaq-handoff.zip
+          ACTUAL_ARTIFACT_DIGEST="$(sha256sum /tmp/nasdaq-handoff.zip | awk '{print $1}')"
+          test "$ACTUAL_ARTIFACT_DIGEST" = "$ARTIFACT_DIGEST" || {
+            echo "::error::artifact digest mismatch"
+            exit 1
+          }
+          mkdir -p /tmp/nasdaq-handoff
+          unzip -q /tmp/nasdaq-handoff.zip -d /tmp/nasdaq-handoff
+
+          MANIFEST="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}/handoff_manifest.json"
+          test -s "$MANIFEST"
+          ACTUAL_MANIFEST_SHA="$(sha256sum "$MANIFEST" | awk '{print $1}')"
+          test "$ACTUAL_MANIFEST_SHA" = "$MANIFEST_SHA" || {
+            echo "::error::handoff manifest SHA mismatch"
+            exit 1
+          }
+
+          python3 - "$MANIFEST" "$EPISODE_DATE" "$BUNDLE_ID" "$RENDERER_COMMIT" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          manifest_path, episode_date, bundle_id, renderer_commit = sys.argv[1:]
+          value = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
+          if value.get('bundle_id') != bundle_id:
+              raise SystemExit('bundle_id mismatch')
+          if value.get('episode_date') != episode_date:
+              raise SystemExit('episode_date mismatch')
+          if value.get('mode') != 'preview' or value.get('final_authorized') is not False:
+              raise SystemExit('handoff must be preview-only and final_authorized=false')
+          renderer = value.get('renderer') or {}
+          if renderer.get('expected_base_commit') != renderer_commit:
+              raise SystemExit('renderer commit pin mismatch')
+          if renderer.get('expected_contract_version') != '2.4.0':
+              raise SystemExit('renderer contract version mismatch')
+          validation = value.get('validation') or {}
+          required = {
+              'production_package': 'pass',
+              'remotion_official_validator': 'pass',
+              'renderer_contract': 'pass',
+              'unresolved_states': 0,
+          }
+          for key, expected in required.items():
+              if validation.get(key) != expected:
+                  raise SystemExit(f'handoff validation.{key} mismatch')
+          PY
+
+          PACKAGE_SRC="/tmp/nasdaq-handoff/episodes/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+          RENDER_SRC="/tmp/nasdaq-handoff/render-specs/${EPISODE_DATE}/render_spec.json"
+          BUNDLE_PACKAGE="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}/production/episode_package_${EPISODE_DATE}.md"
+          BUNDLE_RENDER="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}/render-specs/${EPISODE_DATE}/render_spec.json"
+          for path in "$PACKAGE_SRC" "$RENDER_SRC" "$BUNDLE_PACKAGE" "$BUNDLE_RENDER"; do
+            test -s "$path"
+          done
+          test "$(sha256sum "$PACKAGE_SRC" | awk '{print $1}')" = "$PACKAGE_SHA"
+          test "$(sha256sum "$RENDER_SRC" | awk '{print $1}')" = "$RENDER_SHA"
+          cmp -s "$PACKAGE_SRC" "$BUNDLE_PACKAGE"
+          cmp -s "$RENDER_SRC" "$BUNDLE_RENDER"
+
+          mkdir -p "episode-packages/${EPISODE_DATE}" "render-specs/${EPISODE_DATE}" "handoff-promote-receipts"
+          cp "$PACKAGE_SRC" "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+          cp "$RENDER_SRC" "render-specs/${EPISODE_DATE}/render_spec.json"
+
+          python3 - "$EPISODE_DATE" "$ARTIFACT_DIGEST" "$BUNDLE_ID" "$MANIFEST_SHA" "$PACKAGE_SHA" "$RENDER_SHA" "$RENDERER_COMMIT" <<'PY'
+          import json
+          import sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+          episode_date, artifact_digest, bundle_id, manifest_sha, package_sha, render_sha, renderer_commit = sys.argv[1:]
+          receipt = {
+              'contractVersion': '1.0.0',
+              'status': 'promoted',
+              'episodeDate': episode_date,
+              'artifactDigestSha256': artifact_digest,
+              'bundleId': bundle_id,
+              'manifestSha256': manifest_sha,
+              'episodePackageSha256': package_sha,
+              'renderSpecSha256': render_sha,
+              'rendererCommit': renderer_commit,
+              'promotedAt': datetime.now(timezone.utc).isoformat(),
+          }
+          Path(f'handoff-promote-receipts/{episode_date}-{bundle_id[:12]}.json').write_text(
+              json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          PY
+
+      - name: Commit only verified canonical inputs and receipt
+        shell: bash
+        env:
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+          BUNDLE_ID: ${{ steps.request.outputs.bundle_id }}
+        run: |
+          set -euo pipefail
+          PACKAGE="episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
+          RENDER="render-specs/${EPISODE_DATE}/render_spec.json"
+          RECEIPT="handoff-promote-receipts/${EPISODE_DATE}-${BUNDLE_ID:0:12}.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$PACKAGE" "$RENDER" "$RECEIPT"
+          git diff --cached --quiet && {
+            echo "Verified canonical inputs already match; nothing to commit."
+            exit 0
+          }
+          git commit -m "promote: verified ${EPISODE_DATE} preview inputs"
+          git push origin HEAD:main
