@@ -1,0 +1,101 @@
+name: Nasdaq Cafe Scene 8 Verification Lanes Repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scene8-lanes-repair-requests/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasdaq-cafe-scene8-verification-lanes-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Resolve request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'scene8-lanes-repair-requests/*.json')
+          test "${#CHANGED[@]}" = 1 || exit 1
+          python3 - "${CHANGED[0]}" <<'PY'
+          import json,os,re,sys
+          from pathlib import Path
+          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          if v.get('contractVersion')!='1.0.0' or v.get('confirmation')!='PATCH_SCENE8_VERIFICATION_LANES_ONLY': raise SystemExit('bad request')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',v.get('episodeDate','')): raise SystemExit('bad date')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write(f"date={v['episodeDate']}\nrender_sha={v['expectedRenderSpecSha256']}\npackage_sha={v['expectedEpisodePackageSha256']}\n")
+          PY
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      - name: Patch only Scene 8 lane labels
+        shell: bash
+        env:
+          DATE: ${{ steps.request.outputs.date }}
+          EXPECTED_RENDER_SHA: ${{ steps.request.outputs.render_sha }}
+          EXPECTED_PACKAGE_SHA: ${{ steps.request.outputs.package_sha }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import copy,hashlib,json,os
+          from pathlib import Path
+          d=os.environ['DATE']; sp=Path(f'render-specs/{d}/render_spec.json'); pp=Path(f'episode-packages/{d}/episode_package_{d}.md'); rp=Path(f'render-specs/{d}/production_ready.json')
+          sha=lambda b: hashlib.sha256(b).hexdigest()
+          sb=sp.read_bytes(); pb=pp.read_bytes()
+          if sha(sb)!=os.environ['EXPECTED_RENDER_SHA']: raise SystemExit('render SHA drift')
+          if sha(pb)!=os.environ['EXPECTED_PACKAGE_SHA']: raise SystemExit('package SHA drift')
+          old=json.loads(sb); spec=copy.deepcopy(old)
+          scene=next(s for s in spec['scenes'] if s['sceneId']=='scene-08')
+          beat=next(b for b in scene['visualBeats'] if b['beatId']=='scene-08-beat-001')
+          if beat['visualTemplate']!='verification-matrix' or beat['templateConfig']['variant']!='strengthen-vs-weaken': raise SystemExit('Scene 8 beat drift')
+          if beat['templateConfig']['laneLabels']!=[]: raise SystemExit('laneLabels already changed')
+          beat['templateConfig']['laneLabels']=['強まる','弱まる']
+          check=copy.deepcopy(old); cs=next(s for s in check['scenes'] if s['sceneId']=='scene-08'); cb=next(b for b in cs['visualBeats'] if b['beatId']=='scene-08-beat-001'); cb['templateConfig']['laneLabels']=['強まる','弱まる']
+          if spec!=check: raise SystemExit('unexpected render mutation')
+          text=json.dumps(spec,ensure_ascii=False,indent=2,sort_keys=True)+'\n'; sp.write_text(text,encoding='utf-8')
+          md=pb.decode('utf-8'); m=md.index('<!--BEGIN_FINAL_PRODUCTION_SOURCE-->'); js=md.index('```json',m)+len('```json'); je=md.index('```',js); source=json.loads(md[js:je].strip()); source['render_spec']=spec; md=md[:js]+'\n'+json.dumps(source,ensure_ascii=False,indent=2)+'\n'+md[je:]; pp.write_text(md,encoding='utf-8')
+          if rp.exists(): rp.unlink()
+          PY
+
+      - name: Validate and recreate ready
+        run: |
+          npm run episode:spec:validate -- "render-specs/${{ steps.request.outputs.date }}/render_spec.json"
+          npm run test:public-screen
+          npm run episode:spec:ready -- "${{ steps.request.outputs.date }}" --consistency-pass
+
+      - name: Commit validated fix
+        shell: bash
+        env:
+          DATE: ${{ steps.request.outputs.date }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "render-specs/${DATE}/render_spec.json" "render-specs/${DATE}/production_ready.json" "episode-packages/${DATE}/episode_package_${DATE}.md"
+          git commit -m "fix: bind ${DATE} Scene 8 verification lanes"
+          git pull --rebase origin main
+          git push origin HEAD:main
