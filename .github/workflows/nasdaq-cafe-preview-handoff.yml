@@ -47,6 +47,9 @@ jobs:
     env:
       CI: "true"
       EPISODE_DATE: ${{ inputs.episode_date }}
+      PLOT_RUN_ID: ${{ inputs.plot_run_id }}
+      PLOT_ARTIFACT_NAME: ${{ inputs.handoff_artifact_name }}
+      PLOT_ARTIFACT_TOKEN: ${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}
       EXPECTED_BUNDLE_ID: ${{ inputs.expected_bundle_id }}
       EXPECTED_MANIFEST_SHA256: ${{ inputs.expected_manifest_sha256 }}
       EXPECTED_RENDERER_COMMIT: ${{ inputs.expected_renderer_commit }}
@@ -75,6 +78,14 @@ jobs:
             echo "::error::episode_date must be YYYY-MM-DD"
             exit 1
           }
+          [[ "$PLOT_RUN_ID" =~ ^[0-9]+$ ]] || {
+            echo "::error::plot_run_id must be numeric"
+            exit 1
+          }
+          [[ -n "$PLOT_ARTIFACT_NAME" ]] || {
+            echo "::error::handoff_artifact_name is required"
+            exit 1
+          }
           [[ "$EXPECTED_BUNDLE_ID" =~ ^[0-9a-f]{64}$ ]] || {
             echo "::error::expected_bundle_id must be SHA-256"
             exit 1
@@ -87,13 +98,16 @@ jobs:
             echo "::error::expected_renderer_commit must be 40-hex"
             exit 1
           }
-          if [[ -z "${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}" ]]; then
-            echo "::error::NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN is required for cross-repository Artifact download"
-            exit 1
+          if [[ -z "$PLOT_ARTIFACT_TOKEN" ]]; then
+            echo "NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN is not set; using public GitHub REST Artifact download for public Plot repository."
           fi
 
-      - name: Checkout renderer
+      - name: Checkout pinned renderer
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_renderer_commit }}
+          persist-credentials: false
+          clean: true
 
       - name: Verify renderer commit pin
         shell: bash
@@ -107,14 +121,52 @@ jobs:
             exit 1
           fi
 
-      - name: Download immutable Plot handoff Artifact
+      - name: Download immutable Plot handoff Artifact with configured token
+        if: ${{ env.PLOT_ARTIFACT_TOKEN != '' }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.handoff_artifact_name }}
           path: .handoff-download
           repository: saienjoy0/nasdaq-plot-creator-
           run-id: ${{ inputs.plot_run_id }}
-          github-token: ${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}
+          github-token: ${{ env.PLOT_ARTIFACT_TOKEN }}
+
+      - name: Download immutable public Plot handoff Artifact without token
+        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HANDOFF_DOWNLOAD_ROOT"
+          API_VERSION="2026-03-10"
+          LIST_URL="https://api.github.com/repos/saienjoy0/nasdaq-plot-creator-/actions/runs/${PLOT_RUN_ID}/artifacts?per_page=100"
+          RESPONSE="$(curl --fail --silent --show-error --location \
+            -H 'Accept: application/vnd.github+json' \
+            -H "X-GitHub-Api-Version: ${API_VERSION}" \
+            "$LIST_URL")"
+          mapfile -t MATCHES < <(jq -r --arg name "$PLOT_ARTIFACT_NAME" \
+            '.artifacts[] | select(.name == $name and .expired == false) | [.id, .archive_download_url] | @tsv' \
+            <<<"$RESPONSE")
+          if [[ "${#MATCHES[@]}" -ne 1 ]]; then
+            echo "::error::Expected exactly one non-expired public Plot Artifact named $PLOT_ARTIFACT_NAME; found ${#MATCHES[@]}"
+            exit 1
+          fi
+          IFS=$'\t' read -r ARTIFACT_ID ARCHIVE_URL <<<"${MATCHES[0]}"
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]] || {
+            echo "::error::Resolved public Artifact ID is invalid"
+            exit 1
+          }
+          [[ "$ARCHIVE_URL" == https://api.github.com/repos/saienjoy0/nasdaq-plot-creator-/actions/artifacts/*/zip ]] || {
+            echo "::error::Resolved public Artifact archive URL is outside the pinned Plot repository"
+            exit 1
+          }
+          echo "Resolved public Plot Artifact id=$ARTIFACT_ID"
+          curl --fail --silent --show-error --location \
+            -H 'Accept: application/vnd.github+json' \
+            -H "X-GitHub-Api-Version: ${API_VERSION}" \
+            "$ARCHIVE_URL" \
+            --output "$RUNNER_TEMP/plot-handoff.zip"
+          test -s "$RUNNER_TEMP/plot-handoff.zip"
+          unzip -q "$RUNNER_TEMP/plot-handoff.zip" -d "$HANDOFF_DOWNLOAD_ROOT"
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
