@@ -1,21 +1,147 @@
 name: Nasdaq Cafe Preview Status Receipt
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "handoff-preview-requests/*.json"
   workflow_run:
     workflows:
       - Nasdaq Cafe Preview
+      - Nasdaq Cafe Preview From Handoff
     types:
       - completed
 
 permissions:
-  actions: read
+  actions: write
   contents: read
   issues: write
 
 jobs:
+  dispatch-handoff-preview:
+    name: Dispatch one SHA-bound handoff preview request
+    if: >-
+      github.event_name == 'push' &&
+      github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout immutable owner request
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Resolve and validate exactly one request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(
+            git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'handoff-preview-requests/*.json'
+          )
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one handoff preview request JSON must be added or changed per push"
+            printf 'changed=%s\n' "${CHANGED[*]:-none}"
+            exit 1
+          fi
+          REQUEST_PATH="${CHANGED[0]}"
+          test -s "$REQUEST_PATH" || {
+            echo "::error::Request file is missing or empty: $REQUEST_PATH"
+            exit 1
+          }
+
+          python3 - "$REQUEST_PATH" <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          value = json.loads(path.read_text(encoding='utf-8'))
+          required = {
+              'contractVersion', 'episodeDate', 'plotRunId', 'handoffArtifactName',
+              'expectedBundleId', 'expectedManifestSha256', 'expectedRendererCommit',
+              'rendererRef', 'confirmation'
+          }
+          if set(value) != required:
+              raise SystemExit(f'request fields mismatch: {sorted(value)}')
+          if value['contractVersion'] != '1.0.0':
+              raise SystemExit('contractVersion must be 1.0.0')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', str(value['episodeDate'])):
+              raise SystemExit('episodeDate must be YYYY-MM-DD')
+          if not isinstance(value['plotRunId'], int) or isinstance(value['plotRunId'], bool) or value['plotRunId'] <= 0:
+              raise SystemExit('plotRunId must be a positive integer')
+          if not re.fullmatch(r'[A-Za-z0-9._-]+', str(value['handoffArtifactName'])):
+              raise SystemExit('handoffArtifactName is unsafe')
+          for key in ('expectedBundleId', 'expectedManifestSha256'):
+              if not re.fullmatch(r'[0-9a-f]{64}', str(value[key])):
+                  raise SystemExit(f'{key} must be lowercase SHA-256')
+          if not re.fullmatch(r'[0-9a-f]{40}', str(value['expectedRendererCommit'])):
+              raise SystemExit('expectedRendererCommit must be 40 lowercase hex characters')
+          if not re.fullmatch(r'[A-Za-z0-9._/-]+', str(value['rendererRef'])):
+              raise SystemExit('rendererRef is unsafe')
+          if value['confirmation'] != 'PREVIEW':
+              raise SystemExit('confirmation must be PREVIEW')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write(f"request_path={path.as_posix()}\n")
+              out.write(f"episode_date={value['episodeDate']}\n")
+              out.write(f"plot_run_id={value['plotRunId']}\n")
+              out.write(f"handoff_artifact_name={value['handoffArtifactName']}\n")
+              out.write(f"expected_bundle_id={value['expectedBundleId']}\n")
+              out.write(f"expected_manifest_sha256={value['expectedManifestSha256']}\n")
+              out.write(f"expected_renderer_commit={value['expectedRendererCommit']}\n")
+              out.write(f"renderer_ref={value['rendererRef']}\n")
+          PY
+
+      - name: Dispatch official manual-only handoff Preview
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+          PLOT_RUN_ID: ${{ steps.request.outputs.plot_run_id }}
+          HANDOFF_ARTIFACT_NAME: ${{ steps.request.outputs.handoff_artifact_name }}
+          EXPECTED_BUNDLE_ID: ${{ steps.request.outputs.expected_bundle_id }}
+          EXPECTED_MANIFEST_SHA256: ${{ steps.request.outputs.expected_manifest_sha256 }}
+          EXPECTED_RENDERER_COMMIT: ${{ steps.request.outputs.expected_renderer_commit }}
+          RENDERER_REF: ${{ steps.request.outputs.renderer_ref }}
+        run: |
+          set -euo pipefail
+          gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview-handoff.yml/dispatches" \
+            -f ref="$RENDERER_REF" \
+            -f inputs[episode_date]="$EPISODE_DATE" \
+            -f inputs[plot_run_id]="$PLOT_RUN_ID" \
+            -f inputs[handoff_artifact_name]="$HANDOFF_ARTIFACT_NAME" \
+            -f inputs[expected_bundle_id]="$EXPECTED_BUNDLE_ID" \
+            -f inputs[expected_manifest_sha256]="$EXPECTED_MANIFEST_SHA256" \
+            -f inputs[expected_renderer_commit]="$EXPECTED_RENDERER_COMMIT" \
+            -f inputs[confirmation]="PREVIEW"
+          {
+            echo "### Handoff Preview dispatched"
+            echo "- Episode: \`$EPISODE_DATE\`"
+            echo "- Renderer ref: \`$RENDERER_REF\`"
+            echo "- Renderer commit: \`$EXPECTED_RENDERER_COMMIT\`"
+            echo "- Plot run: \`$PLOT_RUN_ID\`"
+            echo "- Bundle: \`$EXPECTED_BUNDLE_ID\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   publish-status:
     name: Publish preview run receipt
-    if: github.event.workflow_run.event == 'workflow_dispatch'
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.event == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -39,7 +165,7 @@ jobs:
 
           mapfile -t ARTIFACT_NAMES < <(
             jq -r '.artifacts[]?.name' <<<"$RESPONSE" | \
-              grep -E '^nasdaq-cafe-preview(-(raw|failure|build-failure|inspection-failure))?-[0-9]{4}-[0-9]{2}-[0-9]{2}-' || true
+              grep -E '^nasdaq-cafe-(preview(-(raw|failure|build-failure|inspection-failure))?|handoff-preview)-[0-9]{4}-[0-9]{2}-[0-9]{2}-' || true
           )
 
           ARTIFACT_LIST="$(printf '%s\n' "${ARTIFACT_NAMES[@]:-}" | sed '/^$/d')"
