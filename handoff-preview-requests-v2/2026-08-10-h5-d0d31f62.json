@@ -1,0 +1,13 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "plotRunId": 31467344888,
+  "handoffArtifactName": "h5-information-gain-visual-e2e-2026-08-10",
+  "expectedBundleId": "d0d31f62f471df5fe11bd1587ed4bb50bb1ca3045b664a4d8104310272361111",
+  "expectedManifestSha256": "3dfc5d35607ba2ee624283bd8d244a115f8df1bfe4d9957f7248bdee7f2da20f",
+  "expectedRendererCommit": "0aaaf77eb2fd54e3e1b5eb4db05410dcaf71b673",
+  "rendererRef": "main",
+  "signedArtifactUrl": "https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-c9b4-8206-b70b-11f2c394834a/raw?se=2026-08-11T08%3A09%3A53Z&sp=r&sv=2026-02-06&sr=b&scid=42d3350b-7f58-5ca8-aa54-eeb24d3e1ba7&skoid=bb372dd6-3b2a-4af2-b355-c26497ba23cd&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A16%3A21Z&ske=2026-08-12T06%3A16%3A21Z&sks=b&skv=2026-02-06&sig=2syeN4nCv4CcQOkf19ITYYEQ0uoXxHiTl7esK4dQ6b0%3D",
+  "signedArtifactDigestSha256": "65eeb5fffe92bd8f8643c469293ccaa2c5e12f8ad122a53aadfa2368a9c8d8c5",
+  "confirmation": "PREVIEW"
+}
