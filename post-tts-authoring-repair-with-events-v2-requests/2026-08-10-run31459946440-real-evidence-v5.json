@@ -5,64 +5,36 @@
   "expectedBeforeRenderSpecSha256": "ffaed3ddd6c1fa5b967856c36fb99da0aad3c457aa7626a57a99ba138111aff4",
   "expectedBeforeEpisodePackageSha256": "31362cec55349984e678e5e232fb20eb5c5e0dcee9bf6900a85f57a8b85e379f",
   "expectedAfterRenderSpecSha256": "6c0108528de74b5a14e3d3e1483b037616cd020a7aa39ae98ffdb8e8ec8bafda",
-  "expectedAfterEpisodePackageSha256": "857c4cf5068d2fa66ef9d7243f27bfd8e55316b13bfd67d9b9edf99fc9ef83b4",
+  "expectedAfterEpisodePackageSha256": "169ad1a7f53d495a4fb744f34516ebc64be35e493818bfd9c6bffcf8b60cd2a1",
   "expectedIntermediateRenderSpecSha256": "b59f7ae8d46fd998509d8ea404b69662de8f4e0fcdad0cc4eb77cc566926334f",
   "expectedIntermediateEpisodePackageSha256": "3c1270fb699dcc300bf7bd77d123e593798e0c3d658da44e514963ecaff4636b",
   "expectedFinalRenderSpecSha256": "872d05e35423a21a0bd90cfab0ddef5481500be453ceaf43f5beeb76b5c5dacb",
   "expectedFinalEpisodePackageSha256": "6d9ab68903587b95d7710c77c453e6280698c6b117834ef57be26639499b433f",
   "existingBeatChanges": [
-    {
-      "beatId": "vb-01-02",
-      "expected": {"visualTemplate": "hero-number", "visualGrammarId": "evidence", "templateVariant": "default"},
-      "replacement": {"visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "templateVariant": "default"}
-    },
-    {
-      "beatId": "vb-04-02",
-      "expected": {"visualTemplate": "text-focus", "visualGrammarId": "bridge-text", "templateVariant": "default"},
-      "replacement": {"visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "templateVariant": "default"}
-    }
+    {"beatId": "vb-01-02", "expected": {"visualTemplate": "hero-number", "visualGrammarId": "evidence", "templateVariant": "default"}, "replacement": {"visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "templateVariant": "default"}},
+    {"beatId": "vb-04-02", "expected": {"visualTemplate": "text-focus", "visualGrammarId": "bridge-text", "templateVariant": "default"}, "replacement": {"visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "templateVariant": "default"}}
   ],
-  "sceneSplits": [
-    {
-      "sceneId": "scene-08",
-      "chunkSplits": [
-        {
-          "sourceChunkId": "scene-08-chunk-001",
-          "parts": [
-            {"chunkId": "scene-08-chunk-001", "speechText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。", "captionText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。"},
-            {"chunkId": "scene-08-chunk-003", "speechText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。", "captionText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。"}
-          ]
-        },
-        {
-          "sourceChunkId": "scene-08-chunk-002",
-          "parts": [
-            {"chunkId": "scene-08-chunk-002", "speechText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。", "captionText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。"},
-            {"chunkId": "scene-08-chunk-004", "speechText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。", "captionText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。"},
-            {"chunkId": "scene-08-chunk-005", "speechText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。", "captionText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。"}
-          ]
-        }
-      ],
-      "beatRebuilds": [
-        {
-          "sourceBeatId": "vb-08-01",
-          "expected": {"visualTemplate": "event-reaction-timeline", "visualGrammarId": "reaction", "templateVariant": "verified-series"},
-          "parts": [
-            {"beatId": "scene-08-beat-001", "chunkId": "scene-08-chunk-001"},
-            {"beatId": "scene-08-beat-002", "chunkId": "scene-08-chunk-003", "transitionRole": "continuation", "changeCue": "1分足は因果証明ではない", "objectIds": [], "visual": {"visualTemplate": "evidence-boundary", "visualGrammarId": "evidence", "templateVariant": "confirmed-vs-unconfirmed"}}
-          ]
-        },
-        {
-          "sourceBeatId": "vb-08-02",
-          "expected": {"visualTemplate": "verification-checklist", "visualGrammarId": "verification", "templateVariant": "default"},
-          "parts": [
-            {"beatId": "scene-08-beat-003", "chunkId": "scene-08-chunk-002"},
-            {"beatId": "scene-08-beat-004", "chunkId": "scene-08-chunk-004", "transitionRole": "continuation", "changeCue": "主因候補・増幅要因を分ける", "visual": {"visualTemplate": "evidence-boundary", "visualGrammarId": "evidence", "templateVariant": "confirmed-vs-unconfirmed"}},
-            {"beatId": "scene-08-beat-005", "chunkId": "scene-08-chunk-005", "transitionRole": "continuation", "changeCue": "反対材料まで残す", "visual": {"visualTemplate": "verification-checklist", "visualGrammarId": "verification", "templateVariant": "default"}}
-          ]
-        }
-      ]
-    }
-  ],
+  "sceneSplits": [{
+    "sceneId": "scene-08",
+    "chunkSplits": [
+      {"sourceChunkId": "scene-08-chunk-001", "parts": [
+        {"chunkId": "scene-08-chunk-001", "speechText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。", "captionText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。"},
+        {"chunkId": "scene-08-chunk-003", "speechText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。", "captionText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。"}]},
+      {"sourceChunkId": "scene-08-chunk-002", "parts": [
+        {"chunkId": "scene-08-chunk-002", "speechText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。", "captionText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。"},
+        {"chunkId": "scene-08-chunk-004", "speechText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。", "captionText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。"},
+        {"chunkId": "scene-08-chunk-005", "speechText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。", "captionText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。"}]}
+    ],
+    "beatRebuilds": [
+      {"sourceBeatId": "vb-08-01", "expected": {"visualTemplate": "event-reaction-timeline", "visualGrammarId": "reaction", "templateVariant": "verified-series"}, "parts": [
+        {"beatId": "scene-08-beat-001", "chunkId": "scene-08-chunk-001"},
+        {"beatId": "scene-08-beat-002", "chunkId": "scene-08-chunk-003", "transitionRole": "continuation", "changeCue": "1分足は因果証明ではない", "objectIds": [], "visual": {"visualTemplate": "evidence-boundary", "visualGrammarId": "evidence", "templateVariant": "confirmed-vs-unconfirmed"}}]},
+      {"sourceBeatId": "vb-08-02", "expected": {"visualTemplate": "verification-checklist", "visualGrammarId": "verification", "templateVariant": "default"}, "parts": [
+        {"beatId": "scene-08-beat-003", "chunkId": "scene-08-chunk-002"},
+        {"beatId": "scene-08-beat-004", "chunkId": "scene-08-chunk-004", "transitionRole": "continuation", "changeCue": "主因候補・増幅要因を分ける", "visual": {"visualTemplate": "evidence-boundary", "visualGrammarId": "evidence", "templateVariant": "confirmed-vs-unconfirmed"}},
+        {"beatId": "scene-08-beat-005", "chunkId": "scene-08-chunk-005", "transitionRole": "continuation", "changeCue": "反対材料まで残す", "visual": {"visualTemplate": "verification-checklist", "visualGrammarId": "verification", "templateVariant": "default"}}]}
+    ]
+  }],
   "visualEventCopies": [
     {"sceneId": "scene-08", "sourceEventId": "event-017", "newEventId": "event-025", "atChunkId": "scene-08-chunk-004"},
     {"sceneId": "scene-08", "sourceEventId": "event-017", "newEventId": "event-026", "atChunkId": "scene-08-chunk-005"}
