@@ -1,0 +1,12 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "artifactDownloadUrl": "https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-5c44-8206-9a2e-015c3d41ed57/raw?se=2026-08-11T08%3A06%3A16Z&sp=r&sv=2026-02-06&sr=b&scid=60f51e26-30a2-5da8-a370-d8dfc1748d87&skoid=bb372dd6-3b2a-4af2-b355-c26497ba23cd&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A12%3A34Z&ske=2026-08-12T06%3A12%3A34Z&sks=b&skv=2026-02-06&sig=NfbAicNNk6MMVeiDNlfuERQ9GgXa05o16/SyHv5P4NA%3D",
+  "artifactDigestSha256": "65eeb5fffe92bd8f8643c469293ccaa2c5e12f8ad122a53aadfa2368a9c8d8c5",
+  "expectedBundleId": "d0d31f62f471df5fe11bd1587ed4bb50bb1ca3045b664a4d8104310272361111",
+  "expectedManifestSha256": "3dfc5d35607ba2ee624283bd8d244a115f8df1bfe4d9957f7248bdee7f2da20f",
+  "expectedRenderSpecSha256": "b4347625584ee36863ce953cda0428e1256e075ac0229181d2a24706bae511d9",
+  "expectedEpisodePackageSha256": "e8fce5b6b836c1b9212d6c785119fd51b0fd59fab57b7ee5d76cd4f53b47eeea",
+  "expectedRendererCommit": "0aaaf77eb2fd54e3e1b5eb4db05410dcaf71b673",
+  "confirmation": "PROMOTE_PREVIEW_INPUTS"
+}
