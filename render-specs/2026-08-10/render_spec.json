@@ -82,10 +82,10 @@
     "contractVersion": "1.0.0",
     "finalEpisodeContractVersion": "1.0.0",
     "intentVersion": "1.1.0",
-    "recipePlanSha256": "1f3c5b4a7bceaf81ee4191c5d1c215e6e05754102d4a0a51a247e5e390b2c5d5",
+    "recipePlanSha256": "c10df9fedff88dd31c09ccbfab6529072669eb1ef55eb377e2d31b51486aa61c",
     "recipePlanVersion": "1.0.0",
     "recipeRegistryVersion": "1.0.0",
-    "selectionCount": 1
+    "selectionCount": 0
   },
   "pronunciations": [
     {
@@ -239,18 +239,18 @@
       "initialExpression": "軽い驚き",
       "narrationChunks": [
         {
-          "captionText": "おはようございます。昨夜のNasdaq Compositeは1.30%上昇、SOXXは2.02%高でした。ところが、その前に出た7月の雇用者数は、市場予想の+8万人に対して-2.3万人。景気にはかなり弱い数字です。悪い雇用なのに、なぜNASDAQは上がったのか。",
+          "captionText": "おはようございます。昨夜のNasdaq Compositeは1.30%上昇、SOXXは2.02%高でした。ところが7月の雇用者数は、市場予想の+8万人に対して-2.3万人です。景気にはかなり弱い。それでもテックは上がりました。",
           "chunkId": "scene-01-chunk-001",
           "expression": "軽い驚き",
           "pauseAfterMs": 120,
-          "speechText": "おはようございます。昨夜のNasdaq Compositeは一・三〇パーセント上昇、SOXXは二・〇二パーセント高でした。ところが、その前に出た7月の雇用者数は、市場予想のプラス八万人に対してマイナス二・三万人。景気にはかなり弱い数字です。悪い雇用なのに、なぜNASDAQは上がったのか。"
+          "speechText": "おはようございます。昨夜のNasdaq Compositeは一・三〇パーセント上昇、SOXXは二・〇二パーセント高でした。ところが7月の雇用者数は、市場予想のプラス八万人に対してマイナス二・三万人です。景気にはかなり弱い。それでもテックは上がりました。"
         },
         {
-          "captionText": "僕は今日は、このねじれを一本だけ追います。結論から言うと、市場が喜んだのは雇用悪化そのものではありません。次の利上げが必要になる可能性が下がったことが、大型テックには先に追い風として評価された。そこへ半導体の好決算や原油・金利の追い風が重なった、というのが僕の整理です。",
+          "captionText": "まず見えるのは、弱い雇用で利上げ観測が後退し、金利に敏感なテックへ追い風が入った可能性です。ただ、半導体を全部この説明に入れると、一銘柄だけ発表時刻と値動きが合いません。そこを実データで確かめます。",
           "chunkId": "scene-01-chunk-002",
           "expression": "分析",
           "pauseAfterMs": 200,
-          "speechText": "僕は今日は、このねじれを一本だけ追います。結論から言うと、市場が喜んだのは雇用悪化そのものではありません。次の利上げが必要になる可能性が下がったことが、大型テックには先に追い風として評価された。そこへ半導体の好決算や原油・金利の追い風が重なった、というのが僕の整理です。"
+          "speechText": "まず見えるのは、弱い雇用で利上げ観測が後退し、金利に敏感なテックへ追い風が入った可能性です。ただ、半導体を全部この説明に入れると、一銘柄だけ発表時刻と値動きが合いません。そこを実データで確かめます。"
         }
       ],
       "nodes": [],
@@ -288,7 +288,7 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "、市場予想のプラス八万人に対してマイナス二・三万人。景気にはかなり弱い数字です。悪い雇用なのに、なぜNASDAQは上がったのか。",
+          "narrationEndCue": "ころが7月の雇用者数は、市場予想のプラス八万人に対してマイナス二・三万人です。景気にはかなり弱い。それでもテックは上がりました。",
           "narrationStartCue": "おはようございます。昨夜のNasdaq Compositeは一・三〇パーセント上昇、SOXXは二・〇二パーセント高でした。ところ",
           "objectIds": [
             "scene-01-card-001"
@@ -324,7 +324,7 @@
           "assetPlacementIds": [],
           "assetState": "not-required",
           "beatId": "vb-01-02",
-          "changeCue": "悪い雇用→株高？",
+          "changeCue": "半導体を全部この説明に入れると",
           "contentType": "hero-number",
           "endChunkId": "scene-01-chunk-002",
           "entity": null,
@@ -334,16 +334,16 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "たことが、大型テックには先に追い風として評価された。そこへ半導体の好決算や原油・金利の追い風が重なった、というのが僕の整理です。",
-          "narrationStartCue": "僕は今日は、このねじれを一本だけ追います。結論から言うと、市場が喜んだのは雇用悪化そのものではありません。次の利上げが必要になる",
+          "narrationEndCue": "風が入った可能性です。ただ、半導体を全部この説明に入れると、一銘柄だけ発表時刻と値動きが合いません。そこを実データで確かめます。",
+          "narrationStartCue": "まず見えるのは、弱い雇用で利上げ観測が後退し、金利に敏感なテックへ追い風が入った可能性です。ただ、半導体を全部この説明に入れると",
           "objectIds": [
             "scene-01-card-002"
           ],
           "pictureBook": null,
-          "primaryElement": "成長ではなく金利の採点表",
+          "primaryElement": "暫定解：利上げ観測後退 / 未解決：1銘柄の初動",
           "primaryFunction": "Evidence",
           "returnScreenState": null,
-          "screenQuestion": "悪材料がなぜ株高へ変わったか",
+          "screenQuestion": "利上げ観測だけで半導体まで説明できる？",
           "screenState": "Data",
           "sequencePolicy": "explicit",
           "startChunkId": "scene-01-chunk-002",
@@ -358,12 +358,12 @@
           "templateVariant": "default",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "悪い雇用→株高？",
-            "見るべきは利上げ観測"
+            "暫定解：利上げ観測後退",
+            "次の検証：8:30 ETの銘柄別初動"
           ],
-          "visualGrammarId": "analogy",
+          "visualGrammarId": "evidence",
           "visualMode": "conclusion-card",
-          "visualTemplate": "analogy-steps"
+          "visualTemplate": "hero-number"
         }
       ],
       "visualEvents": [
@@ -468,18 +468,18 @@
       "initialExpression": "分析",
       "narrationChunks": [
         {
-          "captionText": "まずBLSの数字を確認します。7月の非農業部門雇用者数は2.3万人減少、失業率は4.1%でした。しかも5月と6月の雇用増も、合わせて10.3万人下方修正されています。つまり、弱かったのは一つの見出しだけではありません。",
+          "captionText": "BLSの中身を見ると、弱さは一行だけではありません。非農業部門雇用者数は2.3万人減、失業率は4.1%。さらに5月と6月の雇用増も、合わせて10.3万人下方修正されました。",
           "chunkId": "scene-02-chunk-001",
           "expression": "分析",
           "pauseAfterMs": 120,
-          "speechText": "まずBLSの数字を確認します。7月の非農業部門雇用者数は二・三万人減少、失業率は四・一パーセントでした。しかも5月と6月の雇用増も、合わせて十・三万人下方修正されています。つまり、弱かったのは一つの見出しだけではありません。"
+          "speechText": "BLSの中身を見ると、弱さは一行だけではありません。非農業部門雇用者数は二・三万人減、失業率は四・一パーセント。さらに5月と6月の雇用増も、合わせて十・三万人下方修正されました。"
         },
         {
-          "captionText": "ここまで見ると普通は、景気減速への警戒が株に重くなる場面を想像します。だからこそ、NASDAQの+1.30%が今回の矛盾になります。",
+          "captionText": "つまり景気側の心配はちゃんと残っています。『悪い数字を市場が無視した』ではありません。",
           "chunkId": "scene-02-chunk-002",
           "expression": "困惑",
           "pauseAfterMs": 200,
-          "speechText": "ここまで見ると普通は、景気減速への警戒が株に重くなる場面を想像します。だからこそ、NASDAQのプラス一・三〇パーセントが今回の矛盾になります。"
+          "speechText": "つまり景気側の心配はちゃんと残っています。『悪い数字を市場が無視した』ではありません。"
         }
       ],
       "nodes": [],
@@ -534,8 +534,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "でした。しかも5月と6月の雇用増も、合わせて十・三万人下方修正されています。つまり、弱かったのは一つの見出しだけではありません。",
-          "narrationStartCue": "まずBLSの数字を確認します。7月の非農業部門雇用者数は二・三万人減少、失業率は四・一パーセントでした。しかも5月と6月の雇用増",
+          "narrationEndCue": "。非農業部門雇用者数は二・三万人減、失業率は四・一パーセント。さらに5月と6月の雇用増も、合わせて十・三万人下方修正されました。",
+          "narrationStartCue": "BLSの中身を見ると、弱さは一行だけではありません。非農業部門雇用者数は二・三万人減、失業率は四・一パーセント。さらに5月と6月",
           "objectIds": [
             "vb-02-01.card-01.line-01",
             "vb-02-01.card-01.line-02"
@@ -581,8 +581,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "通は、景気減速への警戒が株に重くなる場面を想像します。だからこそ、NASDAQのプラス一・三〇パーセントが今回の矛盾になります。",
-          "narrationStartCue": "ここまで見ると普通は、景気減速への警戒が株に重くなる場面を想像します。だからこそ、NASDAQのプラス一・三〇パーセントが今回の",
+          "narrationEndCue": "つまり景気側の心配はちゃんと残っています。『悪い数字を市場が無視した』ではありません。",
+          "narrationStartCue": "つまり景気側の心配はちゃんと残っています。『悪い数字を市場が無視した』ではありません。",
           "objectIds": [
             "scene-02-card-002"
           ],
@@ -702,18 +702,18 @@
       "initialExpression": "分析",
       "narrationChunks": [
         {
-          "captionText": "期待との差を数字にすると、もっと分かりやすいです。Reutersが伝えた市場予想は+8万人。実際は-2.3万人。Gapは-10.3万人です。かなり大きな下振れです。",
+          "captionText": "それでも引けではNasdaq Compositeが1.30%上昇。SOXXは2.02%、NVIDIAも2.27%上がりました。",
           "chunkId": "scene-03-chunk-001",
           "expression": "分析",
           "pauseAfterMs": 120,
-          "speechText": "期待との差を数字にすると、もっと分かりやすいです。Reutersが伝えた市場予想はプラス八万人。実際はマイナス二・三万人。Gapはマイナス十・三万人です。かなり大きな下振れです。"
+          "speechText": "それでも引けではNasdaq Compositeが一・三〇パーセント上昇。SOXXは二・〇二パーセント、NVIDIAも二・二七パーセント上がりました。"
         },
         {
-          "captionText": "ここで面白いのは、株価がそのGapを無視したわけではないことです。市場は同じ数字を、景気の採点表だけではなく、金利の採点表でも読みました。",
+          "captionText": "雇用は弱いのに、指数と半導体は反対方向です。ここまでで分かるのは、景気の採点表だけでは昨夜の値動きが説明できない、ということです。",
           "chunkId": "scene-03-chunk-002",
           "expression": "分析",
           "pauseAfterMs": 200,
-          "speechText": "ここで面白いのは、株価がそのGapを無視したわけではないことです。市場は同じ数字を、景気の採点表だけではなく、金利の採点表でも読みました。"
+          "speechText": "雇用は弱いのに、指数と半導体は反対方向です。ここまでで分かるのは、景気の採点表だけでは昨夜の値動きが説明できない、ということです。"
         }
       ],
       "nodes": [],
@@ -767,8 +767,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "Reutersが伝えた市場予想はプラス八万人。実際はマイナス二・三万人。Gapはマイナス十・三万人です。かなり大きな下振れです。",
-          "narrationStartCue": "期待との差を数字にすると、もっと分かりやすいです。Reutersが伝えた市場予想はプラス八万人。実際はマイナス二・三万人。Gap",
+          "narrationEndCue": "daq Compositeが一・三〇パーセント上昇。SOXXは二・〇二パーセント、NVIDIAも二・二七パーセント上がりました。",
+          "narrationStartCue": "それでも引けではNasdaq Compositeが一・三〇パーセント上昇。SOXXは二・〇二パーセント、NVIDIAも二・二七パ",
           "objectIds": [
             "scene-03-card-expected",
             "scene-03-card-actual",
@@ -816,8 +816,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "いのは、株価がそのGapを無視したわけではないことです。市場は同じ数字を、景気の採点表だけではなく、金利の採点表でも読みました。",
-          "narrationStartCue": "ここで面白いのは、株価がそのGapを無視したわけではないことです。市場は同じ数字を、景気の採点表だけではなく、金利の採点表でも読",
+          "narrationEndCue": "用は弱いのに、指数と半導体は反対方向です。ここまでで分かるのは、景気の採点表だけでは昨夜の値動きが説明できない、ということです。",
+          "narrationStartCue": "雇用は弱いのに、指数と半導体は反対方向です。ここまでで分かるのは、景気の採点表だけでは昨夜の値動きが説明できない、ということです",
           "objectIds": [
             "scene-03-number-compare-001",
             "scene-03-number-compare-002"
@@ -868,7 +868,7 @@
           "atChunkId": "scene-03-chunk-001",
           "durationMs": 560,
           "easingPreset": "smooth-out",
-          "eventId": "event-012",
+          "eventId": "event-020",
           "expression": null,
           "motionPreset": "rise-soft",
           "offsetMs": 0,
@@ -880,7 +880,7 @@
           "atChunkId": "scene-03-chunk-001",
           "durationMs": 560,
           "easingPreset": "smooth-out",
-          "eventId": "event-020",
+          "eventId": "event-021",
           "expression": null,
           "motionPreset": "rise-soft",
           "offsetMs": 0,
@@ -915,7 +915,20 @@
       "visualMode": "expected-actual-gap"
     },
     {
-      "arrows": [],
+      "arrows": [
+        {
+          "arrowId": "scene-04-scorecard-arrow-001",
+          "fromNodeId": "scene-04-scorecard-node-001",
+          "label": "読み替え",
+          "toNodeId": "scene-04-scorecard-node-002"
+        },
+        {
+          "arrowId": "scene-04-scorecard-arrow-002",
+          "fromNodeId": "scene-04-scorecard-node-002",
+          "label": "金利経路",
+          "toNodeId": "scene-04-scorecard-node-003"
+        }
+      ],
       "assetPlacements": [
         {
           "assetId": "mainBackground",
@@ -996,21 +1009,34 @@
       "initialExpression": "分析",
       "narrationChunks": [
         {
-          "captionText": "その金利の採点表を見ると、答えがかなり見えます。Reutersによると、次回のFed会合で利上げが行われる確率は約44%まで低下しました。前日は55%、1週間前は67%です。景気のテストでは赤点でも、金利のテストでは少し安心材料になる。",
+          "captionText": "期待との差はかなり大きいです。Expectedは+8万人。Actualは-2.3万人。Gapは-10.3万人でした。ところが次回Fed会合の利上げ確率は約44%まで低下。前日は55%、一週間前は67%です。",
           "chunkId": "scene-04-chunk-001",
           "expression": "分析",
           "pauseAfterMs": 120,
-          "speechText": "その金利の採点表を見ると、答えがかなり見えます。Reutersによると、次回のFed会合で利上げが行われる確率は約四十四パーセントまで低下しました。前日は五十五パーセント、1週間前は六十七パーセントです。景気のテストでは赤点でも、金利のテストでは少し安心材料になる。"
+          "speechText": "期待との差はかなり大きいです。Expectedはプラス八万人。Actualはマイナス二・三万人。Gapはマイナス十・三万人でした。ところが次回Fed会合の利上げ確率は約四十四パーセントまで低下。前日は五十五パーセント、一週間前は六十七パーセントです。"
         },
         {
-          "captionText": "そんなねじれです。金利がさらに上がるリスクが後退すれば、将来の利益を長く織り込む大型テックには評価上の逆風が和らぎます。『悪い雇用だから株高』ではなく、『悪い雇用で追加利上げの必要性が下がった』。ここが昨夜の中心です。",
+          "captionText": "Reutersも、弱い雇用で利上げ観測が後退したことを株高の主要な説明として伝えています。つまり『悪い雇用が好材料』ではなく、『追加利上げの必要性が下がった』。ここがまず昨夜のマクロの芯です。",
           "chunkId": "scene-04-chunk-002",
           "expression": "警戒",
           "pauseAfterMs": 200,
-          "speechText": "そんなねじれです。金利がさらに上がるリスクが後退すれば、将来の利益を長く織り込む大型テックには評価上の逆風が和らぎます。『悪い雇用だから株高』ではなく、『悪い雇用で追加利上げの必要性が下がった』。ここが昨夜の中心です。"
+          "speechText": "Reutersも、弱い雇用で利上げ観測が後退したことを株高の主要な説明として伝えています。つまり『悪い雇用が好材料』ではなく、『追加利上げの必要性が下がった』。ここがまず昨夜のマクロの芯です。"
         }
       ],
-      "nodes": [],
+      "nodes": [
+        {
+          "label": "景気の採点表：赤点",
+          "nodeId": "scene-04-scorecard-node-001"
+        },
+        {
+          "label": "金利の採点表：利上げリスク↓",
+          "nodeId": "scene-04-scorecard-node-002"
+        },
+        {
+          "label": "大型テック：逆風が和らぐ",
+          "nodeId": "scene-04-scorecard-node-003"
+        }
+      ],
       "numbers": [],
       "performanceIntent": "矛盾が解けるTurnとして少しニヤリとする",
       "purpose": "弱い雇用が利上げ観測後退へ変換された市場解釈を示す",
@@ -1043,8 +1069,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "しました。前日は五十五パーセント、1週間前は六十七パーセントです。景気のテストでは赤点でも、金利のテストでは少し安心材料になる。",
-          "narrationStartCue": "その金利の採点表を見ると、答えがかなり見えます。Reutersによると、次回のFed会合で利上げが行われる確率は約四十四パーセン",
+          "narrationEndCue": "でした。ところが次回Fed会合の利上げ確率は約四十四パーセントまで低下。前日は五十五パーセント、一週間前は六十七パーセントです。",
+          "narrationStartCue": "期待との差はかなり大きいです。Expectedはプラス八万人。Actualはマイナス二・三万人。Gapはマイナス十・三万人でした",
           "objectIds": [
             "scene-04-card-expected",
             "scene-04-card-actual",
@@ -1081,8 +1107,8 @@
           "assetPlacementIds": [],
           "assetState": "not-required",
           "beatId": "vb-04-02",
-          "changeCue": "利上げ確率 約44%",
-          "contentType": "evidence-boundary",
+          "changeCue": "景気の採点表 → 金利の採点表",
+          "contentType": "analogy-steps",
           "endChunkId": "scene-04-chunk-002",
           "entity": null,
           "evidenceSourceIds": [
@@ -1091,33 +1117,44 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "には評価上の逆風が和らぎます。『悪い雇用だから株高』ではなく、『悪い雇用で追加利上げの必要性が下がった』。ここが昨夜の中心です。",
-          "narrationStartCue": "そんなねじれです。金利がさらに上がるリスクが後退すれば、将来の利益を長く織り込む大型テックには評価上の逆風が和らぎます。『悪い雇",
-          "objectIds": [],
+          "narrationEndCue": "な説明として伝えています。つまり『悪い雇用が好材料』ではなく、『追加利上げの必要性が下がった』。ここがまず昨夜のマクロの芯です。",
+          "narrationStartCue": "Reutersも、弱い雇用で利上げ観測が後退したことを株高の主要な説明として伝えています。つまり『悪い雇用が好材料』ではなく、『",
+          "objectIds": [
+            "scene-04-scorecard-node-001",
+            "scene-04-scorecard-node-002",
+            "scene-04-scorecard-arrow-001",
+            "scene-04-scorecard-node-003",
+            "scene-04-scorecard-arrow-002"
+          ],
           "pictureBook": null,
-          "primaryElement": "利上げ観測 67% → 55% → 44%",
+          "primaryElement": "景気の採点表 → 金利の採点表 → 大型テック",
           "primaryFunction": "Evidence",
           "returnScreenState": null,
-          "screenQuestion": "市場の採点表はどう変わった？",
+          "screenQuestion": "同じ悪材料でも採点表が違うと何が変わる？",
           "screenState": "Data",
-          "sequencePolicy": "static",
+          "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-04-chunk-002",
           "templateConfig": {
-            "comparisonBasis": null,
+            "comparisonBasis": "同じ雇用下振れを景気と金利の2つの採点表で読む",
             "dataBasis": "Reuters market interpretation",
             "laneLabels": [],
-            "nodeOrder": [],
-            "outcomeNodeId": null,
-            "variant": "default"
+            "nodeOrder": [
+              "scene-04-scorecard-node-001",
+              "scene-04-scorecard-node-002",
+              "scene-04-scorecard-node-003"
+            ],
+            "outcomeNodeId": "scene-04-scorecard-node-003",
+            "variant": "left-to-right"
           },
-          "templateVariant": "default",
+          "templateVariant": "left-to-right",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "利上げ確率 約44%",
-            "前日55% / 1週前67%"
+            "景気の採点表：赤点",
+            "金利の採点表：利上げリスク↓",
+            "大型テック：逆風が和らぐ"
           ],
           "visualGrammarId": "analogy",
-          "visualMode": "text-focus",
+          "visualMode": "causal-diagram",
           "visualTemplate": "analogy-steps"
         }
       ],
@@ -1139,7 +1176,7 @@
           "atChunkId": "scene-04-chunk-001",
           "durationMs": 560,
           "easingPreset": "smooth-out",
-          "eventId": "event-021",
+          "eventId": "event-022",
           "expression": null,
           "motionPreset": "rise-soft",
           "offsetMs": 0,
@@ -1151,7 +1188,7 @@
           "atChunkId": "scene-04-chunk-001",
           "durationMs": 560,
           "easingPreset": "smooth-out",
-          "eventId": "event-022",
+          "eventId": "event-023",
           "expression": null,
           "motionPreset": "rise-soft",
           "offsetMs": 0,
@@ -1276,25 +1313,25 @@
       "initialExpression": "分析",
       "narrationChunks": [
         {
-          "captionText": "ただし、ここで雇用統計だけに全部を背負わせると雑になります。同じ日の市場には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回りが下がったという支援材料もありました。",
+          "captionText": "ただ、雇用だけに全部を背負わせると話がきれいすぎます。同じ日には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回りが下がったという支援材料もありました。",
           "chunkId": "scene-05-chunk-001",
           "expression": "軽い驚き",
           "pauseAfterMs": 120,
-          "speechText": "ただし、ここで雇用統計だけに全部を背負わせると雑になります。同じ日の市場には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回りが下がったという支援材料もありました。"
+          "speechText": "ただ、雇用だけに全部を背負わせると話がきれいすぎます。同じ日には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回りが下がったという支援材料もありました。"
         },
         {
-          "captionText": "企業決算も全体として強めです。なので経路は、雇用の大幅下振れから利上げ観測が後退し、その横で原油と金利、決算が追い風を足した、と見るのが自然です。",
+          "captionText": "企業決算も強めです。ここは主役ではありません。",
           "chunkId": "scene-05-chunk-002",
           "expression": "分析",
           "pauseAfterMs": 120,
-          "speechText": "企業決算も全体として強めです。なので経路は、雇用の大幅下振れから利上げ観測が後退し、その横で原油と金利、決算が追い風を足した、と見るのが自然です。"
+          "speechText": "企業決算も強めです。ここは主役ではありません。"
         },
         {
-          "captionText": "主役は一つでも、舞台装置は一つではありません。",
+          "captionText": "雇用から金利への経路を、同じ方向から支えた増幅材料として置いておきます。",
           "chunkId": "scene-05-chunk-003",
           "expression": "分析",
           "pauseAfterMs": 200,
-          "speechText": "主役は一つでも、舞台装置は一つではありません。"
+          "speechText": "雇用から金利への経路を、同じ方向から支えた増幅材料として置いておきます。"
         }
       ],
       "nodes": [
@@ -1343,8 +1380,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "なります。同じ日の市場には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回りが下がったという支援材料もありました。",
-          "narrationStartCue": "ただし、ここで雇用統計だけに全部を背負わせると雑になります。同じ日の市場には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、",
+          "narrationEndCue": "きれいすぎます。同じ日には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回りが下がったという支援材料もありました。",
+          "narrationStartCue": "ただ、雇用だけに全部を背負わせると話がきれいすぎます。同じ日には、イランを巡る和平進展で原油とインフレ懸念が和らぎ、米国債利回り",
           "objectIds": [
             "scene-05-card-001"
           ],
@@ -1392,8 +1429,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "て強めです。なので経路は、雇用の大幅下振れから利上げ観測が後退し、その横で原油と金利、決算が追い風を足した、と見るのが自然です。",
-          "narrationStartCue": "企業決算も全体として強めです。なので経路は、雇用の大幅下振れから利上げ観測が後退し、その横で原油と金利、決算が追い風を足した、と",
+          "narrationEndCue": "企業決算も強めです。ここは主役ではありません。",
+          "narrationStartCue": "企業決算も強めです。ここは主役ではありません。",
           "objectIds": [
             "vb-05-02.node-01",
             "vb-05-02.node-02",
@@ -1446,8 +1483,8 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "主役は一つでも、舞台装置は一つではありません。",
-          "narrationStartCue": "主役は一つでも、舞台装置は一つではありません。",
+          "narrationEndCue": "雇用から金利への経路を、同じ方向から支えた増幅材料として置いておきます。",
+          "narrationStartCue": "雇用から金利への経路を、同じ方向から支えた増幅材料として置いておきます。",
           "objectIds": [
             "scene-05-card-003"
           ],
@@ -1550,17 +1587,6 @@
           "region": "fox-left",
           "role": "fox-expression",
           "startChunkId": null
-        },
-        {
-          "assetId": "daily-microchip-q1-fy27-ir-fallback",
-          "endChunkId": "scene-06-chunk-001",
-          "fit": "contain",
-          "focalPoint": null,
-          "opacity": 1,
-          "placementId": "vsi-20260810-microchip-ir-placement",
-          "region": "main-stage",
-          "role": "main-media",
-          "startChunkId": "scene-06-chunk-001"
         }
       ],
       "cards": [],
@@ -1576,51 +1602,91 @@
       "initialExpression": "軽い驚き",
       "narrationChunks": [
         {
-          "captionText": "半導体では、その増幅が特にはっきり見えます。MicrochipはQ1売上14.85億ドル、非GAAP EPS0.76ドルを発表し、次の四半期売上を15.89億から16.18億ドルと見込みました。会社は需要改善や在庫正常化も説明しています。",
+          "captionText": "ここで8時30分ETの1分足を重ねます。QQQは719.16から720.23。SOXXは541.06から542.40。NVIDIAは219.95から220.31へ上向きました。ところがMicrochipは79.58から79.56。",
           "chunkId": "scene-06-chunk-001",
           "expression": "警戒",
           "pauseAfterMs": 120,
-          "speechText": "半導体では、その増幅が特にはっきり見えます。MicrochipはQ1売上十四・八五億ドル、非GAAP EPS〇・七六ドルを発表し、次の四半期売上を十五・八九億から十六・一八億ドルと見込みました。会社は需要改善や在庫正常化も説明しています。"
+          "speechText": "ここで8時30分ETの1分足を重ねます。QQQは719.16から720.23。SOXXは541.06から542.40。NVIDIAは219.95から220.31へ上向きました。ところがMicrochipは79.58から79.56。"
         },
         {
-          "captionText": "MCHPは13.89%高、SOXXは2.02%高、NVIDIAも2.27%高でした。つまり半導体は、マクロの金利追い風に、企業固有の好決算が上乗せされた形です。",
+          "captionText": "ほぼ動いていません。1分足だけで因果は証明できません。ただ、発表直後のマクロ反応とMicrochipの大幅高を同じエンジンで扱うのは無理があります。ここで説明が一段分かれます。",
           "chunkId": "scene-06-chunk-002",
           "expression": "通常",
           "pauseAfterMs": 200,
-          "speechText": "MCHPは十三・八九パーセント高、SOXXは二・〇二パーセント高、NVIDIAも二・二七パーセント高でした。つまり半導体は、マクロの金利追い風に、企業固有の好決算が上乗せされた形です。"
+          "speechText": "ほぼ動いていません。1分足だけで因果は証明できません。ただ、発表直後のマクロ反応とMicrochipの大幅高を同じエンジンで扱うのは無理があります。ここで説明が一段分かれます。"
         }
       ],
       "nodes": [],
       "numbers": [
         {
           "comparison": null,
-          "label": "SOXX",
-          "numberId": "metric.soxx.close-return",
-          "numericValue": 2.02,
-          "precision": 2,
-          "tone": "positive",
-          "unit": "%",
-          "value": "+2.02%"
+          "label": "08:29 ET",
+          "numberId": "scene-06-qqq-01",
+          "numericValue": 719.16,
+          "precision": 3,
+          "tone": "neutral",
+          "unit": "",
+          "value": "719.16"
         },
         {
           "comparison": null,
-          "label": "MCHP",
-          "numberId": "metric.mchp.close-return",
-          "numericValue": 13.89,
-          "precision": 2,
+          "label": "08:30 ET",
+          "numberId": "scene-06-qqq-02",
+          "numericValue": 720.23,
+          "precision": 3,
           "tone": "positive",
-          "unit": "%",
-          "value": "+13.89%"
+          "unit": "",
+          "value": "720.23"
         },
         {
           "comparison": null,
-          "label": "NVIDIA",
-          "numberId": "metric.nvidia.close-return",
-          "numericValue": 2.27,
-          "precision": 2,
+          "label": "08:31 ET",
+          "numberId": "scene-06-qqq-03",
+          "numericValue": 720.531,
+          "precision": 3,
+          "tone": "positive",
+          "unit": "",
+          "value": "720.531"
+        },
+        {
+          "comparison": "08:29→08:30 ET",
+          "label": "+0.149%",
+          "numberId": "scene-06-release-qqq",
+          "numericValue": 0.149,
+          "precision": 3,
           "tone": "positive",
           "unit": "%",
-          "value": "+2.27%"
+          "value": "+0.149%"
+        },
+        {
+          "comparison": "08:29→08:30 ET",
+          "label": "+0.248%",
+          "numberId": "scene-06-release-soxx",
+          "numericValue": 0.248,
+          "precision": 3,
+          "tone": "positive",
+          "unit": "%",
+          "value": "+0.248%"
+        },
+        {
+          "comparison": "08:29→08:30 ET",
+          "label": "+0.164%",
+          "numberId": "scene-06-release-nvidia",
+          "numericValue": 0.164,
+          "precision": 3,
+          "tone": "positive",
+          "unit": "%",
+          "value": "+0.164%"
+        },
+        {
+          "comparison": "08:29→08:30 ET",
+          "label": "-0.025%",
+          "numberId": "scene-06-release-mchp",
+          "numericValue": -0.025,
+          "precision": 3,
+          "tone": "negative",
+          "unit": "%",
+          "value": "-0.025%"
         }
       ],
       "performanceIntent": "Microchipを主因に昇格させず、セクター増幅として扱う",
@@ -1641,148 +1707,118 @@
       "uncertainty": "MCHP一社でSOXX全体を説明しない",
       "visualBeats": [
         {
-          "assetPlacementIds": [
-            "vsi-20260810-microchip-ir-placement"
-          ],
-          "assetState": "ready",
+          "assetPlacementIds": [],
+          "assetState": "not-required",
           "beatId": "vb-06-01",
-          "changeCue": "Microchip Q1 FY27公式IR",
-          "contentType": "news-media",
+          "changeCue": "8時30分ETの1分足",
+          "contentType": "event-reaction-timeline",
           "endChunkId": "scene-06-chunk-001",
           "entity": null,
           "evidenceSourceIds": [
-            "source-001",
             "source-002",
-            "source-003",
-            "source-004"
+            "source-005"
           ],
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "・七六ドルを発表し、次の四半期売上を十五・八九億から十六・一八億ドルと見込みました。会社は需要改善や在庫正常化も説明しています。",
-          "narrationStartCue": "半導体では、その増幅が特にはっきり見えます。MicrochipはQ1売上十四・八五億ドル、非GAAP EPS〇・七六ドルを発表し",
-          "objectIds": [],
+          "narrationEndCue": "ら542.40。NVIDIAは219.95から220.31へ上向きました。ところがMicrochipは79.58から79.56。",
+          "narrationStartCue": "ここで8時30分ETの1分足を重ねます。QQQは719.16から720.23。SOXXは541.06から542.40。NVIDI",
+          "objectIds": [
+            "scene-06-qqq-01",
+            "scene-06-qqq-02",
+            "scene-06-qqq-03"
+          ],
           "pictureBook": null,
-          "primaryElement": "Microchip Q1 FY27 公式IR",
+          "primaryElement": "QQQ 実1分足 08:29→08:30→08:31",
           "primaryFunction": "Explain",
-          "returnScreenState": "Data",
-          "screenQuestion": "Microchipは何を発表した？",
-          "screenState": "News",
-          "sequencePolicy": "static",
+          "returnScreenState": null,
+          "screenQuestion": "BLS 08:30 ET前後、QQQはどう動いた？",
+          "screenState": "Chart",
+          "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-06-chunk-001",
           "templateConfig": {
-            "comparisonBasis": null,
-            "dataBasis": "Microchip Technology official Q1 FY27 investor-relations release",
+            "comparisonBasis": "BLS 08:30 ET発表前後",
+            "dataBasis": "Longbridge verified 1-minute Kline minute-close",
             "laneLabels": [],
             "nodeOrder": [],
             "outcomeNodeId": null,
-            "variant": "default"
+            "reactionTimeline": {
+              "eventOrderIds": [
+                "scene-06-qqq-01",
+                "scene-06-qqq-02",
+                "scene-06-qqq-03"
+              ],
+              "precision": "verified-intraday-series",
+              "seriesObjectIds": [
+                "scene-06-qqq-01",
+                "scene-06-qqq-02",
+                "scene-06-qqq-03"
+              ]
+            },
+            "variant": "verified-series"
           },
-          "templateVariant": "default",
+          "templateVariant": "verified-series",
           "transitionRole": "major-shift",
           "viewerTexts": [
-            "Microchip Q1 FY27 公式IR",
-            "売上 14.85億ドル / 非GAAP EPS 0.76ドル",
-            "次四半期売上 15.89億〜16.18億ドル"
+            "QQQ 実1分足",
+            "08:29 719.16 → 08:30 720.23 → 08:31 720.531"
           ],
-          "visualGrammarId": "evidence",
-          "visualMode": "news-media",
-          "visualTemplate": "news-media"
+          "visualGrammarId": "reaction",
+          "visualMode": "timeline",
+          "visualTemplate": "event-reaction-timeline"
         },
         {
           "assetPlacementIds": [],
           "assetState": "not-required",
           "beatId": "vb-06-02",
-          "changeCue": "SOXX +2.02%",
-          "contentType": "market-pulse-grid",
+          "changeCue": "ところがMicrochipは79.58から79.56",
+          "contentType": "index-return-bars",
           "endChunkId": "scene-06-chunk-002",
           "entity": null,
           "evidenceSourceIds": [
-            "source-001",
-            "source-003",
-            "source-004"
+            "source-005"
           ],
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "financialReturnTarget": "vb-07-01",
-          "financialVisualTrace": {
-            "causalStepIds": [],
-            "comparisonBasis": "2026-08-07米国通常取引終値",
-            "contractVersion": "1.0.0",
-            "displayOrder": [
-              "metric.soxx.close-return",
-              "metric.mchp.close-return",
-              "metric.nvidia.close-return"
-            ],
-            "finalEpisodeContractSha256": "7362171ca2c3cf7b26190464fee79cc969f0cbcdbe304ea87cd2616cd8da57fb",
-            "intentId": "fvi-market-snapshot-s06b02",
-            "metricIds": [
-              "metric.soxx.close-return",
-              "metric.mchp.close-return",
-              "metric.nvidia.close-return"
-            ],
-            "reasonCodes": [],
-            "recipeId": "market-pulse-grid",
-            "recipePlanSha256": "1f3c5b4a7bceaf81ee4191c5d1c215e6e05754102d4a0a51a247e5e390b2c5d5",
-            "selectedPath": "preferred",
-            "selectedPlanId": "fvp-market-snapshot-s06b02-preferred",
-            "selectedPlanSha256": "4c0a8f8c6d633cb10af947d6cc1344cacb08d58b4f45e39bf57020544fb8b851",
-            "sourceIds": [
-              "source-001",
-              "source-003",
-              "source-004"
-            ]
-          },
-          "narrationEndCue": "セント高、NVIDIAも二・二七パーセント高でした。つまり半導体は、マクロの金利追い風に、企業固有の好決算が上乗せされた形です。",
-          "narrationStartCue": "MCHPは十三・八九パーセント高、SOXXは二・〇二パーセント高、NVIDIAも二・二七パーセント高でした。つまり半導体は、マク",
+          "narrationEndCue": "せん。ただ、発表直後のマクロ反応とMicrochipの大幅高を同じエンジンで扱うのは無理があります。ここで説明が一段分かれます。",
+          "narrationStartCue": "ほぼ動いていません。1分足だけで因果は証明できません。ただ、発表直後のマクロ反応とMicrochipの大幅高を同じエンジンで扱う",
           "objectIds": [
-            "metric.soxx.close-return",
-            "metric.mchp.close-return",
-            "metric.nvidia.close-return"
+            "scene-06-release-qqq",
+            "scene-06-release-soxx",
+            "scene-06-release-nvidia",
+            "scene-06-release-mchp"
           ],
           "pictureBook": null,
-          "primaryElement": "SOXX・MCHP・NVIDIA終値",
+          "primaryElement": "08:29→08:30 ET 1分リターン",
           "primaryFunction": "Explain",
           "returnScreenState": null,
-          "screenQuestion": "半導体はどれだけ上乗せされたか",
-          "screenState": "Data",
+          "screenQuestion": "同じ1分で4銘柄は同じ反応だった？",
+          "screenState": "Chart",
           "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-06-chunk-002",
           "templateConfig": {
-            "causalStepIds": [],
-            "comparisonBasis": "2026-08-07米国通常取引終値",
-            "dataBasis": "financial-recipe-plan",
-            "displayOrder": [
-              "metric.soxx.close-return",
-              "metric.mchp.close-return",
-              "metric.nvidia.close-return"
-            ],
-            "highlightObjectIds": [],
+            "comparisonBasis": "08:29→08:30 ETの1分リターン",
+            "dataBasis": "Longbridge verified 1-minute Kline minute-close",
             "laneLabels": [],
-            "metricIds": [
-              "metric.soxx.close-return",
-              "metric.mchp.close-return",
-              "metric.nvidia.close-return"
-            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
-            "variant": "default"
+            "variant": "zero-baseline"
           },
-          "templateVariant": "default",
+          "templateVariant": "zero-baseline",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "SOXX +2.02%",
-            "MCHP +13.89%",
-            "NVIDIA +2.27%"
+            "QQQ / SOXX / NVIDIA は上向き",
+            "MCHP は -0.025%でほぼ横ばい",
+            "1分足だけでは因果証明しない"
           ],
           "visualGrammarId": "reaction",
-          "visualMode": "timeline",
-          "visualTemplate": "market-pulse-grid"
+          "visualMode": "number-comparison",
+          "visualTemplate": "index-return-bars"
         }
       ],
       "visualEvents": [],
-      "visualMode": "news-media"
+      "visualMode": "timeline"
     },
     {
       "arrows": [],
@@ -1816,32 +1852,20 @@
           "region": "fox-left",
           "role": "fox-expression",
           "startChunkId": null
-        }
-      ],
-      "cards": [
+        },
         {
-          "cardId": "scene-07-card-002",
-          "lines": [
-            {
-              "label": "1",
-              "tone": "neutral",
-              "value": "広い金利追い風"
-            },
-            {
-              "label": "2",
-              "tone": "neutral",
-              "value": "個別材料で差"
-            },
-            {
-              "label": "3",
-              "tone": "neutral",
-              "value": "Microsoft +0.03%"
-            }
-          ],
-          "role": null,
-          "title": "全面高ではない"
+          "assetId": "daily-microchip-q1-fy27-ir-secondary",
+          "endChunkId": "scene-07-chunk-001",
+          "fit": "contain",
+          "focalPoint": null,
+          "opacity": 1,
+          "placementId": "vsi-20260810-microchip-ir-placement",
+          "region": "main-stage",
+          "role": "main-media",
+          "startChunkId": "scene-07-chunk-001"
         }
       ],
+      "cards": [],
       "causalScope": "multiple",
       "evidenceSourceIds": [
         "source-001"
@@ -1852,51 +1876,61 @@
       "initialExpression": "困惑",
       "narrationChunks": [
         {
-          "captionText": "ここで一度、この説明を壊しにいきます。AMDは1.21%下落、Alphabetも0.96%下落、Microsoftはほぼ横ばいでした。なので『弱い雇用でテック全部が買われた』ではありませんし、Microchip一社がNASDAQを上げたわけでもありません。",
+          "captionText": "Microchipには会社固有の材料がありました。Q1売上14.85億ドル、非GAAP EPS0.76ドルを発表し、次の四半期売上を15.89億から16.18億ドルと見込みました。需要改善や在庫正常化も説明しています。MCHPは終日で13.89%高でした。",
           "chunkId": "scene-07-chunk-001",
           "expression": "困惑",
           "pauseAfterMs": 120,
-          "speechText": "ここで一度、この説明を壊しにいきます。AMDは一・二一パーセント下落、Alphabetも〇・九六パーセント下落、Microsoftはほぼ横ばいでした。なので『弱い雇用でテック全部が買われた』ではありませんし、Microchip一社がNASDAQを上げたわけでもありません。"
+          "speechText": "Microchipには会社固有の材料がありました。Q1売上十四・八五億ドル、非GAAP EPS〇・七六ドルを発表し、次の四半期売上を十五・八九億から十六・一八億ドルと見込みました。需要改善や在庫正常化も説明しています。MCHPは終日で十三・八九パーセント高でした。"
         },
         {
-          "captionText": "広い金利の追い風の上で、決算や個別材料によって銘柄差が残った。これなら、上昇と逆行を同時に説明できます。",
+          "captionText": "一方でAMDは1.21%下落、Alphabetも0.96%下落、Microsoftはほぼ横ばい。つまり半導体高にも、マクロの金利経路とMicrochipの決算という別エンジンがあり、追い風もテック全体へ均等には届いていません。",
           "chunkId": "scene-07-chunk-002",
           "expression": "分析",
           "pauseAfterMs": 200,
-          "speechText": "広い金利の追い風の上で、決算や個別材料によって銘柄差が残った。これなら、上昇と逆行を同時に説明できます。"
+          "speechText": "一方でAMDは一・二一パーセント下落、Alphabetも〇・九六パーセント下落、Microsoftはほぼ横ばい。つまり半導体高にも、マクロの金利経路とMicrochipの決算という別エンジンがあり、追い風もテック全体へ均等には届いていません。"
         }
       ],
       "nodes": [],
       "numbers": [
         {
-          "comparison": null,
-          "label": "MCHP",
-          "numberId": "vb-07-01.card-01.line-01",
+          "comparison": "8/7通常取引",
+          "label": "+13.89%",
+          "numberId": "scene-07-daily-mchp",
           "numericValue": 13.89,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "positive",
           "unit": "%",
           "value": "+13.89%"
         },
         {
-          "comparison": null,
-          "label": "AMD",
-          "numberId": "vb-07-01.card-01.line-02",
+          "comparison": "8/7通常取引",
+          "label": "-1.21%",
+          "numberId": "scene-07-daily-amd",
           "numericValue": -1.21,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-1.21%"
         },
         {
-          "comparison": null,
-          "label": "Alphabet",
-          "numberId": "vb-07-01.card-01.line-03",
+          "comparison": "8/7通常取引",
+          "label": "-0.96%",
+          "numberId": "scene-07-daily-alphabet",
           "numericValue": -0.96,
           "precision": 2,
-          "tone": "neutral",
+          "tone": "negative",
           "unit": "%",
           "value": "-0.96%"
+        },
+        {
+          "comparison": "8/7通常取引",
+          "label": "+0.03%",
+          "numberId": "scene-07-daily-microsoft",
+          "numericValue": 0.03,
+          "precision": 2,
+          "tone": "positive",
+          "unit": "%",
+          "value": "+0.03%"
         }
       ],
       "performanceIntent": "説明を自分で壊しにいく調子で過剰一般化を止める",
@@ -1917,12 +1951,58 @@
       "uncertainty": "個別材料を完全分離していない",
       "visualBeats": [
         {
+          "assetPlacementIds": [
+            "vsi-20260810-microchip-ir-placement"
+          ],
+          "assetState": "ready",
+          "beatId": "vb-07-01",
+          "changeCue": "Microchipには会社固有の材料",
+          "contentType": "news-media",
+          "endChunkId": "scene-07-chunk-001",
+          "entity": null,
+          "evidenceSourceIds": [
+            "source-004"
+          ],
+          "expressionChange": null,
+          "fallback": null,
+          "finalHoldMs": 500,
+          "narrationEndCue": "・八九億から十六・一八億ドルと見込みました。需要改善や在庫正常化も説明しています。MCHPは終日で十三・八九パーセント高でした。",
+          "narrationStartCue": "Microchipには会社固有の材料がありました。Q1売上十四・八五億ドル、非GAAP EPS〇・七六ドルを発表し、次の四半期売",
+          "objectIds": [],
+          "pictureBook": null,
+          "primaryElement": "Microchip Q1 FY27 公式IR",
+          "primaryFunction": "Compare",
+          "returnScreenState": "Chart",
+          "screenQuestion": "Microchipは何を発表した？",
+          "screenState": "News",
+          "sequencePolicy": "static",
+          "startChunkId": "scene-07-chunk-001",
+          "templateConfig": {
+            "comparisonBasis": null,
+            "dataBasis": "Microchip Technology official Q1 FY27 investor-relations release",
+            "laneLabels": [],
+            "nodeOrder": [],
+            "outcomeNodeId": null,
+            "variant": "default"
+          },
+          "templateVariant": "default",
+          "transitionRole": "major-shift",
+          "viewerTexts": [
+            "Microchip Q1 FY27 公式IR",
+            "売上 14.85億ドル / 非GAAP EPS 0.76ドル",
+            "次四半期売上 15.89億〜16.18億ドル"
+          ],
+          "visualGrammarId": "evidence",
+          "visualMode": "news-media",
+          "visualTemplate": "news-media"
+        },
+        {
           "assetPlacementIds": [],
           "assetState": "not-required",
-          "beatId": "vb-07-01",
-          "changeCue": "MCHP +13.89%",
+          "beatId": "vb-07-02",
+          "changeCue": "一方でAMDは一・二一パーセント下落",
           "contentType": "diverging-stock-bars",
-          "endChunkId": "scene-07-chunk-001",
+          "endChunkId": "scene-07-chunk-002",
           "entity": null,
           "evidenceSourceIds": [
             "source-001",
@@ -1931,103 +2011,44 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "した。なので『弱い雇用でテック全部が買われた』ではありませんし、Microchip一社がNASDAQを上げたわけでもありません。",
-          "narrationStartCue": "ここで一度、この説明を壊しにいきます。AMDは一・二一パーセント下落、Alphabetも〇・九六パーセント下落、Microsof",
+          "narrationEndCue": "まり半導体高にも、マクロの金利経路とMicrochipの決算という別エンジンがあり、追い風もテック全体へ均等には届いていません。",
+          "narrationStartCue": "一方でAMDは一・二一パーセント下落、Alphabetも〇・九六パーセント下落、Microsoftはほぼ横ばい。つまり半導体高に",
           "objectIds": [
-            "vb-07-01.card-01.line-01",
-            "vb-07-01.card-01.line-02",
-            "vb-07-01.card-01.line-03"
+            "scene-07-daily-mchp",
+            "scene-07-daily-amd",
+            "scene-07-daily-alphabet",
+            "scene-07-daily-microsoft"
           ],
           "pictureBook": null,
-          "primaryElement": "MCHPと逆行銘柄",
+          "primaryElement": "MCHP +13.89% / AMD・Alphabetは下落",
           "primaryFunction": "Compare",
           "returnScreenState": null,
-          "screenQuestion": "テック・半導体は全部上がったか",
+          "screenQuestion": "同じテックでも終日は同じ方向だった？",
           "screenState": "Chart",
           "sequencePolicy": "object-order-fallback",
-          "startChunkId": "scene-07-chunk-001",
+          "startChunkId": "scene-07-chunk-002",
           "templateConfig": {
-            "comparisonBasis": "三銘柄の反応差は何を示すか",
-            "dataBasis": "8月7日通常取引終値",
+            "comparisonBasis": "8月7日通常取引終値",
+            "dataBasis": "verified close data + Microchip official IR",
             "laneLabels": [],
             "nodeOrder": [],
             "outcomeNodeId": null,
             "variant": "center-zero"
           },
           "templateVariant": "center-zero",
-          "transitionRole": "major-shift",
+          "transitionRole": "continuation",
           "viewerTexts": [
             "MCHP +13.89%",
-            "AMD -1.21%",
-            "Alphabet -0.96%"
+            "AMD -1.21% / Alphabet -0.96%",
+            "Microsoft +0.03%"
           ],
           "visualGrammarId": "comparison",
           "visualMode": "number-comparison",
           "visualTemplate": "diverging-stock-bars"
-        },
-        {
-          "assetPlacementIds": [],
-          "assetState": "not-required",
-          "beatId": "vb-07-02",
-          "changeCue": "広い金利追い風",
-          "contentType": "text-focus",
-          "endChunkId": "scene-07-chunk-002",
-          "entity": null,
-          "evidenceSourceIds": [
-            "source-001",
-            "source-003"
-          ],
-          "expressionChange": null,
-          "fallback": null,
-          "finalHoldMs": 500,
-          "narrationEndCue": "広い金利の追い風の上で、決算や個別材料によって銘柄差が残った。これなら、上昇と逆行を同時に説明できます。",
-          "narrationStartCue": "広い金利の追い風の上で、決算や個別材料によって銘柄差が残った。これなら、上昇と逆行を同時に説明できます。",
-          "objectIds": [
-            "scene-07-card-002"
-          ],
-          "pictureBook": null,
-          "primaryElement": "マクロと個別の二層",
-          "primaryFunction": "Compare",
-          "returnScreenState": null,
-          "screenQuestion": "広い追い風と個別差をどう両立するか",
-          "screenState": "Data",
-          "sequencePolicy": "explicit",
-          "startChunkId": "scene-07-chunk-002",
-          "templateConfig": {
-            "comparisonBasis": "どこまで因果を言えるか",
-            "dataBasis": "8月7日通常取引終値とReuters",
-            "laneLabels": [],
-            "nodeOrder": [],
-            "outcomeNodeId": null,
-            "variant": "two-lane"
-          },
-          "templateVariant": "two-lane",
-          "transitionRole": "continuation",
-          "viewerTexts": [
-            "広い金利追い風",
-            "個別材料で差",
-            "Microsoft +0.03%"
-          ],
-          "visualGrammarId": "evidence",
-          "visualMode": "text-focus",
-          "visualTemplate": "tailwind-headwind"
         }
       ],
-      "visualEvents": [
-        {
-          "action": "show",
-          "atChunkId": "scene-07-chunk-002",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-015",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 0,
-          "targetId": "scene-07-card-002",
-          "timing": "chunk-start"
-        }
-      ],
-      "visualMode": "number-comparison"
+      "visualEvents": [],
+      "visualMode": "news-media"
     },
     {
       "arrows": [],
@@ -2055,21 +2076,100 @@
       ],
       "cards": [
         {
-          "cardId": "scene-08-card-002",
+          "cardId": "scene-08-h5-strengthen-macro",
           "lines": [
             {
-              "label": "因果",
-              "tone": "neutral",
-              "value": "1分足は因果証明ではない"
-            },
-            {
-              "label": "MCHP",
-              "tone": "neutral",
-              "value": "79.58 → 79.56"
+              "label": "強める1",
+              "tone": "positive",
+              "value": "雇用下振れ→利上げ観測後退"
             }
           ],
           "role": null,
-          "title": "境界"
+          "title": "強める1"
+        },
+        {
+          "cardId": "scene-08-h5-strengthen-reaction",
+          "lines": [
+            {
+              "label": "強める2",
+              "tone": "positive",
+              "value": "QQQ・SOXX・NVIDIA初動↑"
+            }
+          ],
+          "role": null,
+          "title": "強める2"
+        },
+        {
+          "cardId": "scene-08-h5-weaken-boundary",
+          "lines": [
+            {
+              "label": "弱める1",
+              "tone": "warning",
+              "value": "1分足だけでは因果証明できない"
+            }
+          ],
+          "role": null,
+          "title": "弱める1"
+        },
+        {
+          "cardId": "scene-08-h5-weaken-counter",
+          "lines": [
+            {
+              "label": "弱める2",
+              "tone": "warning",
+              "value": "成長不安・AMD/Alphabet下落"
+            }
+          ],
+          "role": null,
+          "title": "弱める2"
+        },
+        {
+          "cardId": "scene-08-h5-path-macro",
+          "lines": [
+            {
+              "label": "経路1",
+              "tone": "positive",
+              "value": "雇用→利上げ観測後退"
+            }
+          ],
+          "role": null,
+          "title": "経路1"
+        },
+        {
+          "cardId": "scene-08-h5-path-company",
+          "lines": [
+            {
+              "label": "経路2",
+              "tone": "neutral",
+              "value": "Microchip決算は別エンジン"
+            }
+          ],
+          "role": null,
+          "title": "経路2"
+        },
+        {
+          "cardId": "scene-08-h5-summary-amplifier",
+          "lines": [
+            {
+              "label": "まとめ1",
+              "tone": "neutral",
+              "value": "原油・利回り低下は増幅"
+            }
+          ],
+          "role": null,
+          "title": "まとめ1"
+        },
+        {
+          "cardId": "scene-08-h5-summary-conclusion",
+          "lines": [
+            {
+              "label": "まとめ2",
+              "tone": "emphasis",
+              "value": "違う理由の上昇が同じ方向へ重なった"
+            }
+          ],
+          "role": null,
+          "title": "まとめ2"
         }
       ],
       "causalScope": "multiple",
@@ -2084,74 +2184,22 @@
       "initialExpression": "分析",
       "narrationChunks": [
         {
-          "captionText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。",
+          "captionText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
           "chunkId": "scene-08-chunk-001",
           "expression": "通常",
-          "pauseAfterMs": 0,
-          "speechText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。"
-        },
-        {
-          "captionText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。",
-          "chunkId": "scene-08-chunk-003",
-          "expression": "通常",
           "pauseAfterMs": 120,
-          "speechText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。"
+          "speechText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。"
         },
         {
-          "captionText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。",
+          "captionText": "原油や利回り低下は増幅要因。雇用が示す成長不安とAMD、Alphabetの下落は反対材料です。僕の結論は中程度の確信で、昨夜は一つの理由で全部が上がったのではなく、違う理由の上昇が同じ指数方向へ重なった夜でした。",
           "chunkId": "scene-08-chunk-002",
           "expression": "通常",
-          "pauseAfterMs": 0,
-          "speechText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。"
-        },
-        {
-          "captionText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。",
-          "chunkId": "scene-08-chunk-004",
-          "expression": "通常",
-          "pauseAfterMs": 0,
-          "speechText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。"
-        },
-        {
-          "captionText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。",
-          "chunkId": "scene-08-chunk-005",
-          "expression": "通常",
           "pauseAfterMs": 200,
-          "speechText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。"
+          "speechText": "原油や利回り低下は増幅要因。雇用が示す成長不安とAMD、Alphabetの下落は反対材料です。僕の結論は中程度の確信で、昨夜は一つの理由で全部が上がったのではなく、違う理由の上昇が同じ指数方向へ重なった夜でした。"
         }
       ],
       "nodes": [],
-      "numbers": [
-        {
-          "comparison": null,
-          "label": "08:29 ET",
-          "numberId": "scene-08-qqq-0829",
-          "numericValue": 719.16,
-          "precision": 3,
-          "tone": "neutral",
-          "unit": "",
-          "value": "719.16"
-        },
-        {
-          "comparison": null,
-          "label": "08:30 ET",
-          "numberId": "scene-08-qqq-0830",
-          "numericValue": 720.23,
-          "precision": 3,
-          "tone": "positive",
-          "unit": "",
-          "value": "720.23"
-        },
-        {
-          "comparison": null,
-          "label": "08:31 ET",
-          "numberId": "scene-08-qqq-0831",
-          "numericValue": 720.531,
-          "precision": 3,
-          "tone": "positive",
-          "unit": "",
-          "value": "720.531"
-        }
-      ],
+      "numbers": [],
       "performanceIntent": "結論を曖昧にせず、時系列で確認できたことと因果として断定しないことを分ける",
       "purpose": "発表時刻の実分足と個別差を残して、安全な結論の境界を示す",
       "sceneId": "scene-08",
@@ -2172,9 +2220,9 @@
         {
           "assetPlacementIds": [],
           "assetState": "not-required",
-          "beatId": "scene-08-beat-001",
-          "changeCue": "QQQ 実1分足",
-          "contentType": "event-reaction-timeline",
+          "beatId": "vb-08-01",
+          "changeCue": "最初の矛盾に戻ります",
+          "contentType": "verification-matrix",
           "endChunkId": "scene-08-chunk-001",
           "entity": null,
           "evidenceSourceIds": [
@@ -2185,117 +2233,50 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "SDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。",
-          "narrationStartCue": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06",
+          "narrationEndCue": "。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
+          "narrationStartCue": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型",
           "objectIds": [
-            "scene-08-qqq-0829",
-            "scene-08-qqq-0830",
-            "scene-08-qqq-0831"
+            "scene-08-h5-strengthen-macro",
+            "scene-08-h5-strengthen-reaction",
+            "scene-08-h5-weaken-boundary",
+            "scene-08-h5-weaken-counter"
           ],
           "pictureBook": null,
-          "primaryElement": "QQQ 実1分足｜08:29 → 08:30 → 08:31 ET",
+          "primaryElement": "利上げ観測後退を中心に境界を残す",
           "primaryFunction": "Evidence",
           "returnScreenState": null,
-          "screenQuestion": "8:30 ETの発表前後でQQQはどう動いた？",
-          "screenState": "Chart",
+          "screenQuestion": "マクロ仮説を強める材料と弱める材料は？",
+          "screenState": "Data",
           "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-08-chunk-001",
           "templateConfig": {
-            "comparisonBasis": "BLS 08:30 ET発表前後",
-            "dataBasis": "Longbridge verified 1-minute Kline minute-close",
-            "laneLabels": [],
+            "comparisonBasis": "中心仮説の支持と反対材料",
+            "dataBasis": "approved causal dossier + verified timing evidence",
+            "laneLabels": [
+              "強める",
+              "弱める"
+            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
-            "reactionTimeline": {
-              "eventOrderIds": [
-                "scene-08-qqq-0829",
-                "scene-08-qqq-0830",
-                "scene-08-qqq-0831"
-              ],
-              "precision": "verified-intraday-series",
-              "seriesObjectIds": [
-                "scene-08-qqq-0829",
-                "scene-08-qqq-0830",
-                "scene-08-qqq-0831"
-              ]
-            },
-            "variant": "verified-series"
+            "variant": "strengthen-vs-weaken"
           },
-          "templateVariant": "verified-series",
+          "templateVariant": "strengthen-vs-weaken",
           "transitionRole": "major-shift",
           "viewerTexts": [
-            "QQQ 実1分足",
-            "08:29 719.16 → 08:30 720.23 → 08:31 720.531",
-            "時系列整合の証拠 / 因果証明ではない"
+            "強める｜雇用下振れ→利上げ観測後退",
+            "強める｜QQQ・SOXX・NVIDIA初動↑",
+            "弱める｜1分足だけでは因果証明できない",
+            "弱める｜成長不安・AMD/Alphabet下落"
           ],
-          "visualGrammarId": "reaction",
-          "visualMode": "timeline",
-          "visualTemplate": "event-reaction-timeline"
+          "visualGrammarId": "verification",
+          "visualMode": "verification-points",
+          "visualTemplate": "verification-matrix"
         },
         {
           "assetPlacementIds": [],
           "assetState": "not-required",
-          "beatId": "scene-08-beat-002",
-          "changeCue": "1分足は因果証明ではない",
-          "contentType": "event-reaction-timeline",
-          "endChunkId": "scene-08-chunk-003",
-          "entity": null,
-          "evidenceSourceIds": [
-            "source-003",
-            "source-004",
-            "source-005"
-          ],
-          "expressionChange": null,
-          "fallback": null,
-          "finalHoldMs": 500,
-          "narrationEndCue": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。",
-          "narrationStartCue": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。",
-          "objectIds": [],
-          "pictureBook": null,
-          "primaryElement": "QQQ 実1分足｜08:29 → 08:30 → 08:31 ET",
-          "primaryFunction": "Evidence",
-          "returnScreenState": null,
-          "screenQuestion": "8:30 ETの発表前後でQQQはどう動いた？",
-          "screenState": "Chart",
-          "sequencePolicy": "object-order-fallback",
-          "startChunkId": "scene-08-chunk-003",
-          "templateConfig": {
-            "comparisonBasis": "BLS 08:30 ET発表前後",
-            "dataBasis": "Longbridge verified 1-minute Kline minute-close",
-            "laneLabels": [],
-            "nodeOrder": [],
-            "outcomeNodeId": null,
-            "reactionTimeline": {
-              "eventOrderIds": [
-                "scene-08-qqq-0829",
-                "scene-08-qqq-0830",
-                "scene-08-qqq-0831"
-              ],
-              "precision": "verified-intraday-series",
-              "seriesObjectIds": [
-                "scene-08-qqq-0829",
-                "scene-08-qqq-0830",
-                "scene-08-qqq-0831"
-              ]
-            },
-            "variant": "confirmed-vs-unconfirmed"
-          },
-          "templateVariant": "confirmed-vs-unconfirmed",
-          "transitionRole": "continuation",
-          "viewerTexts": [
-            "QQQ 実1分足",
-            "08:29 719.16 → 08:30 720.23 → 08:31 720.531",
-            "時系列整合の証拠 / 因果証明ではない"
-          ],
-          "visualGrammarId": "evidence",
-          "visualMode": "timeline",
-          "visualTemplate": "evidence-boundary"
-        },
-        {
-          "assetPlacementIds": [],
-          "assetState": "not-required",
-          "beatId": "scene-08-beat-003",
-          "changeCue": "言える：初動は金利解釈と整合",
+          "beatId": "vb-08-02",
+          "changeCue": "原油や利回り低下は増幅要因",
           "contentType": "verification-checklist",
           "endChunkId": "scene-08-chunk-002",
           "entity": null,
@@ -2307,23 +2288,29 @@
           "expressionChange": null,
           "fallback": null,
           "finalHoldMs": 500,
-          "narrationEndCue": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。",
-          "narrationStartCue": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。",
+          "narrationEndCue": "材料です。僕の結論は中程度の確信で、昨夜は一つの理由で全部が上がったのではなく、違う理由の上昇が同じ指数方向へ重なった夜でした。",
+          "narrationStartCue": "原油や利回り低下は増幅要因。雇用が示す成長不安とAMD、Alphabetの下落は反対材料です。僕の結論は中程度の確信で、昨夜は一",
           "objectIds": [
-            "scene-08-card-002"
+            "scene-08-h5-path-macro",
+            "scene-08-h5-path-company",
+            "scene-08-h5-summary-amplifier",
+            "scene-08-h5-summary-conclusion"
           ],
           "pictureBook": null,
-          "primaryElement": "主因候補・増幅要因・反対材料の境界",
+          "primaryElement": "複数エンジンが同じ指数方向へ重なった",
           "primaryFunction": "Evidence",
           "returnScreenState": null,
-          "screenQuestion": "どこまでを安全な結論にするか",
+          "screenQuestion": "最後に何を残す？",
           "screenState": "Data",
-          "sequencePolicy": "explicit",
+          "sequencePolicy": "object-order-fallback",
           "startChunkId": "scene-08-chunk-002",
           "templateConfig": {
             "comparisonBasis": null,
-            "dataBasis": "検証済み1分足の時系列整合 + 反対材料",
-            "laneLabels": [],
+            "dataBasis": "approved causal dossier",
+            "laneLabels": [
+              "経路",
+              "まとめ"
+            ],
             "nodeOrder": [],
             "outcomeNodeId": null,
             "variant": "default"
@@ -2331,150 +2318,18 @@
           "templateVariant": "default",
           "transitionRole": "continuation",
           "viewerTexts": [
-            "言える：初動は金利解釈と整合",
-            "言わない：1分足だけで終日上昇の原因を断定",
-            "分ける：MCHPは会社固有の増幅要因"
-          ],
-          "visualGrammarId": "verification",
-          "visualMode": "verification-points",
-          "visualTemplate": "verification-checklist"
-        },
-        {
-          "assetPlacementIds": [],
-          "assetState": "not-required",
-          "beatId": "scene-08-beat-004",
-          "changeCue": "主因候補・増幅要因を分ける",
-          "contentType": "verification-checklist",
-          "endChunkId": "scene-08-chunk-004",
-          "entity": null,
-          "evidenceSourceIds": [
-            "source-003",
-            "source-004",
-            "source-005"
-          ],
-          "expressionChange": null,
-          "fallback": null,
-          "finalHoldMs": 500,
-          "narrationEndCue": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。",
-          "narrationStartCue": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。",
-          "objectIds": [
-            "scene-08-card-002"
-          ],
-          "pictureBook": null,
-          "primaryElement": "主因候補・増幅要因・反対材料の境界",
-          "primaryFunction": "Evidence",
-          "returnScreenState": null,
-          "screenQuestion": "どこまでを安全な結論にするか",
-          "screenState": "Data",
-          "sequencePolicy": "explicit",
-          "startChunkId": "scene-08-chunk-004",
-          "templateConfig": {
-            "comparisonBasis": null,
-            "dataBasis": "検証済み1分足の時系列整合 + 反対材料",
-            "laneLabels": [],
-            "nodeOrder": [],
-            "outcomeNodeId": null,
-            "variant": "confirmed-vs-unconfirmed"
-          },
-          "templateVariant": "confirmed-vs-unconfirmed",
-          "transitionRole": "continuation",
-          "viewerTexts": [
-            "言える：初動は金利解釈と整合",
-            "言わない：1分足だけで終日上昇の原因を断定",
-            "分ける：MCHPは会社固有の増幅要因"
-          ],
-          "visualGrammarId": "evidence",
-          "visualMode": "verification-points",
-          "visualTemplate": "evidence-boundary"
-        },
-        {
-          "assetPlacementIds": [],
-          "assetState": "not-required",
-          "beatId": "scene-08-beat-005",
-          "changeCue": "反対材料まで残す",
-          "contentType": "verification-checklist",
-          "endChunkId": "scene-08-chunk-005",
-          "entity": null,
-          "evidenceSourceIds": [
-            "source-003",
-            "source-004",
-            "source-005"
-          ],
-          "expressionChange": null,
-          "fallback": null,
-          "finalHoldMs": 500,
-          "narrationEndCue": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。",
-          "narrationStartCue": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。",
-          "objectIds": [
-            "scene-08-card-002"
-          ],
-          "pictureBook": null,
-          "primaryElement": "主因候補・増幅要因・反対材料の境界",
-          "primaryFunction": "Evidence",
-          "returnScreenState": null,
-          "screenQuestion": "どこまでを安全な結論にするか",
-          "screenState": "Data",
-          "sequencePolicy": "explicit",
-          "startChunkId": "scene-08-chunk-005",
-          "templateConfig": {
-            "comparisonBasis": null,
-            "dataBasis": "検証済み1分足の時系列整合 + 反対材料",
-            "laneLabels": [],
-            "nodeOrder": [],
-            "outcomeNodeId": null,
-            "variant": "default"
-          },
-          "templateVariant": "default",
-          "transitionRole": "continuation",
-          "viewerTexts": [
-            "言える：初動は金利解釈と整合",
-            "言わない：1分足だけで終日上昇の原因を断定",
-            "分ける：MCHPは会社固有の増幅要因"
+            "主役候補｜雇用→利上げ観測後退",
+            "別エンジン｜Microchip決算",
+            "増幅｜原油・利回り低下",
+            "結論｜違う理由の上昇が同じ方向へ重なった"
           ],
           "visualGrammarId": "verification",
           "visualMode": "verification-points",
           "visualTemplate": "verification-checklist"
         }
       ],
-      "visualEvents": [
-        {
-          "action": "show",
-          "atChunkId": "scene-08-chunk-002",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-017",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 0,
-          "targetId": "scene-08-card-002",
-          "timing": "chunk-start"
-        },
-        {
-          "action": "show",
-          "atChunkId": "scene-08-chunk-004",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-025",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 0,
-          "targetId": "scene-08-card-002",
-          "timing": "chunk-start"
-        },
-        {
-          "action": "show",
-          "atChunkId": "scene-08-chunk-005",
-          "durationMs": 560,
-          "easingPreset": "smooth-out",
-          "eventId": "event-026",
-          "expression": null,
-          "motionPreset": "rise-soft",
-          "offsetMs": 0,
-          "targetId": "scene-08-card-002",
-          "timing": "chunk-start"
-        }
-      ],
-      "visualMode": "timeline"
+      "visualEvents": [],
+      "visualMode": "verification-points"
     },
     {
       "arrows": [],
@@ -2706,9 +2561,9 @@
     }
   ],
   "visualGrammarContract": {
-    "beatCount": 21,
+    "beatCount": 18,
     "contractVersion": "1.0.0",
-    "finalEpisodeContractSha256": "59197bc4d3c221903c6c2f97bb2877565e9cfdcfbf13f329b47f729cb0c2bcc0",
+    "finalEpisodeContractSha256": "6c184aa566a8dd3dafdc794b05abf8cf0c98e0bbf7fe0c984705a7b554ac5d21",
     "rendererCompatibilitySha256": "563bc71c58120552c3f601cab662a4f4287e44c149e46268ef5678d279b1adb6",
     "semanticsSha256": "e95b6dc418b4cb1d5c30d8cffc75de22c5c2834190c124e7bbab731f924bd714"
   },
