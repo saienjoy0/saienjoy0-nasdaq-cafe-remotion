@@ -9,7 +9,7 @@
   "expectedIntermediateRenderSpecSha256": "b59f7ae8d46fd998509d8ea404b69662de8f4e0fcdad0cc4eb77cc566926334f",
   "expectedIntermediateEpisodePackageSha256": "60609e3463ce50311f68edf632dc2cfb7230e02a836ab21764d2e8bbcb7b0620",
   "expectedFinalRenderSpecSha256": "872d05e35423a21a0bd90cfab0ddef5481500be453ceaf43f5beeb76b5c5dacb",
-  "expectedFinalEpisodePackageSha256": "6d9ab68903587b95d7710c77c453e6280698c6b117834ef57be26639499b433f",
+  "expectedFinalEpisodePackageSha256": "db6da9ae86ad2b7ab182a970ffc4b46122877fba2d61ee62974347c43aaf734d",
   "existingBeatChanges": [
     {"beatId":"vb-01-02","expected":{"visualTemplate":"hero-number","visualGrammarId":"evidence","templateVariant":"default"},"replacement":{"visualTemplate":"analogy-steps","visualGrammarId":"analogy","templateVariant":"default"}},
     {"beatId":"vb-04-02","expected":{"visualTemplate":"text-focus","visualGrammarId":"bridge-text","templateVariant":"default"},"replacement":{"visualTemplate":"analogy-steps","visualGrammarId":"analogy","templateVariant":"default"}}
