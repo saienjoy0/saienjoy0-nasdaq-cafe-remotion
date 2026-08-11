@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "status": "ready",
+  "episodeDate": "2026-08-10",
+  "renderSpecPath": "render-specs/2026-08-10/render_spec.json",
+  "renderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "episodePackagePath": "episode-packages/2026-08-10/episode_package_2026-08-10.md",
+  "episodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
+  "validatorStatus": "pass",
+  "consistencyStatus": "pass",
+  "unresolvedStateCount": 0,
+  "createdAt": "2026-08-11T08:42:00.000Z"
+}
