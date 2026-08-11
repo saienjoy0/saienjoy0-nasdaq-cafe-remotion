@@ -5,7 +5,7 @@ import path from "node:path";
 import {bundle} from "@remotion/bundler";
 import {getCompositions, renderMedia} from "@remotion/renderer";
 import voiceProfilesJson from "../config/voice-profiles.json";
-import {productionAssetPaths} from "../src/config/production-assets";
+import {loadRuntimeAssetContext} from "../src/config/runtime-assets";
 import {compileRenderSpec} from "../src/spec/compile-render-spec";
 import {resolveVoiceProfile} from "../src/spec/validate-render-spec";
 import {probeAudio} from "../src/tts/tts-service";
@@ -37,7 +37,8 @@ if (!Number.isFinite(durationSeconds) || durationSeconds <= 0 || durationSeconds
   throw new Error("duration-seconds must be greater than 0 and at most 30");
 }
 
-const loaded = await loadRenderSpecForProduction(input);
+const runtimeAssets = await loadRuntimeAssetContext();
+const loaded = await loadRenderSpecForProduction(input, runtimeAssets.manifest);
 const {spec, sha256} = loaded;
 const profile = resolveVoiceProfile(spec.voiceProfileId, voiceProfilesJson);
 if (profile.provider !== "gemini") {
@@ -126,7 +127,7 @@ process.env.GEMINI_API_KEY_1 = "motion-preview-cache-only-sentinel";
 const data = await compileRenderSpec(
   spec,
   createSpecBlockSynthesizer(spec),
-  productionAssetPaths,
+  runtimeAssets.paths,
   {inputSpecSha256: sha256},
 );
 const selectedScene = data.scenes.find(
