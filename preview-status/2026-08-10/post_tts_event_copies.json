@@ -5,13 +5,6 @@
   "eventCopies": [
     {
       "sceneId": "scene-08",
-      "sourceEventId": "event-016",
-      "newEventId": "event-024",
-      "atChunkId": "scene-08-chunk-003",
-      "targetId": "scene-08-card-001"
-    },
-    {
-      "sceneId": "scene-08",
       "sourceEventId": "event-017",
       "newEventId": "event-025",
       "atChunkId": "scene-08-chunk-004",
@@ -25,8 +18,8 @@
       "targetId": "scene-08-card-002"
     }
   ],
-  "finalRenderSpecSha256": "3a5180495ed573e40a71c3aa081d650e6582d66a0685952a1df9795b07fba29b",
-  "finalEpisodePackageSha256": "34fa9b28ec5e51bae763e3521a4a3955b6fc724edfade662cf92dd7b2a543e27",
+  "finalRenderSpecSha256": "872d05e35423a21a0bd90cfab0ddef5481500be453ceaf43f5beeb76b5c5dacb",
+  "finalEpisodePackageSha256": "db6da9ae86ad2b7ab182a970ffc4b46122877fba2d61ee62974347c43aaf734d",
   "editorialChanged": false,
   "narrationWordingChanged": false,
   "captionWordingChanged": false,
