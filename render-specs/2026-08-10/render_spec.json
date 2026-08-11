@@ -1753,7 +1753,316 @@
                 "scene-06-qqq-01",
                 "scene-06-qqq-02",
                 "scene-06-qqq-03"
-              ]
+              ],
+              "intradaySeries": {
+                "fetched_by": "longbridge-cli",
+                "generated_at": "2026-08-10T05:15:44+00:00",
+                "kind": "intraday",
+                "marketDate": "2026-08-07",
+                "precision": "verified-intraday-series",
+                "priceBasis": "minute-close",
+                "providerSurface": "kline-history-fallback",
+                "rawSha256": "8838d3674ca826539312c21599ce9526f21f131b7c90ce32d03a638427c16a46",
+                "resolution": "1m",
+                "session": "all",
+                "source": "Longbridge",
+                "symbol": "QQQ.US",
+                "timezone": "UTC",
+                "points": [
+                  {
+                    "close": 718.61,
+                    "high": 718.86,
+                    "low": 718.61,
+                    "open": 718.859,
+                    "price": 718.61,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:20:00Z",
+                    "turnover": 478693.967,
+                    "volume": 666
+                  },
+                  {
+                    "close": 718.655,
+                    "high": 718.723,
+                    "low": 718.56,
+                    "open": 718.56,
+                    "price": 718.655,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:21:00Z",
+                    "turnover": 365768.867,
+                    "volume": 509
+                  },
+                  {
+                    "close": 718.472,
+                    "high": 718.67,
+                    "low": 718.439,
+                    "open": 718.67,
+                    "price": 718.472,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:22:00Z",
+                    "turnover": 569109.067,
+                    "volume": 792
+                  },
+                  {
+                    "close": 718.477,
+                    "high": 718.53,
+                    "low": 718.37,
+                    "open": 718.5,
+                    "price": 718.477,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:23:00Z",
+                    "turnover": 2281149.365,
+                    "volume": 3175
+                  },
+                  {
+                    "close": 718.79,
+                    "high": 718.83,
+                    "low": 718.51,
+                    "open": 718.51,
+                    "price": 718.79,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:24:00Z",
+                    "turnover": 474001.151,
+                    "volume": 660
+                  },
+                  {
+                    "close": 718.85,
+                    "high": 718.85,
+                    "low": 718.662,
+                    "open": 718.786,
+                    "price": 718.85,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:25:00Z",
+                    "turnover": 228567.483,
+                    "volume": 318
+                  },
+                  {
+                    "close": 718.86,
+                    "high": 718.91,
+                    "low": 718.8,
+                    "open": 718.84,
+                    "price": 718.86,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:26:00Z",
+                    "turnover": 2072420.521,
+                    "volume": 2883
+                  },
+                  {
+                    "close": 718.924,
+                    "high": 718.974,
+                    "low": 718.795,
+                    "open": 718.92,
+                    "price": 718.924,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:27:00Z",
+                    "turnover": 1124279.897,
+                    "volume": 1564
+                  },
+                  {
+                    "close": 719.24,
+                    "high": 719.24,
+                    "low": 718.86,
+                    "open": 718.87,
+                    "price": 719.24,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:28:00Z",
+                    "turnover": 1393333.606,
+                    "volume": 1938
+                  },
+                  {
+                    "close": 719.16,
+                    "high": 719.44,
+                    "low": 718.06,
+                    "open": 719.302,
+                    "price": 719.16,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:29:00Z",
+                    "turnover": 9441861.769,
+                    "volume": 13132
+                  },
+                  {
+                    "close": 720.23,
+                    "high": 721.52,
+                    "low": 719.307,
+                    "open": 719.32,
+                    "price": 720.23,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:30:00Z",
+                    "turnover": 30122415.08,
+                    "volume": 41807
+                  },
+                  {
+                    "close": 720.531,
+                    "high": 720.83,
+                    "low": 720.14,
+                    "open": 720.29,
+                    "price": 720.531,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:31:00Z",
+                    "turnover": 11207190.212,
+                    "volume": 15554
+                  },
+                  {
+                    "close": 720.335,
+                    "high": 720.746,
+                    "low": 720.17,
+                    "open": 720.42,
+                    "price": 720.335,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:32:00Z",
+                    "turnover": 22274410.33,
+                    "volume": 30917
+                  },
+                  {
+                    "close": 720.79,
+                    "high": 720.89,
+                    "low": 720.07,
+                    "open": 720.28,
+                    "price": 720.79,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:33:00Z",
+                    "turnover": 9165402.303,
+                    "volume": 12723
+                  },
+                  {
+                    "close": 721.079,
+                    "high": 721.2,
+                    "low": 720.61,
+                    "open": 720.83,
+                    "price": 721.079,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:34:00Z",
+                    "turnover": 11796736.958,
+                    "volume": 16363
+                  },
+                  {
+                    "close": 721.01,
+                    "high": 721.15,
+                    "low": 720.78,
+                    "open": 721.08,
+                    "price": 721.01,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:35:00Z",
+                    "turnover": 7043335.104,
+                    "volume": 9769
+                  },
+                  {
+                    "close": 721.136,
+                    "high": 721.181,
+                    "low": 720.85,
+                    "open": 721.008,
+                    "price": 721.136,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:36:00Z",
+                    "turnover": 11660901.24,
+                    "volume": 16173
+                  },
+                  {
+                    "close": 721.407,
+                    "high": 721.6,
+                    "low": 721.1,
+                    "open": 721.15,
+                    "price": 721.407,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:37:00Z",
+                    "turnover": 10499825.792,
+                    "volume": 14556
+                  },
+                  {
+                    "close": 721.61,
+                    "high": 721.828,
+                    "low": 721.43,
+                    "open": 721.48,
+                    "price": 721.61,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:38:00Z",
+                    "turnover": 9292106.011,
+                    "volume": 12876
+                  },
+                  {
+                    "close": 722.193,
+                    "high": 722.2,
+                    "low": 721.66,
+                    "open": 721.69,
+                    "price": 722.193,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:39:00Z",
+                    "turnover": 10690878.73,
+                    "volume": 14809
+                  },
+                  {
+                    "close": 722.2,
+                    "high": 722.21,
+                    "low": 721.93,
+                    "open": 722.21,
+                    "price": 722.2,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:40:00Z",
+                    "turnover": 5581566.792,
+                    "volume": 7730
+                  },
+                  {
+                    "close": 722.15,
+                    "high": 722.46,
+                    "low": 721.94,
+                    "open": 722.2,
+                    "price": 722.15,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:41:00Z",
+                    "turnover": 6486438.462,
+                    "volume": 8982
+                  },
+                  {
+                    "close": 722.46,
+                    "high": 722.46,
+                    "low": 721.98,
+                    "open": 722.153,
+                    "price": 722.46,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:42:00Z",
+                    "turnover": 6965289.319,
+                    "volume": 9646
+                  },
+                  {
+                    "close": 722.55,
+                    "high": 722.57,
+                    "low": 722.296,
+                    "open": 722.5,
+                    "price": 722.55,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:43:00Z",
+                    "turnover": 6725314.49,
+                    "volume": 9308
+                  },
+                  {
+                    "close": 722.34,
+                    "high": 722.479,
+                    "low": 722.15,
+                    "open": 722.43,
+                    "price": 722.34,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:44:00Z",
+                    "turnover": 1459695.938,
+                    "volume": 2021
+                  },
+                  {
+                    "close": 722.83,
+                    "high": 722.83,
+                    "low": 722.334,
+                    "open": 722.334,
+                    "price": 722.83,
+                    "session": "Pre",
+                    "timestamp": "2026-08-07T12:45:00Z",
+                    "turnover": 4358142.775,
+                    "volume": 6031
+                  }
+                ]
+              },
+              "eventMarker": {
+                "timestamp": "2026-08-07T12:30:00Z",
+                "label": "BLS発表",
+                "sourceLabel": "BLS 08:30 ET"
+              },
+              "displayTimezone": "America/New_York"
             },
             "variant": "verified-series"
           },
