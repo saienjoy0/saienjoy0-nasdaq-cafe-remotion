@@ -1,0 +1,7 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "rendererRef": "main",
+  "expectedRendererCommit": "0aaaf77eb2fd54e3e1b5eb4db05410dcaf71b673",
+  "notBefore": "2026-08-11T01:25:20Z"
+}
