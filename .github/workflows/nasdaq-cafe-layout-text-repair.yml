@@ -116,15 +116,24 @@ jobs:
           PY
 
       - name: Run formal render-spec validator
+        env:
+          NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.repair.outputs.episode_date }}/runtime_asset_registry.json
+          EPISODE_ID: ${{ steps.repair.outputs.episode_date }}
         run: npm run episode:spec:validate -- "render-specs/${{ steps.repair.outputs.episode_date }}/render_spec.json"
 
       - name: Run layout and visual regressions
+        env:
+          NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.repair.outputs.episode_date }}/runtime_asset_registry.json
+          EPISODE_ID: ${{ steps.repair.outputs.episode_date }}
         run: |
           npm run test:public-screen
           npm run test:visual-validator
           npm run test:visual-variety
 
       - name: Recreate production readiness
+        env:
+          NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.repair.outputs.episode_date }}/runtime_asset_registry.json
+          EPISODE_ID: ${{ steps.repair.outputs.episode_date }}
         run: npm run episode:spec:ready -- "${{ steps.repair.outputs.episode_date }}" --consistency-pass
 
       - name: Mark receipt validated
