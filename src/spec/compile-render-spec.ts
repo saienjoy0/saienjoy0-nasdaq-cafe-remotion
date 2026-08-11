@@ -22,6 +22,21 @@ export type ChunkSynthesizer = (value: {
   pronunciations: RenderSpec["pronunciations"];
 }) => Promise<SynthesizedChunk>;
 
+const isMachineOnlyProductionTextKey = (key: string) =>
+  key === "assets" || /(?:Id|Ids)$/.test(key);
+
+export const toProductionTextSafetyView = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map((item) => toProductionTextSafetyView(item));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([key]) => !isMachineOnlyProductionTextKey(key))
+        .map(([key, item]) => [key, toProductionTextSafetyView(item)]),
+    );
+  }
+  return value;
+};
+
 export const compileRenderSpec = async (
   spec: RenderSpec,
   synthesize: ChunkSynthesizer,
@@ -107,12 +122,14 @@ export const compileRenderSpec = async (
     },
   };
   validateProductionShotTimingContract(data);
-  // shortenedReason is internal production metadata and is never rendered or voiced.
-  // Keep public-text safety checks strict for every field that can reach the viewer.
-  assertProductionTextSafe({
+  // shortenedReason, asset maps, and *Id/*Ids values are internal production metadata
+  // and are never rendered or voiced. Keep public-text safety strict for every
+  // viewer-facing string while allowing machine identifiers such as an approved
+  // asset ID that happens to contain the word "fallback".
+  assertProductionTextSafe(toProductionTextSafetyView({
     ...data,
     episode: {...data.episode, shortenedReason: undefined},
-  });
+  }));
   return data;
 };
 
