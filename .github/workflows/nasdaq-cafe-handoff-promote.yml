@@ -117,7 +117,8 @@ jobs:
           mkdir -p /tmp/nasdaq-handoff
           unzip -q /tmp/nasdaq-handoff.zip -d /tmp/nasdaq-handoff
 
-          MANIFEST="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}/handoff_manifest.json"
+          BUNDLE_ROOT="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}"
+          MANIFEST="${BUNDLE_ROOT}/handoff_manifest.json"
           test -s "$MANIFEST"
           ACTUAL_MANIFEST_SHA="$(sha256sum "$MANIFEST" | awk '{print $1}')"
           test "$ACTUAL_MANIFEST_SHA" = "$MANIFEST_SHA" || {
@@ -156,8 +157,8 @@ jobs:
 
           PACKAGE_SRC="/tmp/nasdaq-handoff/episodes/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
           RENDER_SRC="/tmp/nasdaq-handoff/render-specs/${EPISODE_DATE}/render_spec.json"
-          BUNDLE_PACKAGE="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}/production/episode_package_${EPISODE_DATE}.md"
-          BUNDLE_RENDER="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}/render-specs/${EPISODE_DATE}/render_spec.json"
+          BUNDLE_PACKAGE="${BUNDLE_ROOT}/production/episode_package_${EPISODE_DATE}.md"
+          BUNDLE_RENDER="${BUNDLE_ROOT}/render-specs/${EPISODE_DATE}/render_spec.json"
           for path in "$PACKAGE_SRC" "$RENDER_SRC" "$BUNDLE_PACKAGE" "$BUNDLE_RENDER"; do
             test -s "$path"
           done
@@ -169,6 +170,12 @@ jobs:
           mkdir -p "episode-packages/${EPISODE_DATE}" "render-specs/${EPISODE_DATE}" "handoff-promote-receipts"
           cp "$PACKAGE_SRC" "episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
           cp "$RENDER_SRC" "render-specs/${EPISODE_DATE}/render_spec.json"
+
+          python3 scripts/promote-handoff-runtime-assets.py \
+            --manifest "$MANIFEST" \
+            --bundle-root "$BUNDLE_ROOT" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --episode-date "$EPISODE_DATE"
 
           python3 - "$EPISODE_DATE" "$ARTIFACT_DIGEST" "$BUNDLE_ID" "$MANIFEST_SHA" "$PACKAGE_SHA" "$RENDER_SHA" "$RENDERER_COMMIT" <<'PY'
           import json
@@ -193,7 +200,7 @@ jobs:
           )
           PY
 
-      - name: Commit only verified canonical inputs and receipt
+      - name: Commit verified canonical inputs, runtime assets, and receipt
         shell: bash
         env:
           EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
@@ -203,11 +210,13 @@ jobs:
           PACKAGE="episode-packages/${EPISODE_DATE}/episode_package_${EPISODE_DATE}.md"
           RENDER="render-specs/${EPISODE_DATE}/render_spec.json"
           RECEIPT="handoff-promote-receipts/${EPISODE_DATE}-${BUNDLE_ID:0:12}.json"
+          RUNTIME_DIR="runtime-assets/${EPISODE_DATE}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- "$PACKAGE" "$RENDER" "$RECEIPT"
+          git add -- "$PACKAGE" "$RENDER" "$RECEIPT" "$RUNTIME_DIR"
+          git add -u -- "$RUNTIME_DIR"
           git diff --cached --quiet && {
-            echo "Verified canonical inputs already match; nothing to commit."
+            echo "Verified canonical inputs and runtime assets already match; nothing to commit."
             exit 0
           }
           git commit -m "promote: verified ${EPISODE_DATE} preview inputs"
