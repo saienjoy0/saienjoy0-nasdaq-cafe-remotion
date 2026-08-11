@@ -1,0 +1,13 @@
+{
+  "assets": [
+    {
+      "assetId": "daily-microchip-q1-fy27-ir-fallback",
+      "path": "generated/preflight-assets/2026-08-10/daily-microchip-q1-fy27-ir-fallback/daily-microchip-q1-fy27-ir-fallback.png",
+      "sha256": "8170b0d8d35b4126353883e3fb7d0ff35fa510759f1713d754680f2253dae3f6",
+      "source": "handoff"
+    }
+  ],
+  "bundleId": "9c16a23f1e4dd3eb90388f92c3654e8c5345b83685df4c81e5f54e80d068f666",
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10"
+}
