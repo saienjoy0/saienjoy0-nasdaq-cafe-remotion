@@ -137,28 +137,26 @@ jobs:
             -H 'X-GitHub-Api-Version: 2026-03-10' \
             "repos/${GITHUB_REPOSITORY}/contents/${REQUEST_PATH}?ref=main" \
             --jq '.content' | tr -d '\n' | base64 --decode)"
-          mapfile -t RESOLVED < <(python3 - "$EXPECTED_BUNDLE_ID" "$EXPECTED_MANIFEST_SHA256" <<'PY'
-          import json, re, sys
+          CONTRACT="$(jq -r '.contractVersion // empty' <<<"$CONTENT")"
+          DATE_VALUE="$(jq -r '.episodeDate // empty' <<<"$CONTENT")"
+          BUNDLE="$(jq -r '.expectedBundleId // empty' <<<"$CONTENT")"
+          MANIFEST="$(jq -r '.expectedManifestSha256 // empty' <<<"$CONTENT")"
+          URL="$(jq -r '.artifactDownloadUrl // empty' <<<"$CONTENT")"
+          DIGEST="$(jq -r '.artifactDigestSha256 // empty' <<<"$CONTENT")"
+          [[ "$CONTRACT" == "1.0.0" ]] || { echo "::error::promotion request contractVersion mismatch"; exit 1; }
+          [[ "$DATE_VALUE" == "$EPISODE_DATE" ]] || { echo "::error::promotion request episodeDate mismatch"; exit 1; }
+          [[ "$BUNDLE" == "$EXPECTED_BUNDLE_ID" ]] || { echo "::error::promotion request bundle mismatch"; exit 1; }
+          [[ "$MANIFEST" == "$EXPECTED_MANIFEST_SHA256" ]] || { echo "::error::promotion request manifest mismatch"; exit 1; }
+          [[ "$DIGEST" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::promotion request Artifact digest is invalid"; exit 1; }
+          python3 - "$URL" <<'PY'
+          import sys
           from urllib.parse import urlparse
-          value=json.load(sys.stdin)
-          bundle=sys.argv[1]
-          manifest=sys.argv[2]
-          if value.get('contractVersion')!='1.0.0': raise SystemExit('promotion request contractVersion mismatch')
-          if value.get('episodeDate') is None: raise SystemExit('promotion request episodeDate missing')
-          if value.get('expectedBundleId')!=bundle: raise SystemExit('promotion request bundle mismatch')
-          if value.get('expectedManifestSha256')!=manifest: raise SystemExit('promotion request manifest mismatch')
-          url=value.get('artifactDownloadUrl')
-          digest=value.get('artifactDigestSha256')
-          p=urlparse(str(url))
-          if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'): raise SystemExit('promotion request signed URL is unsafe')
-          if not re.fullmatch(r'[0-9a-f]{64}',str(digest)): raise SystemExit('promotion request artifact digest is invalid')
-          print(url)
-          print(digest)
+          p=urlparse(sys.argv[1])
+          if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'):
+              raise SystemExit('promotion request signed URL is unsafe')
           PY
-          <<<"$CONTENT")
-          [[ "${#RESOLVED[@]}" -eq 2 ]] || { echo "::error::promotion transport resolution failed"; exit 1; }
-          echo "SIGNED_ARTIFACT_URL=${RESOLVED[0]}" >> "$GITHUB_ENV"
-          echo "SIGNED_ARTIFACT_DIGEST=${RESOLVED[1]}" >> "$GITHUB_ENV"
+          echo "SIGNED_ARTIFACT_URL=$URL" >> "$GITHUB_ENV"
+          echo "SIGNED_ARTIFACT_DIGEST=$DIGEST" >> "$GITHUB_ENV"
 
       - name: Require an authenticated or digest-pinned Artifact transport
         shell: bash
