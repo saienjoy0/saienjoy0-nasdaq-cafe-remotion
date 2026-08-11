@@ -1,4 +1,5 @@
 name: Patch 2026-08-10 intraday preview data
+# trigger after workflow registration
 
 on:
   push:
