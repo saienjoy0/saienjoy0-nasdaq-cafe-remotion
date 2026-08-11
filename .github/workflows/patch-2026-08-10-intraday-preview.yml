@@ -1,8 +1,7 @@
 name: Patch 2026-08-10 intraday preview data
-# trigger after workflow registration
 
 on:
-  push:
+  pull_request:
     branches: [main]
     paths:
       - ".github/workflows/patch-2026-08-10-intraday-preview.yml"
@@ -12,11 +11,12 @@ permissions:
 
 jobs:
   patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
           persist-credentials: true
       - uses: actions/setup-node@v6
@@ -65,4 +65,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- render-specs/2026-08-10/render_spec.json
           git commit -m "Attach verified QQQ minute window to 2026-08-10 preview"
-          git push origin HEAD:main
+          git push origin HEAD:${{ github.head_ref }}
