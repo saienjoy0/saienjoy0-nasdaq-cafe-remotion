@@ -6,6 +6,12 @@ assert.doesNotThrow(() => assertProductionTextSafe({
   scenes: [{visualBeats: [{sequencePolicy: "object-order-fallback"}]}],
 }));
 
+assert.doesNotThrow(() => assertProductionTextSafe({
+  scenes: [{visualBeats: [{templateConfig: {reactionTimeline: {
+    providerSurface: "kline-history-fallback",
+  }}}]}],
+}));
+
 assert.doesNotThrow(() => assertProductionTextSafe(toProductionTextSafetyView({
   assets: {
     "daily-microchip-q1-fy27-ir-fallback":
@@ -33,4 +39,4 @@ assert.throws(
   /\$\.cards\[0\]\.lines\[0\]\.value: production forbidden text: debug metadata/u,
 );
 
-console.log("PASS: machine-only IDs/assets are exempt while every viewer-facing string remains protected");
+console.log("PASS: machine-only IDs/assets/provider metadata are exempt while every viewer-facing string remains protected");

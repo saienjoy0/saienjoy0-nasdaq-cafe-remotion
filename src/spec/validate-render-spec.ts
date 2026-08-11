@@ -318,6 +318,7 @@ export const PRODUCTION_FORBIDDEN_TEXT = [
 
 const PRODUCTION_MACHINE_CONTROL_TEXT_KEYS = new Set([
   "sequencePolicy",
+  "providerSurface",
 ]);
 
 export const assertProductionTextSafe = (value: unknown, path = "$"): void => {
