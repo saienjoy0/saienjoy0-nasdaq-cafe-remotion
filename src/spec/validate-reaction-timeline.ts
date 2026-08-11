@@ -12,6 +12,8 @@ export type ReactionTimelineIssueCode =
   | "VG_REACTION_SERIES_REQUIRED"
   | "VG_REACTION_SERIES_FORBIDDEN"
   | "VG_REACTION_SERIES_VALUE_MISSING"
+  | "VG_REACTION_SERIES_TIMESTAMP_ORDER"
+  | "VG_REACTION_EVENT_MARKER_OUTSIDE_SERIES"
   | "VG_REACTION_PRECISION_MOTION_MISMATCH";
 
 const fail = (code: ReactionTimelineIssueCode, path: string, message: string): never => {
@@ -75,29 +77,57 @@ export const validateReactionTimelineBeat = (
   );
 
   if (config.precision === "verified-intraday-series") {
-    if (config.seriesObjectIds.length < 2) {
-      fail(
-        "VG_REACTION_SERIES_REQUIRED",
-        `${path}.templateConfig.reactionTimeline.seriesObjectIds`,
-        "verified intraday series requires at least two explicit series objects",
-      );
-    }
     const numbers = new Map(scene.numbers.map((number) => [number.numberId, number]));
-    config.seriesObjectIds.forEach((objectId, index) => {
-      const number = numbers.get(objectId);
-      if (!number || number.numericValue == null) {
+    const validateLegacySeriesObjects = () => {
+      config.seriesObjectIds.forEach((objectId, index) => {
+        const number = numbers.get(objectId);
+        if (!number || number.numericValue == null) {
+          fail(
+            "VG_REACTION_SERIES_VALUE_MISSING",
+            `${path}.templateConfig.reactionTimeline.seriesObjectIds[${index}]`,
+            `${objectId} requires a verified numericValue`,
+          );
+        }
+      });
+    };
+
+    if (config.intradaySeries) {
+      const timestamps = config.intradaySeries.points.map((point) => Date.parse(point.timestamp));
+      for (let index = 1; index < timestamps.length; index += 1) {
+        if (timestamps[index] <= timestamps[index - 1]) {
+          fail(
+            "VG_REACTION_SERIES_TIMESTAMP_ORDER",
+            `${path}.templateConfig.reactionTimeline.intradaySeries.points[${index}].timestamp`,
+            "verified intraday points must be strictly increasing with no duplicate minute timestamps",
+          );
+        }
+      }
+      if (config.eventMarker) {
+        const marker = Date.parse(config.eventMarker.timestamp);
+        if (marker < timestamps[0] || marker > timestamps[timestamps.length - 1]) {
+          fail(
+            "VG_REACTION_EVENT_MARKER_OUTSIDE_SERIES",
+            `${path}.templateConfig.reactionTimeline.eventMarker.timestamp`,
+            "event marker must fall inside the displayed verified intraday series",
+          );
+        }
+      }
+      validateLegacySeriesObjects();
+    } else {
+      if (config.seriesObjectIds.length < 2) {
         fail(
-          "VG_REACTION_SERIES_VALUE_MISSING",
-          `${path}.templateConfig.reactionTimeline.seriesObjectIds[${index}]`,
-          `${objectId} requires a verified numericValue`,
+          "VG_REACTION_SERIES_REQUIRED",
+          `${path}.templateConfig.reactionTimeline`,
+          "verified intraday series requires intradaySeries points or at least two legacy series objects",
         );
       }
-    });
+      validateLegacySeriesObjects();
+    }
   } else {
-    if (config.seriesObjectIds.length > 0) {
+    if (config.seriesObjectIds.length > 0 || config.intradaySeries !== undefined) {
       fail(
         "VG_REACTION_SERIES_FORBIDDEN",
-        `${path}.templateConfig.reactionTimeline.seriesObjectIds`,
+        `${path}.templateConfig.reactionTimeline`,
         `${config.precision} must not declare a continuous series`,
       );
     }
