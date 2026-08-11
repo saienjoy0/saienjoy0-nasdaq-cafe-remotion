@@ -76,9 +76,19 @@ jobs:
           URL="$(jq -r '.html_url' <<<"$RUN")"
           HEAD_SHA="$(jq -r '.head_sha' <<<"$RUN")"
           ARTIFACTS=""
+          FAILED_JOB=""
+          FAILED_STEP=""
+          LOG_TAIL=""
           if [[ "$STATUS" == "completed" ]]; then
             A="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100")"
             ARTIFACTS="$(jq -r '.artifacts[]?.name' <<<"$A")"
+            if [[ "$CONCLUSION" != "success" ]]; then
+              J="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs?per_page=100")"
+              FAILED_JOB="$(jq -r '.jobs[] | select(.conclusion=="failure") | .id' <<<"$J" | head -n1)"
+              FAILED_STEP="$(jq -r '.jobs[] | select(.conclusion=="failure") | .steps[]? | select(.conclusion=="failure") | .name' <<<"$J" | head -n1)"
+              gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --log-failed >/tmp/preview-failed.log 2>&1 || true
+              LOG_TAIL="$(tail -n 100 /tmp/preview-failed.log)"
+            fi
           fi
           {
             echo "run_found=true"
@@ -87,8 +97,13 @@ jobs:
             echo "conclusion=$CONCLUSION"
             echo "url=$URL"
             echo "head_sha=$HEAD_SHA"
+            echo "failed_job=$FAILED_JOB"
+            echo "failed_step=$FAILED_STEP"
             echo "artifacts<<EOF"
             printf '%s\n' "$ARTIFACTS"
+            echo "EOF"
+            echo "log_tail<<EOF"
+            printf '%s\n' "$LOG_TAIL"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -103,6 +118,9 @@ jobs:
           CONCLUSION: ${{ steps.run.outputs.conclusion }}
           RUN_URL: ${{ steps.run.outputs.url }}
           HEAD_SHA: ${{ steps.run.outputs.head_sha }}
+          FAILED_JOB: ${{ steps.run.outputs.failed_job }}
+          FAILED_STEP: ${{ steps.run.outputs.failed_step }}
+          LOG_TAIL: ${{ steps.run.outputs.log_tail }}
           ARTIFACTS: ${{ steps.run.outputs.artifacts }}
         run: |
           set -euo pipefail
@@ -120,10 +138,17 @@ jobs:
           - Status: \`${STATUS}\`
           - Conclusion: \`${CONCLUSION}\`
           - Head SHA: \`${HEAD_SHA}\`
+          - Failed job: \`${FAILED_JOB:-none}\`
+          - Failed step: \`${FAILED_STEP:-none}\`
           - Run URL: ${RUN_URL}
 
           Artifacts:
           ${LINES}
+
+          Failed log tail:
+          \`\`\`text
+          ${LOG_TAIL:-none}
+          \`\`\`
           EOF
           )"
           fi
