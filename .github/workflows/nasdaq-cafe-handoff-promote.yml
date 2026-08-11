@@ -93,7 +93,7 @@ jobs:
                   out.write(f'{output_key}={value[key]}\n')
           PY
 
-      - name: Download and verify immutable H4 artifact
+      - name: Download and verify immutable handoff artifact
         shell: bash
         env:
           EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
@@ -117,8 +117,32 @@ jobs:
           mkdir -p /tmp/nasdaq-handoff
           unzip -q /tmp/nasdaq-handoff.zip -d /tmp/nasdaq-handoff
 
-          BUNDLE_ROOT="/tmp/nasdaq-handoff/h4-bundles/${EPISODE_DATE}/${BUNDLE_ID}"
-          MANIFEST="${BUNDLE_ROOT}/handoff_manifest.json"
+          MANIFEST="$(
+            python3 - "$EPISODE_DATE" "$BUNDLE_ID" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          episode_date, bundle_id = sys.argv[1:]
+          root = Path('/tmp/nasdaq-handoff')
+          matches = []
+          for path in root.rglob('handoff_manifest.json'):
+              try:
+                  value = json.loads(path.read_text(encoding='utf-8'))
+              except (OSError, json.JSONDecodeError):
+                  continue
+              if value.get('episode_date') == episode_date and value.get('bundle_id') == bundle_id:
+                  matches.append(path)
+          if len(matches) != 1:
+              raise SystemExit(
+                  f'expected exactly one handoff manifest for date={episode_date} bundle={bundle_id}; '
+                  f'found {len(matches)}'
+              )
+          print(matches[0])
+          PY
+          )"
+          BUNDLE_ROOT="$(dirname "$MANIFEST")"
+          test -d "$BUNDLE_ROOT"
           test -s "$MANIFEST"
           ACTUAL_MANIFEST_SHA="$(sha256sum "$MANIFEST" | awk '{print $1}')"
           test "$ACTUAL_MANIFEST_SHA" = "$MANIFEST_SHA" || {
