@@ -5,7 +5,9 @@ build
 .env
 .env.local
 .cache/
-public/generated/
+public/generated/*
+!public/generated/preflight-assets/
+!public/generated/preflight-assets/**
 
 # Ignore the output video from Git but not videos you import into src/.
 out
