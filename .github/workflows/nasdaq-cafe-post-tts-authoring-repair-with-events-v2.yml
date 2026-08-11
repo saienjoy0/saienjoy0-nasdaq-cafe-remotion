@@ -80,6 +80,16 @@ jobs:
             --request /tmp/base-authoring-request.json \
             --output "preview-status/$DATE/post_tts_authoring_repair.json"
 
+      - name: Apply exact authored object ID overrides
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE='${{ steps.request.outputs.episode_date }}'
+          python3 scripts/apply-post-tts-object-id-overrides.py \
+            --repo-root . \
+            --request '${{ steps.request.outputs.request_path }}' \
+            --output "preview-status/$DATE/post_tts_object_id_overrides.json"
+
       - name: Apply exact authored show-event copies
         shell: bash
         run: |
@@ -114,7 +124,7 @@ jobs:
           import json,sys
           from pathlib import Path
           date=sys.argv[1]
-          for name in ('post_tts_authoring_repair.json','post_tts_event_copies.json'):
+          for name in ('post_tts_authoring_repair.json','post_tts_object_id_overrides.json','post_tts_event_copies.json'):
               p=Path(f'preview-status/{date}/{name}')
               v=json.loads(p.read_text(encoding='utf-8'))
               v['status']='validated-awaiting-owner-readiness'
@@ -134,9 +144,10 @@ jobs:
           READY="render-specs/${DATE}/production_ready.json"
           R1="preview-status/${DATE}/post_tts_authoring_repair.json"
           R2="preview-status/${DATE}/post_tts_event_copies.json"
+          R3="preview-status/${DATE}/post_tts_object_id_overrides.json"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- "$PACKAGE" "$SPEC" "$R1" "$R2"
+          git add -- "$PACKAGE" "$SPEC" "$R1" "$R2" "$R3"
           if [[ ! -e "$READY" ]]; then git add -u -- "$READY" 2>/dev/null || true; fi
           git diff --cached --quiet && { echo "::error::No validated repair changes staged"; exit 1; }
           git commit -m "fix: post-TTS visual rhythm for ${DATE} preview"
