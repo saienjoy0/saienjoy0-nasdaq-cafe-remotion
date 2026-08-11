@@ -46,6 +46,17 @@ assert(
   "production-ready creation must validate against the same runtime asset registry used by spec validation and preview",
 );
 
+const inspectPreviewScript = await readFile(
+  path.join(PROJECT_DIR, "scripts", "inspect-preview.ts"),
+  "utf8",
+);
+assert(
+  inspectPreviewScript.includes('import {loadRuntimeAssetContext} from "../src/config/runtime-assets";') &&
+    inspectPreviewScript.includes("const runtimeAssets = await loadRuntimeAssetContext();") &&
+    inspectPreviewScript.includes("loadRenderSpec(input, runtimeAssets.manifest)"),
+  "preview inspection must validate the render spec with the promoted runtime asset registry",
+);
+
 const layoutRepairWorkflow = await readFile(
   path.join(
     PROJECT_DIR,
@@ -65,4 +76,4 @@ assert(
   "layout text repair must validate and recreate ready with promoted runtime assets",
 );
 
-console.log("PASS: handoff promotion and display-only repair preserve runtime asset validation");
+console.log("PASS: handoff promotion, preview inspection, and display-only repair preserve runtime asset validation");
