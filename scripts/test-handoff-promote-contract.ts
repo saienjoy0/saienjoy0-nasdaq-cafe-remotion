@@ -46,4 +46,23 @@ assert(
   "production-ready creation must validate against the same runtime asset registry used by spec validation and preview",
 );
 
-console.log("PASS: handoff promotion is generation-agnostic and production-ready uses runtime assets");
+const layoutRepairWorkflow = await readFile(
+  path.join(
+    PROJECT_DIR,
+    ".github",
+    "workflows",
+    "nasdaq-cafe-layout-text-repair.yml",
+  ),
+  "utf8",
+);
+assert(
+  layoutRepairWorkflow.includes(
+    "NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.repair.outputs.episode_date }}/runtime_asset_registry.json",
+  ) &&
+    layoutRepairWorkflow.includes(
+      "EPISODE_ID: ${{ steps.repair.outputs.episode_date }}",
+    ),
+  "layout text repair must validate and recreate ready with promoted runtime assets",
+);
+
+console.log("PASS: handoff promotion and display-only repair preserve runtime asset validation");
