@@ -1,0 +1,9 @@
+{
+  "requestVersion": "1.0",
+  "episodeDate": "2026-08-10",
+  "expectedSpecSha256": "4884df247d0eccf8cffb28240462db88a2394dc258032cf32dda80d01086694e",
+  "sceneNumber": 6,
+  "offsetSeconds": 0,
+  "durationSeconds": 20,
+  "confirmation": "MOTION"
+}
