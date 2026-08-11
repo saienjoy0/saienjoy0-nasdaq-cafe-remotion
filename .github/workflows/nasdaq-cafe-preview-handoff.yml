@@ -256,9 +256,6 @@ jobs:
           NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: ${{ steps.intake.outputs.registry_path }}
         run: npm run episode:spec:validate -- "${{ steps.intake.outputs.spec_path }}"
 
-      - name: Run deterministic runtime stability tests
-        run: npm run test:runtime-stability
-
       - name: Ensure ffmpeg is available
         shell: bash
         run: |
@@ -267,6 +264,9 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y ffmpeg
           fi
+
+      - name: Run deterministic runtime stability tests
+        run: npm run test:runtime-stability
 
       - name: Prepare TTS cache directory
         run: mkdir -p .cache/spec-tts-blocks
