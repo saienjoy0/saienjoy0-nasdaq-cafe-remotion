@@ -1,7 +1,7 @@
 {
   "contractVersion": "1.0.0",
   "episodeDate": "2026-08-10",
-  "artifactDownloadUrl": "https://sdmntprjapaneast.oaiusercontent.com/files/00000000-cd2c-8209-a1f1-f409f3ad6b24/raw?se=2026-08-11T01%3A02%3A55Z&sp=r&sv=2026-02-06&sr=b&scid=881b97c5-8f8a-51d5-be3b-db233d4252c8&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-10T22%3A46%3A06Z&ske=2026-08-11T22%3A46%3A06Z&sks=b&skv=2026-02-06&sig=mzIK9M%2BhzxQcmuCIsMBpo3DYaVqzzJOWcVBhZ0FBh58%3D",
+  "artifactDownloadUrl": "https://sdmntprkoreacentral.oaiusercontent.com/files/00000000-f6fc-8206-9661-b37b58275a48/raw?se=2026-08-11T01%3A25%3A53Z&sp=r&sv=2026-02-06&sr=b&scid=82bac377-19d0-5510-9cd5-29ddf8f84e57&skoid=3e273c3d-5ea1-4088-9e18-79685531b184&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-10T22%3A40%3A01Z&ske=2026-08-11T22%3A40%3A01Z&sks=b&skv=2026-02-06&sig=KrJ4/rRb5lUw0XGS7jCBWm3jt1B%2BrYneqDH7g28mpmQ%3D",
   "artifactDigestSha256": "0cabf828e99b8ff185689fc92d5af5f792dcb9d3a9705da4b30689129b990773",
   "expectedBundleId": "9c16a23f1e4dd3eb90388f92c3654e8c5345b83685df4c81e5f54e80d068f666",
   "expectedManifestSha256": "5c0b04e993eb0de704c31cf02660267b8ba17f576df2f85e6204f86d6ac1e073",
