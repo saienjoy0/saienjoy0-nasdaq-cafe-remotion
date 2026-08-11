@@ -1162,9 +1162,9 @@
       "status": "not-required"
     },
     {
-      "asset_id": "daily-microchip-q1-fy27-ir-fallback",
+      "asset_id": "daily-microchip-q1-fy27-ir-secondary",
       "media_type": "image",
-      "path": "daily-assets/2026-08-10/daily-microchip-q1-fy27-ir-fallback.png",
+      "path": "daily-assets/2026-08-10/daily-microchip-q1-fy27-ir-secondary.png",
       "sha256": "8170b0d8d35b4126353883e3fb7d0ff35fa510759f1713d754680f2253dae3f6",
       "status": "ready"
     },
@@ -1231,9 +1231,9 @@
       },
       {
         "beat_id": "vb-06-01",
-        "fallback_asset_id": "daily-microchip-q1-fy27-ir-fallback",
+        "fallback_asset_id": "daily-microchip-q1-fy27-ir-secondary",
         "primary_asset_id": "daily-microchip-q1-fy27-ir",
-        "selected_asset_id": "daily-microchip-q1-fy27-ir-fallback",
+        "selected_asset_id": "daily-microchip-q1-fy27-ir-secondary",
         "selected_path": "fallback"
       }
     ],
@@ -2778,7 +2778,7 @@
             "startChunkId": null
           },
           {
-            "assetId": "daily-microchip-q1-fy27-ir-fallback",
+            "assetId": "daily-microchip-q1-fy27-ir-secondary",
             "endChunkId": "scene-06-chunk-001",
             "fit": "contain",
             "focalPoint": null,

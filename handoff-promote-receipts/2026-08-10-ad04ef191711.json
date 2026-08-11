@@ -1,0 +1,12 @@
+{
+  "contractVersion": "1.0.0",
+  "status": "promoted",
+  "episodeDate": "2026-08-10",
+  "artifactDigestSha256": "8f3dec274b993992bba2dceb3089e17567c19bd0a27da4bb05508ee9cbe08977",
+  "bundleId": "ad04ef191711898a7ea2a63b7742f5473cf731a49d3cf85444e500bd2ead6bcc",
+  "manifestSha256": "eddb84536500ebfa926fc2f10629b283e8110071140c7a27191c4e0916f1bb02",
+  "episodePackageSha256": "ad1cde467ed2892dc6b37b3bcde4d855d686579f4a0336d7dcd602b31d8b3d5d",
+  "renderSpecSha256": "f3873b7f67b38c14a148f411a093ffdc7228e556f8c4e2ee10fe3fef4919bad9",
+  "rendererCommit": "0aaaf77eb2fd54e3e1b5eb4db05410dcaf71b673",
+  "promotedAt": "2026-08-11T01:41:17.970005+00:00"
+}

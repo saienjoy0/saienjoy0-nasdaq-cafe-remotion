@@ -1552,7 +1552,7 @@
           "startChunkId": null
         },
         {
-          "assetId": "daily-microchip-q1-fy27-ir-fallback",
+          "assetId": "daily-microchip-q1-fy27-ir-secondary",
           "endChunkId": "scene-06-chunk-001",
           "fit": "contain",
           "focalPoint": null,
@@ -2508,7 +2508,7 @@
   "visualGrammarContract": {
     "beatCount": 18,
     "contractVersion": "1.0.0",
-    "finalEpisodeContractSha256": "59197bc4d3c221903c6c2f97bb2877565e9cfdcfbf13f329b47f729cb0c2bcc0",
+    "finalEpisodeContractSha256": "15cce7060de781879e33a2a52067917191d9fd4bd45455df466febf29400eeae",
     "rendererCompatibilitySha256": "563bc71c58120552c3f601cab662a4f4287e44c149e46268ef5678d279b1adb6",
     "semanticsSha256": "e95b6dc418b4cb1d5c30d8cffc75de22c5c2834190c124e7bbab731f924bd714"
   },
