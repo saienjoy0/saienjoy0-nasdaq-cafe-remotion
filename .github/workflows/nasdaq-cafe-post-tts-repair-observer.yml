@@ -1,0 +1,70 @@
+name: Nasdaq Cafe Post-TTS Repair Observer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "post-tts-repair-observer-probes/*.json"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  observe:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with: {ref: main, fetch-depth: 0, persist-credentials: false}
+      - id: probe
+        shell: bash
+        env: {BEFORE_SHA: "${{ github.event.before }}", TRIGGER_SHA: "${{ github.sha }}"}
+        run: |
+          set -euo pipefail
+          mapfile -t P < <(git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'post-tts-repair-observer-probes/*.json')
+          test "${#P[@]}" = 1
+          python3 - "${P[0]}" <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          v=json.loads(Path(sys.argv[1]).read_text())
+          if set(v)!={'contractVersion','notBefore'} or v['contractVersion']!='1.0.0': raise SystemExit('bad probe')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write(f"not_before={v['notBefore']}\n")
+          PY
+      - id: run
+        shell: bash
+        env: {GH_TOKEN: "${{ github.token }}", NOT_BEFORE: "${{ steps.probe.outputs.not_before }}"}
+        run: |
+          set -euo pipefail
+          R="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-post-tts-authoring-repair-with-events-v2.yml/runs?branch=main&per_page=30")"
+          X="$(jq -c --arg t "$NOT_BEFORE" '.workflow_runs | map(select(.created_at >= $t)) | sort_by(.created_at) | reverse | .[0] // empty' <<<"$R")"
+          if [[ -z "$X" ]]; then echo found=false >> "$GITHUB_OUTPUT"; exit 0; fi
+          ID="$(jq -r .id <<<"$X")"; STATUS="$(jq -r .status <<<"$X")"; CONCLUSION="$(jq -r '.conclusion // "pending"' <<<"$X")"; URL="$(jq -r .html_url <<<"$X")"
+          FAILED_JOB=""; FAILED_STEP=""; LOG_TAIL=""
+          if [[ "$STATUS" == completed && "$CONCLUSION" != success ]]; then
+            J="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${ID}/jobs?per_page=100")"
+            FAILED_JOB="$(jq -r '.jobs[] | select(.conclusion=="failure") | .id' <<<"$J" | head -n1)"
+            FAILED_STEP="$(jq -r '.jobs[] | select(.conclusion=="failure") | .steps[]? | select(.conclusion=="failure") | .name' <<<"$J" | head -n1)"
+            gh run view "$ID" --repo "$GITHUB_REPOSITORY" --log-failed >/tmp/f.log 2>&1 || true
+            LOG_TAIL="$(tail -n 100 /tmp/f.log)"
+          fi
+          { echo found=true; echo id=$ID; echo status=$STATUS; echo conclusion=$CONCLUSION; echo url=$URL; echo failed_job=$FAILED_JOB; echo failed_step=$FAILED_STEP; echo 'log_tail<<EOF'; printf '%s\n' "$LOG_TAIL"; echo EOF; } >> "$GITHUB_OUTPUT"
+      - shell: bash
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          FOUND: "${{ steps.run.outputs.found }}"
+          RUN_ID: "${{ steps.run.outputs.id }}"
+          STATUS: "${{ steps.run.outputs.status }}"
+          CONCLUSION: "${{ steps.run.outputs.conclusion }}"
+          RUN_URL: "${{ steps.run.outputs.url }}"
+          FAILED_JOB: "${{ steps.run.outputs.failed_job }}"
+          FAILED_STEP: "${{ steps.run.outputs.failed_step }}"
+          LOG_TAIL: "${{ steps.run.outputs.log_tail }}"
+        run: |
+          set -euo pipefail
+          TITLE='NASDAQ CAFE POST-TTS REPAIR OBSERVER 2026-08-10'
+          if [[ "$FOUND" != true ]]; then BODY='No post-TTS repair run found after probe.'; else BODY="- Run ID: \`${RUN_ID}\`\n- Status: \`${STATUS}\`\n- Conclusion: \`${CONCLUSION}\`\n- Failed job: \`${FAILED_JOB:-none}\`\n- Failed step: \`${FAILED_STEP:-none}\`\n- URL: ${RUN_URL}\n\n\`\`\`text\n${LOG_TAIL:-none}\n\`\`\`"; fi
+          N="$(gh issue list --state all --search "${TITLE} in:title" --json number,title --jq ".[] | select(.title == \"${TITLE}\") | .number" | head -n1)"
+          if [[ -n "$N" ]]; then gh issue edit "$N" --body "$BODY"; gh issue reopen "$N" >/dev/null 2>&1 || true; else gh issue create --title "$TITLE" --body "$BODY"; fi
