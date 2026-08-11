@@ -1,5 +1,6 @@
 import {readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
+import {loadRuntimeAssetContext} from "../src/config/runtime-assets";
 import {loadProductionData, loadRenderSpec} from "./load-render-spec";
 import {PROJECT_DIR} from "./render-helpers";
 import {inspectSpecMedia} from "./spec-inspect";
@@ -7,7 +8,8 @@ import {inspectSpecMedia} from "./spec-inspect";
 const input = process.argv[2];
 if (!input) throw new Error("usage: inspect-preview <render_spec.json>");
 
-const {spec, sha256} = await loadRenderSpec(input);
+const runtimeAssets = await loadRuntimeAssetContext();
+const {spec, sha256} = await loadRenderSpec(input, runtimeAssets.manifest);
 const workspace = path.join(PROJECT_DIR, "build", spec.episode.id);
 const productionPath = path.join(workspace, "render_data.production.json");
 const technicalPath = path.join(workspace, "technical_report.json");
