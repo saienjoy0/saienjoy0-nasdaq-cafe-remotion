@@ -1,0 +1,134 @@
+name: Nasdaq Cafe Handoff Promote Observer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "handoff-promote-observer-probes/*.json"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  observe:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve exactly one probe
+        id: probe
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t P < <(git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'handoff-promote-observer-probes/*.json')
+          test "${#P[@]}" = 1
+          python3 - "${P[0]}" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          if set(v)!={'contractVersion','notBefore'} or v['contractVersion']!='1.0.0':
+              raise SystemExit('bad probe')
+          if not isinstance(v['notBefore'],str) or not v['notBefore'].endswith('Z'):
+              raise SystemExit('bad notBefore')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f"not_before={v['notBefore']}\n")
+          PY
+
+      - name: Query latest handoff promotion run
+        id: run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOT_BEFORE: ${{ steps.probe.outputs.not_before }}
+        run: |
+          set -euo pipefail
+          R="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-handoff-promote.yml/runs?branch=main&per_page=30")"
+          X="$(jq -c --arg t "$NOT_BEFORE" '.workflow_runs | map(select(.created_at >= $t)) | sort_by(.created_at) | reverse | .[0] // empty' <<<"$R")"
+          if [[ -z "$X" ]]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ID="$(jq -r .id <<<"$X")"
+          STATUS="$(jq -r .status <<<"$X")"
+          CONCLUSION="$(jq -r '.conclusion // "pending"' <<<"$X")"
+          URL="$(jq -r .html_url <<<"$X")"
+          HEAD_SHA="$(jq -r .head_sha <<<"$X")"
+          FAILED_JOB=""
+          FAILED_STEP=""
+          LOG_TAIL=""
+          if [[ "$STATUS" == completed && "$CONCLUSION" != success ]]; then
+            J="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${ID}/jobs?per_page=100")"
+            FAILED_JOB="$(jq -r '.jobs[] | select(.conclusion=="failure") | .id' <<<"$J" | head -n1)"
+            FAILED_STEP="$(jq -r '.jobs[] | select(.conclusion=="failure") | .steps[]? | select(.conclusion=="failure") | .name' <<<"$J" | head -n1)"
+            if [[ -n "$FAILED_JOB" ]]; then
+              gh run view "$ID" --repo "$GITHUB_REPOSITORY" --log-failed > /tmp/failed.log 2>&1 || true
+              LOG_TAIL="$(tail -n 80 /tmp/failed.log)"
+            fi
+          fi
+          {
+            echo "found=true"
+            echo "id=$ID"
+            echo "status=$STATUS"
+            echo "conclusion=$CONCLUSION"
+            echo "url=$URL"
+            echo "head_sha=$HEAD_SHA"
+            echo "failed_job=$FAILED_JOB"
+            echo "failed_step=$FAILED_STEP"
+            echo "log_tail<<EOF"
+            printf '%s\n' "$LOG_TAIL"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upsert observer issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FOUND: ${{ steps.run.outputs.found }}
+          RUN_ID: ${{ steps.run.outputs.id }}
+          STATUS: ${{ steps.run.outputs.status }}
+          CONCLUSION: ${{ steps.run.outputs.conclusion }}
+          RUN_URL: ${{ steps.run.outputs.url }}
+          HEAD_SHA: ${{ steps.run.outputs.head_sha }}
+          FAILED_JOB: ${{ steps.run.outputs.failed_job }}
+          FAILED_STEP: ${{ steps.run.outputs.failed_step }}
+          LOG_TAIL: ${{ steps.run.outputs.log_tail }}
+        run: |
+          set -euo pipefail
+          TITLE='NASDAQ CAFE HANDOFF PROMOTE OBSERVER 2026-08-10'
+          if [[ "$FOUND" != true ]]; then
+            BODY='No Handoff Promote run found after the probe timestamp.'
+          else
+            BODY="$(cat <<EOF
+          - Run ID: \`${RUN_ID}\`
+          - Status: \`${STATUS}\`
+          - Conclusion: \`${CONCLUSION}\`
+          - Head SHA: \`${HEAD_SHA}\`
+          - Failed job: \`${FAILED_JOB:-none}\`
+          - Failed step: \`${FAILED_STEP:-none}\`
+          - URL: ${RUN_URL}
+
+          Failed log tail:
+          \`\`\`text
+          ${LOG_TAIL:-none}
+          \`\`\`
+          EOF
+          )"
+          fi
+          N="$(gh issue list --state all --search "${TITLE} in:title" --json number,title --jq ".[] | select(.title == \"${TITLE}\") | .number" | head -n1)"
+          if [[ -n "$N" ]]; then
+            gh issue edit "$N" --body "$BODY"
+            gh issue reopen "$N" >/dev/null 2>&1 || true
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
