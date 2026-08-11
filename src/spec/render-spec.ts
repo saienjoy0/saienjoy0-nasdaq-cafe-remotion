@@ -55,7 +55,7 @@ export const cameraPresetSchema = z.enum(CAMERA_PRESET_IDS);
 export const shotTransitionSchema = z.enum(SHOT_TRANSITION_IDS);
 export const typographyTreatmentSchema = z.enum(TYPOGRAPHY_TREATMENT_IDS);
 export const soundCueSchema = z.enum(SOUND_CUE_IDS);
-const visualTemplateConfigSchema = z.object({
+export const visualTemplateConfigSchema = z.object({
   variant: visualTemplateVariantSchema,
   comparisonBasis: nullableText,
   dataBasis: nonEmptyText,
