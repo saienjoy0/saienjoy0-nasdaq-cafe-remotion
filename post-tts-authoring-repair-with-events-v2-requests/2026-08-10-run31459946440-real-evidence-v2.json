@@ -1,0 +1,74 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "confirmation": "APPLY_POST_TTS_AUTHORING_REPAIR_WITH_EVENT_COPIES",
+  "expectedBeforeRenderSpecSha256": "ffaed3ddd6c1fa5b967856c36fb99da0aad3c457aa7626a57a99ba138111aff4",
+  "expectedBeforeEpisodePackageSha256": "31362cec55349984e678e5e232fb20eb5c5e0dcee9bf6900a85f57a8b85e379f",
+  "expectedAfterRenderSpecSha256": "e44166d802bee6420d4e571ae77a7dce189c14eb2acf1cc81e850434980189ea",
+  "expectedAfterEpisodePackageSha256": "4d83a56839d5d98664dfaf1968323d7115075323d4f61bcc4fe0da44a649affd",
+  "expectedIntermediateRenderSpecSha256": "e44166d802bee6420d4e571ae77a7dce189c14eb2acf1cc81e850434980189ea",
+  "expectedIntermediateEpisodePackageSha256": "4d83a56839d5d98664dfaf1968323d7115075323d4f61bcc4fe0da44a649affd",
+  "expectedFinalRenderSpecSha256": "c52da66c00c2a69bcf7937d981f7b8d243e24a4785be3ac196b9376f637fcb46",
+  "expectedFinalEpisodePackageSha256": "2cf506d29a2345f3c67a3a60c10ce80e08a3b14129fea57817582a506a502fa7",
+  "existingBeatChanges": [
+    {
+      "beatId": "vb-01-02",
+      "expected": {"visualTemplate": "hero-number", "visualGrammarId": "evidence", "templateVariant": "default"},
+      "replacement": {"visualTemplate": "analogy-steps", "visualGrammarId": "analogy", "templateVariant": "default"}
+    },
+    {
+      "beatId": "vb-04-02",
+      "expected": {"visualTemplate": "text-focus", "visualGrammarId": "bridge-text", "templateVariant": "default"},
+      "replacement": {"visualTemplate": "evidence-boundary", "visualGrammarId": "evidence", "templateVariant": "confirmed-vs-unconfirmed"}
+    }
+  ],
+  "sceneSplits": [
+    {
+      "sceneId": "scene-08",
+      "chunkSplits": [
+        {
+          "sourceChunkId": "scene-08-chunk-001",
+          "parts": [
+            {"chunkId": "scene-08-chunk-001", "speechText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。", "captionText": "最後に、時系列まで確認します。8時30分ETの発表の1分前から発表分へ、NASDAQの代理として見るQQQは719.16から720.23、SOXXは541.06から542.40、NVIDIAは219.95から220.31へ上向きました。"},
+            {"chunkId": "scene-08-chunk-003", "speechText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。", "captionText": "だから、弱い雇用から利上げ観測後退、そしてテック買いという市場解釈は、引けだけでなく発表時刻の初動とも整合します。ただし、1分足は原因そのものを証明しません。"}
+          ]
+        },
+        {
+          "sourceChunkId": "scene-08-chunk-002",
+          "parts": [
+            {"chunkId": "scene-08-chunk-002", "speechText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。", "captionText": "MCHPは同じ1分で79.58から79.56とほぼ横ばいでした。Microchipの大幅高は会社固有材料を別の増幅要因として分ける方が自然です。"},
+            {"chunkId": "scene-08-chunk-004", "speechText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。", "captionText": "僕の結論は中程度の確信で、雇用下振れから利上げリスク低下が主役候補。Microchip好決算と原油・利回り低下が増幅要因。"},
+            {"chunkId": "scene-08-chunk-005", "speechText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。", "captionText": "成長不安と個別の下落銘柄が反対材料です。悪材料が消えた夜ではなく、どの採点表が優先されたかが変わった夜でした。"}
+          ]
+        }
+      ],
+      "beatRebuilds": [
+        {
+          "sourceBeatId": "vb-08-01",
+          "expected": {"visualTemplate": "event-reaction-timeline", "visualGrammarId": "reaction", "templateVariant": "verified-series"},
+          "parts": [
+            {"beatId": "scene-08-beat-001", "chunkId": "scene-08-chunk-001"},
+            {"beatId": "scene-08-beat-002", "chunkId": "scene-08-chunk-003", "transitionRole": "continuation", "changeCue": "1分足は因果証明ではない", "visual": {"visualTemplate": "metric-comparison-board", "visualGrammarId": "evidence", "templateVariant": "default"}}
+          ]
+        },
+        {
+          "sourceBeatId": "vb-08-02",
+          "expected": {"visualTemplate": "verification-checklist", "visualGrammarId": "verification", "templateVariant": "default"},
+          "parts": [
+            {"beatId": "scene-08-beat-003", "chunkId": "scene-08-chunk-002"},
+            {"beatId": "scene-08-beat-004", "chunkId": "scene-08-chunk-004", "transitionRole": "continuation", "changeCue": "主因候補・増幅要因を分ける", "visual": {"visualTemplate": "evidence-boundary", "visualGrammarId": "evidence", "templateVariant": "confirmed-vs-unconfirmed"}},
+            {"beatId": "scene-08-beat-005", "chunkId": "scene-08-chunk-005", "transitionRole": "continuation", "changeCue": "反対材料まで残す", "visual": {"visualTemplate": "verification-checklist", "visualGrammarId": "verification", "templateVariant": "default"}}
+          ]
+        }
+      ]
+    }
+  ],
+  "visualEventCopies": [
+    {"sceneId": "scene-08", "sourceEventId": "event-017", "newEventId": "event-025", "atChunkId": "scene-08-chunk-004"},
+    {"sceneId": "scene-08", "sourceEventId": "event-017", "newEventId": "event-026", "atChunkId": "scene-08-chunk-005"}
+  ],
+  "packageSummaryReplacements": [
+    {"old": "- Scene 1｜寝ている間に何が起きた？｜opening-contradiction → hero-number", "new": "- Scene 1｜寝ている間に何が起きた？｜opening-contradiction → analogy-steps"},
+    {"old": "- Scene 8｜どこまで言える？｜verification-matrix → verification-checklist", "new": "- Scene 8｜どこまで言える？｜event-reaction-timeline → metric-comparison-board → verification-checklist → evidence-boundary → verification-checklist"}
+  ]
+}
