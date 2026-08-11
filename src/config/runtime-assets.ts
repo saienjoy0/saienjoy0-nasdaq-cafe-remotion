@@ -1,4 +1,4 @@
-import {readFile} from "node:fs/promises";
+import {access, readFile} from "node:fs/promises";
 import path from "node:path";
 import type {AssetManifestForSpec} from "../spec/validate-render-spec";
 import {productionAssetManifest, productionAssetPaths} from "./production-assets";
@@ -26,6 +26,7 @@ export type RuntimeAssetContext = {
 
 const safeAssetId = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const sha256 = /^[0-9a-f]{64}$/;
+const episodeDatePattern = /^\d{4}-\d{2}-\d{2}$/;
 const safePublicPath = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._/\-]+$/;
 
 const staticManifest: AssetManifestForSpec = productionAssetManifest;
@@ -37,11 +38,31 @@ const staticContext = (): RuntimeAssetContext => ({
   paths: productionAssetPaths,
 });
 
+const resolveRuntimeRegistryPath = async (
+  explicitPath: string | undefined,
+): Promise<string | null> => {
+  if (explicitPath) return explicitPath;
+  const episodeId = process.env.EPISODE_ID;
+  if (!episodeId || !episodeDatePattern.test(episodeId)) return null;
+  const promotedPath = path.resolve(
+    `runtime-assets/${episodeId}/runtime_asset_registry.json`,
+  );
+  try {
+    await access(promotedPath);
+    return promotedPath;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return null;
+    throw error;
+  }
+};
+
 export const loadRuntimeAssetContext = async (
   registryPath = process.env.NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY,
 ): Promise<RuntimeAssetContext> => {
-  if (!registryPath) return staticContext();
-  const resolved = path.resolve(registryPath);
+  const selectedRegistryPath = await resolveRuntimeRegistryPath(registryPath);
+  if (!selectedRegistryPath) return staticContext();
+  const resolved = path.resolve(selectedRegistryPath);
   const raw = JSON.parse(await readFile(resolved, "utf8")) as unknown;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error("runtime asset registry root must be an object");
@@ -55,9 +76,19 @@ export const loadRuntimeAssetContext = async (
   }
   if (
     typeof registry.episodeDate !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(registry.episodeDate)
+    !episodeDatePattern.test(registry.episodeDate)
   ) {
     throw new Error("runtime asset registry episodeDate must be YYYY-MM-DD");
+  }
+  const episodeId = process.env.EPISODE_ID;
+  if (
+    episodeId &&
+    episodeDatePattern.test(episodeId) &&
+    registry.episodeDate !== episodeId
+  ) {
+    throw new Error(
+      `runtime asset registry episodeDate mismatch: ${registry.episodeDate} != ${episodeId}`,
+    );
   }
   if (!Array.isArray(registry.assets)) {
     throw new Error("runtime asset registry assets must be an array");
