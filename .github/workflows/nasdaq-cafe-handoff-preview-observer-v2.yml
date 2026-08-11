@@ -1,0 +1,135 @@
+name: Nasdaq Cafe Handoff Preview Observer V2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "handoff-preview-probes-v2/*.json"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  observe:
+    name: Observe recent handoff Preview run
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout probe
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Resolve exactly one probe
+        id: probe
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGED < <(git diff --name-only "$BEFORE_SHA" "$TRIGGER_SHA" -- 'handoff-preview-probes-v2/*.json')
+          if [[ "${#CHANGED[@]}" -ne 1 ]]; then
+            echo "::error::Exactly one V2 handoff preview probe JSON must change"
+            exit 1
+          fi
+          python3 - "${CHANGED[0]}" <<'PY'
+          import json, os, re, sys
+          from pathlib import Path
+          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          required={'contractVersion','episodeDate','rendererRef','expectedRendererCommit','notBefore'}
+          if set(v)!=required: raise SystemExit(f'probe fields mismatch: {sorted(v)}')
+          if v['contractVersion']!='1.0.0': raise SystemExit('contractVersion must be 1.0.0')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', str(v['episodeDate'])): raise SystemExit('bad episodeDate')
+          if not re.fullmatch(r'[A-Za-z0-9._/-]+', str(v['rendererRef'])): raise SystemExit('unsafe rendererRef')
+          if not re.fullmatch(r'[0-9a-f]{40}', str(v['expectedRendererCommit'])): raise SystemExit('bad expectedRendererCommit')
+          if not isinstance(v['notBefore'], str) or not v['notBefore'].endswith('Z'): raise SystemExit('bad notBefore')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f"episode_date={v['episodeDate']}\n")
+              out.write(f"renderer_ref={v['rendererRef']}\n")
+              out.write(f"expected_renderer_commit={v['expectedRendererCommit']}\n")
+              out.write(f"not_before={v['notBefore']}\n")
+          PY
+
+      - name: Query latest handoff Preview after probe time
+        id: run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RENDERER_REF: ${{ steps.probe.outputs.renderer_ref }}
+          NOT_BEFORE: ${{ steps.probe.outputs.not_before }}
+        run: |
+          set -euo pipefail
+          RESPONSE="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' "repos/${GITHUB_REPOSITORY}/actions/workflows/nasdaq-cafe-preview-handoff.yml/runs?event=workflow_dispatch&branch=${RENDERER_REF}&per_page=30")"
+          RUN="$(jq -c --arg t "$NOT_BEFORE" '.workflow_runs | map(select(.created_at >= $t)) | sort_by(.created_at) | reverse | .[0] // empty' <<<"$RESPONSE")"
+          if [[ -z "$RUN" ]]; then
+            echo "::error::No handoff Preview run found after notBefore"
+            exit 1
+          fi
+          RUN_ID="$(jq -r '.id' <<<"$RUN")"
+          STATUS="$(jq -r '.status' <<<"$RUN")"
+          CONCLUSION="$(jq -r '.conclusion // "pending"' <<<"$RUN")"
+          URL="$(jq -r '.html_url' <<<"$RUN")"
+          CREATED="$(jq -r '.created_at' <<<"$RUN")"
+          ARTIFACTS=""
+          if [[ "$STATUS" == "completed" ]]; then
+            A="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts?per_page=100")"
+            ARTIFACTS="$(jq -r '.artifacts[]?.name' <<<"$A")"
+          fi
+          {
+            echo "run_id=$RUN_ID"
+            echo "status=$STATUS"
+            echo "conclusion=$CONCLUSION"
+            echo "url=$URL"
+            echo "created=$CREATED"
+            echo "artifacts<<EOF"
+            printf '%s\n' "$ARTIFACTS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upsert observer receipt
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.probe.outputs.episode_date }}
+          EXPECTED_RENDERER_COMMIT: ${{ steps.probe.outputs.expected_renderer_commit }}
+          RUN_ID: ${{ steps.run.outputs.run_id }}
+          STATUS: ${{ steps.run.outputs.status }}
+          CONCLUSION: ${{ steps.run.outputs.conclusion }}
+          RUN_URL: ${{ steps.run.outputs.url }}
+          CREATED: ${{ steps.run.outputs.created }}
+          ARTIFACTS: ${{ steps.run.outputs.artifacts }}
+        run: |
+          set -euo pipefail
+          TITLE="NASDAQ CAFE HANDOFF PREVIEW OBSERVER V2 ${EPISODE_DATE}"
+          LINES="$(printf '%s\n' "$ARTIFACTS" | sed '/^$/d;s/^/- `/;s/$/`/')"
+          [[ -n "$LINES" ]] || LINES="- none yet"
+          BODY="$(cat <<EOF
+          Handoff Preview V2 observer receipt.
+
+          - Episode date: \`${EPISODE_DATE}\`
+          - Expected renderer checkout: \`${EXPECTED_RENDERER_COMMIT}\`
+          - Workflow run ID: \`${RUN_ID}\`
+          - Status: \`${STATUS}\`
+          - Conclusion: \`${CONCLUSION}\`
+          - Created: \`${CREATED}\`
+          - Run URL: ${RUN_URL}
+
+          Artifacts:
+          ${LINES}
+          EOF
+          )"
+          N="$(gh issue list --state all --search "${TITLE} in:title" --json number,title --jq ".[] | select(.title == \"${TITLE}\") | .number" | head -n1)"
+          if [[ -n "$N" ]]; then
+            gh issue edit "$N" --title "$TITLE" --body "$BODY"
+            gh issue reopen "$N" >/dev/null 2>&1 || true
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
