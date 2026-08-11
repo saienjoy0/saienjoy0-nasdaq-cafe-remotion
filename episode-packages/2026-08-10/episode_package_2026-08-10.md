@@ -505,9 +505,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
 
 - ナレーションで示す出典主体・媒体：当日の市場データ
 - 大テロップ：全面高ではない
-- 補助テロップ：AMD -1.21% / Alphabet -0.96% / MSFT +0.03%
+- 補助テロップ：AMD -1.21% / Alphabet -0.96%/MSFT +0.03%
 - 使用する数字：MCHP +13.89%、AMD -1.21%、Alphabet -0.96%、Microsoft +0.03%
-- 画面で見せる内容：AMD -1.21% / Alphabet -0.96% / MSFT +0.03%
+- 画面で見せる内容：AMD -1.21% / Alphabet -0.96%/MSFT +0.03%
 - 根拠：当日の市場データ
 - 不確実性：個別材料を完全分離していない
 
@@ -3069,7 +3069,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         "sourceLabel": "当日の市場データ",
         "supportingTexts": [
           "AMD -1.21%",
-          "Alphabet -0.96% / MSFT +0.03%"
+          "Alphabet -0.96%/MSFT +0.03%"
         ],
         "timelineBasis": "8月7日通常取引終値",
         "transition": {
