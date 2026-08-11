@@ -7,7 +7,7 @@
   "expectedManifestSha256": "3dfc5d35607ba2ee624283bd8d244a115f8df1bfe4d9957f7248bdee7f2da20f",
   "expectedRendererCommit": "0aaaf77eb2fd54e3e1b5eb4db05410dcaf71b673",
   "rendererRef": "main",
-  "signedArtifactUrl": "https://sdmntprwestus3.oaiusercontent.com/files/00000000-8af8-81fd-bbd0-ec15f8c7338a/raw?se=2026-08-11T07%3A40%3A01Z&sp=r&sv=2026-02-06&sr=b&scid=d383dda1-b633-53df-8fe7-1e10c7e9b142&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A49%3A37Z&ske=2026-08-12T06%3A49%3A37Z&sks=b&skv=2026-02-06&sig=5UPYMqRvpTmGejaggTimlAIpUYlLBwbTegveV%2BngasI%3D",
+  "signedArtifactUrl": "https://sdmntprwestus.oaiusercontent.com/files/00000000-44c0-8230-85ec-7fae1cd4fd70/raw?se=2026-08-11T07%3A47%3A37Z&sp=r&sv=2026-02-06&sr=b&scid=de3de989-28ea-57d4-b032-5130f4e6b1b2&skoid=1a0ef048-201c-43e0-8950-52d58956a71a&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A07%3A02Z&ske=2026-08-12T06%3A07%3A02Z&sks=b&skv=2026-02-06&sig=S6cdTzZpBWay5Y0syyeIaW6EEbtWWz0nokBcFo%2Bs3fk%3D",
   "signedArtifactDigestSha256": "65eeb5fffe92bd8f8643c469293ccaa2c5e12f8ad122a53aadfa2368a9c8d8c5",
   "confirmation": "PREVIEW"
 }
