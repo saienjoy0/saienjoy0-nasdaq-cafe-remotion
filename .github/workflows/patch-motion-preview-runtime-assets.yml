@@ -1,4 +1,5 @@
 name: Patch Motion Preview runtime assets
+# trigger after workflow registration
 
 on:
   pull_request:
