@@ -1,5 +1,5 @@
 name: Patch Motion Preview runtime assets
-# trigger after workflow registration
+# trigger registered base workflow
 
 on:
   pull_request:
@@ -31,37 +31,28 @@ jobs:
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
-
           script = Path('scripts/render-motion-preview.ts')
           text = script.read_text(encoding='utf-8')
           old = 'import {productionAssetPaths} from "../src/config/production-assets";'
           new = 'import {loadRuntimeAssetContext} from "../src/config/runtime-assets";'
-          if old in text:
-              text = text.replace(old, new, 1)
-          elif new not in text:
-              raise SystemExit('render-motion-preview asset import drift')
+          if old in text: text = text.replace(old, new, 1)
+          elif new not in text: raise SystemExit('render-motion-preview asset import drift')
           old = 'const loaded = await loadRenderSpecForProduction(input);'
           new = 'const runtimeAssets = await loadRuntimeAssetContext();\nconst loaded = await loadRenderSpecForProduction(input, runtimeAssets.manifest);'
-          if old in text:
-              text = text.replace(old, new, 1)
-          elif new not in text:
-              raise SystemExit('render-motion-preview load call drift')
+          if old in text: text = text.replace(old, new, 1)
+          elif new not in text: raise SystemExit('render-motion-preview load call drift')
           old = '  productionAssetPaths,\n  {inputSpecSha256: sha256},'
           new = '  runtimeAssets.paths,\n  {inputSpecSha256: sha256},'
-          if old in text:
-              text = text.replace(old, new, 1)
-          elif new not in text:
-              raise SystemExit('render-motion-preview compile asset paths drift')
+          if old in text: text = text.replace(old, new, 1)
+          elif new not in text: raise SystemExit('render-motion-preview compile asset paths drift')
           script.write_text(text, encoding='utf-8')
 
           workflow = Path('.github/workflows/nasdaq-cafe-motion-preview.yml')
           text = workflow.read_text(encoding='utf-8')
           old = '      EPISODE_DATE: ${{ inputs.episode_date }}\n      EXPECTED_SPEC_SHA256:'
           new = '      EPISODE_DATE: ${{ inputs.episode_date }}\n      EPISODE_ID: ${{ inputs.episode_date }}\n      EXPECTED_SPEC_SHA256:'
-          if old in text:
-              text = text.replace(old, new, 1)
-          elif '      EPISODE_ID: ${{ inputs.episode_date }}' not in text:
-              raise SystemExit('motion-preview env block drift')
+          if old in text: text = text.replace(old, new, 1)
+          elif '      EPISODE_ID: ${{ inputs.episode_date }}' not in text: raise SystemExit('motion-preview env block drift')
           old = '''      - name: Validate code and render spec
         run: |
           npm run typecheck
@@ -80,15 +71,12 @@ jobs:
           console.log(`PASS runtime asset validation bundle=${runtimeAssets.bundleId}`);
           JS
 '''
-          if old in text:
-              text = text.replace(old, new, 1)
-          elif 'Validate code and render spec with promoted runtime assets' not in text:
-              raise SystemExit('motion-preview validation step drift')
+          if old in text: text = text.replace(old, new, 1)
+          elif 'Validate code and render spec with promoted runtime assets' not in text: raise SystemExit('motion-preview validation step drift')
           workflow.write_text(text, encoding='utf-8')
           PY
-      - name: Typecheck patched preview
-        run: npm run typecheck
-      - name: Validate 2026-08-10 with promoted runtime assets
+      - run: npm run typecheck
+      - name: Validate 2026-08-10 runtime asset path
         shell: bash
         env:
           EPISODE_ID: "2026-08-10"
@@ -100,16 +88,12 @@ jobs:
           const runtimeAssets = await loadRuntimeAssetContext();
           await loadRenderSpecForProduction('render-specs/2026-08-10/render_spec.json', runtimeAssets.manifest);
           if (!runtimeAssets.bundleId) throw new Error('runtime assets were not loaded');
-          console.log(`PASS runtime bundle ${runtimeAssets.bundleId}`);
           JS
       - name: Commit patch
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- scripts/render-motion-preview.ts .github/workflows/nasdaq-cafe-motion-preview.yml; then
-            echo "already patched"
-            exit 0
-          fi
+          if git diff --quiet -- scripts/render-motion-preview.ts .github/workflows/nasdaq-cafe-motion-preview.yml; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- scripts/render-motion-preview.ts .github/workflows/nasdaq-cafe-motion-preview.yml
