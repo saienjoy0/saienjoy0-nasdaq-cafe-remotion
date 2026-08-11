@@ -1,0 +1,11 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "plotRunId": 31449899111,
+  "handoffArtifactName": "h4-clean-real-day-2026-08-10",
+  "expectedBundleId": "ad04ef191711898a7ea2a63b7742f5473cf731a49d3cf85444e500bd2ead6bcc",
+  "expectedManifestSha256": "eddb84536500ebfa926fc2f10629b283e8110071140c7a27191c4e0916f1bb02",
+  "expectedRendererCommit": "0aaaf77eb2fd54e3e1b5eb4db05410dcaf71b673",
+  "rendererRef": "main",
+  "confirmation": "PREVIEW"
+}
