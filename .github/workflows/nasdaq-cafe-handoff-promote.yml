@@ -211,10 +211,11 @@ jobs:
           RENDER="render-specs/${EPISODE_DATE}/render_spec.json"
           RECEIPT="handoff-promote-receipts/${EPISODE_DATE}-${BUNDLE_ID:0:12}.json"
           RUNTIME_DIR="runtime-assets/${EPISODE_DATE}"
+          PUBLIC_RUNTIME_DIR="public/generated/preflight-assets/${EPISODE_DATE}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- "$PACKAGE" "$RENDER" "$RECEIPT" "$RUNTIME_DIR"
-          git add -u -- "$RUNTIME_DIR"
+          git add -- "$PACKAGE" "$RENDER" "$RECEIPT" "$RUNTIME_DIR" "$PUBLIC_RUNTIME_DIR"
+          git add -u -- "$RUNTIME_DIR" "$PUBLIC_RUNTIME_DIR"
           git diff --cached --quiet && {
             echo "Verified canonical inputs and runtime assets already match; nothing to commit."
             exit 0
