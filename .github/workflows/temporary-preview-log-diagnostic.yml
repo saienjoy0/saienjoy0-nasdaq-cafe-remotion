@@ -1,0 +1,40 @@
+name: Temporary Preview Log Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/temporary-preview-log-diagnostic.json"]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RUN_ID: "31452681431"
+    steps:
+      - name: Extract only failed-step log tail
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --log-failed > /tmp/failed.log 2>&1 || true
+          tail -n 180 /tmp/failed.log > /tmp/tail.log
+          TITLE="TEMP PREVIEW RENDER DIAGNOSTIC 2026-08-10"
+          BODY="$(python3 - <<'PY'
+          from pathlib import Path
+          text=Path('/tmp/tail.log').read_text(encoding='utf-8',errors='replace')
+          print('Temporary diagnostic; close after repair.\n\n```text\n'+text+'\n```')
+          PY
+          )"
+          n="$(gh issue list --state all --search "${TITLE} in:title" --json number,title --jq ".[] | select(.title == \"${TITLE}\") | .number" | head -n1)"
+          if [[ -n "$n" ]]; then
+            gh issue edit "$n" --body "$BODY"
+            gh issue reopen "$n" >/dev/null 2>&1 || true
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
