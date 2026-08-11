@@ -1407,8 +1407,8 @@
           "templateVariant": "two-lane",
           "transitionRole": "major-shift",
           "viewerTexts": [
-            "原油・インフレ懸念↓",
-            "米国債利回り↓"
+            "追い風｜原油・インフレ懸念↓",
+            "留保｜米国債利回り↓"
           ],
           "visualGrammarId": "causal",
           "visualMode": "conclusion-card",
