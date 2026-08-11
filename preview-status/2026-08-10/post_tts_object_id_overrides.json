@@ -2,14 +2,9 @@
   "contractVersion": "1.0.0",
   "status": "validated-awaiting-owner-readiness",
   "episodeDate": "2026-08-10",
-  "overrides": [
-    {
-      "beatId": "scene-08-beat-002",
-      "objectIds": []
-    }
-  ],
-  "intermediateRenderSpecSha256": "b59f7ae8d46fd998509d8ea404b69662de8f4e0fcdad0cc4eb77cc566926334f",
-  "intermediateEpisodePackageSha256": "60609e3463ce50311f68edf632dc2cfb7230e02a836ab21764d2e8bbcb7b0620",
+  "overrides": [],
+  "intermediateRenderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "intermediateEpisodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
   "editorialChanged": false,
   "narrationWordingChanged": false,
   "captionWordingChanged": false,

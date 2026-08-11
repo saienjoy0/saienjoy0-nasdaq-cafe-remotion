@@ -19,14 +19,14 @@
 
 ### 画面構成表
 
-- Scene 1｜寝ている間に何が起きた？｜opening-contradiction → hero-number
+- Scene 1｜寝ている間に何が起きた？｜opening-contradiction → evidence-boundary
 - Scene 2｜今朝の矛盾｜hero-number → text-focus
 - Scene 3｜Expected / Actual / Gap｜expected-actual-gap-flow → text-focus
 - Scene 4｜採点表が変わった｜expected-actual-gap-flow → evidence-boundary
 - Scene 5｜世界からNASDAQへの経路｜hero-number → text-focus
 - Scene 6｜半導体で増幅｜event-reaction-timeline → market-pulse-grid
 - Scene 7｜反対材料と銘柄差｜diverging-stock-bars → text-focus
-- Scene 8｜どこまで言える？｜verification-matrix → verification-checklist
+- Scene 8｜どこまで言える？｜verification-matrix → evidence-boundary → verification-checklist
 - Scene 9｜いってらっしゃい、おやすみ｜closing-recap → closing-recap
 
 ## Scene 1｜寝ている間に何が起きた？
@@ -72,8 +72,8 @@
   - 主要視覚機能：Evidence
   - 画面状態：Data
   - Visual Grammar：evidence / continuation
-  - Visual Template ID：hero-number
-  - Template Variant：default
+  - Visual Template ID：evidence-boundary
+  - Template Variant：confirmed-vs-unconfirmed
   - 入力構造：悪い雇用→株高？ / 見るべきは利上げ観測
   - 画面の問い：利上げ観測だけで半導体まで説明できる？
   - 主要要素：暫定解：利上げ観測後退 / 未解決：1銘柄の初動
@@ -525,16 +525,36 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
 
 ### Visual Beats
 
-<!--VISUAL_BEAT:scene-08:vb-08-01-->
+<!--VISUAL_BEAT:scene-08:scene-08-beat-001-->
 - **scene-08-beat-001**
-  - 開始合図：最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型
-  - 終了合図：。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。
+  - 開始合図：最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだこと
+  - 終了合図：の説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。
   - 主要視覚機能：Evidence
   - 画面状態：Data
   - Visual Grammar：verification / major-shift
   - Visual Template ID：verification-matrix
   - Template Variant：strengthen-vs-weaken
-  - 入力構造：8:30 ETの実分足 / MCHPの逆方向初動 / 1分足は因果証明ではない
+  - 入力構造：強める｜雇用下振れ→利上げ観測後退 / 強める｜QQQ・SOXX・NVIDIA初動↑ / 弱める｜1分足だけでは因果証明できない / 弱める｜成長不安・AMD/Alphabet下落
+  - 画面の問い：マクロ仮説を強める材料と弱める材料は？
+  - 主要要素：利上げ観測後退を中心に境界を残す
+  - 視聴者向けテキスト：強める｜雇用下振れ→利上げ観測後退 / 強める｜QQQ・SOXX・NVIDIA初動↑ / 弱める｜1分足だけでは因果証明できない / 弱める｜成長不安・AMD/Alphabet下落
+  - 使用アセットID：not-required
+  - アセット状態：not-required
+  - 表示後の復帰先：該当なし
+  - Primary / Approved Fallback：not-required
+  - selected_path：not-required
+  - 根拠ID：source-003, source-004, source-005
+
+<!--VISUAL_BEAT:scene-08:scene-08-beat-002-->
+- **scene-08-beat-002**
+  - 開始合図：ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。
+  - 終了合図：ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。
+  - 主要視覚機能：Evidence
+  - 画面状態：Data
+  - Visual Grammar：evidence / continuation
+  - Visual Template ID：evidence-boundary
+  - Template Variant：confirmed-vs-unconfirmed
+  - 入力構造：強める｜雇用下振れ→利上げ観測後退 / 強める｜QQQ・SOXX・NVIDIA初動↑ / 弱める｜1分足だけでは因果証明できない / 弱める｜成長不安・AMD/Alphabet下落
   - 画面の問い：マクロ仮説を強める材料と弱める材料は？
   - 主要要素：利上げ観測後退を中心に境界を残す
   - 視聴者向けテキスト：強める｜雇用下振れ→利上げ観測後退 / 強める｜QQQ・SOXX・NVIDIA初動↑ / 弱める｜1分足だけでは因果証明できない / 弱める｜成長不安・AMD/Alphabet下落
@@ -546,7 +566,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
   - 根拠ID：source-003, source-004, source-005
 
 <!--VISUAL_BEAT:scene-08:vb-08-02-->
-- **scene-08-beat-002**
+- **scene-08-beat-003a**
   - 開始合図：原油や利回り低下は増幅要因。雇用が示す成長不安とAMD、Alphabetの下落は反対材料です。僕の結論は中程度の確信で、昨夜は一
   - 終了合図：材料です。僕の結論は中程度の確信で、昨夜は一つの理由で全部が上がったのではなく、違う理由の上昇が同じ指数方向へ重なった夜でした。
   - 主要視覚機能：Evidence
@@ -554,7 +574,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
   - Visual Grammar：verification / continuation
   - Visual Template ID：verification-checklist
   - Template Variant：default
-  - 入力構造：言える：初動整合 / 言わない：因果断定 / 分ける：MCHP固有増幅
+  - 入力構造：主役候補｜雇用→利上げ観測後退 / 別エンジン｜Microchip決算 / 増幅｜原油・利回り低下 / 結論｜違う理由の上昇が同じ方向へ重なった
   - 画面の問い：最後に何を残す？
   - 主要要素：複数エンジンが同じ指数方向へ重なった
   - 視聴者向けテキスト：主役候補｜雇用→利上げ観測後退 / 別エンジン｜Microchip決算 / 増幅｜原油・利回り低下 / 結論｜違う理由の上昇が同じ方向へ重なった
@@ -563,7 +583,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
   - 表示後の復帰先：該当なし
   - Primary / Approved Fallback：not-required
   - selected_path：not-required
-  - 根拠ID：source-002, source-003, source-005
+  - 根拠ID：source-003, source-004, source-005
 
 ### 完成ナレーション
 
@@ -891,12 +911,21 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
       "sceneId": "scene-08",
       "visualBeats": [
         {
-          "visualBeatId": "vb-08-01",
+          "visualBeatId": "scene-08-beat-001",
           "visualGrammar": {
             "contractVersion": "1.0.0",
             "grammarId": "verification",
             "returnTargetBeatId": null,
             "transitionRole": "major-shift"
+          }
+        },
+        {
+          "visualBeatId": "scene-08-beat-002",
+          "visualGrammar": {
+            "contractVersion": "1.0.0",
+            "grammarId": "evidence",
+            "returnTargetBeatId": null,
+            "transitionRole": "continuation"
           }
         },
         {
@@ -1177,6 +1206,15 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
       "targetDate": "2026-08-10",
       "width": 1920
     },
+    "financialVisualContract": {
+      "contractVersion": "1.0.0",
+      "finalEpisodeContractVersion": "1.0.0",
+      "intentVersion": "1.1.0",
+      "recipePlanSha256": "c10df9fedff88dd31c09ccbfab6529072669eb1ef55eb377e2d31b51486aa61c",
+      "recipePlanVersion": "1.0.0",
+      "recipeRegistryVersion": "1.0.0",
+      "selectionCount": 0
+    },
     "pronunciations": [
       {
         "reading": "ナスダック・コンポジット",
@@ -1400,18 +1438,13 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "雇用 -2.3万人",
               "予想 +8万人",
               "NASDAQ +1.30%"
             ],
-            "visualBeatId": "vb-01-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "contradiction",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "contradiction",
             "visualMode": "conclusion-card",
             "visualTemplate": "opening-contradiction"
           },
@@ -1448,22 +1481,17 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "laneLabels": [],
               "nodeOrder": [],
               "outcomeNodeId": null,
-              "variant": "default"
+              "variant": "confirmed-vs-unconfirmed"
             },
-            "templateVariant": "default",
+            "templateVariant": "confirmed-vs-unconfirmed",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "暫定解：利上げ観測後退",
               "次の検証：8:30 ETの銘柄別初動"
             ],
-            "visualBeatId": "vb-01-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "evidence",
             "visualMode": "conclusion-card",
-            "visualTemplate": "hero-number"
+            "visualTemplate": "evidence-boundary"
           }
         ],
         "visualEvents": [
@@ -1541,23 +1569,6 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         ],
         "cards": [
           {
-            "cardId": "scene-02-card-001",
-            "lines": [
-              {
-                "label": "1",
-                "tone": "neutral",
-                "value": "雇用 -2.3万人"
-              },
-              {
-                "label": "2",
-                "tone": "neutral",
-                "value": "失業率 4.1%"
-              }
-            ],
-            "role": null,
-            "title": "BLSが確認した7月雇用"
-          },
-          {
             "cardId": "scene-02-card-002",
             "lines": [
               {
@@ -1600,7 +1611,24 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           }
         ],
         "nodes": [],
-        "numbers": [],
+        "numbers": [
+          {
+            "comparison": null,
+            "label": "1",
+            "numberId": "vb-02-01.card-01.line-01",
+            "tone": "neutral",
+            "unit": "",
+            "value": "雇用 -2.3万人"
+          },
+          {
+            "comparison": null,
+            "label": "2",
+            "numberId": "vb-02-01.card-01.line-02",
+            "tone": "neutral",
+            "unit": "",
+            "value": "失業率 4.1%"
+          }
+        ],
         "performanceIntent": "落ち着いてBLSの数字を確認し、景気側の弱さを過小評価しない",
         "purpose": "雇用の弱さが一行だけではないことをBLSの確認済み事実で示す",
         "sceneId": "scene-02",
@@ -1637,7 +1665,8 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "narrationEndCue": "。非農業部門雇用者数は二・三万人減、失業率は四・一パーセント。さらに5月と6月の雇用増も、合わせて十・三万人下方修正されました。",
             "narrationStartCue": "BLSの中身を見ると、弱さは一行だけではありません。非農業部門雇用者数は二・三万人減、失業率は四・一パーセント。さらに5月と6月",
             "objectIds": [
-              "scene-02-card-001"
+              "vb-02-01.card-01.line-01",
+              "vb-02-01.card-01.line-02"
             ],
             "pictureBook": null,
             "primaryElement": "7月雇用の確認済み事実",
@@ -1645,7 +1674,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "returnScreenState": null,
             "screenQuestion": "BLSは何を確認したか",
             "screenState": "Data",
-            "sequencePolicy": "static",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-02-chunk-001",
             "templateConfig": {
               "comparisonBasis": null,
@@ -1656,17 +1685,12 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "雇用 -2.3万人",
               "失業率 4.1%"
             ],
-            "visualBeatId": "vb-02-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "evidence",
             "visualMode": "number-comparison",
             "visualTemplate": "metric-comparison-board"
           },
@@ -1707,34 +1731,17 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "confirmed-vs-unconfirmed"
             },
             "templateVariant": "confirmed-vs-unconfirmed",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "5月・6月 改定 -10.3万人",
               "NASDAQ +1.30%"
             ],
-            "visualBeatId": "vb-02-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "evidence",
             "visualMode": "text-focus",
             "visualTemplate": "evidence-boundary"
           }
         ],
         "visualEvents": [
-          {
-            "action": "show",
-            "atChunkId": "scene-02-chunk-001",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-003",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-02-card-001",
-            "timing": "chunk-start"
-          },
           {
             "action": "show",
             "atChunkId": "scene-02-chunk-002",
@@ -1748,7 +1755,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "timing": "chunk-start"
           }
         ],
-        "visualMode": "conclusion-card"
+        "visualMode": "number-comparison"
       },
       {
         "arrows": [],
@@ -1776,26 +1783,40 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         ],
         "cards": [
           {
-            "cardId": "scene-03-card-001",
+            "cardId": "scene-03-card-expected",
             "lines": [
               {
                 "label": "1",
                 "tone": "neutral",
                 "value": "Expected +8万人"
-              },
+              }
+            ],
+            "role": "expected",
+            "title": "Expected"
+          },
+          {
+            "cardId": "scene-03-card-actual",
+            "lines": [
               {
                 "label": "2",
                 "tone": "neutral",
                 "value": "Actual -2.3万人"
-              },
+              }
+            ],
+            "role": "actual",
+            "title": "Actual"
+          },
+          {
+            "cardId": "scene-03-card-gap",
+            "lines": [
               {
                 "label": "3",
                 "tone": "neutral",
                 "value": "Gap -10.3万人"
               }
             ],
-            "role": null,
-            "title": "Expected / Actual / Gap"
+            "role": "gap",
+            "title": "Gap"
           }
         ],
         "causalScope": "nasdaq",
@@ -1877,7 +1898,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "narrationEndCue": "daq Compositeが一・三〇パーセント上昇。SOXXは二・〇二パーセント、NVIDIAも二・二七パーセント上がりました。",
             "narrationStartCue": "それでも引けではNasdaq Compositeが一・三〇パーセント上昇。SOXXは二・〇二パーセント、NVIDIAも二・二七パ",
             "objectIds": [
-              "scene-03-card-001"
+              "scene-03-card-expected",
+              "scene-03-card-actual",
+              "scene-03-card-gap"
             ],
             "pictureBook": null,
             "primaryElement": "Expected / Actual / Gap",
@@ -1896,18 +1919,13 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "Expected +8万人",
               "Actual -2.3万人",
               "Gap -10.3万人"
             ],
-            "visualBeatId": "vb-03-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "gap",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "gap",
             "visualMode": "expected-actual-gap",
             "visualTemplate": "expected-actual-gap-flow"
           },
@@ -1949,18 +1967,13 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "予想差 -10.3万人",
               "過去2か月改定 -10.3万人",
               "意味は別の数字"
             ],
-            "visualBeatId": "vb-03-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "evidence",
             "visualMode": "number-comparison",
             "visualTemplate": "metric-comparison-board"
           }
@@ -1975,7 +1988,31 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-03-card-001",
+            "targetId": "scene-03-card-expected",
+            "timing": "chunk-start"
+          },
+          {
+            "action": "show",
+            "atChunkId": "scene-03-chunk-001",
+            "durationMs": 560,
+            "easingPreset": "smooth-out",
+            "eventId": "event-020",
+            "expression": null,
+            "motionPreset": "rise-soft",
+            "offsetMs": 0,
+            "targetId": "scene-03-card-actual",
+            "timing": "chunk-start"
+          },
+          {
+            "action": "show",
+            "atChunkId": "scene-03-chunk-001",
+            "durationMs": 560,
+            "easingPreset": "smooth-out",
+            "eventId": "event-021",
+            "expression": null,
+            "motionPreset": "rise-soft",
+            "offsetMs": 0,
+            "targetId": "scene-03-card-gap",
             "timing": "chunk-start"
           },
           {
@@ -2003,7 +2040,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "timing": "chunk-start"
           }
         ],
-        "visualMode": "number-comparison"
+        "visualMode": "expected-actual-gap"
       },
       {
         "arrows": [
@@ -2054,48 +2091,40 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         ],
         "cards": [
           {
-            "cardId": "scene-04-card-001",
+            "cardId": "scene-04-card-expected",
             "lines": [
               {
                 "label": "Expected",
                 "tone": "neutral",
                 "value": "+8万人"
-              },
+              }
+            ],
+            "role": "expected",
+            "title": "Expected"
+          },
+          {
+            "cardId": "scene-04-card-actual",
+            "lines": [
               {
                 "label": "Actual",
                 "tone": "neutral",
                 "value": "-2.3万人"
-              },
+              }
+            ],
+            "role": "actual",
+            "title": "Actual"
+          },
+          {
+            "cardId": "scene-04-card-gap",
+            "lines": [
               {
                 "label": "Gap",
                 "tone": "neutral",
                 "value": "-10.3万人"
               }
             ],
-            "role": null,
-            "title": "Expected / Actual / Gap"
-          },
-          {
-            "cardId": "scene-04-card-002",
-            "lines": [
-              {
-                "label": "8月7日",
-                "tone": "neutral",
-                "value": "約44%"
-              },
-              {
-                "label": "前日",
-                "tone": "neutral",
-                "value": "55%"
-              },
-              {
-                "label": "1週間前",
-                "tone": "neutral",
-                "value": "67%"
-              }
-            ],
-            "role": null,
-            "title": "利上げ確率の変化"
+            "role": "gap",
+            "title": "Gap"
           }
         ],
         "causalScope": "nasdaq",
@@ -2171,7 +2200,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "narrationEndCue": "でした。ところが次回Fed会合の利上げ確率は約四十四パーセントまで低下。前日は五十五パーセント、一週間前は六十七パーセントです。",
             "narrationStartCue": "期待との差はかなり大きいです。Expectedはプラス八万人。Actualはマイナス二・三万人。Gapはマイナス十・三万人でした",
             "objectIds": [
-              "scene-04-card-001"
+              "scene-04-card-expected",
+              "scene-04-card-actual",
+              "scene-04-card-gap"
             ],
             "pictureBook": null,
             "primaryElement": "Expected → Actual → Gap",
@@ -2190,18 +2221,13 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "Expected +8万人",
               "Actual -2.3万人",
               "Gap -10.3万人"
             ],
-            "visualBeatId": "vb-04-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "gap",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
+            "visualGrammarId": "gap",
             "visualMode": "expected-actual-gap",
             "visualTemplate": "expected-actual-gap-flow"
           },
@@ -2234,7 +2260,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "returnScreenState": null,
             "screenQuestion": "同じ悪材料でも採点表が違うと何が変わる？",
             "screenState": "Data",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-04-chunk-002",
             "templateConfig": {
               "comparisonBasis": "同じ雇用下振れを景気と金利の2つの採点表で読む",
@@ -2249,18 +2275,12 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "left-to-right"
             },
             "templateVariant": "left-to-right",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "景気の採点表：赤点",
               "金利の採点表：利上げリスク↓",
               "大型テック：逆風が和らぐ"
             ],
-            "visualBeatId": "vb-04-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "analogy",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
             "visualGrammarId": "analogy",
             "visualMode": "causal-diagram",
             "visualTemplate": "analogy-steps"
@@ -2276,26 +2296,51 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-04-card-001",
+            "targetId": "scene-04-card-expected",
             "timing": "chunk-start"
           },
           {
             "action": "show",
-            "atChunkId": "scene-04-chunk-002",
+            "atChunkId": "scene-04-chunk-001",
             "durationMs": 560,
             "easingPreset": "smooth-out",
-            "eventId": "event-008",
+            "eventId": "event-022",
             "expression": null,
             "motionPreset": "rise-soft",
             "offsetMs": 0,
-            "targetId": "scene-04-card-002",
+            "targetId": "scene-04-card-actual",
+            "timing": "chunk-start"
+          },
+          {
+            "action": "show",
+            "atChunkId": "scene-04-chunk-001",
+            "durationMs": 560,
+            "easingPreset": "smooth-out",
+            "eventId": "event-023",
+            "expression": null,
+            "motionPreset": "rise-soft",
+            "offsetMs": 0,
+            "targetId": "scene-04-card-gap",
             "timing": "chunk-start"
           }
         ],
         "visualMode": "expected-actual-gap"
       },
       {
-        "arrows": [],
+        "arrows": [
+          {
+            "arrowId": "vb-05-02.arrow-01",
+            "fromNodeId": "vb-05-02.node-01",
+            "label": "",
+            "toNodeId": "vb-05-02.node-02"
+          },
+          {
+            "arrowId": "vb-05-02.arrow-02",
+            "fromNodeId": "vb-05-02.node-02",
+            "label": "",
+            "toNodeId": "vb-05-02.node-03"
+          }
+        ],
         "assetPlacements": [
           {
             "assetId": "mainBackground",
@@ -2417,7 +2462,20 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "speechText": "雇用から金利への経路を、同じ方向から支えた増幅材料として置いておきます。"
           }
         ],
-        "nodes": [],
+        "nodes": [
+          {
+            "label": "雇用大幅下振れ",
+            "nodeId": "vb-05-02.node-01"
+          },
+          {
+            "label": "利上げ観測↓",
+            "nodeId": "vb-05-02.node-02"
+          },
+          {
+            "label": "大型テックの逆風↓",
+            "nodeId": "vb-05-02.node-03"
+          }
+        ],
         "numbers": [],
         "performanceIntent": "主因をぼかさず、舞台装置が複数あることを短く整理する",
         "purpose": "雇用以外の原油・利回り・決算を増幅要因として分離する",
@@ -2461,7 +2519,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "returnScreenState": null,
             "screenQuestion": "雇用以外の追い風は何か",
             "screenState": "Data",
-            "sequencePolicy": "static",
+            "sequencePolicy": "explicit",
             "startChunkId": "scene-05-chunk-001",
             "templateConfig": {
               "comparisonBasis": "NASDAQへの主因候補と同日に存在した増幅要因",
@@ -2475,17 +2533,11 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "two-lane"
             },
             "templateVariant": "two-lane",
+            "transitionRole": "major-shift",
             "viewerTexts": [
               "原油・インフレ懸念↓",
               "米国債利回り↓"
             ],
-            "visualBeatId": "vb-05-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "causal",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
             "visualGrammarId": "causal",
             "visualMode": "conclusion-card",
             "visualTemplate": "tailwind-headwind"
@@ -2508,7 +2560,11 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "narrationEndCue": "企業決算も強めです。ここは主役ではありません。",
             "narrationStartCue": "企業決算も強めです。ここは主役ではありません。",
             "objectIds": [
-              "scene-05-card-002"
+              "vb-05-02.node-01",
+              "vb-05-02.node-02",
+              "vb-05-02.arrow-01",
+              "vb-05-02.node-03",
+              "vb-05-02.arrow-02"
             ],
             "pictureBook": null,
             "primaryElement": "雇用→利上げ観測→テック",
@@ -2516,30 +2572,29 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "returnScreenState": null,
             "screenQuestion": "雇用からNASDAQへどう届くか",
             "screenState": "Chart",
-            "sequencePolicy": "explicit",
+            "sequencePolicy": "object-order-fallback",
             "startChunkId": "scene-05-chunk-002",
             "templateConfig": {
               "comparisonBasis": null,
               "dataBasis": "BLS / Reuters",
               "laneLabels": [],
-              "nodeOrder": [],
-              "outcomeNodeId": null,
+              "nodeOrder": [
+                "vb-05-02.node-01",
+                "vb-05-02.node-02",
+                "vb-05-02.node-03"
+              ],
+              "outcomeNodeId": "vb-05-02.node-03",
               "variant": "left-to-right"
             },
             "templateVariant": "left-to-right",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "雇用大幅下振れ",
               "利上げ観測↓",
               "大型テックの逆風↓"
             ],
-            "visualBeatId": "vb-05-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "causal",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
-            "visualMode": "text-focus",
+            "visualGrammarId": "causal",
+            "visualMode": "causal-diagram",
             "visualTemplate": "causal-lane"
           },
           {
@@ -2578,17 +2633,12 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "continuation",
             "viewerTexts": [
               "主因候補：雇用→金利",
               "増幅：原油・決算"
             ],
-            "visualBeatId": "vb-05-03",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "bridge-text",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
+            "visualGrammarId": "bridge-text",
             "visualMode": "text-focus",
             "visualTemplate": "text-focus"
           }
@@ -2667,52 +2717,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "startChunkId": null
           }
         ],
-        "cards": [
-          {
-            "cardId": "scene-06-card-001",
-            "lines": [
-              {
-                "label": "1",
-                "tone": "neutral",
-                "value": "08:30 ET BLS発表"
-              },
-              {
-                "label": "2",
-                "tone": "neutral",
-                "value": "利上げ確率 約44%"
-              },
-              {
-                "label": "3",
-                "tone": "neutral",
-                "value": "引け NASDAQ +1.30%"
-              }
-            ],
-            "role": null,
-            "title": "公式時刻から引けまで"
-          },
-          {
-            "cardId": "scene-06-card-002",
-            "lines": [
-              {
-                "label": "1",
-                "tone": "neutral",
-                "value": "SOXX +2.02%"
-              },
-              {
-                "label": "2",
-                "tone": "neutral",
-                "value": "MCHP +13.89%"
-              },
-              {
-                "label": "3",
-                "tone": "neutral",
-                "value": "NVIDIA +2.27%"
-              }
-            ],
-            "role": null,
-            "title": "半導体の増幅"
-          }
-        ],
+        "cards": [],
         "causalScope": "sector",
         "evidenceSourceIds": [
           "source-001",
@@ -2773,9 +2778,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "08:29→08:30 ET",
-            "label": "QQQ",
+            "label": "+0.149%",
             "numberId": "scene-06-release-qqq",
-            "numericValue": 0.148785,
+            "numericValue": 0.149,
             "precision": 3,
             "tone": "positive",
             "unit": "%",
@@ -2783,9 +2788,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "08:29→08:30 ET",
-            "label": "SOXX",
+            "label": "+0.248%",
             "numberId": "scene-06-release-soxx",
-            "numericValue": 0.247662,
+            "numericValue": 0.248,
             "precision": 3,
             "tone": "positive",
             "unit": "%",
@@ -2793,9 +2798,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "08:29→08:30 ET",
-            "label": "NVIDIA",
+            "label": "+0.164%",
             "numberId": "scene-06-release-nvidia",
-            "numericValue": 0.163674,
+            "numericValue": 0.164,
             "precision": 3,
             "tone": "positive",
             "unit": "%",
@@ -2803,9 +2808,9 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "08:29→08:30 ET",
-            "label": "MCHP",
+            "label": "-0.025%",
             "numberId": "scene-06-release-mchp",
-            "numericValue": -0.025132,
+            "numericValue": -0.025,
             "precision": 3,
             "tone": "negative",
             "unit": "%",
@@ -2886,13 +2891,6 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "QQQ 実1分足",
               "08:29 719.16 → 08:30 720.23 → 08:31 720.531"
             ],
-            "visualBeatId": "vb-06-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "reaction",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
             "visualGrammarId": "reaction",
             "visualMode": "timeline",
             "visualTemplate": "event-reaction-timeline"
@@ -2942,44 +2940,12 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "MCHP は -0.025%でほぼ横ばい",
               "1分足だけでは因果証明しない"
             ],
-            "visualBeatId": "vb-06-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "reaction",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
             "visualGrammarId": "reaction",
-            "visualMode": "stock-comparison",
+            "visualMode": "number-comparison",
             "visualTemplate": "index-return-bars"
           }
         ],
-        "visualEvents": [
-          {
-            "action": "show",
-            "atChunkId": "scene-06-chunk-001",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-012",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-06-card-001",
-            "timing": "chunk-start"
-          },
-          {
-            "action": "show",
-            "atChunkId": "scene-06-chunk-002",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-013",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-06-card-002",
-            "timing": "chunk-start"
-          }
-        ],
+        "visualEvents": [],
         "visualMode": "timeline"
       },
       {
@@ -3027,52 +2993,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "startChunkId": "scene-07-chunk-001"
           }
         ],
-        "cards": [
-          {
-            "cardId": "scene-07-card-001",
-            "lines": [
-              {
-                "label": "1",
-                "tone": "neutral",
-                "value": "MCHP +13.89%"
-              },
-              {
-                "label": "2",
-                "tone": "neutral",
-                "value": "AMD -1.21%"
-              },
-              {
-                "label": "3",
-                "tone": "neutral",
-                "value": "Alphabet -0.96%"
-              }
-            ],
-            "role": null,
-            "title": "上昇の中の逆行"
-          },
-          {
-            "cardId": "scene-07-card-002",
-            "lines": [
-              {
-                "label": "1",
-                "tone": "neutral",
-                "value": "広い金利追い風"
-              },
-              {
-                "label": "2",
-                "tone": "neutral",
-                "value": "個別材料で差"
-              },
-              {
-                "label": "3",
-                "tone": "neutral",
-                "value": "Microsoft +0.03%"
-              }
-            ],
-            "role": null,
-            "title": "全面高ではない"
-          }
-        ],
+        "cards": [],
         "causalScope": "multiple",
         "evidenceSourceIds": [
           "source-001"
@@ -3101,7 +3022,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         "numbers": [
           {
             "comparison": "8/7通常取引",
-            "label": "MCHP",
+            "label": "+13.89%",
             "numberId": "scene-07-daily-mchp",
             "numericValue": 13.89,
             "precision": 2,
@@ -3111,7 +3032,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "8/7通常取引",
-            "label": "AMD",
+            "label": "-1.21%",
             "numberId": "scene-07-daily-amd",
             "numericValue": -1.21,
             "precision": 2,
@@ -3121,7 +3042,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "8/7通常取引",
-            "label": "Alphabet",
+            "label": "-0.96%",
             "numberId": "scene-07-daily-alphabet",
             "numericValue": -0.96,
             "precision": 2,
@@ -3131,7 +3052,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           },
           {
             "comparison": "8/7通常取引",
-            "label": "Microsoft",
+            "label": "+0.03%",
             "numberId": "scene-07-daily-microsoft",
             "numericValue": 0.03,
             "precision": 2,
@@ -3179,7 +3100,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "pictureBook": null,
             "primaryElement": "Microchip Q1 FY27 公式IR",
             "primaryFunction": "Compare",
-            "returnScreenState": null,
+            "returnScreenState": "Chart",
             "screenQuestion": "Microchipは何を発表した？",
             "screenState": "News",
             "sequencePolicy": "static",
@@ -3199,13 +3120,6 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "売上 14.85億ドル / 非GAAP EPS 0.76ドル",
               "次四半期売上 15.89億〜16.18億ドル"
             ],
-            "visualBeatId": "vb-07-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "evidence",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
             "visualGrammarId": "evidence",
             "visualMode": "news-media",
             "visualTemplate": "news-media"
@@ -3256,45 +3170,13 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "AMD -1.21% / Alphabet -0.96%",
               "Microsoft +0.03%"
             ],
-            "visualBeatId": "vb-07-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "comparison",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
             "visualGrammarId": "comparison",
-            "visualMode": "stock-comparison",
+            "visualMode": "number-comparison",
             "visualTemplate": "diverging-stock-bars"
           }
         ],
-        "visualEvents": [
-          {
-            "action": "show",
-            "atChunkId": "scene-07-chunk-001",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-014",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-07-card-001",
-            "timing": "chunk-start"
-          },
-          {
-            "action": "show",
-            "atChunkId": "scene-07-chunk-002",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-015",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-07-card-002",
-            "timing": "chunk-start"
-          }
-        ],
-        "visualMode": "number-comparison"
+        "visualEvents": [],
+        "visualMode": "news-media"
       },
       {
         "arrows": [],
@@ -3321,45 +3203,6 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           }
         ],
         "cards": [
-          {
-            "cardId": "scene-08-card-001",
-            "lines": [
-              {
-                "label": "QQQ",
-                "tone": "neutral",
-                "value": "719.16 → 720.23"
-              },
-              {
-                "label": "SOXX",
-                "tone": "neutral",
-                "value": "541.06 → 542.40"
-              },
-              {
-                "label": "NVDA",
-                "tone": "neutral",
-                "value": "219.95 → 220.31"
-              }
-            ],
-            "role": null,
-            "title": "8:30 ETの実分足"
-          },
-          {
-            "cardId": "scene-08-card-002",
-            "lines": [
-              {
-                "label": "因果",
-                "tone": "neutral",
-                "value": "1分足は因果証明ではない"
-              },
-              {
-                "label": "MCHP",
-                "tone": "neutral",
-                "value": "79.58 → 79.56"
-              }
-            ],
-            "role": null,
-            "title": "境界"
-          },
           {
             "cardId": "scene-08-h5-strengthen-macro",
             "lines": [
@@ -3469,11 +3312,18 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         "initialExpression": "分析",
         "narrationChunks": [
           {
-            "captionText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
+            "captionText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。",
             "chunkId": "scene-08-chunk-001",
             "expression": "通常",
+            "pauseAfterMs": 0,
+            "speechText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。"
+          },
+          {
+            "captionText": "ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
+            "chunkId": "scene-08-chunk-003",
+            "expression": "通常",
             "pauseAfterMs": 120,
-            "speechText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。"
+            "speechText": "ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。"
           },
           {
             "captionText": "原油や利回り低下は増幅要因。雇用が示す成長不安とAMD、Alphabetの下落は反対材料です。僕の結論は中程度の確信で、昨夜は一つの理由で全部が上がったのではなく、違う理由の上昇が同じ指数方向へ重なった夜でした。",
@@ -3505,7 +3355,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
           {
             "assetPlacementIds": [],
             "assetState": "not-required",
-            "beatId": "vb-08-01",
+            "beatId": "scene-08-beat-001",
             "changeCue": "最初の矛盾に戻ります",
             "contentType": "verification-matrix",
             "endChunkId": "scene-08-chunk-001",
@@ -3518,8 +3368,8 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "expressionChange": null,
             "fallback": null,
             "finalHoldMs": 500,
-            "narrationEndCue": "。ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
-            "narrationStartCue": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型",
+            "narrationEndCue": "の説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。",
+            "narrationStartCue": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだこと",
             "objectIds": [
               "scene-08-h5-strengthen-macro",
               "scene-08-h5-strengthen-reaction",
@@ -3553,16 +3403,64 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "弱める｜1分足だけでは因果証明できない",
               "弱める｜成長不安・AMD/Alphabet下落"
             ],
-            "visualBeatId": "vb-08-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "verification",
-              "returnTargetBeatId": null,
-              "transitionRole": "major-shift"
-            },
             "visualGrammarId": "verification",
             "visualMode": "verification-points",
             "visualTemplate": "verification-matrix"
+          },
+          {
+            "assetPlacementIds": [],
+            "assetState": "not-required",
+            "beatId": "scene-08-beat-002",
+            "changeCue": "ただし1分足は因果証明ではありません",
+            "contentType": "verification-matrix",
+            "endChunkId": "scene-08-chunk-003",
+            "entity": null,
+            "evidenceSourceIds": [
+              "source-003",
+              "source-004",
+              "source-005"
+            ],
+            "expressionChange": null,
+            "fallback": null,
+            "finalHoldMs": 500,
+            "narrationEndCue": "ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
+            "narrationStartCue": "ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
+            "objectIds": [
+              "scene-08-h5-strengthen-macro",
+              "scene-08-h5-strengthen-reaction",
+              "scene-08-h5-weaken-boundary",
+              "scene-08-h5-weaken-counter"
+            ],
+            "pictureBook": null,
+            "primaryElement": "利上げ観測後退を中心に境界を残す",
+            "primaryFunction": "Evidence",
+            "returnScreenState": null,
+            "screenQuestion": "マクロ仮説を強める材料と弱める材料は？",
+            "screenState": "Data",
+            "sequencePolicy": "object-order-fallback",
+            "startChunkId": "scene-08-chunk-003",
+            "templateConfig": {
+              "comparisonBasis": "中心仮説の支持と反対材料",
+              "dataBasis": "approved causal dossier + verified timing evidence",
+              "laneLabels": [
+                "強める",
+                "弱める"
+              ],
+              "nodeOrder": [],
+              "outcomeNodeId": null,
+              "variant": "confirmed-vs-unconfirmed"
+            },
+            "templateVariant": "confirmed-vs-unconfirmed",
+            "transitionRole": "continuation",
+            "viewerTexts": [
+              "強める｜雇用下振れ→利上げ観測後退",
+              "強める｜QQQ・SOXX・NVIDIA初動↑",
+              "弱める｜1分足だけでは因果証明できない",
+              "弱める｜成長不安・AMD/Alphabet下落"
+            ],
+            "visualGrammarId": "evidence",
+            "visualMode": "verification-points",
+            "visualTemplate": "evidence-boundary"
           },
           {
             "assetPlacementIds": [],
@@ -3615,44 +3513,12 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "増幅｜原油・利回り低下",
               "結論｜違う理由の上昇が同じ方向へ重なった"
             ],
-            "visualBeatId": "vb-08-02",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "verification",
-              "returnTargetBeatId": null,
-              "transitionRole": "continuation"
-            },
             "visualGrammarId": "verification",
             "visualMode": "verification-points",
             "visualTemplate": "verification-checklist"
           }
         ],
-        "visualEvents": [
-          {
-            "action": "show",
-            "atChunkId": "scene-08-chunk-001",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-016",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-08-card-001",
-            "timing": "chunk-start"
-          },
-          {
-            "action": "show",
-            "atChunkId": "scene-08-chunk-002",
-            "durationMs": 560,
-            "easingPreset": "smooth-out",
-            "eventId": "event-017",
-            "expression": null,
-            "motionPreset": "rise-soft",
-            "offsetMs": 0,
-            "targetId": "scene-08-card-002",
-            "timing": "chunk-start"
-          }
-        ],
+        "visualEvents": [],
         "visualMode": "verification-points"
       },
       {
@@ -3728,7 +3594,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         "purpose": "中心結論を回収し固定エンディングへつなぐ",
         "sceneId": "scene-09",
         "sceneNumber": 9,
-        "sceneRole": "fixed-ending",
+        "sceneRole": "closing-recap-sendoff-goodnight",
         "sourceLabel": "当日の市場データ / BLS / Reuters",
         "supportingTexts": [
           "採点表が金利へ移った",
@@ -3736,8 +3602,8 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         ],
         "timelineBasis": "本編の回収",
         "transition": {
-          "durationMs": 300,
-          "type": "fade"
+          "durationMs": 0,
+          "type": "none"
         },
         "uncertainty": "新情報は追加しない",
         "visualBeats": [
@@ -3746,7 +3612,7 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
             "assetState": "not-required",
             "beatId": "vb-09-01",
             "changeCue": "雇用 -2.3万人",
-            "contentType": "closing-recap",
+            "contentType": "final-assembly",
             "endChunkId": "scene-09-chunk-001",
             "entity": null,
             "evidenceSourceIds": [
@@ -3779,20 +3645,15 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
               "variant": "default"
             },
             "templateVariant": "default",
+            "transitionRole": "closing",
             "viewerTexts": [
               "雇用 -2.3万人",
               "NASDAQ +1.30%",
               "主因候補：利上げ観測後退"
             ],
-            "visualBeatId": "vb-09-01",
-            "visualGrammar": {
-              "contractVersion": "1.0.0",
-              "grammarId": "assembly",
-              "returnTargetBeatId": null,
-              "transitionRole": "closing"
-            },
+            "visualGrammarId": "assembly",
             "visualMode": "conclusion-card",
-            "visualTemplate": "closing-recap"
+            "visualTemplate": "final-assembly"
           }
         ],
         "visualEvents": [
@@ -3889,6 +3750,13 @@ Microchipには会社固有の材料がありました。Q1売上十四・八五
         ]
       }
     ],
+    "visualGrammarContract": {
+      "beatCount": 19,
+      "contractVersion": "1.0.0",
+      "finalEpisodeContractSha256": "6c184aa566a8dd3dafdc794b05abf8cf0c98e0bbf7fe0c984705a7b554ac5d21",
+      "rendererCompatibilitySha256": "563bc71c58120552c3f601cab662a4f4287e44c149e46268ef5678d279b1adb6",
+      "semanticsSha256": "e95b6dc418b4cb1d5c30d8cffc75de22c5c2834190c124e7bbab731f924bd714"
+    },
     "voiceProfileId": "gemini-charon"
   },
   "renderer_contract": {

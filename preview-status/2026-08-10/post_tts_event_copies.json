@@ -2,24 +2,9 @@
   "contractVersion": "1.0.0",
   "status": "validated-awaiting-owner-readiness",
   "episodeDate": "2026-08-10",
-  "eventCopies": [
-    {
-      "sceneId": "scene-08",
-      "sourceEventId": "event-017",
-      "newEventId": "event-025",
-      "atChunkId": "scene-08-chunk-004",
-      "targetId": "scene-08-card-002"
-    },
-    {
-      "sceneId": "scene-08",
-      "sourceEventId": "event-017",
-      "newEventId": "event-026",
-      "atChunkId": "scene-08-chunk-005",
-      "targetId": "scene-08-card-002"
-    }
-  ],
-  "finalRenderSpecSha256": "872d05e35423a21a0bd90cfab0ddef5481500be453ceaf43f5beeb76b5c5dacb",
-  "finalEpisodePackageSha256": "db6da9ae86ad2b7ab182a970ffc4b46122877fba2d61ee62974347c43aaf734d",
+  "eventCopies": [],
+  "finalRenderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "finalEpisodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
   "editorialChanged": false,
   "narrationWordingChanged": false,
   "captionWordingChanged": false,

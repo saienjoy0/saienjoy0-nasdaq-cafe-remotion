@@ -2,10 +2,10 @@
   "contractVersion": "1.0.0",
   "status": "validated-awaiting-owner-readiness",
   "episodeDate": "2026-08-10",
-  "oldRenderSpecSha256": "ffaed3ddd6c1fa5b967856c36fb99da0aad3c457aa7626a57a99ba138111aff4",
-  "newRenderSpecSha256": "6c0108528de74b5a14e3d3e1483b037616cd020a7aa39ae98ffdb8e8ec8bafda",
-  "oldEpisodePackageSha256": "31362cec55349984e678e5e232fb20eb5c5e0dcee9bf6900a85f57a8b85e379f",
-  "newEpisodePackageSha256": "169ad1a7f53d495a4fb744f34516ebc64be35e493818bfd9c6bffcf8b60cd2a1",
+  "oldRenderSpecSha256": "b4347625584ee36863ce953cda0428e1256e075ac0229181d2a24706bae511d9",
+  "newRenderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "oldEpisodePackageSha256": "e8fce5b6b836c1b9212d6c785119fd51b0fd59fab57b7ee5d76cd4f53b47eeea",
+  "newEpisodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
   "narrationWordingChanged": false,
   "captionWordingChanged": false,
   "editorialChanged": false,
@@ -13,10 +13,9 @@
   "sourcesChanged": false,
   "explicitPauseBudgetChanged": false,
   "chunkBoundariesChanged": true,
-  "visualGrammarBeatCount": 21,
+  "visualGrammarBeatCount": 19,
   "changedExistingBeatIds": [
-    "vb-01-02",
-    "vb-04-02"
+    "vb-01-02"
   ],
   "splitSceneIds": [
     "scene-08"
