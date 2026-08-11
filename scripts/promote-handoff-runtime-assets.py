@@ -2,8 +2,9 @@
 """Persist verified handoff binary assets for the canonical Preview path.
 
 The handoff manifest remains the authority. This helper copies only rows whose role
-is ``asset``, verifies their declared size/SHA again, and writes the renderer's
-existing runtime asset registry. It never infers an asset or changes render_spec.
+is ``asset``, verifies their declared size/SHA again, stages binaries under public,
+and writes the renderer's existing runtime asset registry. It never infers an asset
+or changes render_spec.
 """
 
 from __future__ import annotations
@@ -53,10 +54,14 @@ def promote(*, manifest_path: Path, bundle_root: Path, repo_root: Path, episode_
 
     repo_root = repo_root.resolve()
     bundle_root = bundle_root.resolve()
-    runtime_root = repo_root / "runtime-assets" / episode_date
-    if runtime_root.exists():
-        shutil.rmtree(runtime_root)
-    runtime_root.mkdir(parents=True, exist_ok=True)
+    registry_root = repo_root / "runtime-assets" / episode_date
+    public_root = repo_root / "public" / "generated" / "preflight-assets" / episode_date
+    if registry_root.exists():
+        shutil.rmtree(registry_root)
+    if public_root.exists():
+        shutil.rmtree(public_root)
+    registry_root.mkdir(parents=True, exist_ok=True)
+    public_root.mkdir(parents=True, exist_ok=True)
 
     entries: list[dict[str, str]] = []
     seen: set[str] = set()
@@ -79,14 +84,15 @@ def promote(*, manifest_path: Path, bundle_root: Path, repo_root: Path, episode_
         if not isinstance(declared_size, int) or source.stat().st_size != declared_size:
             raise PromotionAssetError(f"handoff asset size mismatch: {asset_id}")
 
-        target = runtime_root / Path(*destination.parts)
+        filename_parts = destination.parts[2:]
+        target = public_root / asset_id / Path(*filename_parts)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
-        relative = target.relative_to(repo_root).as_posix()
+        public_path = target.relative_to(repo_root / "public").as_posix()
         entries.append(
             {
                 "assetId": asset_id,
-                "path": relative,
+                "path": public_path,
                 "sha256": declared_sha,
                 "source": "handoff",
             }
@@ -99,7 +105,7 @@ def promote(*, manifest_path: Path, bundle_root: Path, repo_root: Path, episode_
         "episodeDate": episode_date,
         "assets": entries,
     }
-    registry_path = runtime_root / "runtime_asset_registry.json"
+    registry_path = registry_root / "runtime_asset_registry.json"
     registry_path.write_text(
         json.dumps(registry, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -111,6 +117,7 @@ def promote(*, manifest_path: Path, bundle_root: Path, repo_root: Path, episode_
         "assetCount": len(entries),
         "runtimeRegistry": registry_path.relative_to(repo_root).as_posix(),
         "runtimeRegistrySha256": sha256_file(registry_path),
+        "publicAssetRoot": public_root.relative_to(repo_root).as_posix(),
     }
 
 
