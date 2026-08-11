@@ -122,8 +122,54 @@ jobs:
               if not re.fullmatch(r'[0-9a-f]{64}', digest):
                   raise SystemExit('signed_artifact_digest_sha256 must be SHA-256')
           PY
+
+      - name: Resolve signed Artifact transport from verified promotion request
+        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' && inputs.signed_artifact_url == '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PREFIX="${EXPECTED_BUNDLE_ID:0:12}"
+          REQUEST_PATH="handoff-promote-requests/${EPISODE_DATE}-${PREFIX}.json"
+          CONTENT="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/contents/${REQUEST_PATH}?ref=main" \
+            --jq '.content' | tr -d '\n' | base64 --decode)"
+          mapfile -t RESOLVED < <(python3 - "$EXPECTED_BUNDLE_ID" "$EXPECTED_MANIFEST_SHA256" <<'PY'
+          import json, re, sys
+          from urllib.parse import urlparse
+          value=json.load(sys.stdin)
+          bundle=sys.argv[1]
+          manifest=sys.argv[2]
+          if value.get('contractVersion')!='1.0.0': raise SystemExit('promotion request contractVersion mismatch')
+          if value.get('episodeDate') is None: raise SystemExit('promotion request episodeDate missing')
+          if value.get('expectedBundleId')!=bundle: raise SystemExit('promotion request bundle mismatch')
+          if value.get('expectedManifestSha256')!=manifest: raise SystemExit('promotion request manifest mismatch')
+          url=value.get('artifactDownloadUrl')
+          digest=value.get('artifactDigestSha256')
+          p=urlparse(str(url))
+          if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'): raise SystemExit('promotion request signed URL is unsafe')
+          if not re.fullmatch(r'[0-9a-f]{64}',str(digest)): raise SystemExit('promotion request artifact digest is invalid')
+          print(url)
+          print(digest)
+          PY
+          <<<"$CONTENT")
+          [[ "${#RESOLVED[@]}" -eq 2 ]] || { echo "::error::promotion transport resolution failed"; exit 1; }
+          echo "SIGNED_ARTIFACT_URL=${RESOLVED[0]}" >> "$GITHUB_ENV"
+          echo "SIGNED_ARTIFACT_DIGEST=${RESOLVED[1]}" >> "$GITHUB_ENV"
+
+      - name: Require an authenticated or digest-pinned Artifact transport
+        shell: bash
+        run: |
+          set -euo pipefail
           if [[ -z "$PLOT_ARTIFACT_TOKEN" && -z "$SIGNED_ARTIFACT_URL" ]]; then
-            echo "::error::NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN is unset and no digest-pinned signed Artifact URL was supplied"
+            echo "::error::No usable Plot Artifact transport is available"
+            exit 1
+          fi
+          if [[ -z "$PLOT_ARTIFACT_TOKEN" && ! "$SIGNED_ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Signed Artifact transport is missing its SHA-256 digest"
             exit 1
           fi
 
@@ -157,7 +203,7 @@ jobs:
           github-token: ${{ env.PLOT_ARTIFACT_TOKEN }}
 
       - name: Download digest-pinned signed Plot handoff Artifact
-        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' && inputs.signed_artifact_url != '' }}
+        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' }}
         shell: bash
         run: |
           set -euo pipefail
