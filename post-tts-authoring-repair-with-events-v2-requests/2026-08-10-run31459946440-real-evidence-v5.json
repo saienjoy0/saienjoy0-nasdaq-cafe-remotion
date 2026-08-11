@@ -7,7 +7,7 @@
   "expectedAfterRenderSpecSha256": "6ae736d15db8adb9801db70077d55e85efac69cfaf2fe97a6c798dde2c39b27a",
   "expectedAfterEpisodePackageSha256": "3e68ff8abe98929dddadfbe54be3bcc0226a08f90df8ca4a91d2348e83629e8f",
   "expectedIntermediateRenderSpecSha256": "8663a2b4c007e9364e9324862b9f85f3a04a9491b32f281f170605d1524ec44e",
-  "expectedIntermediateEpisodePackageSha256": "4ec73c36c690dc6590a1f944089945b31fd1c9c582d873964c41af35d62392a0",
+  "expectedIntermediateEpisodePackageSha256": "eaa00d1da293cdc2140c85a9da34f742f6bdb51a6479f1939ce48e74930f2248",
   "expectedFinalRenderSpecSha256": "a83140c6c009b12b6d2c306cd67ec3e433d4bc4ffc9e810d9878d7b4e44a8652",
   "expectedFinalEpisodePackageSha256": "8233b3bf97736a4853616971d0f9d7a658b5491f97453094e13481388ea69958",
   "existingBeatChanges": [
