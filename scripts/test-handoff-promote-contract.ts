@@ -35,4 +35,15 @@ assert(
   "generation-agnostic discovery must retain manifest SHA, preview-only, and renderer-pin verification",
 );
 
-console.log("PASS: handoff promotion is generation-agnostic and still fail-closed");
+const readyScript = await readFile(
+  path.join(PROJECT_DIR, "scripts", "create-production-ready.ts"),
+  "utf8",
+);
+assert(
+  readyScript.includes('import {loadRuntimeAssetContext} from "../src/config/runtime-assets";') &&
+    readyScript.includes("const runtimeAssets = await loadRuntimeAssetContext();") &&
+    readyScript.includes("loadRenderSpecForProduction(specPath, runtimeAssets.manifest)"),
+  "production-ready creation must validate against the same runtime asset registry used by spec validation and preview",
+);
+
+console.log("PASS: handoff promotion is generation-agnostic and production-ready uses runtime assets");
