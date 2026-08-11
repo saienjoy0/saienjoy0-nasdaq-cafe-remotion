@@ -42,7 +42,7 @@ const resolveRuntimeRegistryPath = async (
   explicitPath: string | undefined,
 ): Promise<string | null> => {
   if (explicitPath) return explicitPath;
-  const episodeId = process.env.EPISODE_ID;
+  const episodeId = process.env.EPISODE_ID ?? process.env.EPISODE_DATE;
   if (!episodeId || !episodeDatePattern.test(episodeId)) return null;
   const promotedPath = path.resolve(
     `runtime-assets/${episodeId}/runtime_asset_registry.json`,
