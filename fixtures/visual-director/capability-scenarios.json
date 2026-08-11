@@ -1,0 +1,10 @@
+[
+  {"name":"macro-release","capabilities":["source-document","gap","time-series","causal-graph"],"mustInclude":["source-receipt","expected-actual-gap-flow","event-reaction-timeline","causal-lane"]},
+  {"name":"earnings","capabilities":["source-document","gap","comparison-set","time-series","entity"],"mustInclude":["source-receipt","expected-actual-gap-flow","diverging-stock-bars","event-reaction-timeline","entity-card-full"]},
+  {"name":"central-bank-statement","capabilities":["source-document","quote-social","time-series","causal-graph","verification"],"mustInclude":["source-receipt","event-reaction-timeline","causal-lane","verification-matrix"]},
+  {"name":"social-ceo-quote","capabilities":["quote-social","entity","time-series","verification"],"mustInclude":["source-receipt","entity-card-full","event-reaction-timeline","verification-matrix"]},
+  {"name":"geopolitics-commodity","capabilities":["source-document","image-media","causal-graph","comparison-set","time-series"],"mustInclude":["news-media","causal-lane","diverging-stock-bars","event-reaction-timeline"]},
+  {"name":"product-ai-launch","capabilities":["source-document","image-media","entity","causal-graph","comparison-set"],"mustInclude":["news-media","entity-card-full","causal-lane","focus-matrix"]},
+  {"name":"merger-acquisition","capabilities":["source-document","entity","comparison-set","causal-graph"],"mustInclude":["source-receipt","entity-card-full","split-comparison","causal-lane"]},
+  {"name":"reason-unknown","capabilities":["comparison-set","verification","text-only"],"mustInclude":["focus-matrix","evidence-boundary","text-focus"]}
+]
