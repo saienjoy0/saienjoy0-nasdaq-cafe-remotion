@@ -91,9 +91,15 @@ jobs:
             --output "preview-status/$DATE/post_tts_event_copies.json"
 
       - name: Run formal render-spec validator
+        env:
+          NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.request.outputs.episode_date }}/runtime_asset_registry.json
+          EPISODE_ID: ${{ steps.request.outputs.episode_date }}
         run: npm run episode:spec:validate -- "render-specs/${{ steps.request.outputs.episode_date }}/render_spec.json"
 
       - name: Run static Visual Story regressions
+        env:
+          NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.request.outputs.episode_date }}/runtime_asset_registry.json
+          EPISODE_ID: ${{ steps.request.outputs.episode_date }}
         run: |
           npm run test:visual-variety
           npm run test:visual-templates
