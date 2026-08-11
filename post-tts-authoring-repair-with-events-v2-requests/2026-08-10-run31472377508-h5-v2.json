@@ -1,0 +1,88 @@
+{
+  "existingBeatChanges": [
+    {
+      "beatId": "vb-01-02",
+      "expected": {
+        "visualTemplate": "hero-number",
+        "visualGrammarId": "evidence",
+        "templateVariant": "default"
+      },
+      "replacement": {
+        "visualTemplate": "evidence-boundary",
+        "visualGrammarId": "evidence",
+        "templateVariant": "confirmed-vs-unconfirmed"
+      }
+    }
+  ],
+  "sceneSplits": [
+    {
+      "sceneId": "scene-08",
+      "chunkSplits": [
+        {
+          "sourceChunkId": "scene-08-chunk-001",
+          "parts": [
+            {
+              "chunkId": "scene-08-chunk-001",
+              "speechText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。",
+              "captionText": "最初の矛盾に戻ります。弱い雇用なのにNASDAQが上がった。いちばん筋が通るマクロの説明は、雇用下振れで利上げ観測が後退し、大型テックへの金利逆風が和らいだことです。QQQ、SOXX、NVIDIAの8時30分の初動も、その時系列とは合います。"
+            },
+            {
+              "chunkId": "scene-08-chunk-003",
+              "speechText": "ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。",
+              "captionText": "ただし1分足は因果証明ではありません。そしてMicrochipは同じ1分では動かず、決算という別エンジンで終日大きく上がった。"
+            }
+          ]
+        }
+      ],
+      "beatRebuilds": [
+        {
+          "sourceBeatId": "vb-08-01",
+          "expected": {
+            "visualTemplate": "verification-matrix",
+            "visualGrammarId": "verification",
+            "templateVariant": "strengthen-vs-weaken"
+          },
+          "parts": [
+            {
+              "beatId": "scene-08-beat-001",
+              "chunkId": "scene-08-chunk-001"
+            },
+            {
+              "beatId": "scene-08-beat-002",
+              "chunkId": "scene-08-chunk-003",
+              "transitionRole": "continuation",
+              "changeCue": "ただし1分足は因果証明ではありません",
+              "visual": {
+                "visualTemplate": "evidence-boundary",
+                "visualGrammarId": "evidence",
+                "templateVariant": "confirmed-vs-unconfirmed"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "packageSummaryReplacements": [
+    {
+      "old": "- Scene 1｜寝ている間に何が起きた？｜opening-contradiction → hero-number",
+      "new": "- Scene 1｜寝ている間に何が起きた？｜opening-contradiction → evidence-boundary"
+    },
+    {
+      "old": "- Scene 8｜どこまで言える？｜verification-matrix → verification-checklist",
+      "new": "- Scene 8｜どこまで言える？｜verification-matrix → evidence-boundary → verification-checklist"
+    }
+  ],
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-10",
+  "confirmation": "APPLY_POST_TTS_AUTHORING_REPAIR_WITH_EVENT_COPIES",
+  "expectedBeforeRenderSpecSha256": "b4347625584ee36863ce953cda0428e1256e075ac0229181d2a24706bae511d9",
+  "expectedBeforeEpisodePackageSha256": "e8fce5b6b836c1b9212d6c785119fd51b0fd59fab57b7ee5d76cd4f53b47eeea",
+  "expectedAfterRenderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "expectedAfterEpisodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
+  "expectedIntermediateRenderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "expectedIntermediateEpisodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
+  "expectedFinalRenderSpecSha256": "4e610cfa146401cee1eaa35c6130d6ad37aaa7b14b521d0fa91c37be25fc360c",
+  "expectedFinalEpisodePackageSha256": "cc2fd5169fdc5dbd3ebcf1baba237ca9e16e55ff8e084eaf35672964844445c5",
+  "visualEventCopies": []
+}
