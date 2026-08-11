@@ -1,6 +1,7 @@
 import {createHash} from "node:crypto";
 import {mkdir, readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
+import {loadRuntimeAssetContext} from "../src/config/runtime-assets";
 import {loadRenderSpecForProduction} from "./load-render-spec";
 
 const [episodeDate, confirmation] = process.argv.slice(2);
@@ -19,7 +20,8 @@ const specPath = `render-specs/${episodeDate}/render_spec.json`;
 const episodePackagePath = `episode-packages/${episodeDate}/episode_package_${episodeDate}.md`;
 const readyPath = `render-specs/${episodeDate}/production_ready.json`;
 
-const loaded = await loadRenderSpecForProduction(specPath);
+const runtimeAssets = await loadRuntimeAssetContext();
+const loaded = await loadRenderSpecForProduction(specPath, runtimeAssets.manifest);
 if (loaded.spec.episode.id !== episodeDate) {
   throw new Error(
     `render_spec episode.id mismatch: ${loaded.spec.episode.id} != ${episodeDate}`,
