@@ -5,7 +5,7 @@
   "expectedBeforeRenderSpecSha256": "ffaed3ddd6c1fa5b967856c36fb99da0aad3c457aa7626a57a99ba138111aff4",
   "expectedBeforeEpisodePackageSha256": "31362cec55349984e678e5e232fb20eb5c5e0dcee9bf6900a85f57a8b85e379f",
   "expectedAfterRenderSpecSha256": "6ae736d15db8adb9801db70077d55e85efac69cfaf2fe97a6c798dde2c39b27a",
-  "expectedAfterEpisodePackageSha256": "580fb3aca15dc9d1dbfff5cf4905947ec0db913758947de2994f4df3c4ddfc94",
+  "expectedAfterEpisodePackageSha256": "3e68ff8abe98929dddadfbe54be3bcc0226a08f90df8ca4a91d2348e83629e8f",
   "expectedIntermediateRenderSpecSha256": "8663a2b4c007e9364e9324862b9f85f3a04a9491b32f281f170605d1524ec44e",
   "expectedIntermediateEpisodePackageSha256": "4ec73c36c690dc6590a1f944089945b31fd1c9c582d873964c41af35d62392a0",
   "expectedFinalRenderSpecSha256": "a83140c6c009b12b6d2c306cd67ec3e433d4bc4ffc9e810d9878d7b4e44a8652",
