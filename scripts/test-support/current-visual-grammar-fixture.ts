@@ -76,6 +76,9 @@ export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
       const arrowIds = chooseIds(scene.arrows, selected, (item) => item.arrowId, contract.arrows);
       beat.objectIds = [...cardIds, ...numberIds, ...nodeIds, ...arrowIds];
       beat.templateVariant = beat.templateConfig.variant;
+      if (!contract.supportedScreenStates.includes(beat.screenState)) {
+        beat.screenState = contract.supportedScreenStates[0];
+      }
     }
   }
 
