@@ -1,8 +1,12 @@
 import type {RenderSpec} from "./render-spec";
 
 const NUMERIC_KANJI = "〇零一二三四五六七八九十百千万億兆";
+// Japanese magnitude characters remain useful display units after an Arabic
+// coefficient (for example 5,000億ドル / 25.8億ドル). Do not reinterpret that unit
+// suffix as an unconverted Japanese numeral. A genuine Japanese numeral still starts
+// at a non-Arabic boundary and therefore fails closed.
 const NUMERIC_CONTEXT = new RegExp(
-  `[${NUMERIC_KANJI}・]+(?=(?:パーセント|%|ドル|円|時|分|秒|年|月|日|回|件|社|人|位|番目|段|つ|分足))`,
+  `(?<![0-9,.])[${NUMERIC_KANJI}・]+(?=(?:パーセント|%|ドル|円|時|分|秒|年|月|日|回|件|社|人|位|番目|段|つ|分足))`,
   "u",
 );
 const NUMERIC_PREFIX = new RegExp(`第[${NUMERIC_KANJI}・]+`, "u");
