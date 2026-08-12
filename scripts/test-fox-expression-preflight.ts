@@ -58,6 +58,22 @@ assert.throws(
 
 const shotExpression = structuredClone(fixture);
 const shotScene = shotExpression.scenes[1];
+// Make the Shot the only 軽い驚き use in this Scene so the failure path proves
+// Shot expressions are part of the preflight inventory rather than an earlier source.
+if (shotScene.initialExpression === "軽い驚き") shotScene.initialExpression = "通常";
+for (const chunk of shotScene.narrationChunks) {
+  if (chunk.expression === "軽い驚き") chunk.expression = "通常";
+}
+for (const event of shotScene.visualEvents) {
+  if (event.action === "set-expression" && event.expression === "軽い驚き") {
+    event.expression = "通常";
+  }
+}
+for (const beat of shotScene.visualBeats) {
+  for (const shot of beat.shots ?? []) {
+    if (shot.foxExpression === "軽い驚き") shot.foxExpression = "通常";
+  }
+}
 shotScene.assetPlacements = shotScene.assetPlacements.filter(
   (placement) => placement.assetId !== "foxSlightSurprise",
 );
