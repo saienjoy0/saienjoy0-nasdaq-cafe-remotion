@@ -1,0 +1,12 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-12",
+  "artifactDownloadUrl": "https://sdmntprnorthcentralus.oaiusercontent.com/files/00000000-6af8-822f-9c7f-442ada79f470/raw?se=2026-08-12T03%3A56%3A49Z&sp=r&sv=2026-02-06&sr=b&scid=790792c9-d62f-513a-b07f-8867341a0065&skoid=9063adf3-a524-4acf-b70a-8731b33f2f50&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A12%3A16Z&ske=2026-08-12T06%3A12%3A16Z&sks=b&skv=2026-02-06&sig=jzS/ntWqsDAXIPyUbmN8tmla7f%2BiNJvgYXht2SVQ%2BqM%3D",
+  "artifactDigestSha256": "5d5708b2f2607179f643209ce48eb55cb1c0da72e3ce86ff16ed1407fbc84424",
+  "expectedBundleId": "8a969685ebf34ca3985d85e149958cf36656835084da6e383ab2b4ff833f2a94",
+  "expectedManifestSha256": "3431c120cf2d91aec58549fc81360a7c7f783c74dd8c24f6826e6655223b12c3",
+  "expectedRenderSpecSha256": "1cae6d9c659067939d0df34ff49016a193a0f884bf69a083d508e3cad35754ae",
+  "expectedEpisodePackageSha256": "308e000d496bf7d46c5a5f83f6725b9cfe9157d8cf46ab0cd2561c9f33f7d66f",
+  "expectedRendererCommit": "f2b416b8d43f35a4c24310440eb7f520cebfebc0",
+  "confirmation": "PROMOTE_PREVIEW_INPUTS"
+}
