@@ -12,13 +12,16 @@ import {
 import {renderSpecSchema, type RenderSpec} from "../src/spec/render-spec";
 import {validateVisualGrammarContract} from "../src/spec/validate-visual-grammar";
 import {
+  cloneTestValue,
+  makeCurrentVisualGrammarFixture,
+} from "./test-support/current-visual-grammar-fixture";
+import {
   VISUAL_TEMPLATE_IDS,
   type VisualTemplateId,
 } from "../src/spec/visual-template-contract";
 
 const tests: Array<{name: string; run: () => void | Promise<void>}> = [];
 const test = (name: string, run: () => void | Promise<void>) => tests.push({name, run});
-const clone = <T>(value: T): T => structuredClone(value);
 
 const compatibilityById = Object.fromEntries(
   VISUAL_GRAMMAR_RENDERER_COMPATIBILITY.templates.map((entry) => [
@@ -26,30 +29,6 @@ const compatibilityById = Object.fromEntries(
     entry,
   ]),
 ) as Record<string, (typeof VISUAL_GRAMMAR_RENDERER_COMPATIBILITY.templates)[number]>;
-
-const make24 = (): RenderSpec => {
-  const value = clone(fixtureJson) as unknown as Record<string, unknown>;
-  value.schemaVersion = "2.4.0";
-  const scenes = value.scenes as Array<{visualBeats: Array<Record<string, unknown>>}>;
-  let beatCount = 0;
-  for (const scene of scenes) {
-    for (const beat of scene.visualBeats) {
-      const visualTemplate = beat.visualTemplate as VisualTemplateId;
-      const entry = getVisualGrammarCompatibility(visualTemplate);
-      beat.visualGrammarId = entry.allowedGrammarIds[0];
-      beat.transitionRole = "continuation";
-      beatCount += 1;
-    }
-  }
-  value.visualGrammarContract = {
-    contractVersion: "1.0.0",
-    semanticsSha256: "0".repeat(64),
-    rendererCompatibilitySha256: VISUAL_GRAMMAR_RENDERER_COMPATIBILITY_SHA256,
-    finalEpisodeContractSha256: "1".repeat(64),
-    beatCount,
-  };
-  return renderSpecSchema.parse(value);
-};
 
 test("compatibility registry validates", () => {
   visualGrammarRendererCompatibilitySchema.parse(VISUAL_GRAMMAR_RENDERER_COMPATIBILITY);
@@ -106,18 +85,18 @@ test("render_spec 2.2.0 remains valid without Visual Grammar metadata", () => {
 });
 
 test("render_spec 2.4.0 requires and validates Visual Grammar metadata", () => {
-  const value = make24();
+  const value = makeCurrentVisualGrammarFixture();
   validateVisualGrammarContract(value);
 });
 
 test("render_spec 2.4.0 rejects a missing root contract", () => {
-  const value = clone(make24()) as RenderSpec & {visualGrammarContract?: unknown};
+  const value = cloneTestValue(makeCurrentVisualGrammarFixture()) as RenderSpec & {visualGrammarContract?: unknown};
   delete value.visualGrammarContract;
   assert.throws(() => renderSpecSchema.parse(value), /visualGrammarContract/);
 });
 
 test("renderer compatibility SHA mismatch is rejected", () => {
-  const value = clone(make24());
+  const value = cloneTestValue(makeCurrentVisualGrammarFixture());
   value.visualGrammarContract!.rendererCompatibilitySha256 = "f".repeat(64);
   assert.throws(
     () => validateVisualGrammarContract(value),
@@ -126,7 +105,7 @@ test("renderer compatibility SHA mismatch is rejected", () => {
 });
 
 test("Grammar and Template mismatch is rejected", () => {
-  const value = clone(make24());
+  const value = cloneTestValue(makeCurrentVisualGrammarFixture());
   value.scenes[0].visualBeats[0].visualGrammarId = "verification";
   assert.throws(
     () => validateVisualGrammarContract(value),
@@ -135,7 +114,7 @@ test("Grammar and Template mismatch is rejected", () => {
 });
 
 test("major-shift must be physically different", () => {
-  const value = clone(make24());
+  const value = cloneTestValue(makeCurrentVisualGrammarFixture());
   const first = value.scenes[0].visualBeats[0];
   const second = value.scenes[0].visualBeats[1];
   second.visualTemplate = first.visualTemplate;
