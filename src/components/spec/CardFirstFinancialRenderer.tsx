@@ -235,7 +235,8 @@ export const CardFirstFinancialRenderer: React.FC<{content: PublicMainContent}> 
   if (recipe === "actual-crosses-expected") return <ActualVsExpectedCards content={content}/>;
   if (recipe === "gap-macro") return <GapCard content={content}/>;
   if (recipe === "causal-build" || ["causal-lane", "macro-pressure"].includes(content.visualTemplate)) return <CausalStepCards content={content}/>;
-  if (recipe === "split-opposition" || ["dual-asset-split", "split-comparison"].includes(content.visualTemplate)) return <SplitCards content={content}/>;
+  if (recipe === "split-opposition" || content.visualTemplate === "dual-asset-split") return <SplitCards content={content}/>;
+  if (content.visualTemplate === "split-comparison") return content.numbers.length === 2 ? <SplitCards content={content}/> : <MetricGrid content={content}/>;
   if (recipe === "focus-matrix-reveal" || ["focus-matrix", "market-pulse-grid", "metric-comparison-board"].includes(content.visualTemplate)) return <MetricGrid content={content}/>;
   if (recipe === "verification-two-paths" || content.visualTemplate === "verification-matrix") return <VerificationCards content={content}/>;
   if (content.visualTemplate === "expected-actual-gap-flow") return <ExpectedActualGapCards content={content}/>;
