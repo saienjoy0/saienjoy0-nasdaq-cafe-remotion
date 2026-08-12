@@ -15,10 +15,7 @@ import {
   cloneTestValue,
   makeCurrentVisualGrammarFixture,
 } from "./test-support/current-visual-grammar-fixture";
-import {
-  VISUAL_TEMPLATE_IDS,
-  type VisualTemplateId,
-} from "../src/spec/visual-template-contract";
+import {VISUAL_TEMPLATE_IDS} from "../src/spec/visual-template-contract";
 
 const tests: Array<{name: string; run: () => void | Promise<void>}> = [];
 const test = (name: string, run: () => void | Promise<void>) => tests.push({name, run});
