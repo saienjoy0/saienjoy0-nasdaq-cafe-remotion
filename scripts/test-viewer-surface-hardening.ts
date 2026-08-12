@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import fixtureJson from "../render-specs/fixtures/complete-9scene/render_spec.json";
 import {localizeStageViewerLabel} from "../src/components/spec/StageSafeArea";
+import {renderSpecSchema} from "../src/spec/render-spec";
+import {preflightStaticViewerLayout} from "../src/spec/preflight-static-viewer-layout";
 import {planSourceReceiptLayout} from "../src/spec/template-layout/source-receipt-layout";
 import {visualCapabilityHintsSchema} from "../src/spec/visual-director-contract";
 import {candidateTemplatesForPolicy} from "../src/spec/visual-template-policy";
@@ -35,6 +38,17 @@ test("viewer-facing Expected Actual Gap labels use the single Japanese vocabular
   assert.equal(localizeStageViewerLabel("GAP"), "差分");
   assert.equal(localizeStageViewerLabel("実績"), "実際");
   assert.equal(localizeStageViewerLabel("差"), "差分");
+});
+
+test("static viewer layout rejects a long card value before Chrome starts", () => {
+  const value = renderSpecSchema.parse(structuredClone(fixtureJson));
+  value.scenes[0].cards[0].lines[0].value = "NASDAQ -0.60% / Brent +1.4% / $88.91";
+  assert.throws(
+    () => preflightStaticViewerLayout(value),
+    /36 characters exceed card value limit 28/,
+  );
+  value.scenes[0].cards[0].lines[0].value = "NASDAQ -0.60%\nBrent +1.4% \/ $88.91";
+  assert.doesNotThrow(() => preflightStaticViewerLayout(value));
 });
 
 test("source receipt planner switches to stacked Japanese layout and fails closed", () => {
