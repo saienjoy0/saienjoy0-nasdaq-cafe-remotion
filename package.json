@@ -83,7 +83,7 @@
     "test:visual-sequence": "tsx scripts/test-visual-sequence.ts",
     "test:visual-variety": "tsx scripts/test-visual-variety.ts",
     "test:visual-templates": "tsx scripts/test-visual-templates.ts",
-    "test:visual-validator": "tsx scripts/test-visual-validator.ts",
+    "test:visual-validator": "tsx scripts/test-visual-validator.ts && tsx scripts/test-fox-expression-preflight.ts",
     "test:subtitles": "tsx scripts/test-subtitles.ts",
     "test:shot-story": "tsx scripts/test-shot-story.ts",
     "test:shot-motion-continuity": "tsx scripts/test-shot-motion-continuity.ts",
