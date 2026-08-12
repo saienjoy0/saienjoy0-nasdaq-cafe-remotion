@@ -103,17 +103,20 @@ export const StepCard: React.FC<{
   tone?: FinancialCardTone;
   highlighted?: boolean;
   style?: CSSProperties;
-}> = ({index, text, tone = "neutral", highlighted = false, style}) => <FinanceCardFrame
-  tone={tone}
-  highlighted={highlighted}
-  minHeight={124}
-  maxHeight={190}
-  dataRole="step"
-  style={{display: "grid", gridTemplateColumns: "52px minmax(0,1fr)", gap: 18, alignItems: "center", ...style}}
->
-  <div style={{width: 42, height: 42, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", background: strongSurface, color: toneColor(tone), border: `2px solid ${toneColor(tone)}`, fontSize: 23, fontWeight: 950}}>{index}</div>
-  <div style={{fontSize: safeFontSize(text, 34, 25, 440), lineHeight: 1.16, fontWeight: 950, overflowWrap: "anywhere"}}>{text}</div>
-</FinanceCardFrame>;
+}> = ({index, text, tone = "neutral", highlighted = false, style}) => {
+  const stepTone: FinancialCardTone = tone === "emphasis" ? "emphasis" : "neutral";
+  return <FinanceCardFrame
+    tone={stepTone}
+    highlighted={highlighted}
+    minHeight={124}
+    maxHeight={190}
+    dataRole="step"
+    style={{display: "grid", gridTemplateColumns: "52px minmax(0,1fr)", gap: 18, alignItems: "center", ...style}}
+  >
+    <div style={{width: 42, height: 42, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", background: strongSurface, color: toneColor(stepTone), border: `2px solid ${toneColor(stepTone)}`, fontSize: 23, fontWeight: 950}}>{index}</div>
+    <div style={{fontSize: safeFontSize(text, 34, 25, 440), lineHeight: 1.16, fontWeight: 950, overflowWrap: "anywhere"}}>{text}</div>
+  </FinanceCardFrame>;
+};
 
 export const CardConnector: React.FC<{label?: string | null; vertical?: boolean}> = ({label = null, vertical = false}) => <div
   data-card-connector="short"
