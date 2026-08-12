@@ -101,7 +101,6 @@ const comparisonEntry = beatEntries(comparison).find((item) =>
   item.beat.visualTemplate === "metric-comparison-board" && selectedNumbers(item).length >= 2,
 );
 assert.ok(comparisonEntry, "synthetic fixture requires an aligned metric comparison Beat");
-comparisonEntry.beat.visualGrammarId = "comparison";
 const comparisonHints = {
   contractVersion: "1.0.0" as const,
   episodeDate: comparison.episode.targetDate,
