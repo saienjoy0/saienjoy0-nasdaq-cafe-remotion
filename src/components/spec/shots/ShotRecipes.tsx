@@ -67,7 +67,7 @@ const ExpectedAnchor: React.FC<{content: PublicMainContent}> = ({content}) => {
   const {introProgress: p} = useMotionFor(shot);
   return <StageShell accent={palette.neutral}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
-      <StageEyebrow>EXPECTED｜市場が置いていた基準</StageEyebrow>
+      <StageEyebrow>予想｜市場が置いていた基準</StageEyebrow>
       <div style={{position: "relative", alignSelf: "center", height: 210, borderRadius: 26, background: "rgba(143,183,209,.08)", border: "2px solid rgba(143,183,209,.25)"}}>
         <div style={{position: "absolute", left: 54, right: 54, top: 126, height: 5, background: "rgba(143,183,209,.35)"}}/>
         <div style={{position: "absolute", left: `${interpolate(p, [0, 1], [18, 58])}%`, top: 55, width: 7, height: 128, borderRadius: 99, background: palette.warning, boxShadow: "0 0 26px rgba(255,199,74,.38)"}}/>
@@ -84,11 +84,11 @@ const ActualCrosses: React.FC<{content: PublicMainContent}> = ({content}) => {
   const actualCard = cardById(content, shot.primaryTargetId);
   const expectedCard = cardById(content, shot.referenceTargetId);
   const actualLabel = actualNumber ? `${actualNumber.value}${actualNumber.unit}` : actualCard?.lines[0]?.value ?? targetText(content, shot);
-  const expectedLabel = expectedCard?.lines[0]?.value ?? actualNumber?.comparison ?? "EXPECTED";
+  const expectedLabel = expectedCard?.lines[0]?.value ?? actualNumber?.comparison ?? "予想";
   const {introProgress: p} = useMotionFor(shot);
   return <StageShell accent={palette.positive}>
     <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 18}}>
-      <div style={{display: "flex", justifyContent: "space-between", gap: 26, alignItems: "center"}}><StageEyebrow tone={palette.positive}>ACTUAL｜実際に出た結果</StageEyebrow><div style={{fontSize: safeFontSize(actualLabel, 48, 30, 590), color: palette.positive, fontWeight: 950, whiteSpace: "nowrap"}}>{actualLabel}</div></div>
+      <div style={{display: "flex", justifyContent: "space-between", gap: 26, alignItems: "center"}}><StageEyebrow tone={palette.positive}>実績｜実際に出た結果</StageEyebrow><div style={{fontSize: safeFontSize(actualLabel, 48, 30, 590), color: palette.positive, fontWeight: 950, whiteSpace: "nowrap"}}>{actualLabel}</div></div>
       <div style={{position: "relative", alignSelf: "center", height: 190, borderRadius: 25, background: "rgba(143,183,209,.09)", border: "2px solid rgba(143,183,209,.24)", overflow: "hidden"}}>
         <div style={{position: "absolute", left: 0, top: 0, bottom: 0, width: `${interpolate(p, [0, 1], [0, 82])}%`, background: "linear-gradient(90deg,rgba(57,217,154,.35),rgba(57,217,154,.92))"}}/>
         <div style={{position: "absolute", left: "66%", top: 0, bottom: 0, width: 7, background: palette.warning, boxShadow: "0 0 0 4px rgba(5,12,28,.84)"}}/>
@@ -110,7 +110,7 @@ const GapMacro: React.FC<{content: PublicMainContent}> = ({content}) => {
       <SafeCameraViewport shot={shot}>
         <div style={{position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center"}}>
           <div style={{position: "absolute", width: 330, height: 330, borderRadius: 999, border: `${interpolate(p, [0, 1], [3, 14])}px solid rgba(183,140,255,.36)`, transform: `scale(${interpolate(p, [0, 1], [.72, 1])})`}}/>
-          <div style={{position: "relative", zIndex: 2, width: 850, textAlign: "center"}}><StageEyebrow tone={palette.emphasis}>GAP｜市場が反応した差分</StageEyebrow><div style={{marginTop: 25, color: palette.emphasis, fontSize: safeFontSize(value, 86, 42, 850), lineHeight: 1.08, fontWeight: 950, overflowWrap: "anywhere"}}>{value}</div></div>
+          <div style={{position: "relative", zIndex: 2, width: 850, textAlign: "center"}}><StageEyebrow tone={palette.emphasis}>差分｜市場が反応したズレ</StageEyebrow><div style={{marginTop: 25, color: palette.emphasis, fontSize: safeFontSize(value, 86, 42, 850), lineHeight: 1.08, fontWeight: 950, overflowWrap: "anywhere"}}>{value}</div></div>
         </div>
       </SafeCameraViewport>
     </SafeContent>
@@ -200,7 +200,22 @@ const VerificationPaths: React.FC<{content: PublicMainContent}> = ({content}) =>
   const items = values.slice(0, 4);
   const {staggerProgress} = useMotionFor(shot);
   return <StageShell accent={palette.warning}>
-    <SafeContent reserveTypography style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 22}}>{items.map((text, index) => {const strengthen = /強まる|継続|安定|波及/u.test(text) && !/弱まる|上昇継続|弱い/u.test(text); const color = strengthen ? palette.positive : index % 2 === 0 ? palette.cyan : palette.warning; const reveal = staggerProgress(index, items.length); return <div key={`${text}-${index}`} style={{padding: "22px 25px", borderRadius: 22, background: `${color}10`, border: `3px solid ${color}`, opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [22, 0])}px)`}}><div style={{fontSize: 23, color, fontWeight: 900}}>{strengthen ? "強まる条件" : "確認条件"}</div><div style={{marginTop: 12, fontSize: safeFontSize(text, 35, 25, 550), lineHeight: 1.17, fontWeight: 950, overflowWrap: "anywhere"}}>{text.replace(/^強まる｜|^弱まる｜/u, "")}</div></div>;})}</SafeContent>
+    <SafeContent reserveTypography style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 18}}>
+      <StageEyebrow tone={palette.warning}>時系列を分けて確認</StageEyebrow>
+      <div style={{display: "grid", gridTemplateRows: `repeat(${Math.max(1, items.length)},minmax(0,1fr))`, gap: 14, alignContent: "center"}}>
+        {items.map((text, index) => {
+          const reveal = staggerProgress(index, items.length);
+          const isAfterHours = /引け後|時間外/u.test(text);
+          const isBoundary = /遡及しない|原因ではない|境界/u.test(text);
+          const color = isBoundary ? palette.emphasis : isAfterHours ? palette.warning : palette.cyan;
+          const stepLabel = isBoundary ? "結論" : index === 0 ? "通常取引" : isAfterHours ? "引け後" : `確認${index + 1}`;
+          return <div key={`${text}-${index}`} style={{display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 22, alignItems: "center", minHeight: 92, padding: "17px 24px", borderRadius: 22, background: `${color}10`, border: `3px solid ${color}`, opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [20, 0])}px)`}}>
+            <div style={{display: "flex", alignItems: "center", justifyContent: "center", minHeight: 48, padding: "4px 14px", borderRadius: 999, background: `${color}18`, border: `2px solid ${color}`, color, fontSize: 27, fontWeight: 950}}>{stepLabel}</div>
+            <div style={{fontSize: safeFontSize(text, 40, 29, 900), lineHeight: 1.15, fontWeight: 950, overflowWrap: "anywhere"}}>{text}</div>
+          </div>;
+        })}
+      </div>
+    </SafeContent>
   </StageShell>;
 };
 
