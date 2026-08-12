@@ -1,22 +1,23 @@
 import type {RenderSpec} from "./render-spec";
 
-const NUMERIC_KANJI = "〇零一二三四五六七八九十百千万億兆";
-// Japanese magnitude characters remain useful display units after an Arabic
-// coefficient (for example 5,000億ドル / 25.8億ドル). Do not reinterpret that unit
-// suffix as an unconverted Japanese numeral. A genuine Japanese numeral still starts
-// at a non-Arabic boundary and therefore fails closed.
-const NUMERIC_CONTEXT = new RegExp(
-  `(?<![0-9,.])[${NUMERIC_KANJI}・]+(?=(?:パーセント|%|ドル|円|時|分|秒|年|月|日|回|件|社|人|位|番目|段|つ|分足))`,
+// Keep these implementation details deliberately private and browser-boundary-safe.
+// The public screen only receives the exported assertion functions, never raw policy
+// constants. Japanese magnitude characters remain valid display units after an Arabic
+// coefficient (for example 5,000億ドル / 25.8億ドル), while a genuine Japanese numeral
+// still starts at a non-Arabic boundary and therefore fails closed.
+const viewerNumeralChars = "〇零一二三四五六七八九十百千万億兆";
+const viewerNumericContext = new RegExp(
+  `(?<![0-9,.])[${viewerNumeralChars}・]+(?=(?:パーセント|%|ドル|円|時|分|秒|年|月|日|回|件|社|人|位|番目|段|つ|分足))`,
   "u",
 );
-const NUMERIC_PREFIX = new RegExp(`第[${NUMERIC_KANJI}・]+`, "u");
-const FIXED_UI_ENGLISH = /^(?:EXPECTED|ACTUAL|GAP)(?:$|｜)/u;
+const viewerNumericPrefix = new RegExp(`第[${viewerNumeralChars}・]+`, "u");
+const viewerFixedUiEnglish = /^(?:EXPECTED|ACTUAL|GAP)(?:$|｜)/u;
 
 export const assertViewerTextSafe = (value: string, path: string) => {
-  if (NUMERIC_CONTEXT.test(value) || NUMERIC_PREFIX.test(value)) {
+  if (viewerNumericContext.test(value) || viewerNumericPrefix.test(value)) {
     throw new Error(`E_VIEWER_NUMERIC_KANJI_REMAINS:${path}:${value}`);
   }
-  if (FIXED_UI_ENGLISH.test(value)) {
+  if (viewerFixedUiEnglish.test(value)) {
     throw new Error(`E_VIEWER_FIXED_UI_ENGLISH:${path}:${value}`);
   }
 };
@@ -56,6 +57,7 @@ export const collectViewerSurfaceStrings = (spec: RenderSpec) => {
 };
 
 export const assertViewerSurfacePolicy = (spec: RenderSpec) => {
-  collectViewerSurfaceStrings(spec).forEach(([path, value]) => assertViewerTextSafe(value, path));
-  return {status: "PASS" as const, checked: collectViewerSurfaceStrings(spec).length};
+  const rows = collectViewerSurfaceStrings(spec);
+  rows.forEach(([path, value]) => assertViewerTextSafe(value, path));
+  return {status: "PASS" as const, checked: rows.length};
 };
