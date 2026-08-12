@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {renderToStaticMarkup} from "react-dom/server";
 import {getStageMotionStyle} from "../src/components/spec/ShotStageRenderer";
+import {StageEyebrow, localizeStageViewerLabel} from "../src/components/spec/StageSafeArea";
 import {VisualGrammarStageHost} from "../src/components/spec/VisualGrammarStageHost";
 import {
   STAGE_THEMES,
@@ -44,6 +45,18 @@ test("Stage shells expose semantic theme tokens to Shot recipes", () => {
   assert.match(evidence, /data-stage-theme="evidence-paper"/);
   assert.match(evidence, /--stage-text-primary:#102033/);
   assert.match(evidence, /--stage-typography-background:rgba\(255,255,255,.90\)/);
+});
+
+test("viewer-facing Expected Actual Gap labels are Japanese", () => {
+  assert.equal(localizeStageViewerLabel("EXPECTED｜市場が置いていた基準"), "予想｜市場の基準");
+  assert.equal(localizeStageViewerLabel("ACTUAL｜実際に出た結果"), "実際｜発表された結果");
+  assert.equal(localizeStageViewerLabel("GAP｜市場が反応した差分"), "差分｜予想との差");
+  assert.equal(localizeStageViewerLabel("EXPECTED｜consensus"), "予想｜consensus");
+  assert.equal(localizeStageViewerLabel("OTHER｜そのまま"), "OTHER｜そのまま");
+
+  const markup = renderToStaticMarkup(<StageEyebrow>EXPECTED｜市場が置いていた基準</StageEyebrow>);
+  assert.match(markup, /予想｜市場の基準/);
+  assert.doesNotMatch(markup, /EXPECTED/);
 });
 
 test("chrome removes duplicate title bands on open explanatory Stages", () => {

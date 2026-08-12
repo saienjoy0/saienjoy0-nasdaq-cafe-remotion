@@ -18,6 +18,30 @@ export const palette = {
   emphasis: "var(--stage-emphasis,#B78CFF)",
 };
 
+const EXACT_STAGE_VIEWER_LABELS: Record<string, string> = {
+  "EXPECTED｜市場が置いていた基準": "予想｜市場の基準",
+  "ACTUAL｜実際に出た結果": "実際｜発表された結果",
+  "GAP｜市場が反応した差分": "差分｜予想との差",
+  EXPECTED: "予想",
+  ACTUAL: "実際",
+  GAP: "差分",
+};
+
+const STAGE_VIEWER_PREFIXES = [
+  ["EXPECTED｜", "予想｜"],
+  ["ACTUAL｜", "実際｜"],
+  ["GAP｜", "差分｜"],
+] as const;
+
+export const localizeStageViewerLabel = (value: string) => {
+  const exact = EXACT_STAGE_VIEWER_LABELS[value];
+  if (exact) return exact;
+  for (const [english, japanese] of STAGE_VIEWER_PREFIXES) {
+    if (value.startsWith(english)) return `${japanese}${value.slice(english.length)}`;
+  }
+  return value;
+};
+
 export const visibleLength = (value: string) => Array.from(value.replace(/\s+/gu, "")).length;
 
 export const safeFontSize = (value: string, preferred: number, minimum = 30, width = 1180) => {
@@ -65,10 +89,13 @@ export const SafeContent: React.FC<{
   ...style,
 }}>{children}</div>;
 
-export const StageEyebrow: React.FC<{children: React.ReactNode; tone?: string}> = ({children, tone = palette.neutral}) => <div style={{
-  fontSize: 29,
-  lineHeight: "36px",
-  color: tone,
-  fontWeight: 900,
-  letterSpacing: ".035em",
-}}>{children}</div>;
+export const StageEyebrow: React.FC<{children: React.ReactNode; tone?: string}> = ({children, tone = palette.neutral}) => {
+  const viewerLabel = typeof children === "string" ? localizeStageViewerLabel(children) : children;
+  return <div style={{
+    fontSize: 29,
+    lineHeight: "36px",
+    color: tone,
+    fontWeight: 900,
+    letterSpacing: ".035em",
+  }}>{viewerLabel}</div>;
+};
