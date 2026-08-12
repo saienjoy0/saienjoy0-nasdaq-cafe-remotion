@@ -6,6 +6,7 @@ on:
       - "src/**"
       - "scripts/**"
       - "schemas/**"
+      - "contracts/**"
       - "render-specs/**"
       - "episode-packages/**"
       - "shot-timing-requests/**"
