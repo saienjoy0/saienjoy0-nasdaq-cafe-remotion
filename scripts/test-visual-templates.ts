@@ -6,6 +6,7 @@ import {VISUAL_TEMPLATE_CONTRACTS, VISUAL_TEMPLATE_IDS} from "../src/spec/visual
 
 const project = process.cwd();
 const renderer = await readFile(path.join(project, "src/components/spec/VisualTemplateRenderer.tsx"), "utf8");
+const checklistRenderer = await readFile(path.join(project, "src/components/spec/VerificationChecklistTemplate.tsx"), "utf8");
 const shotRenderer = await readFile(path.join(project, "src/components/spec/ShotStageRenderer.tsx"), "utf8");
 const shotRecipes = await readFile(path.join(project, "src/components/spec/shots/ShotRecipes.tsx"), "utf8");
 const shotTransitionHost = await readFile(path.join(project, "src/components/spec/ShotTransitionHost.tsx"), "utf8");
@@ -69,6 +70,13 @@ assert.match(
 );
 assert.match(renderer, /DivergingBars/);
 assert.match(renderer, /VerificationMatrix/);
+assert.match(renderer, /VerificationChecklistTemplate/);
+assert.match(renderer, /case "verification-checklist": return <VerificationChecklistTemplate content=\{content\}\/>/);
+assert.doesNotMatch(renderer, /case "verification-checklist": return <VerificationMatrix content=\{content\}\/>/);
+assert.match(checklistRenderer, /次に確認/);
+assert.doesNotMatch(checklistRenderer, /NEXT CHECK/);
+assert.match(checklistRenderer, /確認順にチェック/);
+assert.match(checklistRenderer, /gridTemplateColumns: "76px minmax\(0,1fr\) auto"/);
 assert.match(renderer, /FinalAssembly/);
 assert.match(renderer, /draw-line/);
 assert.match(renderer, /count-up/);
