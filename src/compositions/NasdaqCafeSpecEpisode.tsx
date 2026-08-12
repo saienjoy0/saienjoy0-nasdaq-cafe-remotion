@@ -5,6 +5,7 @@ import {fade} from "@remotion/transitions/fade";
 import {AbsoluteFill, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {SpecAssetLayer} from "../components/spec/SpecAssetLayer";
 import {FoxExpressionLayer} from "../components/spec/FoxExpressionLayer";
+import {isCardFirstFinancialContent} from "../components/spec/CardFirstFinancialRenderer";
 import {ShotStageRenderer} from "../components/spec/ShotStageRenderer";
 import {SoundCueTrack} from "../components/spec/SoundCueTrack";
 import {VisualGrammarStageModeProvider, getVisualGrammarStageShellId} from "../components/spec/VisualGrammarStageHost";
@@ -81,9 +82,14 @@ export const SpecSceneFrame: React.FC<{
   const stageShellId = view.mainContent
     ? getVisualGrammarStageShellId(view.mainContent.visualTemplate, view.mainContent.templateConfig.variant)
     : null;
-  const chromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
+  const baseChromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
     ? getStageChromeModeForShell(stageShellId)
     : "full";
+  const chromeMode: StageChromeMode = view.mainContent &&
+    isCardFirstFinancialContent(view.mainContent) &&
+    view.mainContent.visualTemplate === "opening-contradiction"
+      ? "none"
+      : baseChromeMode;
 
   return <AbsoluteFill style={sceneStyle} data-stage-chrome={chromeMode}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
