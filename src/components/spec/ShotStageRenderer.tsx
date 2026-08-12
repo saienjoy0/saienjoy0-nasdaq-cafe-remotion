@@ -1,5 +1,6 @@
 import type {PublicMainContent, PublicShot} from "../../spec/public-view-model";
 import {getStageMotionRoleForShell, type StageMotionRole} from "../../spec/stage-theme-contract";
+import {CardFirstFinancialRenderer, isCardFirstFinancialContent} from "./CardFirstFinancialRenderer";
 import {VisualGrammarStageHost, getVisualGrammarStageShellId} from "./VisualGrammarStageHost";
 import {VisualTemplateRenderer} from "./VisualTemplateRenderer";
 import {ShotTransitionHost} from "./ShotTransitionHost";
@@ -38,11 +39,14 @@ const ShotTypography: React.FC<{shot: PublicShot}> = ({shot}) => shot.typography
   ? <div data-kinetic-typography={shot.typographyTreatment} style={typographyStyle(shot)}>{shot.typographyText}</div>
   : null;
 
-const renderShot = (content: PublicMainContent) => <>
-  <DedicatedShotRenderer content={content}/>
-  <CausalVisualEventOverlay content={content}/>
-  <ShotTypography shot={content.shot!}/>
-</>;
+const renderShot = (content: PublicMainContent) => {
+  const cardFirst = isCardFirstFinancialContent(content);
+  return <>
+    {cardFirst ? <CardFirstFinancialRenderer content={content}/> : <DedicatedShotRenderer content={content}/>}
+    {cardFirst ? null : <CausalVisualEventOverlay content={content}/>}
+    <ShotTypography shot={content.shot!}/>
+  </>;
+};
 
 const clampUnit = (value: number) => Math.max(0, Math.min(1, value));
 
@@ -67,8 +71,12 @@ export const getStageMotionStyle = (
 };
 
 export const ShotStageRenderer: React.FC<{content: PublicMainContent}> = ({content}) => {
-  // v2 compatibility remains only for inputs that have no Shot plan.
-  if (!content.shot) return <VisualTemplateRenderer content={content}/>;
+  const cardFirst = isCardFirstFinancialContent(content);
+
+  // v2 compatibility remains for inputs that have no Shot plan. Card-first
+  // templates still use the same registered Stage shell rather than bypassing
+  // Visual Grammar.
+  if (!content.shot && !cardFirst) return <VisualTemplateRenderer content={content}/>;
 
   const stageShellId = getVisualGrammarStageShellId(
     content.visualTemplate,
@@ -78,13 +86,16 @@ export const ShotStageRenderer: React.FC<{content: PublicMainContent}> = ({conte
 
   return <div
     data-stage-motion-role={stageMotionRole}
+    data-card-first-financial={cardFirst ? "true" : "false"}
     style={{position: "absolute", inset: 0, transformOrigin: "50% 50%", ...getStageMotionStyle(stageMotionRole, content.beatProgress)}}
   >
     <VisualGrammarStageHost
       visualTemplate={content.visualTemplate}
       variant={content.templateConfig.variant}
     >
-      <ShotTransitionHost content={content} renderShot={renderShot}/>
+      {content.shot
+        ? <ShotTransitionHost content={content} renderShot={renderShot}/>
+        : <CardFirstFinancialRenderer content={content}/>}
     </VisualGrammarStageHost>
   </div>;
 };

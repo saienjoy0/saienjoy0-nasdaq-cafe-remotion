@@ -5,10 +5,12 @@ import {fade} from "@remotion/transitions/fade";
 import {AbsoluteFill, Sequence, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {SpecAssetLayer} from "../components/spec/SpecAssetLayer";
 import {FoxExpressionLayer} from "../components/spec/FoxExpressionLayer";
+import {isCardFirstFinancialContent} from "../components/spec/CardFirstFinancialRenderer";
 import {ShotStageRenderer} from "../components/spec/ShotStageRenderer";
 import {SoundCueTrack} from "../components/spec/SoundCueTrack";
 import {VisualGrammarStageModeProvider, getVisualGrammarStageShellId} from "../components/spec/VisualGrammarStageHost";
 import {useVisualGrammarStageMode} from "../components/spec/VisualGrammarStageMode";
+import {SourceStrip} from "../components/spec/cards/FinancialCards";
 import type {RenderProductionData, RenderSpecScene} from "../spec/render-spec";
 import {getSceneRenderState, getSpecDurationInFrames, getTransitionDurationInFrames} from "../spec/render-state";
 import {getStageChromeModeForShell, type StageChromeMode} from "../spec/stage-theme-contract";
@@ -80,9 +82,14 @@ export const SpecSceneFrame: React.FC<{
   const stageShellId = view.mainContent
     ? getVisualGrammarStageShellId(view.mainContent.visualTemplate, view.mainContent.templateConfig.variant)
     : null;
-  const chromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
+  const baseChromeMode: StageChromeMode = stageMode === "candidate" && stageShellId
     ? getStageChromeModeForShell(stageShellId)
     : "full";
+  const chromeMode: StageChromeMode = view.mainContent &&
+    isCardFirstFinancialContent(view.mainContent) &&
+    view.mainContent.visualTemplate === "opening-contradiction"
+      ? "none"
+      : baseChromeMode;
 
   return <AbsoluteFill style={sceneStyle} data-stage-chrome={chromeMode}>
     <SpecAssetLayer assets={[view.background]} zIndex={0}/>
@@ -95,7 +102,7 @@ export const SpecSceneFrame: React.FC<{
     </div>
     <SpecAssetLayer assets={view.overlays} zIndex={40}/>
     {chromeMode !== "none" ? <div style={headlineStyle(chromeMode)}>{view.headline}</div> : null}
-    {view.sourceLabel ? <div style={{position: "absolute", left: 1016, top: 744, width: 808, height: 32, zIndex: 50, overflow: "hidden", whiteSpace: "nowrap", color: "#b6cad9", fontSize: 22, lineHeight: "32px", textAlign: "right"}}>{view.sourceLabel}</div> : null}
+    {view.sourceLabel ? <div style={{position: "absolute", right: 96, top: 148, zIndex: 50}}><SourceStrip text={view.sourceLabel}/></div> : null}
     {state.subtitleText ? <div style={{position: "absolute", left: 208, top: 812, width: 1664, height: 208, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: "14px 42px", boxSizing: "border-box", overflow: "hidden", borderRadius: 18, background: "rgba(0,0,0,.88)", borderTop: "4px solid rgba(255,199,74,.88)", color: "#fff7df", fontSize: 52, lineHeight: 1.28, fontWeight: 900, letterSpacing: "0.01em", textAlign: "center", whiteSpace: "pre-line", wordBreak: "keep-all", overflowWrap: "anywhere", textShadow: "0 4px 12px #000"}}>{state.subtitleText}</div> : null}
   </AbsoluteFill>;
 };

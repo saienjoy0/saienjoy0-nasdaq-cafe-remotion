@@ -28,11 +28,14 @@ import {defaultEpisodeV1} from "./data/default-episode-v1";
 import {type EpisodeV1CompositionProps} from "./schemas/episode-v1";
 import fixtureSpecJson from "../render-specs/fixtures/minimal/render_spec.json";
 import {calculateSpecDurationInFrames, NasdaqCafeSpecEpisode, SpecDebugStill} from "./compositions/NasdaqCafeSpecEpisode";
+import {CardFirstContractStill} from "./compositions/CardFirstContractStill";
 import {productionAssetPaths} from "./config/production-assets";
+import {makeCardFirstCurrentFixtures} from "./dev/card-first-current-fixtures";
 import type {RenderProductionData, RenderSpec} from "./spec/render-spec";
 
 const specAssets = productionAssetPaths;
 const fixtureSpec = fixtureSpecJson as RenderSpec;
+const cardFirstFixture = makeCardFirstCurrentFixtures()[0];
 let defaultSpecStartFrame = 0;
 const defaultSpecScenes: RenderProductionData["scenes"] = fixtureSpec.scenes.map((scene) => {
   const narrationChunks = scene.narrationChunks.map((chunk, chunkIndex) => ({
@@ -130,6 +133,13 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
         defaultProps={{scene: fixtureSpec.scenes[0], assets: specAssets}}
+      />
+      <Still
+        id="CardFirstContractStill"
+        component={CardFirstContractStill}
+        width={1920}
+        height={1080}
+        defaultProps={{content: cardFirstFixture.content}}
       />
       <Still
         id="FixedAssetFoxSmirk"

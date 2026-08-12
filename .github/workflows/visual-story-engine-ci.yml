@@ -6,6 +6,7 @@ on:
       - "src/**"
       - "scripts/**"
       - "schemas/**"
+      - "contracts/**"
       - "render-specs/**"
       - "episode-packages/**"
       - "shot-timing-requests/**"
@@ -178,6 +179,20 @@ jobs:
 
       - name: Public screen boundary
         run: npm run test:public-screen
+
+      - name: Card-first financial mechanical gate
+        run: npm run test:card-first-financial
+
+      - name: Render card-first current-contract stills
+        run: npm run render:card-first-stills
+
+      - name: Upload card-first current-contract stills
+        uses: actions/upload-artifact@v6
+        with:
+          name: card-first-current-stills-${{ github.run_id }}
+          path: renders/tests/card-first-current-contract
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Clean generated contract workspace
         run: rm -rf build

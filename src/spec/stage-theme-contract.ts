@@ -86,7 +86,7 @@ export const STAGE_THEMES: Record<StageThemeId, StageTheme> = {
   "open-causal": {
     id: "open-causal",
     background: "#EAF2F7",
-    surface: "rgba(255,255,255,.72)",
+    surface: "rgba(255,255,255,.96)",
     surfaceStrong: "#D8E6EF",
     ...lightBase,
   },
