@@ -11,11 +11,8 @@ export const VerificationGateStage: React.FC<StageShellProps> = ({children, acce
     boxShadow="0 12px 28px rgba(16,32,51,.12)"
     style={style}
     ornaments={<>
-      {stageOrnament({left: 32, width: "calc(33.333% - 42px)", top: 24, height: 9, borderRadius: 99, background: "#087B58"})}
-      {stageOrnament({left: "calc(33.333% + 16px)", width: "calc(33.333% - 32px)", top: 24, height: 9, borderRadius: 99, background: accent})}
-      {stageOrnament({right: 32, width: "calc(33.333% - 42px)", top: 24, height: 9, borderRadius: 99, background: "#506A7F"})}
-      {stageOrnament({left: "33.333%", top: 20, bottom: 24, width: 1, background: "#9FB0BD"})}
-      {stageOrnament({left: "66.666%", top: 20, bottom: 24, width: 1, background: "#9FB0BD"})}
+      {stageOrnament({left: 32, right: 32, top: 24, height: 9, borderRadius: 99, background: accent})}
+      {stageOrnament({left: 44, top: 58, bottom: 34, width: 3, borderRadius: 99, background: "rgba(80,106,127,.22)"})}
     </>}
   >{children}</StageShellFrame>
 );
