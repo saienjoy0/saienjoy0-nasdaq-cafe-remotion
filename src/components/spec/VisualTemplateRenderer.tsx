@@ -24,6 +24,7 @@ import {
 } from "./FinancialVisualTemplates";
 import {VisualGrammarStageHost} from "./VisualGrammarStageHost";
 import {EventReactionTimelineTemplate} from "./EventReactionTimelineTemplate";
+import {VerificationChecklistTemplate} from "./VerificationChecklistTemplate";
 
 const FPS = 30;
 const color = {
@@ -340,7 +341,7 @@ const renderSelectedVisualTemplate = (content: PublicMainContent): React.ReactNo
     case "tailwind-headwind": return <TailwindHeadwind content={content}/>;
     case "diverging-stock-bars": return <DivergingBars content={content}/>;
     case "verification-matrix": return <VerificationMatrix content={content}/>;
-    case "verification-checklist": return <VerificationMatrix content={content}/>;
+    case "verification-checklist": return <VerificationChecklistTemplate content={content}/>;
     case "conclusion-card":
     case "metric-comparison-board":
     case "index-return-bars":
