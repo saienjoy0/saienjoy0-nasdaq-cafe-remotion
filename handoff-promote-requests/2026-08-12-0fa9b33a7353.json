@@ -1,0 +1,8 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-12",
+  "expectedBundleId": "0fa9b33a735394ca9deaa3bc174ff4ded984299ae191c1cb7424f9bd9fbb97ee",
+  "expectedManifestSha256": "a70eec1042fe808f5d23b11aa01a21827fcfd0911d67fbe9cd70b884cf27e384",
+  "artifactDownloadUrl": "https://sdmntpraustraliaeast.oaiusercontent.com/files/00000000-f6a0-81fa-b8f2-2f5228a0211d/raw?se=2026-08-12T00%3A21%3A52Z&sp=r&sv=2026-02-06&sr=b&scid=6463d315-b973-52ee-a6bf-6c20299e2f67&skoid=27fbae2c-124f-4566-a0d8-1b07a5a41c53&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-11T06%3A25%3A37Z&ske=2026-08-12T06%3A25%3A37Z&sks=b&skv=2026-02-06&sig=TD6HSkwqS/%2BKTq37KPQld7OarFFCo2uhJDraLJcWXgY%3D",
+  "artifactDigestSha256": "9ec91f79ec18a38a40c0e5c76ebd8c74d5beb7c857d3af313d3b52983603065c"
+}
