@@ -96,7 +96,7 @@ export const SpecSceneFrame: React.FC<{
     </div>
     <SpecAssetLayer assets={view.overlays} zIndex={40}/>
     {chromeMode !== "none" ? <div style={headlineStyle(chromeMode)}>{view.headline}</div> : null}
-    {view.sourceLabel ? <div style={{position: "absolute", right: 96, top: 742, zIndex: 50}}><SourceStrip text={view.sourceLabel}/></div> : null}
+    {view.sourceLabel ? <div style={{position: "absolute", right: 96, top: 148, zIndex: 50}}><SourceStrip text={view.sourceLabel}/></div> : null}
     {state.subtitleText ? <div style={{position: "absolute", left: 208, top: 812, width: 1664, height: 208, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: "14px 42px", boxSizing: "border-box", overflow: "hidden", borderRadius: 18, background: "rgba(0,0,0,.88)", borderTop: "4px solid rgba(255,199,74,.88)", color: "#fff7df", fontSize: 52, lineHeight: 1.28, fontWeight: 900, letterSpacing: "0.01em", textAlign: "center", whiteSpace: "pre-line", wordBreak: "keep-all", overflowWrap: "anywhere", textShadow: "0 4px 12px #000"}}>{state.subtitleText}</div> : null}
   </AbsoluteFill>;
 };
