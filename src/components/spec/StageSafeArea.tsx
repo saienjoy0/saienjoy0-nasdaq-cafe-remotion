@@ -29,17 +29,20 @@ const EXACT_STAGE_VIEWER_LABELS: Record<string, string> = {
   差: "差分",
 };
 
-const STAGE_VIEWER_PREFIXES = [
-  ["EXPECTED｜", "予想｜"],
-  ["ACTUAL｜", "実際｜"],
-  ["GAP｜", "差分｜"],
-] as const;
+const FIXED_UI_JAPANESE: Record<string, string> = {
+  EXPECTED: "予想",
+  ACTUAL: "実際",
+  GAP: "差分",
+};
 
 export const localizeStageViewerLabel = (value: string) => {
-  const exact = EXACT_STAGE_VIEWER_LABELS[value];
-  if (exact) return exact;
-  for (const [english, japanese] of STAGE_VIEWER_PREFIXES) {
-    if (value.startsWith(english)) return `${japanese}${value.slice(english.length)}`;
+  for (const [english, japanese] of Object.entries(EXACT_STAGE_VIEWER_LABELS)) {
+    if (value.toLocaleUpperCase("en-US") === english.toLocaleUpperCase("en-US")) return japanese;
+  }
+  const match = /^(expected|actual|gap)(?=$|｜)/iu.exec(value);
+  if (match) {
+    const japanese = FIXED_UI_JAPANESE[match[1].toUpperCase()];
+    return `${japanese}${value.slice(match[1].length)}`;
   }
   return value;
 };
