@@ -86,7 +86,7 @@ export const VISUAL_GRAMMAR_RENDERER_COMPATIBILITY =
   visualGrammarRendererCompatibilitySchema.parse(compatibilityJson);
 
 export const VISUAL_GRAMMAR_RENDERER_COMPATIBILITY_SHA256 =
-  "56c0ef3b26d9f7c66d21b476b4dcea2bb2cddbb7620bb38885513bf190620855" as const;
+  "4bf9851e83b85b2371bfb2427af631906170724318df2641fd01460d6b8171f5" as const;
 
 export type VisualGrammarId = z.infer<typeof visualGrammarIdSchema>;
 export type TransitionRole = z.infer<typeof transitionRoleSchema>;
