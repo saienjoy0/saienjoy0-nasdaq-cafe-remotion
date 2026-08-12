@@ -80,6 +80,27 @@ test("disallowed Grammar and Template pairs fail", () => {
   assert.equal(isVisualGrammarTemplatePairAllowed("gap", "news-media"), false);
 });
 
+test("verification checklist is physically distinct from verification matrix", () => {
+  const checklist = getVisualGrammarCompatibility("verification-checklist");
+  const matrix = getVisualGrammarCompatibility("verification-matrix");
+  assert.deepEqual(
+    {
+      appearanceClass: checklist.appearanceClass,
+      dominantSurface: checklist.dominantSurface,
+      stageShell: checklist.stageShell,
+      motionLanguage: checklist.motionLanguage,
+    },
+    {
+      appearanceClass: "metric-board",
+      dominantSurface: "card-board",
+      stageShell: "MetricBoardStage",
+      motionLanguage: "metric-board",
+    },
+  );
+  assert.notEqual(checklist.appearanceClass, matrix.appearanceClass);
+  assert.notEqual(checklist.stageShell, matrix.stageShell);
+});
+
 test("render_spec 2.2.0 remains valid without Visual Grammar metadata", () => {
   renderSpecSchema.parse(fixtureJson);
 });
