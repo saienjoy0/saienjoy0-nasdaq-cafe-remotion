@@ -15,6 +15,7 @@ import {
   type VisualCandidateCatalog,
   type VisualCapabilityHints,
 } from "./visual-director-contract";
+import {candidateTemplatesForPolicy} from "./visual-template-policy";
 
 type Beat = RenderSpec["scenes"][number]["visualBeats"][number];
 type Scene = RenderSpec["scenes"][number];
@@ -224,15 +225,20 @@ export const buildVisualCandidateCatalog = ({
 }): VisualCandidateCatalog => {
   if (spec.schemaVersion !== "2.4.0") throw new Error("Visual Director requires render_spec 2.4.0");
   if (hints && hints.episodeDate !== spec.episode.targetDate) throw new Error("capability hint episodeDate mismatch");
-  const hintMap = new Map(hints?.beats.map((item) => [item.visualBeatId, item.capabilities] as const) ?? []);
+  const hintMap = new Map(hints?.beats.map((item) => [item.visualBeatId, item] as const) ?? []);
   const candidates: VisualCandidate[] = [];
 
   for (const scene of spec.scenes) {
     for (const beat of scene.visualBeats) {
-      const capabilities = unique([...(hintMap.get(beat.beatId) ?? []), ...inferCapabilities(beat)]).sort();
+      const hint = hintMap.get(beat.beatId);
+      const capabilities = unique([...(hint?.capabilities ?? []), ...inferCapabilities(beat)]).sort();
       const drafts = new Map<string, Omit<VisualCandidate, "candidateId">>();
       for (const capability of capabilities) {
-        const templates = unique([beat.visualTemplate, ...CAPABILITY_TEMPLATES[capability]]).sort();
+        const templates = candidateTemplatesForPolicy(
+          beat.visualTemplate,
+          CAPABILITY_TEMPLATES[capability],
+          hint?.templatePolicy,
+        );
         for (const template of templates) {
           if (!canBuild(capability, template, scene, beat)) continue;
           const templateConfig = templateConfigFor(template, scene, beat);
