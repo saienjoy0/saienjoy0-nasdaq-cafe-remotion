@@ -1,0 +1,13 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-12",
+  "plotRunId": 31605236021,
+  "handoffArtifactName": "nasdaq-cafe-handoff-2026-08-12-31605236021",
+  "expectedBundleId": "b9fcc4b7d6b25b4b83e1fa0b62d077bda2f70aeb9430c363d2c291e9e6dfb1fd",
+  "expectedManifestSha256": "09582061fc6b8c0bd619df06147ac797f4917d659bdf8bd2e1203abb5c72cf73",
+  "expectedRendererCommit": "6a44cdeb04d401dc45379783862e279a5c2f04a5",
+  "rendererRef": "main",
+  "signedArtifactUrl": "https://sdmntprindiasocentral.oaiusercontent.com/files/00000000-78e8-8211-8d27-906ace3d8681/raw?se=2026-08-12T14%3A15%3A26Z&sp=r&sv=2026-02-06&sr=b&scid=cce58be1-b5bc-5321-907d-15e94b20036f&skoid=0556a536-9b18-4aa8-bae0-70ed682ee936&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-12T04%3A03%3A36Z&ske=2026-08-13T04%3A03%3A36Z&sks=b&skv=2026-02-06&sig=Aot02zpEe8NjkImw0VYaboum3/fhxr0CLfAcOzTF/tM%3D",
+  "signedArtifactDigestSha256": "a5d4c717a571bbe8882e88c10696a5084190db566071dcec300a5acbcf4ccc9d",
+  "confirmation": "PREVIEW"
+}
