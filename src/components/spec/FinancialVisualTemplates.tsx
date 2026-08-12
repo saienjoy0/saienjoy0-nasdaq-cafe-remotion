@@ -2,7 +2,6 @@ import type {CSSProperties, FC, ReactNode} from "react";
 import {Easing, interpolate, spring} from "remotion";
 import type {
   PublicArrow,
-  PublicCard,
   PublicMainContent,
   PublicNode,
   PublicNumber,
