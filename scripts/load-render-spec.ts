@@ -12,6 +12,7 @@ import {
 import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
 import {validateShotStoryContract} from "../src/spec/validate-shot-story";
 import {preflightProductionExpressions} from "../src/spec/preflight-render-spec";
+import {preflightViewerSurface} from "../src/spec/preflight-viewer-surface";
 
 export const resolveSpecPath = (input: string) => path.resolve(process.cwd(), input);
 const format = (issues: Array<{path: PropertyKey[]; message: string}>) =>
@@ -32,11 +33,13 @@ export const loadRenderSpec = async (
   validateVisualStoryContract(parsed.data, {enforceVariety});
   validateShotStoryContract(parsed.data, {enforceVariety});
   const expressionPreflight = preflightProductionExpressions(parsed.data);
+  const viewerSurfacePreflight = preflightViewerSurface(parsed.data);
   return {
     spec: parsed.data,
     resolved,
     sha256: createHash("sha256").update(source).digest("hex"),
     expressionPreflight,
+    viewerSurfacePreflight,
   };
 };
 
