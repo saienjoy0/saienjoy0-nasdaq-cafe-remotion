@@ -1,0 +1,11 @@
+{
+  "contractVersion": "1.0.0",
+  "episodeDate": "2026-08-12",
+  "plotRunId": 31552934923,
+  "handoffArtifactName": "nasdaq-cafe-handoff-2026-08-12-31552934923",
+  "expectedBundleId": "31e6f6270aef7dc4a3f7e022dcf6d4dbba40f755d2e4918395c19faa474810fd",
+  "expectedManifestSha256": "b95b2a349bec7cf199e5e19547b54c8cd890b230b16f05ba4b213c00b66db381",
+  "expectedRendererCommit": "9f0acd45586b2aff8902aae7a5f7df0beb7df120",
+  "rendererRef": "preview/2026-08-12-renderer-pin",
+  "confirmation": "PREVIEW"
+}
