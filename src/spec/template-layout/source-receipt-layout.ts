@@ -18,11 +18,14 @@ export type SourceReceiptLayoutPlan = {
 const visibleLength = (value: string) => Array.from(value.replace(/\s+/gu, "")).length;
 const within = (value: string, capacity: number) => visibleLength(value) <= capacity;
 
+// Side-by-side has roughly half of the 1440px stage for each column. These
+// capacities deliberately preserve readable Japanese type rather than shrinking
+// text until it technically fits.
 const SIDE = {
-  title: 30,
-  question: 34,
-  evidence: 40,
-  footer: 48,
+  title: 22,
+  question: 26,
+  evidence: 30,
+  footer: 40,
 } as const;
 
 const STACKED = {
