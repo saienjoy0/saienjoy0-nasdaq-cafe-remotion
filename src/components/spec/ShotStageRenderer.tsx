@@ -42,8 +42,8 @@ const ShotTypography: React.FC<{shot: PublicShot}> = ({shot}) => shot.typography
 const renderShot = (content: PublicMainContent) => {
   const cardFirst = isCardFirstFinancialContent(content);
   return <>
-    {cardFirst ? <CardFirstFinancialRenderer content={content}/> : <DedicatedShotRenderer content={content}/>} 
-    {cardFirst ? null : <CausalVisualEventOverlay content={content}/>} 
+    {cardFirst ? <CardFirstFinancialRenderer content={content}/> : <DedicatedShotRenderer content={content}/>}
+    {cardFirst ? null : <CausalVisualEventOverlay content={content}/>}
     <ShotTypography shot={content.shot!}/>
   </>;
 };
@@ -95,7 +95,7 @@ export const ShotStageRenderer: React.FC<{content: PublicMainContent}> = ({conte
     >
       {content.shot
         ? <ShotTransitionHost content={content} renderShot={renderShot}/>
-        : <CardFirstFinancialRenderer content={content}/>} 
+        : <CardFirstFinancialRenderer content={content}/>}
     </VisualGrammarStageHost>
   </div>;
 };
