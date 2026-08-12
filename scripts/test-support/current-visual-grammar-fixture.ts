@@ -75,6 +75,7 @@ export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
       const nodeIds = chooseIds(scene.nodes, selected, (item) => item.nodeId, contract.nodes);
       const arrowIds = chooseIds(scene.arrows, selected, (item) => item.arrowId, contract.arrows);
       beat.objectIds = [...cardIds, ...numberIds, ...nodeIds, ...arrowIds];
+      beat.templateVariant = beat.templateConfig.variant;
     }
   }
 
