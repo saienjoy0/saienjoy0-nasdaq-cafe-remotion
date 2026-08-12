@@ -31,21 +31,19 @@ export const loadRenderSpec = async (
   const enforceVariety = !resolved.includes(`${path.sep}fixtures${path.sep}`);
   validateVisualStoryContract(parsed.data, {enforceVariety});
   validateShotStoryContract(parsed.data, {enforceVariety});
+  const expressionPreflight = preflightProductionExpressions(parsed.data);
   return {
     spec: parsed.data,
     resolved,
     sha256: createHash("sha256").update(source).digest("hex"),
+    expressionPreflight,
   };
 };
 
 export const loadRenderSpecForProduction = async (
   input: string,
   assetManifest: AssetManifestForSpec = productionAssetManifest,
-) => {
-  const loaded = await loadRenderSpec(input, assetManifest);
-  const expressionPreflight = preflightProductionExpressions(loaded.spec);
-  return {...loaded, expressionPreflight};
-};
+) => loadRenderSpec(input, assetManifest);
 
 export const loadProductionData = async (input: string) => {
   const resolved = path.resolve(process.cwd(), input);
