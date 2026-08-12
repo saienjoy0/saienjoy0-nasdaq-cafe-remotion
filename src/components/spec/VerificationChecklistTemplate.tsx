@@ -58,7 +58,7 @@ export const VerificationChecklistTemplate: FC<{content: PublicMainContent}> = (
     }}>
       <div style={{display: "flex", alignItems: "end", justifyContent: "space-between", gap: 28}}>
         <div style={{minWidth: 0}}>
-          <div style={{fontSize: 23, color: palette.positive, fontWeight: 950, letterSpacing: ".08em"}}>NEXT CHECK</div>
+          <div style={{fontSize: 23, color: palette.positive, fontWeight: 950, letterSpacing: ".08em"}}>次に確認</div>
           <div style={{marginTop: 7, fontSize: 42, lineHeight: 1.13, color: palette.ink, fontWeight: 950}}>{content.primaryElement}</div>
         </div>
         <div style={{maxWidth: 520, textAlign: "right", color: palette.emphasis, fontSize: 27, lineHeight: 1.24, fontWeight: 900}}>{content.screenQuestion}</div>
