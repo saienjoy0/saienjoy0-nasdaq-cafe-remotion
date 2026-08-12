@@ -15,8 +15,18 @@ test("viewer numeric kanji is rejected while ordinary Japanese words remain vali
     () => assertViewerTextSafe("十五時五十九分", "caption"),
     /E_VIEWER_NUMERIC_KANJI_REMAINS/,
   );
+  assert.throws(
+    () => assertViewerTextSafe("資金動員は五千億ドル規模", "caption"),
+    /E_VIEWER_NUMERIC_KANJI_REMAINS/,
+  );
   assert.doesNotThrow(() => assertViewerTextSafe("一方で四半期売上は増加", "caption"));
   assert.doesNotThrow(() => assertViewerTextSafe("三菱を確認", "caption"));
+});
+
+test("Arabic coefficients may keep Japanese financial magnitude units", () => {
+  assert.doesNotThrow(() => assertViewerTextSafe("資金動員は5,000億ドル規模", "caption"));
+  assert.doesNotThrow(() => assertViewerTextSafe("売上25.8億ドル、backlog1,040億ドル", "caption"));
+  assert.doesNotThrow(() => assertViewerTextSafe("市場規模は1万ドル", "caption"));
 });
 
 test("viewer-facing Expected Actual Gap labels use the single Japanese vocabulary", () => {
