@@ -1,0 +1,46 @@
+name: Production Closure Contract CI
+
+on:
+  push:
+    branches:
+      - fix/production-closure-v1-2
+    paths:
+      - "scripts/duration-policy.ts"
+      - "scripts/test-duration-policy.ts"
+      - "src/spec/measure-visual-grammar.ts"
+      - "src/spec/visual-stagnation.ts"
+      - "scripts/test-visual-grammar-timing.ts"
+      - "scripts/test-visual-stagnation.ts"
+      - "contracts/visual_grammar_timing_report.schema.json"
+      - "docs/07_codex_minimal_execution_contract.md"
+      - "docs/14_visual_grammar_measured_diversity.md"
+      - ".github/workflows/production-closure-contract-ci.yml"
+  pull_request:
+    paths:
+      - "scripts/duration-policy.ts"
+      - "scripts/test-duration-policy.ts"
+      - "src/spec/measure-visual-grammar.ts"
+      - "src/spec/visual-stagnation.ts"
+      - "scripts/test-visual-grammar-timing.ts"
+      - "scripts/test-visual-stagnation.ts"
+      - "contracts/visual_grammar_timing_report.schema.json"
+      - "docs/07_codex_minimal_execution_contract.md"
+      - "docs/14_visual_grammar_measured_diversity.md"
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test:duration-policy
+      - run: npm run test:visual-grammar-timing
