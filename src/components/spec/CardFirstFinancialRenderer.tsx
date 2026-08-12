@@ -1,5 +1,5 @@
 import {interpolate} from "remotion";
-import type {PublicCard, PublicMainContent, PublicNode, PublicNumber} from "../../spec/public-view-model";
+import type {PublicCard, PublicMainContent, PublicNode} from "../../spec/public-view-model";
 import {SafeContent, safeFontSize, StageEyebrow} from "./StageSafeArea";
 import {
   CardConnector,
@@ -48,12 +48,15 @@ const OpeningCards: React.FC<{content: PublicMainContent}> = ({content}) => {
     [content.texts[0], content.primaryElement, content.screenQuestion],
     [lead?.label ?? "", lead?.value ?? ""],
   );
+  const showVerdict = Boolean(verdict);
+  const showSecondaryNumber = !showVerdict && Boolean(secondaryNumber);
 
   return <SafeContent reserveTypography={Boolean(shot?.typographyTreatment)} style={{display: "grid", gridTemplateRows: "auto 1fr auto", gap: 18, alignContent: "center"}}>
     <SectionTitle>昨夜の方向と矛盾</SectionTitle>
-    <div style={{display: "grid", gridTemplateColumns: lead && (verdict || secondaryNumber) ? "minmax(0,.9fr) minmax(0,1.1fr)" : "1fr", gap: 22, alignItems: "center"}}>
+    <div style={{display: "grid", gridTemplateColumns: lead && (showVerdict || showSecondaryNumber) ? "minmax(0,.9fr) minmax(0,1.1fr)" : "1fr", gap: 22, alignItems: "center"}}>
       {lead ? <div style={revealStyle(content, lead.revealAtMs)}><MetricCard number={lead}/></div> : null}
-      {secondaryNumber ? <div style={revealStyle(content, secondaryNumber.revealAtMs)}><MetricCard number={secondaryNumber}/></div> : verdict ? <div style={secondaryCard ? revealStyle(content, secondaryCard.revealAtMs) : timedStyle(content, 1)}><TextCard title={secondaryCard?.title ?? "結論"} text={verdict} tone={secondaryCard?.lines[0]?.tone ?? "emphasis"} role="verdict"/></div> : null}
+      {showVerdict && verdict ? <div style={secondaryCard ? revealStyle(content, secondaryCard.revealAtMs) : timedStyle(content, 1)}><TextCard title={secondaryCard?.title ?? "結論"} text={verdict} tone={secondaryCard?.lines[0]?.tone ?? "emphasis"} role="verdict"/></div> : null}
+      {showSecondaryNumber && secondaryNumber ? <div style={revealStyle(content, secondaryNumber.revealAtMs)}><MetricCard number={secondaryNumber}/></div> : null}
     </div>
     {content.screenQuestion && content.screenQuestion !== verdict ? <div style={{...timedStyle(content, 2), fontSize: safeFontSize(content.screenQuestion, 34, 26, 1120), color: "var(--stage-text-secondary,#314A60)", fontWeight: 900, textAlign: "center"}}>{content.screenQuestion}</div> : <div/>}
   </SafeContent>;
@@ -79,10 +82,12 @@ const ActualVsExpectedCards: React.FC<{content: PublicMainContent}> = ({content}
   const referenceCard = cardById(content, shot?.referenceTargetId) ?? content.cards.find((item) => item.role === "expected") ?? null;
   const expectedText = referenceCard?.lines[0]?.value ?? actualNumber?.comparison ?? null;
   const actualText = actualCard?.lines[0]?.value ?? null;
+  const hasExpected = Boolean(expectedText);
+  const hasActual = Boolean(actualNumber || actualText);
   return <SafeContent reserveTypography={Boolean(shot?.typographyTreatment)} style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 18, alignItems: "center"}}>
     <SectionTitle>予想と実際</SectionTitle>
-    <div style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 22, alignItems: "center"}}>
-      {expectedText ? <div style={referenceCard ? revealStyle(content, referenceCard.revealAtMs) : timedStyle(content, 0)}><TextCard title="予想" text={expectedText} tone="neutral" role="expected"/></div> : <TextCard title="予想" text="基準値" tone="neutral" role="expected"/>}
+    <div style={{display: "grid", gridTemplateColumns: hasExpected && hasActual ? "repeat(2,minmax(0,1fr))" : "minmax(0,1fr)", gap: 22, alignItems: "center"}}>
+      {expectedText ? <div style={referenceCard ? revealStyle(content, referenceCard.revealAtMs) : timedStyle(content, 0)}><TextCard title="予想" text={expectedText} tone="neutral" role="expected"/></div> : null}
       {actualNumber ? <div style={revealStyle(content, actualNumber.revealAtMs)}><MetricCard number={actualNumber} meta={null}/></div> : actualText ? <div style={actualCard ? revealStyle(content, actualCard.revealAtMs) : timedStyle(content, 1)}><TextCard title="実際" text={actualText} tone="positive" role="actual"/></div> : null}
     </div>
   </SafeContent>;
@@ -116,9 +121,9 @@ const SplitCards: React.FC<{content: PublicMainContent}> = ({content}) => {
   return <SafeContent reserveTypography={Boolean(content.shot?.typographyTreatment)} style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 18, alignItems: "center"}}>
     <SectionTitle>同じ基準で比較</SectionTitle>
     <div style={{display: "grid", gridTemplateColumns: "minmax(0,1fr) 54px minmax(0,1fr)", gap: 18, alignItems: "center"}}>
-      {numbers[0] ? <div style={revealStyle(content, numbers[0].revealAtMs)}><MetricCard number={numbers[0]}/></div> : <TextCard text={texts[0] ?? content.primaryElement} tone="neutral"/>}
+      {numbers[0] ? <div style={revealStyle(content, numbers[0].revealAtMs)}><MetricCard number={numbers[0]}/></div> : texts[0] ? <TextCard text={texts[0]} tone="neutral"/> : null}
       <div style={{fontSize: 24, color: "var(--stage-text-muted,#506A7F)", textAlign: "center", fontWeight: 950}}>対比</div>
-      {numbers[1] ? <div style={revealStyle(content, numbers[1].revealAtMs)}><MetricCard number={numbers[1]}/></div> : <TextCard text={texts[1] ?? content.screenQuestion} tone="warning"/>}
+      {numbers[1] ? <div style={revealStyle(content, numbers[1].revealAtMs)}><MetricCard number={numbers[1]}/></div> : texts[1] ? <TextCard text={texts[1]} tone="warning"/> : null}
     </div>
   </SafeContent>;
 };
@@ -163,14 +168,15 @@ const SequenceVerification: React.FC<{content: PublicMainContent}> = ({content})
 };
 
 const LaneVerification: React.FC<{content: PublicMainContent}> = ({content}) => {
-  const labels = content.templateConfig.laneLabels.length >= 2 ? content.templateConfig.laneLabels.slice(0, 2) : ["強まる条件", "弱まる条件"];
+  const defaultLaneLabels = ["強まる条件", "弱まる条件"] as const;
+  const labels = content.templateConfig.laneLabels.length >= 2 ? content.templateConfig.laneLabels.slice(0, 2) : [...defaultLaneLabels];
   const cards = content.cards.slice(0, 4);
   const textItems = cards.length > 0 ? [] : (content.nodes.length > 0 ? content.nodes.map((node) => node.label) : content.texts).slice(0, 4);
   const midpoint = Math.ceil((cards.length || textItems.length) / 2);
   const lane = (index: number) => cards.length > 0 ? cards.slice(index === 0 ? 0 : midpoint, index === 0 ? midpoint : undefined) : textItems.slice(index === 0 ? 0 : midpoint, index === 0 ? midpoint : undefined);
   return <SafeContent reserveTypography={Boolean(content.shot?.typographyTreatment)} style={{display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 22}}>
     {[0, 1].map((laneIndex) => <div key={laneIndex} data-verification-lane={laneIndex} style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 14}}>
-      <SectionTitle>{labels[laneIndex]}</SectionTitle>
+      <SectionTitle>{labels[laneIndex] ?? defaultLaneLabels[laneIndex]}</SectionTitle>
       <div style={{display: "grid", gap: 14, alignContent: "center"}}>{lane(laneIndex).map((item, index) => typeof item === "string"
         ? <div key={`${laneIndex}-${index}`} style={timedStyle(content, laneIndex * midpoint + index)}><TextCard text={item} tone={laneIndex === 0 ? "positive" : "warning"} role="verification"/></div>
         : <div key={item.key} style={revealStyle(content, item.revealAtMs)}><TextCard title={item.title} text={cardText(item)} tone={item.lines[0]?.tone ?? (laneIndex === 0 ? "positive" : "warning")} highlighted={item.highlighted} role="verification"/></div>)}</div>
