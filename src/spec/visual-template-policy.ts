@@ -10,5 +10,7 @@ export const candidateTemplatesForPolicy = (
 ) => {
   if (!policy) return unique([authoredTemplate, ...capabilityTemplates]).sort();
   if (policy.mode === "authored-only") return [authoredTemplate];
-  return unique([authoredTemplate, ...policy.allowedTemplateIds]).sort();
+  const capabilitySet = new Set(capabilityTemplates);
+  const explicitlyAllowed = policy.allowedTemplateIds.filter((template) => capabilitySet.has(template));
+  return unique([authoredTemplate, ...explicitlyAllowed]).sort();
 };
