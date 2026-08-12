@@ -25,6 +25,8 @@ const EXACT_STAGE_VIEWER_LABELS: Record<string, string> = {
   EXPECTED: "予想",
   ACTUAL: "実際",
   GAP: "差分",
+  実績: "実際",
+  差: "差分",
 };
 
 const STAGE_VIEWER_PREFIXES = [
@@ -64,6 +66,8 @@ export const StageShell: React.FC<{
     position: "absolute",
     inset: 0,
     overflow: "hidden",
+    overflowWrap: "anywhere",
+    wordBreak: "normal",
     boxSizing: "border-box",
     borderRadius: "var(--shot-stage-border-radius,30px)",
     color: palette.ink,
@@ -85,6 +89,7 @@ export const SafeContent: React.FC<{
   top: STAGE_SAFE_TOP,
   bottom: reserveTypography ? STAGE_SAFE_BOTTOM + STAGE_TYPOGRAPHY_HEIGHT : STAGE_SAFE_BOTTOM,
   overflow: "hidden",
+  overflowWrap: "anywhere",
   boxSizing: "border-box",
   ...style,
 }}>{children}</div>;

@@ -68,19 +68,43 @@ export const visualDirectionPlanSchema = z.object({
   }).strict()).min(1),
 }).strict();
 
+export const visualTemplatePolicySchema = z.discriminatedUnion("mode", [
+  z.object({
+    mode: z.literal("authored-only"),
+    allowedTemplateIds: z.array(visualTemplateSchema).max(0).optional(),
+  }).strict(),
+  z.object({
+    mode: z.literal("allow-list"),
+    allowedTemplateIds: z.array(visualTemplateSchema).min(1),
+  }).strict(),
+]);
+
 export const visualCapabilityHintsSchema = z.object({
-  contractVersion: z.literal("1.0.0"),
+  contractVersion: z.enum(["1.0.0", "1.1.0"]),
   episodeDate: episodeDateSchema,
   beats: z.array(z.object({
     visualBeatId: safeId,
     capabilities: z.array(evidenceCapabilitySchema).min(1),
+    templatePolicy: visualTemplatePolicySchema.optional(),
   }).strict()),
-}).strict();
+}).strict().superRefine((value, context) => {
+  if (value.contractVersion !== "1.1.0") return;
+  value.beats.forEach((beat, index) => {
+    if (!beat.templatePolicy) {
+      context.addIssue({
+        code: "custom",
+        path: ["beats", index, "templatePolicy"],
+        message: "E_VISUAL_DIRECTOR_TEMPLATE_POLICY_MISSING",
+      });
+    }
+  });
+});
 
 export type EvidenceCapability = z.infer<typeof evidenceCapabilitySchema>;
 export type VisualCandidate = z.infer<typeof visualCandidateSchema>;
 export type VisualCandidateCatalog = z.infer<typeof visualCandidateCatalogSchema>;
 export type VisualDirectionPlan = z.infer<typeof visualDirectionPlanSchema>;
+export type VisualTemplatePolicy = z.infer<typeof visualTemplatePolicySchema>;
 export type VisualCapabilityHints = z.infer<typeof visualCapabilityHintsSchema>;
 
 const canonicalize = (value: unknown): unknown => {
