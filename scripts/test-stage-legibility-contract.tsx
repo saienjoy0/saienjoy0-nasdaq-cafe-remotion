@@ -59,6 +59,17 @@ test("viewer-facing Expected Actual Gap labels are Japanese", () => {
   assert.doesNotMatch(markup, /EXPECTED/);
 });
 
+test("verification Stage does not force a misleading three-column chrome", () => {
+  const markup = renderToStaticMarkup(
+    <VisualGrammarStageHost visualTemplate="verification-matrix" variant="default">
+      <span>通常取引 → 引け後 → 結論</span>
+    </VisualGrammarStageHost>,
+  );
+  assert.match(markup, /data-stage-shell="VerificationGateStage"/);
+  assert.doesNotMatch(markup, /33\.333%/);
+  assert.doesNotMatch(markup, /66\.666%/);
+});
+
 test("chrome removes duplicate title bands on open explanatory Stages", () => {
   assert.equal(getStageChromeModeForShell("OpenHeroStage"), "full");
   assert.equal(getStageChromeModeForShell("DocumentMediaStage"), "minimal");
