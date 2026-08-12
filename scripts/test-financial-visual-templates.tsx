@@ -141,7 +141,7 @@ const earnings = baseContent({
   ],
 });
 const earningsMarkup = render(<EarningsSurpriseTemplate content={earnings}/>);
-assert.match(earningsMarkup, /予想・実績・差/);
+assert.match(earningsMarkup, /予想・実際・差分/);
 assert.match(earningsMarkup, /市場予想/);
 assert.match(earningsMarkup, /上振れ幅/);
 
@@ -198,7 +198,7 @@ assert.match(receiptMarkup, /Amazon reported AWS revenue/);
 assert.doesNotMatch(receiptMarkup, /financialVisualTrace|recipePlanSha256|selectedPlanId/);
 
 for (const markup of [marketMarkup, earningsMarkup, divergenceMarkup, macroMarkup, receiptMarkup]) {
-  assert.doesNotMatch(markup, /MARKET SNAPSHOT|EXPECTED \/ ACTUAL \/ GAP|ENTITY DIVERGENCE|MACRO TRANSMISSION|SOURCE EVIDENCE|CONFIRMED MATERIAL|>RECEIPT</);
+  assert.doesNotMatch(markup, /MARKET SNAPSHOT|EXPECTED \/ ACTUAL \/ GAP|ENTITY DIVERGENCE|MACRO TRANSMISSION|SOURCE EVIDENCE|CONFIRMED MATERIAL|>RECEIPT/);
 }
 
 assert.throws(
