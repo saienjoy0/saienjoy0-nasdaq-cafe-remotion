@@ -7,6 +7,7 @@ import type {
   PublicNode,
   PublicNumber,
 } from "../../spec/public-view-model";
+import {planSourceReceiptLayout} from "../../spec/template-layout/source-receipt-layout";
 
 const FPS = 30;
 const palette = {
@@ -68,6 +69,7 @@ const Surface: FC<{children: ReactNode; accent?: string; style?: CSSProperties}>
     height: "100%",
     boxSizing: "border-box",
     overflow: "hidden",
+    overflowWrap: "anywhere",
     ...style,
   }}>
     {children}
@@ -139,14 +141,17 @@ export const assertFinancialTemplateContent = (
       throw new Error("macro-pressure requires one to three visible arrows");
     }
   }
-  if (
-    template === "source-receipt" &&
-    content.cards.length === 0 &&
-    content.numbers.length === 0 &&
-    content.texts.length === 0 &&
-    content.supportingTexts.length === 0
-  ) {
-    throw new Error("source-receipt requires at least one visible evidence item");
+  if (template === "source-receipt") {
+    if (
+      content.cards.length === 0 &&
+      content.numbers.length === 0 &&
+      content.texts.length === 0
+    ) {
+      throw new Error("source-receipt requires at least one visible evidence item");
+    }
+    if (content.numbers.some((number) => number.numericValue === null || !Number.isFinite(number.numericValue))) {
+      throw new Error("E_SOURCE_RECEIPT_NON_NUMERIC_NUMBER");
+    }
   }
 };
 
@@ -224,13 +229,13 @@ export const EarningsSurpriseTemplate: FC<{content: PublicMainContent}> = ({cont
   return (
     <Surface accent={palette.emphasis} style={{padding: "27px 32px", display: "grid", gridTemplateRows: "auto 1fr auto", gap: 20}}>
       <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", gap: 22}}>
-        <div><Pill tone="emphasis">予想・実績・差</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
+        <div><Pill tone="emphasis">予想・実際・差分</Pill><div style={{marginTop: 9, fontSize: 32, fontWeight: 950}}>{content.headline}</div></div>
         <div style={{maxWidth: 440, color: palette.emphasis, textAlign: "right", fontSize: 31, lineHeight: 1.2, fontWeight: 950}}>{content.screenQuestion}</div>
       </div>
       <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1.08fr", gap: 18, alignContent: "stretch"}}>
         <SurprisePanel content={content} number={expected} title="予想" tone="neutral"/>
-        <SurprisePanel content={content} number={actual} title="実績" tone="positive"/>
-        <SurprisePanel content={content} number={gap} title="差" tone="emphasis" featured/>
+        <SurprisePanel content={content} number={actual} title="実際" tone="positive"/>
+        <SurprisePanel content={content} number={gap} title="差分" tone="emphasis" featured/>
       </div>
       <div style={{display: "flex", justifyContent: "space-between", gap: 22, color: palette.muted, fontSize: 22, fontWeight: 850}}>
         <span>{content.templateConfig.comparisonBasis ?? "同一企業・同一期間・同一通貨"}</span>
@@ -366,40 +371,88 @@ export const MacroPressureTemplate: FC<{content: PublicMainContent}> = ({content
   );
 };
 
-const firstEvidenceLine = (card: PublicCard | undefined) => card?.lines[0]?.value ?? card?.title ?? null;
+const uniqueEvidence = (values: Array<string | null | undefined>) =>
+  [...new Set(values.filter((value): value is string => Boolean(value?.trim())))];
+
+const ReceiptEvidence: FC<{
+  content: PublicMainContent;
+  evidence: string[];
+  fontSize: number;
+  compact?: boolean;
+}> = ({content, evidence, fontSize, compact = false}) => (
+  <div style={{
+    ...entryStyle(content, content.beatStartMs + 380, "x"),
+    position: "relative",
+    minWidth: 0,
+    minHeight: compact ? 300 : 390,
+    padding: compact ? "25px 28px 52px" : "30px 29px 58px",
+    borderRadius: 18,
+    background: "rgba(255,255,255,.92)",
+    border: `2px solid ${palette.line}`,
+    boxShadow: "0 18px 35px rgba(16,32,51,.13)",
+  }}>
+    <div style={{position: "absolute", left: 22, right: 22, top: 18, height: 3, background: `repeating-linear-gradient(90deg,${palette.neutral} 0 12px,transparent 12px 21px)`}}/>
+    <div style={{marginTop: 10, display: "flex", justifyContent: "space-between", gap: 15, color: palette.muted, fontSize: 20, fontWeight: 900}}><span>確認済み資料</span><span>出典メモ</span></div>
+    <div style={{marginTop: 20, display: "grid", gap: compact ? 12 : 16}}>
+      {evidence.map((item, index) => (
+        <div key={`${index}-${item}`} style={{
+          ...entryStyle(content, content.beatStartMs + 620 + index * 360),
+          display: "grid",
+          gridTemplateColumns: "34px minmax(0,1fr)",
+          gap: 13,
+          alignItems: "start",
+          paddingBottom: compact ? 10 : 14,
+          borderBottom: `2px dashed ${palette.line}`,
+        }}>
+          <div style={{width: 28, height: 28, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: palette.white, background: palette.positive, fontSize: 18, fontWeight: 950}}>✓</div>
+          <div style={{minWidth: 0, fontSize, lineHeight: 1.3, fontWeight: 900, overflowWrap: "anywhere"}}>{item}</div>
+        </div>
+      ))}
+    </div>
+    <div style={{position: "absolute", left: 29, right: 29, bottom: 20, color: palette.muted, fontSize: 19, lineHeight: 1.25, fontWeight: 850, overflowWrap: "anywhere"}}>{content.templateConfig.comparisonBasis ?? "確認できた範囲だけを表示"}</div>
+  </div>
+);
 
 export const SourceReceiptTemplate: FC<{content: PublicMainContent}> = ({content}) => {
   assertFinancialTemplateContent("source-receipt", content);
-  const evidence = [
-    firstEvidenceLine(content.cards[0]),
+  const evidence = uniqueEvidence([
+    ...content.cards.flatMap((card) => card.lines.length > 0 ? card.lines.map((line) => line.value) : [card.title]),
     ...content.texts,
-    ...content.supportingTexts,
-  ].filter((value): value is string => Boolean(value)).slice(0, 4);
+  ]).slice(0, 4);
+  const primaryElement = content.primaryElement || content.headline;
+  const plan = planSourceReceiptLayout({
+    primaryElement,
+    screenQuestion: content.screenQuestion,
+    evidence,
+    comparisonBasis: content.templateConfig.comparisonBasis,
+  });
+
+  const heading = (
+    <div style={{display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0}}>
+      <div style={entryStyle(content, content.beatStartMs)}><Pill tone="neutral">確認済みの根拠</Pill></div>
+      <div style={{...entryStyle(content, content.beatStartMs + 250), marginTop: 16, fontSize: plan.titleFontSize, lineHeight: 1.16, fontWeight: 950, overflowWrap: "anywhere"}}>{primaryElement}</div>
+      <div style={{...entryStyle(content, content.beatStartMs + 500), marginTop: 13, color: palette.emphasis, fontSize: plan.questionFontSize, lineHeight: 1.28, fontWeight: 950, overflowWrap: "anywhere"}}>{content.screenQuestion}</div>
+      {content.numbers.slice(0, 2).map((number) => (
+        <div key={number.key} style={{...entryStyle(content, number.revealAtMs), marginTop: 16, color: toneColor(number.tone)}}>
+          <AnimatedMetric content={content} number={number} size={plan.mode === "stacked" ? 45 : 52}/>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (plan.mode === "stacked") {
+    return (
+      <Surface accent={palette.neutral} style={{padding: "24px 38px", display: "grid", gridTemplateRows: "auto minmax(0,1fr)", gap: 18}}>
+        {heading}
+        <ReceiptEvidence content={content} evidence={evidence} fontSize={plan.evidenceFontSize} compact/>
+      </Surface>
+    );
+  }
+
   return (
     <Surface accent={palette.neutral} style={{padding: "28px 38px", display: "grid", gridTemplateColumns: "1.08fr .92fr", gap: 26}}>
-      <div style={{display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0}}>
-        <div style={entryStyle(content, content.beatStartMs)}><Pill tone="neutral">確認済みの根拠</Pill></div>
-        <div style={{...entryStyle(content, content.beatStartMs + 250), marginTop: 20, fontSize: 47, lineHeight: 1.15, fontWeight: 950}}>{content.primaryElement || content.headline}</div>
-        <div style={{...entryStyle(content, content.beatStartMs + 500), marginTop: 18, color: palette.emphasis, fontSize: 30, lineHeight: 1.25, fontWeight: 950}}>{content.screenQuestion}</div>
-        {content.numbers.slice(0, 2).map((number) => (
-          <div key={number.key} style={{...entryStyle(content, number.revealAtMs), marginTop: 20, color: toneColor(number.tone)}}>
-            <AnimatedMetric content={content} number={number} size={55}/>
-          </div>
-        ))}
-      </div>
-      <div style={{...entryStyle(content, content.beatStartMs + 380, "x"), position: "relative", alignSelf: "center", minHeight: 410, padding: "30px 29px", borderRadius: 18, background: "rgba(255,255,255,.92)", border: `2px solid ${palette.line}`, boxShadow: "0 18px 35px rgba(16,32,51,.13)"}}>
-        <div style={{position: "absolute", left: 22, right: 22, top: 18, height: 3, background: `repeating-linear-gradient(90deg,${palette.neutral} 0 12px,transparent 12px 21px)`}}/>
-        <div style={{marginTop: 10, display: "flex", justifyContent: "space-between", gap: 15, color: palette.muted, fontSize: 20, fontWeight: 900}}><span>確認済み資料</span><span>出典メモ</span></div>
-        <div style={{marginTop: 22, display: "grid", gap: 17}}>
-          {evidence.map((item, index) => (
-            <div key={`${index}-${item}`} style={{...entryStyle(content, content.beatStartMs + 620 + index * 420), display: "grid", gridTemplateColumns: "34px 1fr", gap: 13, alignItems: "start", paddingBottom: 15, borderBottom: `2px dashed ${palette.line}`}}>
-              <div style={{width: 28, height: 28, borderRadius: 99, display: "flex", alignItems: "center", justifyContent: "center", color: palette.white, background: palette.positive, fontSize: 18, fontWeight: 950}}>✓</div>
-              <div style={{fontSize: 25, lineHeight: 1.25, fontWeight: 900}}>{item}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{position: "absolute", left: 29, right: 29, bottom: 24, color: palette.muted, fontSize: 20, lineHeight: 1.25, fontWeight: 850}}>{content.templateConfig.comparisonBasis ?? "確認できた範囲だけを表示"}</div>
-      </div>
+      {heading}
+      <ReceiptEvidence content={content} evidence={evidence} fontSize={plan.evidenceFontSize}/>
     </Surface>
   );
 };
