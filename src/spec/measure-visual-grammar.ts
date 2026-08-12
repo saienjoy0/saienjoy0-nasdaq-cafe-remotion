@@ -1,4 +1,5 @@
 import type {RenderProductionData, RenderSpec} from "./render-spec";
+import {resolveBeatShots} from "./shot-timeline";
 import {
   getVisualGrammarAppearance,
   type AppearanceClass,
@@ -7,7 +8,9 @@ import {
   type VisualGrammarId,
 } from "./visual-grammar-contract";
 
-export const VISUAL_GRAMMAR_TIMING_REPORT_VERSION = "1.0.0" as const;
+export const VISUAL_GRAMMAR_TIMING_REPORT_VERSION = "1.1.0" as const;
+export const STATIC_STATE_WARNING_MS = 8000 as const;
+export const STATIC_STATE_FAILURE_CANDIDATE_MS = 16000 as const;
 
 export const VISUAL_GRAMMAR_TIMING_FAILURE_CODES = [
   "VG_SAME_APPEARANCE_RUN_TOO_LONG",
@@ -55,6 +58,39 @@ export type VisualGrammarTimingWarning = {
   recommendedMaxMs: 8000;
 };
 
+export type StaticStateBoundaryKind =
+  | "scene-boundary"
+  | "beat-boundary"
+  | "shot-boundary"
+  | "show"
+  | "hide"
+  | "highlight"
+  | "unhighlight"
+  | "main-stage-placement-change";
+
+export type StaticStateFinding = {
+  sceneId: string;
+  beatId: string | null;
+  startMs: number;
+  endMs: number;
+  durationMs: number;
+  startBoundaryKinds: StaticStateBoundaryKind[];
+  endBoundaryKinds: StaticStateBoundaryKind[];
+};
+
+export type StaticStateReport = {
+  mode: "report-only";
+  warningThresholdMs: typeof STATIC_STATE_WARNING_MS;
+  failureCandidateThresholdMs: typeof STATIC_STATE_FAILURE_CANDIDATE_MS;
+  longestStaticStateMs: number;
+  longestStaticStateSceneId: string | null;
+  longestStaticStateBeatId: string | null;
+  warningCount: number;
+  failureCandidateCount: number;
+  warnings: StaticStateFinding[];
+  failureCandidates: StaticStateFinding[];
+};
+
 export type VisualGrammarTimingReport = {
   contractVersion: typeof VISUAL_GRAMMAR_TIMING_REPORT_VERSION;
   status: "PASS" | "FAIL";
@@ -95,6 +131,7 @@ export type VisualGrammarTimingReport = {
     appearanceDurationMs: Partial<Record<AppearanceClass, number>>;
     dominantSurfaceDurationMs: Partial<Record<DominantSurface, number>>;
   };
+  staticState: StaticStateReport;
   beats: MeasuredVisualGrammarBeat[];
   failures: VisualGrammarTimingFailure[];
   warnings: VisualGrammarTimingWarning[];
@@ -117,6 +154,124 @@ const increment = <Key extends string>(
 const ratio = (value: number, total: number) => total <= 0 ? 0 : value / total;
 const roundRatio = (value: number) => Math.round(value * 1_000_000) / 1_000_000;
 
+const emptyStaticState = (): StaticStateReport => ({
+  mode: "report-only",
+  warningThresholdMs: STATIC_STATE_WARNING_MS,
+  failureCandidateThresholdMs: STATIC_STATE_FAILURE_CANDIDATE_MS,
+  longestStaticStateMs: 0,
+  longestStaticStateSceneId: null,
+  longestStaticStateBeatId: null,
+  warningCount: 0,
+  failureCandidateCount: 0,
+  warnings: [],
+  failureCandidates: [],
+});
+
+const addBoundary = (
+  boundaries: Map<number, Set<StaticStateBoundaryKind>>,
+  value: number,
+  kind: StaticStateBoundaryKind,
+  durationMs: number,
+) => {
+  const timeMs = Math.max(0, Math.min(durationMs, value));
+  const kinds = boundaries.get(timeMs) ?? new Set<StaticStateBoundaryKind>();
+  kinds.add(kind);
+  boundaries.set(timeMs, kinds);
+};
+
+const eventTimeMs = (
+  scene: RenderProductionData["scenes"][number],
+  event: RenderProductionData["scenes"][number]["visualEvents"][number],
+) => {
+  const chunk = scene.narrationChunks.find((item) => item.chunkId === event.atChunkId);
+  if (!chunk) throw new Error(`VG_TIMING_METADATA_MISSING ${scene.sceneId}: unknown event chunk ${event.atChunkId}`);
+  return (event.timing === "chunk-start" ? chunk.startMs : chunk.endMs) + event.offsetMs;
+};
+
+export const measureStaticState = (data: RenderProductionData): StaticStateReport => {
+  const findings: StaticStateFinding[] = [];
+  for (const scene of data.scenes.filter((item) => item.sceneNumber <= 8)) {
+    const boundaries = new Map<number, Set<StaticStateBoundaryKind>>();
+    addBoundary(boundaries, 0, "scene-boundary", scene.durationMs);
+    addBoundary(boundaries, scene.durationMs, "scene-boundary", scene.durationMs);
+
+    for (const beat of scene.visualBeats) {
+      addBoundary(boundaries, beat.startMs, "beat-boundary", scene.durationMs);
+      addBoundary(boundaries, beat.endMs, "beat-boundary", scene.durationMs);
+      for (const shot of resolveBeatShots(scene, beat)) {
+        addBoundary(boundaries, shot.startMs, "shot-boundary", scene.durationMs);
+        addBoundary(boundaries, shot.endMs, "shot-boundary", scene.durationMs);
+      }
+    }
+
+    for (const event of scene.visualEvents) {
+      if (!["show", "hide", "highlight", "unhighlight"].includes(event.action)) continue;
+      addBoundary(
+        boundaries,
+        eventTimeMs(scene, event),
+        event.action as "show" | "hide" | "highlight" | "unhighlight",
+        scene.durationMs,
+      );
+    }
+
+    for (const placement of scene.assetPlacements) {
+      if (!["main-media", "chart", "illustration"].includes(placement.role)) continue;
+      const startChunk = placement.startChunkId
+        ? scene.narrationChunks.find((item) => item.chunkId === placement.startChunkId)
+        : null;
+      const endChunk = placement.endChunkId
+        ? scene.narrationChunks.find((item) => item.chunkId === placement.endChunkId)
+        : null;
+      const startMs = placement.startChunkId ? startChunk?.startMs : 0;
+      const endMs = placement.endChunkId
+        ? endChunk ? endChunk.endMs + endChunk.pauseAfterMs : undefined
+        : scene.durationMs;
+      if (startMs === undefined || endMs === undefined) {
+        throw new Error(`VG_TIMING_METADATA_MISSING ${scene.sceneId}: invalid main-stage placement range`);
+      }
+      addBoundary(boundaries, startMs, "main-stage-placement-change", scene.durationMs);
+      addBoundary(boundaries, endMs, "main-stage-placement-change", scene.durationMs);
+    }
+
+    const times = [...boundaries.keys()].sort((left, right) => left - right);
+    for (let index = 0; index < times.length - 1; index += 1) {
+      const startMs = times[index];
+      const endMs = times[index + 1];
+      if (endMs <= startMs) continue;
+      const activeBeat = scene.visualBeats.find(
+        (beat) => beat.startMs <= startMs && startMs < beat.endMs,
+      );
+      findings.push({
+        sceneId: scene.sceneId,
+        beatId: activeBeat?.beatId ?? null,
+        startMs,
+        endMs,
+        durationMs: endMs - startMs,
+        startBoundaryKinds: [...(boundaries.get(startMs) ?? [])].sort(),
+        endBoundaryKinds: [...(boundaries.get(endMs) ?? [])].sort(),
+      });
+    }
+  }
+
+  const longest = [...findings].sort((left, right) => right.durationMs - left.durationMs)[0];
+  const warnings = findings.filter((item) => item.durationMs > STATIC_STATE_WARNING_MS);
+  const failureCandidates = findings.filter(
+    (item) => item.durationMs > STATIC_STATE_FAILURE_CANDIDATE_MS,
+  );
+  return {
+    mode: "report-only",
+    warningThresholdMs: STATIC_STATE_WARNING_MS,
+    failureCandidateThresholdMs: STATIC_STATE_FAILURE_CANDIDATE_MS,
+    longestStaticStateMs: longest?.durationMs ?? 0,
+    longestStaticStateSceneId: longest?.sceneId ?? null,
+    longestStaticStateBeatId: longest?.beatId ?? null,
+    warningCount: warnings.length,
+    failureCandidateCount: failureCandidates.length,
+    warnings,
+    failureCandidates,
+  };
+};
+
 export const evaluateVisualGrammarTiming = (input: {
   episodeId: string;
   durationMode: "standard" | "shortened";
@@ -125,6 +280,7 @@ export const evaluateVisualGrammarTiming = (input: {
   rendererCompatibilitySha256: string;
   finalEpisodeContractSha256: string;
   beats: MeasuredVisualGrammarBeat[];
+  staticState?: StaticStateReport;
 }): VisualGrammarTimingReport => {
   const thresholds = {
     sameAppearanceRunMaxMs: 28000 as const,
@@ -305,6 +461,7 @@ export const evaluateVisualGrammarTiming = (input: {
       appearanceDurationMs,
       dominantSurfaceDurationMs,
     },
+    staticState: input.staticState ?? emptyStaticState(),
     beats: input.beats,
     failures,
     warnings,
@@ -355,5 +512,6 @@ export const measureVisualGrammarTiming = (
     rendererCompatibilitySha256: contract.rendererCompatibilitySha256,
     finalEpisodeContractSha256: contract.finalEpisodeContractSha256,
     beats,
+    staticState: measureStaticState(data),
   });
 };
