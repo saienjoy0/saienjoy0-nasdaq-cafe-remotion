@@ -39,7 +39,7 @@ export const localizeStageViewerLabel = (value: string) => {
   for (const [english, japanese] of Object.entries(EXACT_STAGE_VIEWER_LABELS)) {
     if (value.toLocaleUpperCase("en-US") === english.toLocaleUpperCase("en-US")) return japanese;
   }
-  const match = /^(expected|actual|gap)(?=$|｜)/iu.exec(value);
+  const match = /^(expected|actual|gap)(?=$|｜|：|:)/iu.exec(value);
   if (match) {
     const japanese = FIXED_UI_JAPANESE[match[1].toUpperCase()];
     return `${japanese}${value.slice(match[1].length)}`;
