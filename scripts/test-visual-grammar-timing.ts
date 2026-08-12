@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import {
   evaluateVisualGrammarTiming,
+  measureStaticState,
   type MeasuredVisualGrammarBeat,
 } from "../src/spec/measure-visual-grammar";
+import type {RenderProductionData} from "../src/spec/render-spec";
 import type {
   AppearanceClass,
   DominantSurface,
@@ -60,13 +62,16 @@ const evaluate = (
 });
 
 const valid = evaluate(validBeats());
+assert.equal(valid.contractVersion, "1.1.0");
 assert.equal(valid.status, "PASS");
 assert.equal(valid.timingBasis, "post-tts-production-data");
 assert.equal(valid.fallbackDiversityRecheck, "completed");
 assert.deepEqual(valid.selectedFallbackBeatIds, ["vb-03-01"]);
 assert.equal(valid.unresolvedStateCount, 0);
 assert.equal(valid.metrics.nonAnalysisDurationMs, 14000);
-console.log("PASS: standard measured timing report passes and includes fallback path");
+assert.equal(valid.staticState.mode, "report-only");
+assert.equal(valid.staticState.failureCandidateCount, 0);
+console.log("PASS: standard measured timing report passes with report-only Static State 1.1.0");
 
 const longRunBeats = validBeats();
 for (let index = 0; index < 5; index += 1) {
@@ -135,4 +140,55 @@ console.log("PASS: shortened episode uses the eight-second non-analysis threshol
 assert.ok(valid.warnings.every((warning) => warning.recommendedMinMs === 5000 && warning.recommendedMaxMs === 8000));
 console.log("PASS: non-analysis five-to-eight-second guidance remains advisory");
 
-console.log("Visual Grammar measured timing tests: 9 passed");
+const staticData = {
+  scenes: [
+    {
+      sceneId: "scene-01",
+      sceneNumber: 1,
+      durationMs: 20_000,
+      narrationChunks: [
+        {
+          chunkId: "scene-01-chunk-001",
+          startMs: 0,
+          endMs: 20_000,
+          pauseAfterMs: 0,
+        },
+      ],
+      visualBeats: [
+        {
+          beatId: "scene-01-beat-001",
+          startMs: 0,
+          endMs: 20_000,
+          shots: [],
+        },
+      ],
+      visualEvents: [
+        {
+          atChunkId: "scene-01-chunk-001",
+          timing: "chunk-start",
+          action: "show",
+          targetId: "number-a",
+          offsetMs: 0,
+        },
+        {
+          atChunkId: "scene-01-chunk-001",
+          timing: "chunk-start",
+          action: "highlight",
+          targetId: "number-a",
+          offsetMs: 9_000,
+        },
+      ],
+      assetPlacements: [],
+    },
+  ],
+} as unknown as RenderProductionData;
+const staticReport = measureStaticState(staticData);
+assert.equal(staticReport.mode, "report-only");
+assert.equal(staticReport.warningThresholdMs, 8000);
+assert.equal(staticReport.failureCandidateThresholdMs, 16000);
+assert.equal(staticReport.longestStaticStateMs, 11_000);
+assert.equal(staticReport.warningCount, 2);
+assert.equal(staticReport.failureCandidateCount, 0);
+console.log("PASS: Static State uses mechanical event boundaries and does not hard-fail");
+
+console.log("Visual Grammar measured timing tests: 10 passed");
