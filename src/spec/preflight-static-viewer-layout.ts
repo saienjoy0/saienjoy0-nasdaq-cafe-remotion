@@ -1,4 +1,5 @@
 import type {RenderSpec} from "./render-spec";
+import {viewerVisibleObjectIds} from "./viewer-visible-object-ids";
 
 // These are the same public-surface budgets enforced again at composition time
 // by validate-render-layout.ts. This preflight exists at the render_spec boundary
@@ -47,6 +48,7 @@ const assertWrapped = (
 export const preflightStaticViewerLayout = (spec: RenderSpec) => {
   spec.scenes.forEach((scene, sceneIndex) => {
     const base = `$.scenes[${sceneIndex}]`;
+    const visibleObjectIds = viewerVisibleObjectIds(scene);
     assertWrapped(
       scene.headline,
       limits.headline.perLine,
@@ -64,6 +66,7 @@ export const preflightStaticViewerLayout = (spec: RenderSpec) => {
       ),
     );
     scene.cards.forEach((card, cardIndex) => {
+      if (!visibleObjectIds.has(card.cardId)) return;
       assertWrapped(
         card.title,
         limits.cardTitle.perLine,
@@ -88,30 +91,33 @@ export const preflightStaticViewerLayout = (spec: RenderSpec) => {
         );
       });
     });
-    scene.numbers.forEach((number, index) =>
+    scene.numbers.forEach((number, index) => {
+      if (!visibleObjectIds.has(number.numberId)) return;
       assertLength(
         number.label,
         limits.numberLabel,
         `${base}.numbers[${index}].label`,
         "number label",
-      ),
-    );
-    scene.nodes.forEach((node, index) =>
+      );
+    });
+    scene.nodes.forEach((node, index) => {
+      if (!visibleObjectIds.has(node.nodeId)) return;
       assertLength(
         node.label,
         limits.nodeLabel,
         `${base}.nodes[${index}].label`,
         "node label",
-      ),
-    );
-    scene.arrows.forEach((arrow, index) =>
+      );
+    });
+    scene.arrows.forEach((arrow, index) => {
+      if (!visibleObjectIds.has(arrow.arrowId)) return;
       assertLength(
         arrow.label,
         limits.arrowLabel,
         `${base}.arrows[${index}].label`,
         "arrow label",
-      ),
-    );
+      );
+    });
     if (scene.sourceLabel) {
       assertWrapped(
         scene.sourceLabel,
