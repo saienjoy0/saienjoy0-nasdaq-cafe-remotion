@@ -4,6 +4,17 @@ import {sha256Json} from "../src/spec/visual-director-contract";
 import {getVisualComponentDescriptor} from "../src/spec/visual-component-registry";
 import {cloneTestValue, makeCurrentVisualDirectorFixture} from "./test-support/current-visual-grammar-fixture";
 
+const sourceReceiptDescriptor = getVisualComponentDescriptor("source-receipt");
+assert.equal(
+  sourceReceiptDescriptor.visualMode,
+  "text-focus",
+  "source-receipt is a card-based source receipt and must not inherit news-media's main-media requirement",
+);
+assert.ok(
+  sourceReceiptDescriptor.supportedScreenStates.includes("Data"),
+  "source-receipt must remain legal on the Data screen without an invented main-media placement",
+);
+
 const spec = cloneTestValue(makeCurrentVisualDirectorFixture());
 const scene = spec.scenes[0];
 const beat = scene.visualBeats[0];
