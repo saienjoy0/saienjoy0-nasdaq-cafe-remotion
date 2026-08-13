@@ -118,50 +118,58 @@ const VISUAL_MODE_BY_TEMPLATE: Record<VisualTemplateId, VisualMode> = {
   "text-focus": "text-focus",
 };
 
-const PRIMARY_CAPABILITY_BY_TEMPLATE: Partial<Record<VisualTemplateId, EvidenceCapability>> = {
+const PRIMARY_CAPABILITY_BY_TEMPLATE: Record<VisualTemplateId, EvidenceCapability> = {
+  "opening-contradiction": "text-only",
+  "market-pulse-grid": "comparison-set",
+  "earnings-surprise": "gap",
+  "dual-asset-split": "comparison-set",
+  "macro-pressure": "causal-graph",
   "source-receipt": "source-document",
-  "news-media": "source-document",
-  "event-reaction-timeline": "time-series",
+  "hero-number": "text-only",
+  "closing-recap": "text-only",
+  "final-assembly": "text-only",
+  "conclusion-card": "text-only",
+  "expected-actual-bullet": "gap",
+  "expected-actual-gap-flow": "gap",
+  "metric-comparison-board": "text-only",
   "index-return-bars": "comparison-set",
   "diverging-stock-bars": "comparison-set",
   "split-comparison": "comparison-set",
   "focus-matrix": "comparison-set",
-  "expected-actual-bullet": "gap",
-  "expected-actual-gap-flow": "gap",
-  "earnings-surprise": "gap",
   "causal-lane": "causal-graph",
-  "macro-pressure": "causal-graph",
   "tailwind-headwind": "causal-graph",
-  "entity-card-full": "entity",
-  "analogy-steps": "image-media",
+  "evidence-boundary": "verification",
   "verification-checklist": "verification",
   "verification-matrix": "verification",
-  "evidence-boundary": "verification",
+  "analogy-steps": "image-media",
+  "entity-card-full": "entity",
+  "news-media": "source-document",
+  "event-reaction-timeline": "time-series",
+  "text-focus": "text-only",
 };
 
-const DISCOVERY_TEMPLATES_BY_CAPABILITY: Record<EvidenceCapability, readonly VisualTemplateId[]> = {
-  "source-document": ["source-receipt", "news-media"],
-  "quote-social": ["source-receipt", "news-media"],
-  "time-series": ["event-reaction-timeline"],
-  "comparison-set": ["index-return-bars", "diverging-stock-bars", "split-comparison", "focus-matrix"],
-  gap: ["expected-actual-bullet", "expected-actual-gap-flow"],
-  "causal-graph": ["causal-lane", "tailwind-headwind", "evidence-boundary"],
-  entity: ["entity-card-full", "hero-number"],
-  "image-media": ["news-media", "source-receipt"],
-  verification: ["verification-checklist", "verification-matrix", "evidence-boundary"],
-  "text-only": ["hero-number", "text-focus", "conclusion-card"],
+const EXTRA_CAPABILITIES_BY_TEMPLATE: Partial<Record<VisualTemplateId, readonly EvidenceCapability[]>> = {
+  "source-receipt": ["quote-social", "image-media"],
+  "hero-number": ["entity"],
+  "metric-comparison-board": ["comparison-set"],
+  "tailwind-headwind": ["verification"],
+  "evidence-boundary": ["causal-graph"],
+  "news-media": ["quote-social", "image-media"],
 };
 
 const RULES_BY_TEMPLATE: Partial<Record<VisualTemplateId, readonly VisualEligibilityRuleId[]>> = {
   "source-receipt": ["source-bound", "single-main-media"],
   "news-media": ["source-bound", "single-main-media"],
   "event-reaction-timeline": ["verified-intraday-series"],
+  "market-pulse-grid": ["aligned-comparison", "numeric-values-present"],
+  "dual-asset-split": ["aligned-comparison", "numeric-values-present"],
   "index-return-bars": ["aligned-comparison", "numeric-values-present"],
   "diverging-stock-bars": ["aligned-comparison", "numeric-values-present"],
   "split-comparison": ["aligned-comparison", "numeric-values-present"],
   "focus-matrix": ["aligned-comparison", "numeric-values-present"],
   "expected-actual-bullet": ["numeric-values-present"],
   "entity-card-full": ["entity-bound", "single-main-media"],
+  "macro-pressure": ["causal-graph-complete"],
   "causal-lane": ["causal-graph-complete"],
 };
 
@@ -175,31 +183,22 @@ const realityCapabilities = new Set<EvidenceCapability>([
 
 const unique = <T,>(values: readonly T[]) => [...new Set(values)];
 
-const capabilitiesForTemplate = (template: VisualTemplateId): EvidenceCapability[] => {
-  const discovery = (Object.entries(DISCOVERY_TEMPLATES_BY_CAPABILITY) as Array<[
-    EvidenceCapability,
-    readonly VisualTemplateId[],
-  ]>)
-    .filter(([, templates]) => templates.includes(template))
-    .map(([capability]) => capability);
-  return unique([
-    PRIMARY_CAPABILITY_BY_TEMPLATE[template] ?? "text-only",
-    ...discovery,
-  ]).sort();
-};
-
 const registry = Object.fromEntries(VISUAL_TEMPLATE_IDS.map((id) => {
   const compatibility = getVisualGrammarCompatibility(id);
   const defaultVariant = DEFAULT_VARIANT_BY_TEMPLATE[id];
   const appearance = getVisualGrammarAppearance(id, defaultVariant);
-  const primaryCapability = PRIMARY_CAPABILITY_BY_TEMPLATE[id] ?? "text-only";
+  const primaryCapability = PRIMARY_CAPABILITY_BY_TEMPLATE[id];
+  const capabilities = unique([
+    primaryCapability,
+    ...(EXTRA_CAPABILITIES_BY_TEMPLATE[id] ?? []),
+  ]).sort();
   const descriptor: VisualComponentDescriptor = {
     id,
     version: "1.0.0",
     status: "production",
     family: VISUAL_TEMPLATE_CONTRACTS[id].family,
     allowedGrammarIds: compatibility.allowedGrammarIds,
-    capabilities: capabilitiesForTemplate(id),
+    capabilities,
     eligibilityRuleIds: RULES_BY_TEMPLATE[id] ?? [],
     supportedScreenStates: VISUAL_TEMPLATE_CONTRACTS[id].supportedScreenStates,
     variants: VISUAL_TEMPLATE_CONTRACTS[id].variants,
@@ -229,10 +228,10 @@ export const getVisualComponentDescriptor = (template: VisualTemplateId) =>
   VISUAL_COMPONENT_REGISTRY[template];
 
 export const candidateTemplatesForCapability = (capability: EvidenceCapability) =>
-  [...DISCOVERY_TEMPLATES_BY_CAPABILITY[capability]];
+  VISUAL_TEMPLATE_IDS.filter((id) => VISUAL_COMPONENT_REGISTRY[id].capabilities.includes(capability));
 
 export const primaryCapabilityForTemplate = (template: VisualTemplateId): EvidenceCapability =>
-  PRIMARY_CAPABILITY_BY_TEMPLATE[template] ?? "text-only";
+  PRIMARY_CAPABILITY_BY_TEMPLATE[template];
 
 export const defaultVariantForTemplate = (template: VisualTemplateId) =>
   VISUAL_COMPONENT_REGISTRY[template].defaultVariant;
