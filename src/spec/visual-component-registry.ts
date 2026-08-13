@@ -158,7 +158,7 @@ const EXTRA_CAPABILITIES_BY_TEMPLATE: Partial<Record<VisualTemplateId, readonly 
 };
 
 const RULES_BY_TEMPLATE: Partial<Record<VisualTemplateId, readonly VisualEligibilityRuleId[]>> = {
-  "source-receipt": ["source-bound", "single-main-media"],
+  "source-receipt": ["source-bound"],
   "news-media": ["source-bound", "single-main-media"],
   "event-reaction-timeline": ["verified-intraday-series"],
   "market-pulse-grid": ["aligned-comparison", "numeric-values-present"],

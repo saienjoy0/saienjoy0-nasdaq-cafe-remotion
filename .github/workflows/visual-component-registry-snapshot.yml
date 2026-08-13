@@ -34,6 +34,7 @@ jobs:
             cmp contracts/visual_component_registry_snapshot.json build/visual_component_registry_snapshot.json
           fi
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: visual-component-registry-snapshot-${{ github.run_id }}
           path: build/visual_component_registry_snapshot.json
