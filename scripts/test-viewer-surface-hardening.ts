@@ -40,15 +40,35 @@ test("viewer-facing Expected Actual Gap labels use the single Japanese vocabular
   assert.equal(localizeStageViewerLabel("差"), "差分");
 });
 
-test("static viewer layout rejects a long card value before Chrome starts", () => {
+test("static viewer layout rejects a long visible card value before Chrome starts", () => {
   const value = renderSpecSchema.parse(structuredClone(fixtureJson));
-  value.scenes[0].cards[0].lines[0].value = "NASDAQ -0.60% / Brent +1.4% / $88.91";
+  const scene = value.scenes[0];
+  const visibleIds = new Set(scene.visualBeats.flatMap((beat) => beat.objectIds));
+  const visibleCard = scene.cards.find((card) => visibleIds.has(card.cardId));
+  assert.ok(visibleCard, "fixture must expose a viewer-visible card");
+  visibleCard.lines[0].value = "NASDAQ -0.60% / Brent +1.4% / $88.91";
   assert.throws(
     () => preflightStaticViewerLayout(value),
     /36 characters exceed card value limit 28/,
   );
-  value.scenes[0].cards[0].lines[0].value = "NASDAQ -0.60%\nBrent +1.4% \/ $88.91";
+  visibleCard.lines[0].value = "NASDAQ -0.60%\nBrent +1.4% \/ $88.91";
   assert.doesNotThrow(() => preflightStaticViewerLayout(value));
+});
+
+test("static viewer layout ignores unreachable producer inventory but not visible objects", () => {
+  const value = renderSpecSchema.parse(structuredClone(fixtureJson));
+  const scene = value.scenes.find((item) => item.cards.length > 0)!;
+  const existing = structuredClone(scene.cards[0]);
+  existing.cardId = `${scene.sceneId}-unreachable-long-card`;
+  existing.title = "UNREACHABLE PRODUCER INVENTORY TITLE THAT MUST NOT BE MEASURED";
+  scene.cards.push(existing);
+  assert.doesNotThrow(() => preflightStaticViewerLayout(value));
+
+  scene.visualBeats[0].objectIds.push(existing.cardId);
+  assert.throws(
+    () => preflightStaticViewerLayout(value),
+    /card title limit 18/,
+  );
 });
 
 test("source receipt planner switches to stacked Japanese layout and fails closed", () => {
