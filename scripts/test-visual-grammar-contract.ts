@@ -142,3 +142,5 @@ for (const item of tests) {
 }
 if (failed > 0) process.exit(1);
 console.log(`visual grammar renderer contract tests: ${tests.length} passed`);
+
+await import("./test-visual-director");
