@@ -43,6 +43,10 @@ const protectedSemanticInventory = (spec: RenderSpec) => {
     }>;
   };
   for (const scene of inventory.scenes) {
+    // Scene visualMode is a derived summary of the first Visual Beat, not an
+    // independent editorial field. Candidate compilation may legitimately change
+    // the first Beat's mode, so exclude the summary from protected semantics too.
+    delete (scene as unknown as Record<string, unknown>).visualMode;
     for (const beat of scene.visualBeats) {
       for (const key of visualMutationKeys) delete beat[key];
     }
@@ -132,6 +136,12 @@ export const compileVisualDirection = ({
       beat.assetPlacementIds = [...candidate.assetPlacementIds];
       beat.assetState = candidate.assetState;
       selected.push(candidate);
+    }
+    if (scene.visualBeats.length > 0) {
+      // Renderer contract: Scene visualMode is derived metadata and must mirror the
+      // first Visual Beat after Candidate compilation. Never leave the authored
+      // pre-selection summary stale when the selected Candidate changes Beat 1 mode.
+      scene.visualMode = scene.visualBeats[0].visualMode;
     }
   }
 
