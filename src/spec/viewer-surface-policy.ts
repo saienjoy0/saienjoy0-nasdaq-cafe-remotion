@@ -1,4 +1,5 @@
 import type {RenderSpec} from "./render-spec";
+import {viewerVisibleObjectIds} from "./viewer-visible-object-ids";
 
 // Keep these implementation details deliberately private and browser-boundary-safe.
 // The public screen only receives the exported assertion functions, never raw policy
@@ -30,6 +31,7 @@ export const collectViewerSurfaceStrings = (spec: RenderSpec) => {
   const rows: Array<[string, string]> = [];
   spec.scenes.forEach((scene, sceneIndex) => {
     const base = `$.scenes[${sceneIndex}]`;
+    const visibleObjectIds = viewerVisibleObjectIds(scene);
     pushText(rows, `${base}.headline`, scene.headline);
     scene.supportingTexts.forEach((value, index) =>
       pushText(rows, `${base}.supportingTexts[${index}]`, value),
@@ -38,6 +40,7 @@ export const collectViewerSurfaceStrings = (spec: RenderSpec) => {
       pushText(rows, `${base}.narrationChunks[${index}].captionText`, chunk.captionText),
     );
     scene.cards.forEach((card, cardIndex) => {
+      if (!visibleObjectIds.has(card.cardId)) return;
       pushText(rows, `${base}.cards[${cardIndex}].title`, card.title);
       card.lines.forEach((line, lineIndex) => {
         pushText(rows, `${base}.cards[${cardIndex}].lines[${lineIndex}].label`, line.label);
