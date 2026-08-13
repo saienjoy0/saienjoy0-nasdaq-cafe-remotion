@@ -23,7 +23,57 @@ const numericFromText = (value: string) => {
   return match ? Number(match[0]) : null;
 };
 
-const normalized = (value: string) => value.replace(/[\s　|｜、。,.・:：+＋−-]/g, "").toLowerCase();
+const numericTokens = (value: string) =>
+  value.replace(/,/g, "").match(/[+-]?\d+(?:\.\d+)?%?/g) ?? [];
+
+const publicTexts = (scenes: RenderSpec["scenes"]) => scenes.flatMap((scene) => [
+  scene.headline,
+  ...scene.supportingTexts,
+  ...scene.visualBeats.flatMap((beat) => beat.viewerTexts),
+  ...scene.cards.flatMap((card) => card.lines.map((line) => line.value)),
+  ...scene.numbers.map((number) => number.value),
+]);
+
+const validateScene9AssemblyLineage = (spec: RenderSpec) => {
+  const earlierScenes = spec.scenes.slice(0, 8);
+  const scene9 = spec.scenes[8];
+  const earlierEvidence = new Set(earlierScenes.flatMap((scene) => [
+    ...scene.evidenceSourceIds,
+    ...scene.visualBeats.flatMap((beat) => beat.evidenceSourceIds),
+  ]));
+
+  scene9.evidenceSourceIds.forEach((sourceId, sourceIndex) => {
+    if (!earlierEvidence.has(sourceId)) {
+      fail(
+        `$.scenes[8].evidenceSourceIds[${sourceIndex}]`,
+        `Scene 9 must not introduce a new evidence source: ${sourceId}`,
+      );
+    }
+  });
+  scene9.visualBeats.forEach((beat, beatIndex) => {
+    beat.evidenceSourceIds.forEach((sourceId, sourceIndex) => {
+      if (!earlierEvidence.has(sourceId)) {
+        fail(
+          `$.scenes[8].visualBeats[${beatIndex}].evidenceSourceIds[${sourceIndex}]`,
+          `Scene 9 must not introduce a new evidence source: ${sourceId}`,
+        );
+      }
+    });
+  });
+
+  const earlierNumbers = new Set(publicTexts(earlierScenes).flatMap(numericTokens));
+  const scene9Public = publicTexts([scene9]);
+  scene9Public.forEach((value, valueIndex) => {
+    numericTokens(value).forEach((token) => {
+      if (!earlierNumbers.has(token)) {
+        fail(
+          `$.scenes[8].publicText[${valueIndex}]`,
+          `Scene 9 must not introduce a new numeric claim: ${token}`,
+        );
+      }
+    });
+  });
+};
 
 export const validateVisualStoryContract = (
   spec: RenderSpec,
@@ -183,17 +233,10 @@ export const validateVisualStoryContract = (
       fail("$.scenes[8].visualBeats", "Scene 9 requires final-assembly");
     }
 
-    const earlierText = normalized(spec.scenes.slice(0, 8).flatMap((scene) => [
-      scene.headline,
-      ...scene.supportingTexts,
-      ...scene.visualBeats.flatMap((beat) => beat.viewerTexts),
-      ...scene.cards.flatMap((card) => card.lines.map((line) => line.value)),
-    ]).join(" "));
-    spec.scenes[8].cards.flatMap((card) => card.lines).forEach((line, index) => {
-      const value = normalized(line.value);
-      if (value.length > 0 && !earlierText.includes(value)) {
-        fail(`$.scenes[8].cards[*].lines[${index}].value`, "Scene 9 must assemble an already introduced conclusion, not new evidence");
-      }
-    });
+    // Editorial Critic owns whether a qualitative Scene 9 synthesis faithfully
+    // restates the approved Story. Machine code must not require byte/substring
+    // equality for paraphrases. Its hard boundary is provenance and numeric novelty:
+    // no new evidence source and no new numeric claim may first appear in Scene 9.
+    validateScene9AssemblyLineage(spec);
   }
 };
