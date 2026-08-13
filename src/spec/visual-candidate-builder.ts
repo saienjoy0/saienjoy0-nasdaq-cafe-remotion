@@ -150,11 +150,14 @@ const buildCatalog = ({
   for (const scene of spec.scenes) {
     for (const beat of scene.visualBeats) {
       const hint = hintMap.get(beat.beatId);
-      const capabilities = unique([
-        ...(hint?.capabilities ?? []),
-        ...(inventoryMap.get(beat.beatId) ?? []),
-        primaryCapabilityForTemplate(beat.visualTemplate),
-      ]).sort();
+      const primaryCapability = primaryCapabilityForTemplate(beat.visualTemplate);
+      const capabilities = hint?.templatePolicy?.mode === "authored-only"
+        ? [primaryCapability]
+        : unique([
+            ...(hint?.capabilities ?? []),
+            ...(inventoryMap.get(beat.beatId) ?? []),
+            primaryCapability,
+          ]).sort();
       const drafts = new Map<string, Omit<VisualCandidate, "candidateId">>();
       for (const capability of capabilities) {
         const discoveryTemplates = candidateTemplatesForCapability(capability);
