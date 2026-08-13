@@ -1,0 +1,41 @@
+name: Visual Component Registry Snapshot
+
+on:
+  pull_request:
+    paths:
+      - "src/spec/visual-component-registry.ts"
+      - "src/spec/visual-template-contract.ts"
+      - "src/spec/visual-grammar-contract.ts"
+      - "contracts/visual_grammar_renderer_compatibility.json"
+      - "contracts/visual_component_registry_snapshot.json"
+      - "scripts/generate-visual-component-registry-snapshot.ts"
+      - ".github/workflows/visual-component-registry-snapshot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Generate registry snapshot
+        run: node --import tsx scripts/generate-visual-component-registry-snapshot.ts --output build/visual_component_registry_snapshot.json
+      - name: Compare committed snapshot when present
+        shell: bash
+        run: |
+          if [[ -f contracts/visual_component_registry_snapshot.json ]]; then
+            cmp contracts/visual_component_registry_snapshot.json build/visual_component_registry_snapshot.json
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-component-registry-snapshot-${{ github.run_id }}
+          path: build/visual_component_registry_snapshot.json
+          if-no-files-found: error
+          retention-days: 7
