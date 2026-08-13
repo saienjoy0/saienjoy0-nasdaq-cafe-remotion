@@ -1,0 +1,27 @@
+name: Visual Compile Scene Summary
+
+on:
+  pull_request:
+    paths:
+      - "src/spec/visual-direction-compiler.ts"
+      - "scripts/test-visual-compile-scene-mode-summary.ts"
+      - ".github/workflows/visual-compile-scene-summary-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Compiled Scene visualMode summary regression
+        run: node --import tsx scripts/test-visual-compile-scene-mode-summary.ts
+      - name: Typecheck
+        run: npm run typecheck
