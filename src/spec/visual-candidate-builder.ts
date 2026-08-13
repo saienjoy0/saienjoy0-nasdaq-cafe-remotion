@@ -181,7 +181,11 @@ const buildCatalog = ({
             visualTemplate: template,
             templateVariant: variant,
             screenState,
-            visualMode: template === beat.visualTemplate ? beat.visualMode : visualModeForTemplate(template),
+            // Candidate legality belongs to the candidate Template Registry. Producer
+            // visualMode may be a stale scene-level value, so it must never override
+            // the Renderer-owned template -> visualMode contract, even for an authored
+            // template retained as a vNext candidate.
+            visualMode: visualModeForTemplate(template),
             templateConfig,
             appearanceClass: appearance.appearanceClass,
             dominantSurface: appearance.dominantSurface,
