@@ -94,7 +94,7 @@ const VISUAL_MODE_BY_TEMPLATE: Record<VisualTemplateId, VisualMode> = {
   "earnings-surprise": "expected-actual-gap",
   "dual-asset-split": "stock-comparison",
   "macro-pressure": "causal-diagram",
-  "source-receipt": "news-media",
+  "source-receipt": "text-focus",
   "hero-number": "text-focus",
   "closing-recap": "conclusion-card",
   "final-assembly": "conclusion-card",
