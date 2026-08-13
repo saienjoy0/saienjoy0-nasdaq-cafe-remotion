@@ -64,7 +64,21 @@ export const VISUAL_ELIGIBILITY_RULES: Record<VisualEligibilityRuleId, Eligibili
   "numeric-values-present": numericValuesPresent,
 };
 
+const CAPABILITY_ELIGIBILITY_RULES: Partial<Record<EvidenceCapability, readonly VisualEligibilityRuleId[]>> = {
+  "source-document": ["source-bound"],
+  "quote-social": ["source-bound"],
+  "time-series": ["verified-intraday-series"],
+  "comparison-set": ["aligned-comparison"],
+  entity: ["entity-bound"],
+};
+
 export const passesVisualEligibilityRules = (
   ruleIds: readonly VisualEligibilityRuleId[],
   context: VisualEligibilityContext,
-) => ruleIds.every((ruleId) => VISUAL_ELIGIBILITY_RULES[ruleId](context));
+) => {
+  const combined = new Set<VisualEligibilityRuleId>([
+    ...(CAPABILITY_ELIGIBILITY_RULES[context.capability] ?? []),
+    ...ruleIds,
+  ]);
+  return [...combined].every((ruleId) => VISUAL_ELIGIBILITY_RULES[ruleId](context));
+};
