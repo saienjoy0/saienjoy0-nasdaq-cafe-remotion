@@ -14,6 +14,7 @@ import {validateShotStoryContract} from "../src/spec/validate-shot-story";
 import {preflightProductionExpressions} from "../src/spec/preflight-render-spec";
 import {preflightViewerSurface} from "../src/spec/preflight-viewer-surface";
 import {preflightStaticViewerLayout} from "../src/spec/preflight-static-viewer-layout";
+import {verifyFinalApprovalPreflight} from "./final-approval-preflight";
 
 export const resolveSpecPath = (input: string) => path.resolve(process.cwd(), input);
 const format = (issues: Array<{path: PropertyKey[]; message: string}>) =>
@@ -48,7 +49,17 @@ export const loadRenderSpec = async (
 export const loadRenderSpecForProduction = async (
   input: string,
   assetManifest: AssetManifestForSpec = productionAssetManifest,
-) => loadRenderSpec(input, assetManifest);
+) => {
+  const loaded = await loadRenderSpec(input, assetManifest);
+  const isFixture = loaded.resolved.includes(`${path.sep}fixtures${path.sep}`);
+  if (process.argv[2] === "final" && !isFixture) {
+    await verifyFinalApprovalPreflight({
+      episodeDate: loaded.spec.episode.id,
+      inputSpecSha256: loaded.sha256,
+    });
+  }
+  return loaded;
+};
 
 export const loadProductionData = async (input: string) => {
   const resolved = path.resolve(process.cwd(), input);
