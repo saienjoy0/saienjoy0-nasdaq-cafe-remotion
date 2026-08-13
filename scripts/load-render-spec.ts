@@ -6,9 +6,9 @@ import {productionAssetManifest} from "../src/config/production-assets";
 import {renderSpecSchema, productionDataSchema} from "../src/spec/render-spec";
 import {
   assertProductionTextSafe,
-  validateRenderSpecReferences,
   type AssetManifestForSpec,
 } from "../src/spec/validate-render-spec";
+import {validateRenderSpecReferencesMultiBeat} from "../src/spec/validate-render-spec-multibeat";
 import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
 import {validateShotStoryContract} from "../src/spec/validate-shot-story";
 import {preflightProductionExpressions} from "../src/spec/preflight-render-spec";
@@ -30,7 +30,7 @@ export const loadRenderSpec = async (
   if (!parsed.success) {
     throw new Error(`render_spec validation failed:\n${format(parsed.error.issues)}`);
   }
-  validateRenderSpecReferences(parsed.data, assetManifest, voiceProfilesJson);
+  validateRenderSpecReferencesMultiBeat(parsed.data, assetManifest, voiceProfilesJson);
   const enforceVariety = !resolved.includes(`${path.sep}fixtures${path.sep}`);
   validateVisualStoryContract(parsed.data, {enforceVariety});
   validateShotStoryContract(parsed.data, {enforceVariety});
