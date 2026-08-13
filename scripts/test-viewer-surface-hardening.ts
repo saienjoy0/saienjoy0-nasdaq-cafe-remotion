@@ -7,7 +7,7 @@ import {preflightStaticViewerLayout} from "../src/spec/preflight-static-viewer-l
 import {planSourceReceiptLayout} from "../src/spec/template-layout/source-receipt-layout";
 import {visualCapabilityHintsSchema} from "../src/spec/visual-director-contract";
 import {candidateTemplatesForPolicy} from "../src/spec/visual-template-policy";
-import {assertViewerTextSafe} from "../src/spec/viewer-surface-policy";
+import {assertViewerSurfacePolicy, assertViewerTextSafe} from "../src/spec/viewer-surface-policy";
 
 test("viewer numeric kanji is rejected while ordinary Japanese words remain valid", () => {
   assert.throws(
@@ -68,6 +68,22 @@ test("static viewer layout ignores unreachable producer inventory but not visibl
   assert.throws(
     () => preflightStaticViewerLayout(value),
     /card title limit 18/,
+  );
+});
+
+test("viewer surface policy ignores unreachable cards but rejects them once selected", () => {
+  const value = renderSpecSchema.parse(structuredClone(fixtureJson));
+  const scene = value.scenes.find((item) => item.cards.length > 0)!;
+  const existing = structuredClone(scene.cards[0]);
+  existing.cardId = `${scene.sceneId}-unreachable-unsafe-card`;
+  existing.lines[0].value = "資金動員は五千億ドル規模";
+  scene.cards.push(existing);
+
+  assert.doesNotThrow(() => assertViewerSurfacePolicy(value));
+  scene.visualBeats[0].objectIds.push(existing.cardId);
+  assert.throws(
+    () => assertViewerSurfacePolicy(value),
+    /E_VIEWER_NUMERIC_KANJI_REMAINS/,
   );
 });
 
