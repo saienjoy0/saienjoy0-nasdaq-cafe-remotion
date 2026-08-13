@@ -4,6 +4,7 @@ import {
   VISUAL_GRAMMAR_RENDERER_COMPATIBILITY_SHA256,
   getVisualGrammarCompatibility,
 } from "../../src/spec/visual-grammar-contract";
+import {getVisualComponentDescriptor} from "../../src/spec/visual-component-registry";
 import {
   VISUAL_TEMPLATE_CONTRACTS,
   type VisualTemplateId,
@@ -63,6 +64,7 @@ export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
   for (const scene of value.scenes) {
     for (const beat of scene.visualBeats) {
       const contract = VISUAL_TEMPLATE_CONTRACTS[beat.visualTemplate];
+      const descriptor = getVisualComponentDescriptor(beat.visualTemplate);
       const selected = new Set(beat.objectIds);
       const cardIds = chooseIds(scene.cards, selected, (item) => item.cardId, contract.cards);
       const numberIds = chooseIds(
@@ -76,9 +78,16 @@ export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
       const arrowIds = chooseIds(scene.arrows, selected, (item) => item.arrowId, contract.arrows);
       beat.objectIds = [...cardIds, ...numberIds, ...nodeIds, ...arrowIds];
       beat.templateVariant = beat.templateConfig.variant;
+      // Current synthetic fixtures represent the current Registry contract, not stale
+      // historical producer combinations. Candidate tests may deliberately introduce
+      // drift after this point, but the shared fixture itself must be canonical.
+      beat.visualMode = descriptor.visualMode;
       if (!contract.supportedScreenStates.includes(beat.screenState)) {
         beat.screenState = contract.supportedScreenStates[0];
       }
+    }
+    if (scene.visualBeats.length > 0) {
+      scene.visualMode = scene.visualBeats[0].visualMode;
     }
   }
 
