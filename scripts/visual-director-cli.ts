@@ -6,6 +6,10 @@ import {
   buildVisualCandidateCatalog,
   buildVisualCandidateCatalogVNext,
 } from "../src/spec/visual-candidate-builder";
+import {
+  buildVisualCandidateInputFromRenderSpec,
+  buildVisualCapabilityInventory,
+} from "../src/spec/visual-candidate-input";
 import {compileVisualDirection} from "../src/spec/visual-direction-compiler";
 import {
   visualCandidateCatalogSchema,
@@ -38,10 +42,30 @@ const main = async () => {
     if (builder !== "legacy" && builder !== "vnext") {
       throw new Error("--candidate-builder must be legacy|vnext");
     }
-    const catalog = builder === "vnext"
-      ? buildVisualCandidateCatalogVNext({spec, sourceRenderSpecSha256, hints})
-      : buildVisualCandidateCatalog({spec, sourceRenderSpecSha256, hints});
-    await writeJson(arg("--catalog"), catalog);
+    if (builder === "vnext") {
+      const editorialSnapshotSha256 = arg("--editorial-snapshot-sha256");
+      if (!/^[a-f0-9]{64}$/.test(editorialSnapshotSha256)) {
+        throw new Error("--editorial-snapshot-sha256 must be a 64-character lowercase SHA-256");
+      }
+      const candidateInputPath = arg("--candidate-input");
+      const capabilityInventoryPath = arg("--capability-inventory");
+      const candidateInput = buildVisualCandidateInputFromRenderSpec({
+        spec,
+        editorialSnapshotSha256,
+      });
+      const capabilityInventory = buildVisualCapabilityInventory(candidateInput);
+      await writeJson(candidateInputPath, candidateInput);
+      await writeJson(capabilityInventoryPath, capabilityInventory);
+      await writeJson(
+        arg("--catalog"),
+        buildVisualCandidateCatalogVNext({spec, sourceRenderSpecSha256, hints}),
+      );
+      return;
+    }
+    await writeJson(
+      arg("--catalog"),
+      buildVisualCandidateCatalog({spec, sourceRenderSpecSha256, hints}),
+    );
     return;
   }
   if (command === "compile") {
