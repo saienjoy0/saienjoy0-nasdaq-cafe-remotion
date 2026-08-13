@@ -11,8 +11,31 @@ const makeMultiBeatGapScene = () => {
   const value = structuredClone(base);
   const scene = value.scenes.find((item) => item.visualMode === "expected-actual-gap");
   assert.ok(scene, "fixture must contain an expected-actual-gap Scene");
-  assert.ok(scene.visualBeats.length >= 2, "fixture E/A/G Scene must contain a later Beat");
   assert.equal(scene.visualBeats[0].visualMode, "expected-actual-gap");
+  assert.ok(scene.narrationChunks.length >= 2, "fixture E/A/G Scene must have at least two chunks");
+
+  const firstBeat = scene.visualBeats[0];
+  const firstChunk = scene.narrationChunks[0];
+  const secondChunk = scene.narrationChunks[1];
+  const lastChunk = scene.narrationChunks.at(-1)!;
+  firstBeat.endChunkId = firstChunk.chunkId;
+  firstBeat.narrationEndCue = firstChunk.speechText;
+
+  const secondBeat = structuredClone(firstBeat);
+  secondBeat.beatId = `${scene.sceneId}-beat-later`;
+  secondBeat.startChunkId = secondChunk.chunkId;
+  secondBeat.endChunkId = lastChunk.chunkId;
+  secondBeat.narrationStartCue = secondChunk.speechText;
+  secondBeat.narrationEndCue = lastChunk.speechText;
+  secondBeat.screenState = "Data";
+  secondBeat.visualMode = "text-focus";
+  secondBeat.visualTemplate = "text-focus";
+  secondBeat.viewerTexts = ["Later Beat context"];
+  secondBeat.assetPlacementIds = [];
+  secondBeat.assetState = "not-required";
+  secondBeat.returnScreenState = null;
+  secondBeat.entity = null;
+  secondBeat.pictureBook = null;
 
   const sourceCard = scene.cards[0];
   const extraCard = structuredClone(sourceCard);
@@ -21,7 +44,8 @@ const makeMultiBeatGapScene = () => {
   extraCard.title = "Later Beat context";
   extraCard.lines = [{label: "Context", value: "Later Beat owns this card", tone: "neutral"}];
   scene.cards.push(extraCard);
-  scene.visualBeats[1].objectIds = [...scene.visualBeats[1].objectIds, extraCard.cardId];
+  secondBeat.objectIds = [extraCard.cardId];
+  scene.visualBeats = [firstBeat, secondBeat];
   return value;
 };
 
