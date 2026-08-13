@@ -144,3 +144,4 @@ if (failed > 0) process.exit(1);
 console.log(`visual grammar renderer contract tests: ${tests.length} passed`);
 
 await import("./test-visual-architecture-v1-5");
+await import("./test-visual-director-cli");

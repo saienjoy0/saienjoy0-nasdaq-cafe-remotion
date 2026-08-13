@@ -2,7 +2,14 @@ import {createHash} from "node:crypto";
 import {readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import {renderSpecSchema} from "../src/spec/render-spec";
-import {buildVisualCandidateCatalog} from "../src/spec/visual-candidate-builder";
+import {
+  buildVisualCandidateCatalog,
+  buildVisualCandidateCatalogVNext,
+} from "../src/spec/visual-candidate-builder";
+import {
+  buildVisualCandidateInputFromRenderSpec,
+  buildVisualCapabilityInventory,
+} from "../src/spec/visual-candidate-input";
 import {compileVisualDirection} from "../src/spec/visual-direction-compiler";
 import {
   visualCandidateCatalogSchema,
@@ -31,7 +38,34 @@ const main = async () => {
   if (command === "build") {
     const hintsPath = optionalArg("--hints");
     const hints = hintsPath ? visualCapabilityHintsSchema.parse(await readJson(hintsPath)) : undefined;
-    await writeJson(arg("--catalog"), buildVisualCandidateCatalog({spec, sourceRenderSpecSha256, hints}));
+    const builder = optionalArg("--candidate-builder") ?? "legacy";
+    if (builder !== "legacy" && builder !== "vnext") {
+      throw new Error("--candidate-builder must be legacy|vnext");
+    }
+    if (builder === "vnext") {
+      const editorialSnapshotSha256 = arg("--editorial-snapshot-sha256");
+      if (!/^[a-f0-9]{64}$/.test(editorialSnapshotSha256)) {
+        throw new Error("--editorial-snapshot-sha256 must be a 64-character lowercase SHA-256");
+      }
+      const candidateInputPath = arg("--candidate-input");
+      const capabilityInventoryPath = arg("--capability-inventory");
+      const candidateInput = buildVisualCandidateInputFromRenderSpec({
+        spec,
+        editorialSnapshotSha256,
+      });
+      const capabilityInventory = buildVisualCapabilityInventory(candidateInput);
+      await writeJson(candidateInputPath, candidateInput);
+      await writeJson(capabilityInventoryPath, capabilityInventory);
+      await writeJson(
+        arg("--catalog"),
+        buildVisualCandidateCatalogVNext({spec, sourceRenderSpecSha256, hints}),
+      );
+      return;
+    }
+    await writeJson(
+      arg("--catalog"),
+      buildVisualCandidateCatalog({spec, sourceRenderSpecSha256, hints}),
+    );
     return;
   }
   if (command === "compile") {
@@ -42,7 +76,7 @@ const main = async () => {
     await writeJson(arg("--report"), result.report);
     return;
   }
-  throw new Error("usage: visual-director-cli.ts build|compile --spec ...");
+  throw new Error("usage: visual-director-cli.ts build|compile --spec ... [--candidate-builder legacy|vnext]");
 };
 
 main().catch((error: unknown) => {
