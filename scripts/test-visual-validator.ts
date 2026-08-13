@@ -95,4 +95,35 @@ validateVisualStoryContract(source, {enforceVariety: true});
   );
 }
 
-console.log("PASS: formal Visual Story validator accepts production input and rejects invalid geometry, order, timing, and variety");
+// Scene 9 may paraphrase or label an already grounded conclusion. String equality is
+// not a machine proof of semantic novelty; evidence lineage and numeric novelty are.
+{
+  const value = clone();
+  const line = value.scenes[8].cards[0]?.lines[0];
+  assert.ok(line, "production fixture must expose a Scene 9 summary card line");
+  line.value = "既出材料を再統合した結論";
+  validateVisualStoryContract(value, {enforceVariety: true});
+}
+
+{
+  const value = clone();
+  const beat = value.scenes[8].visualBeats[0];
+  beat.evidenceSourceIds = [...beat.evidenceSourceIds, "source-never-introduced"];
+  assert.throws(
+    () => validateVisualStoryContract(value, {enforceVariety: true}),
+    /Scene 9 must not introduce a new evidence source/,
+  );
+}
+
+{
+  const value = clone();
+  const line = value.scenes[8].cards[0]?.lines[0];
+  assert.ok(line, "production fixture must expose a Scene 9 summary card line");
+  line.value = "新規数値 987654.321%";
+  assert.throws(
+    () => validateVisualStoryContract(value, {enforceVariety: true}),
+    /Scene 9 must not introduce a new numeric claim/,
+  );
+}
+
+console.log("PASS: formal Visual Story validator accepts production input and rejects invalid geometry, order, timing, variety, and Scene 9 evidence novelty");
