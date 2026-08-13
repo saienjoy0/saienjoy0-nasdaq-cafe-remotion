@@ -1,9 +1,23 @@
 import assert from "node:assert/strict";
 import {buildVisualCandidateCatalog} from "../src/spec/visual-candidate-builder";
+import {getVisualComponentDescriptor} from "../src/spec/visual-component-registry";
 import {sha256Json} from "../src/spec/visual-director-contract";
 import {makeCurrentVisualDirectorFixture} from "./test-support/current-visual-grammar-fixture";
 
 await import("./test-visual-director");
+
+const sourceReceipt = getVisualComponentDescriptor("source-receipt");
+const newsMedia = getVisualComponentDescriptor("news-media");
+assert.deepEqual(
+  sourceReceipt.eligibilityRuleIds,
+  ["source-bound"],
+  "source-receipt is a cited reconstructed receipt and must not require a main-media placement",
+);
+assert.deepEqual(
+  newsMedia.eligibilityRuleIds,
+  ["source-bound", "single-main-media"],
+  "news-media must remain bound to exactly one real main-media placement",
+);
 
 const authoredOnlySpec = makeCurrentVisualDirectorFixture();
 const authoredOnlyBeat = authoredOnlySpec.scenes
