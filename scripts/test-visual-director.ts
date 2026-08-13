@@ -3,8 +3,15 @@ import {readFileSync} from "node:fs";
 import type {RenderSpec} from "../src/spec/render-spec";
 import {
   buildVisualCandidateCatalog,
+  buildVisualCandidateCatalogVNext,
   candidateTemplatesForCapabilities,
 } from "../src/spec/visual-candidate-builder";
+import {
+  buildVisualCandidateInputFromRenderSpec,
+  buildVisualCapabilityInventory,
+} from "../src/spec/visual-candidate-input";
+import {VISUAL_COMPONENT_REGISTRY} from "../src/spec/visual-component-registry";
+import {VISUAL_TEMPLATE_IDS} from "../src/spec/visual-template-contract";
 import {
   assertProtectedSemanticFieldsUnchanged,
   compileVisualDirection,
@@ -25,6 +32,26 @@ import {
 const spec = makeCurrentVisualDirectorFixture();
 validateVisualGrammarContract(spec);
 const sourceSha = sha256Json(spec);
+
+assert.equal(Object.keys(VISUAL_COMPONENT_REGISTRY).length, VISUAL_TEMPLATE_IDS.length, "registry must cover every Visual Template");
+for (const templateId of VISUAL_TEMPLATE_IDS) {
+  const descriptor = VISUAL_COMPONENT_REGISTRY[templateId];
+  assert.equal(descriptor.id, templateId);
+  assert.equal(descriptor.status, "production");
+  assert.ok(descriptor.allowedGrammarIds.length > 0);
+  assert.ok(descriptor.variants.includes(descriptor.defaultVariant));
+}
+
+const candidateInput = buildVisualCandidateInputFromRenderSpec({
+  spec,
+  editorialSnapshotSha256: sourceSha,
+});
+const sourceBeatCount = spec.scenes.reduce((sum, scene) => sum + scene.visualBeats.length, 0);
+assert.equal(candidateInput.beats.length, sourceBeatCount, "VisualCandidateInput must cover every Beat");
+assert.equal(candidateInput.editorialSnapshotSha256, sourceSha);
+const capabilityInventory = buildVisualCapabilityInventory(candidateInput);
+assert.equal(capabilityInventory.beats.length, sourceBeatCount, "Capability Inventory must cover every Beat");
+assert.equal(capabilityInventory.visualCandidateInputSha256, sha256Json(candidateInput));
 
 type BeatEntry = {
   scene: RenderSpec["scenes"][number];
@@ -112,6 +139,36 @@ const comparisonCatalog = buildVisualCandidateCatalog({
   hints: comparisonHints,
 });
 assert.ok(comparisonCatalog.candidates.some((item) => item.visualBeatId === comparisonEntry.beat.beatId && item.capability === "comparison-set"));
+
+const comparisonSceneIndex = comparison.scenes.findIndex((scene) =>
+  scene.visualBeats.some((item) => item.beatId === comparisonEntry.beat.beatId));
+assert.ok(comparisonSceneIndex >= 0);
+const vNextComparison = cloneTestValue(comparison);
+vNextComparison.scenes = [vNextComparison.scenes[comparisonSceneIndex]];
+vNextComparison.scenes[0].visualBeats = vNextComparison.scenes[0].visualBeats.filter((item) => item.beatId === comparisonEntry.beat.beatId);
+const vNextCatalog = buildVisualCandidateCatalogVNext({
+  spec: vNextComparison,
+  sourceRenderSpecSha256: sha256Json(vNextComparison),
+  hints: {
+    contractVersion: "1.0.0",
+    episodeDate: vNextComparison.episode.targetDate,
+    beats: [{visualBeatId: comparisonEntry.beat.beatId, capabilities: ["comparison-set"]}],
+  },
+});
+assert.ok(vNextCatalog.candidates.some((item) => item.visualTemplate === "focus-matrix"), "vNext must discover a legal alternative instead of locking to the authored template");
+assert.throws(() => buildVisualCandidateCatalogVNext({
+  spec: vNextComparison,
+  sourceRenderSpecSha256: sha256Json(vNextComparison),
+  hints: {
+    contractVersion: "1.1.0",
+    episodeDate: vNextComparison.episode.targetDate,
+    beats: [{
+      visualBeatId: comparisonEntry.beat.beatId,
+      capabilities: ["comparison-set"],
+      templatePolicy: {mode: "authored-only"},
+    }],
+  },
+}), /authored-only requires the legacy compatibility path/);
 
 const mismatch = cloneTestValue(comparison);
 const mismatchEntry = beatEntries(mismatch).find((item) => item.beat.beatId === comparisonEntry.beat.beatId)!;

@@ -3,10 +3,9 @@ import {
   getVisualGrammarAppearance,
   isVisualGrammarTemplatePairAllowed,
 } from "./visual-grammar-contract";
-import {
-  VISUAL_TEMPLATE_CONTRACTS,
-  type VisualTemplateId,
-  type VisualTemplateVariant,
+import type {
+  VisualTemplateId,
+  VisualTemplateVariant,
 } from "./visual-template-contract";
 import {
   visualCandidateCatalogSchema,
@@ -14,120 +13,29 @@ import {
   type VisualCandidate,
   type VisualCandidateCatalog,
   type VisualCapabilityHints,
+  type VisualTemplatePolicy,
 } from "./visual-director-contract";
 import {candidateTemplatesForPolicy} from "./visual-template-policy";
+import {
+  candidateTemplatesForCapability,
+  getVisualComponentDescriptor,
+  primaryCapabilityForTemplate,
+  visualModeForTemplate,
+} from "./visual-component-registry";
+import {passesVisualEligibilityRules} from "./visual-eligibility-rule-registry";
+import {
+  buildVisualCandidateInputFromRenderSpec,
+  buildVisualCapabilityInventory,
+} from "./visual-candidate-input";
 
 type Beat = RenderSpec["scenes"][number]["visualBeats"][number];
 type Scene = RenderSpec["scenes"][number];
-
-const CAPABILITY_TEMPLATES: Record<EvidenceCapability, readonly VisualTemplateId[]> = {
-  "source-document": ["source-receipt", "news-media"],
-  "quote-social": ["source-receipt", "news-media"],
-  "time-series": ["event-reaction-timeline"],
-  "comparison-set": ["index-return-bars", "diverging-stock-bars", "split-comparison", "focus-matrix"],
-  gap: ["expected-actual-bullet", "expected-actual-gap-flow"],
-  "causal-graph": ["causal-lane", "tailwind-headwind", "evidence-boundary"],
-  entity: ["entity-card-full", "hero-number"],
-  "image-media": ["news-media", "source-receipt"],
-  verification: ["verification-checklist", "verification-matrix", "evidence-boundary"],
-  "text-only": ["hero-number", "text-focus", "conclusion-card"],
-};
-
-const TEMPLATE_CAPABILITY: Partial<Record<VisualTemplateId, EvidenceCapability>> = {
-  "source-receipt": "source-document",
-  "news-media": "source-document",
-  "event-reaction-timeline": "time-series",
-  "index-return-bars": "comparison-set",
-  "diverging-stock-bars": "comparison-set",
-  "split-comparison": "comparison-set",
-  "focus-matrix": "comparison-set",
-  "expected-actual-bullet": "gap",
-  "expected-actual-gap-flow": "gap",
-  "earnings-surprise": "gap",
-  "causal-lane": "causal-graph",
-  "macro-pressure": "causal-graph",
-  "tailwind-headwind": "causal-graph",
-  "entity-card-full": "entity",
-  "analogy-steps": "image-media",
-  "verification-checklist": "verification",
-  "verification-matrix": "verification",
-  "evidence-boundary": "verification",
-};
-
-const VARIANT_BY_TEMPLATE: Record<VisualTemplateId, VisualTemplateVariant> = {
-  "opening-contradiction": "default",
-  "market-pulse-grid": "grid",
-  "earnings-surprise": "zero-baseline",
-  "dual-asset-split": "center-zero",
-  "macro-pressure": "left-to-right",
-  "source-receipt": "receipt",
-  "hero-number": "default",
-  "closing-recap": "default",
-  "final-assembly": "default",
-  "conclusion-card": "default",
-  "expected-actual-bullet": "zero-baseline",
-  "expected-actual-gap-flow": "left-to-right",
-  "metric-comparison-board": "default",
-  "index-return-bars": "zero-baseline",
-  "diverging-stock-bars": "center-zero",
-  "split-comparison": "two-lane",
-  "focus-matrix": "default",
-  "causal-lane": "left-to-right",
-  "tailwind-headwind": "two-lane",
-  "evidence-boundary": "confirmed-vs-unconfirmed",
-  "verification-checklist": "default",
-  "verification-matrix": "strengthen-vs-weaken",
-  "analogy-steps": "default",
-  "entity-card-full": "default",
-  "news-media": "default",
-  "event-reaction-timeline": "verified-series",
-  "text-focus": "default",
-};
-
-const VISUAL_MODE_BY_TEMPLATE: Record<VisualTemplateId, Beat["visualMode"]> = {
-  "opening-contradiction": "conclusion-card",
-  "market-pulse-grid": "number-comparison",
-  "earnings-surprise": "expected-actual-gap",
-  "dual-asset-split": "stock-comparison",
-  "macro-pressure": "causal-diagram",
-  "source-receipt": "news-media",
-  "hero-number": "text-focus",
-  "closing-recap": "conclusion-card",
-  "final-assembly": "conclusion-card",
-  "conclusion-card": "conclusion-card",
-  "expected-actual-bullet": "expected-actual-gap",
-  "expected-actual-gap-flow": "expected-actual-gap",
-  "metric-comparison-board": "number-comparison",
-  "index-return-bars": "stock-comparison",
-  "diverging-stock-bars": "stock-comparison",
-  "split-comparison": "stock-comparison",
-  "focus-matrix": "stock-comparison",
-  "causal-lane": "causal-diagram",
-  "tailwind-headwind": "causal-diagram",
-  "evidence-boundary": "verification-points",
-  "verification-checklist": "verification-points",
-  "verification-matrix": "verification-points",
-  "analogy-steps": "causal-diagram",
-  "entity-card-full": "text-focus",
-  "news-media": "news-media",
-  "event-reaction-timeline": "timeline",
-  "text-focus": "text-focus",
-};
 
 const realityCapabilities = new Set<EvidenceCapability>([
   "source-document", "quote-social", "time-series", "entity", "image-media",
 ]);
 
 const unique = <T,>(values: readonly T[]) => [...new Set(values)];
-
-const inferCapabilities = (beat: Beat): EvidenceCapability[] => {
-  const result = new Set<EvidenceCapability>();
-  result.add(TEMPLATE_CAPABILITY[beat.visualTemplate] ?? "text-only");
-  if (beat.entity) result.add("entity");
-  if (beat.pictureBook) result.add("image-media");
-  if (beat.templateConfig.reactionTimeline?.precision === "verified-intraday-series") result.add("time-series");
-  return [...result].sort();
-};
 
 const objectInventory = (scene: Scene, beat: Beat) => {
   const selected = new Set(beat.objectIds);
@@ -142,14 +50,6 @@ const objectInventory = (scene: Scene, beat: Beat) => {
 const within = (value: number, range: {min: number; max: number}) =>
   range.min <= value && value <= range.max;
 
-const comparisonBasisAligned = (scene: Scene, beat: Beat) => {
-  const numbers = objectInventory(scene, beat).numbers;
-  if (numbers.length < 2 || numbers.some((item) => item.numericValue == null)) return false;
-  const units = new Set(numbers.map((item) => item.unit));
-  const bases = new Set(numbers.map((item) => item.comparison));
-  return units.size === 1 && bases.size === 1 && !bases.has(null);
-};
-
 const sourcePlacementIds = (scene: Scene, beat: Beat) => {
   const placements = new Map(scene.assetPlacements.map((item) => [item.placementId, item] as const));
   return beat.assetPlacementIds.filter((id) => {
@@ -162,7 +62,7 @@ const screenStateFor = (template: VisualTemplateId, beat: Beat, hasMedia: boolea
   if (template === "news-media") return "News" as const;
   if (template === "entity-card-full") return beat.screenState === "MainWithEntity" ? "MainWithEntity" as const : "EntityFocus" as const;
   if (template === "source-receipt" && hasMedia) return "News" as const;
-  const supported = VISUAL_TEMPLATE_CONTRACTS[template].supportedScreenStates;
+  const supported = getVisualComponentDescriptor(template).supportedScreenStates;
   return supported.includes(beat.screenState) ? beat.screenState : supported[0];
 };
 
@@ -173,30 +73,27 @@ const canBuild = (
   beat: Beat,
 ) => {
   const inventory = objectInventory(scene, beat);
-  const contract = VISUAL_TEMPLATE_CONTRACTS[template];
+  const descriptor = getVisualComponentDescriptor(template);
+  const contract = descriptor.inventory;
   if (!within(inventory.cards.length, contract.cards) ||
       !within(inventory.numbers.length, contract.numbers) ||
       !within(inventory.nodes.length, contract.nodes) ||
       !within(inventory.arrows.length, contract.arrows)) return false;
   if (contract.requiresNumericValue && inventory.numbers.some((item) => item.numericValue == null)) return false;
   if (!beat.visualGrammarId || !isVisualGrammarTemplatePairAllowed(beat.visualGrammarId, template)) return false;
-  if ((beat.shots?.length ?? 0) > 0 || beat.financialVisualTrace) return template === beat.visualTemplate;
-  if (capability === "comparison-set" && !comparisonBasisAligned(scene, beat)) return false;
-  if (capability === "time-series") {
-    const reaction = beat.templateConfig.reactionTimeline;
-    if (reaction?.precision !== "verified-intraday-series") return false;
-    if (!reaction.intradaySeries && reaction.seriesObjectIds.length < 2) return false;
-  }
-  if ((capability === "source-document" || capability === "quote-social" || template === "news-media" || template === "source-receipt") && beat.evidenceSourceIds.length === 0) return false;
-  if ((template === "source-receipt" || template === "news-media") && sourcePlacementIds(scene, beat).length !== 1) return false;
-  if (template === "news-media" && sourcePlacementIds(scene, beat).length !== 1) return false;
-  if (template === "entity-card-full" && (!beat.entity || sourcePlacementIds(scene, beat).length !== 1)) return false;
+  const placements = sourcePlacementIds(scene, beat);
+  if (!passesVisualEligibilityRules(descriptor.eligibilityRuleIds, {
+    scene,
+    beat,
+    capability,
+    sourcePlacementIds: placements,
+  })) return false;
   return true;
 };
 
 const templateConfigFor = (template: VisualTemplateId, scene: Scene, beat: Beat) => {
   if (template === beat.visualTemplate) return structuredClone(beat.templateConfig);
-  const variant = VARIANT_BY_TEMPLATE[template];
+  const variant = getVisualComponentDescriptor(template).defaultVariant;
   const inventory = objectInventory(scene, beat);
   return {
     variant,
@@ -214,35 +111,60 @@ const templateConfigFor = (template: VisualTemplateId, scene: Scene, beat: Beat)
 const candidateSignature = (candidate: Omit<VisualCandidate, "candidateId">) =>
   [candidate.visualTemplate, candidate.templateVariant, candidate.screenState, candidate.capability].join("|");
 
-export const buildVisualCandidateCatalog = ({
+const templatesForNewPath = (
+  capability: EvidenceCapability,
+  policy: VisualTemplatePolicy | undefined,
+) => {
+  const capabilityTemplates = candidateTemplatesForCapability(capability);
+  if (!policy) return capabilityTemplates;
+  if (policy.mode === "authored-only") {
+    throw new Error("authored-only requires the legacy compatibility path");
+  }
+  const allowed = new Set(policy.allowedTemplateIds);
+  return capabilityTemplates.filter((template) => allowed.has(template));
+};
+
+const buildCatalog = ({
   spec,
   sourceRenderSpecSha256,
   hints,
+  includeAuthoredCompatibility,
 }: {
   spec: RenderSpec;
   sourceRenderSpecSha256: string;
   hints?: VisualCapabilityHints;
+  includeAuthoredCompatibility: boolean;
 }): VisualCandidateCatalog => {
   if (spec.schemaVersion !== "2.4.0") throw new Error("Visual Director requires render_spec 2.4.0");
   if (hints && hints.episodeDate !== spec.episode.targetDate) throw new Error("capability hint episodeDate mismatch");
+
+  const candidateInput = buildVisualCandidateInputFromRenderSpec({
+    spec,
+    editorialSnapshotSha256: sourceRenderSpecSha256,
+  });
+  const capabilityInventory = buildVisualCapabilityInventory(candidateInput);
+  const inventoryMap = new Map(capabilityInventory.beats.map((item) => [item.visualBeatId, item.capabilities] as const));
   const hintMap = new Map(hints?.beats.map((item) => [item.visualBeatId, item] as const) ?? []);
   const candidates: VisualCandidate[] = [];
 
   for (const scene of spec.scenes) {
     for (const beat of scene.visualBeats) {
       const hint = hintMap.get(beat.beatId);
-      const capabilities = unique([...(hint?.capabilities ?? []), ...inferCapabilities(beat)]).sort();
+      const capabilities = unique([
+        ...(hint?.capabilities ?? []),
+        ...(inventoryMap.get(beat.beatId) ?? []),
+        primaryCapabilityForTemplate(beat.visualTemplate),
+      ]).sort();
       const drafts = new Map<string, Omit<VisualCandidate, "candidateId">>();
       for (const capability of capabilities) {
-        const templates = candidateTemplatesForPolicy(
-          beat.visualTemplate,
-          CAPABILITY_TEMPLATES[capability],
-          hint?.templatePolicy,
-        );
+        const discoveryTemplates = candidateTemplatesForCapability(capability);
+        const templates = includeAuthoredCompatibility
+          ? candidateTemplatesForPolicy(beat.visualTemplate, discoveryTemplates, hint?.templatePolicy)
+          : templatesForNewPath(capability, hint?.templatePolicy);
         for (const template of templates) {
           if (!canBuild(capability, template, scene, beat)) continue;
           const templateConfig = templateConfigFor(template, scene, beat);
-          const variant = templateConfig.variant;
+          const variant = templateConfig.variant as VisualTemplateVariant;
           const assetPlacementIds = template === beat.visualTemplate
             ? [...beat.assetPlacementIds]
             : sourcePlacementIds(scene, beat);
@@ -256,7 +178,7 @@ export const buildVisualCandidateCatalog = ({
             visualTemplate: template,
             templateVariant: variant,
             screenState,
-            visualMode: template === beat.visualTemplate ? beat.visualMode : VISUAL_MODE_BY_TEMPLATE[template],
+            visualMode: template === beat.visualTemplate ? beat.visualMode : visualModeForTemplate(template),
             templateConfig,
             appearanceClass: appearance.appearanceClass,
             dominantSurface: appearance.dominantSurface,
@@ -289,5 +211,35 @@ export const buildVisualCandidateCatalog = ({
   });
 };
 
+export const buildVisualCandidateCatalog = ({
+  spec,
+  sourceRenderSpecSha256,
+  hints,
+}: {
+  spec: RenderSpec;
+  sourceRenderSpecSha256: string;
+  hints?: VisualCapabilityHints;
+}): VisualCandidateCatalog => buildCatalog({
+  spec,
+  sourceRenderSpecSha256,
+  hints,
+  includeAuthoredCompatibility: true,
+});
+
+export const buildVisualCandidateCatalogVNext = ({
+  spec,
+  sourceRenderSpecSha256,
+  hints,
+}: {
+  spec: RenderSpec;
+  sourceRenderSpecSha256: string;
+  hints?: VisualCapabilityHints;
+}): VisualCandidateCatalog => buildCatalog({
+  spec,
+  sourceRenderSpecSha256,
+  hints,
+  includeAuthoredCompatibility: false,
+});
+
 export const candidateTemplatesForCapabilities = (capabilities: readonly EvidenceCapability[]) =>
-  unique(capabilities.flatMap((capability) => CAPABILITY_TEMPLATES[capability])).sort();
+  unique(capabilities.flatMap((capability) => candidateTemplatesForCapability(capability))).sort();
