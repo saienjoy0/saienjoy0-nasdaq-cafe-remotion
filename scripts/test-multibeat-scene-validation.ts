@@ -49,6 +49,25 @@ const makeMultiBeatGapScene = () => {
   return value;
 };
 
+const makeCardBasedCausalScene = (visualTemplate: "tailwind-headwind" | "causal-lane") => {
+  const value = structuredClone(base);
+  const scene = value.scenes.find((item) => item.cards.length > 0 && item.visualBeats.length > 0);
+  assert.ok(scene, "fixture must contain a card-backed Scene");
+  const beat = scene.visualBeats[0];
+  scene.visualMode = "causal-diagram";
+  beat.visualMode = "causal-diagram";
+  beat.visualTemplate = visualTemplate;
+  beat.screenState = "Data";
+  beat.objectIds = [scene.cards[0].cardId];
+  beat.assetPlacementIds = [];
+  beat.assetState = "not-required";
+  beat.returnScreenState = null;
+  beat.entity = null;
+  beat.pictureBook = null;
+  beat.viewerTexts = beat.viewerTexts.length > 0 ? beat.viewerTexts : ["forces"];
+  return value;
+};
+
 {
   const value = makeMultiBeatGapScene();
   const before = JSON.stringify(value);
@@ -75,4 +94,25 @@ const makeMultiBeatGapScene = () => {
   );
 }
 
-console.log("multi-Beat scene validation tests passed");
+{
+  const value = makeCardBasedCausalScene("tailwind-headwind");
+  const before = JSON.stringify(value);
+  assert.throws(
+    () => validateRenderSpecReferences(value, productionAssetManifest, voiceProfilesJson),
+    /required Beat data missing for causal-diagram/,
+    "legacy generic causal mode should reproduce the card-only tailwind regression",
+  );
+  validateRenderSpecReferencesMultiBeat(value, productionAssetManifest, voiceProfilesJson);
+  assert.equal(JSON.stringify(value), before, "template-aware validation must not mutate the RenderSpec");
+}
+
+{
+  const value = makeCardBasedCausalScene("causal-lane");
+  assert.throws(
+    () => validateRenderSpecReferencesMultiBeat(value, productionAssetManifest, voiceProfilesJson),
+    /required Beat data missing for causal-diagram/,
+    "node/arrow causal templates must remain strict; card-only data must not be accepted",
+  );
+}
+
+console.log("multi-Beat and template-aware scene validation tests passed");
