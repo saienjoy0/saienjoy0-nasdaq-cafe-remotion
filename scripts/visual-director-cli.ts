@@ -2,7 +2,10 @@ import {createHash} from "node:crypto";
 import {readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import {renderSpecSchema} from "../src/spec/render-spec";
-import {buildVisualCandidateCatalog} from "../src/spec/visual-candidate-builder";
+import {
+  buildVisualCandidateCatalog,
+  buildVisualCandidateCatalogVNext,
+} from "../src/spec/visual-candidate-builder";
 import {compileVisualDirection} from "../src/spec/visual-direction-compiler";
 import {
   visualCandidateCatalogSchema,
@@ -31,7 +34,14 @@ const main = async () => {
   if (command === "build") {
     const hintsPath = optionalArg("--hints");
     const hints = hintsPath ? visualCapabilityHintsSchema.parse(await readJson(hintsPath)) : undefined;
-    await writeJson(arg("--catalog"), buildVisualCandidateCatalog({spec, sourceRenderSpecSha256, hints}));
+    const builder = optionalArg("--candidate-builder") ?? "legacy";
+    if (builder !== "legacy" && builder !== "vnext") {
+      throw new Error("--candidate-builder must be legacy|vnext");
+    }
+    const catalog = builder === "vnext"
+      ? buildVisualCandidateCatalogVNext({spec, sourceRenderSpecSha256, hints})
+      : buildVisualCandidateCatalog({spec, sourceRenderSpecSha256, hints});
+    await writeJson(arg("--catalog"), catalog);
     return;
   }
   if (command === "compile") {
@@ -42,7 +52,7 @@ const main = async () => {
     await writeJson(arg("--report"), result.report);
     return;
   }
-  throw new Error("usage: visual-director-cli.ts build|compile --spec ...");
+  throw new Error("usage: visual-director-cli.ts build|compile --spec ... [--candidate-builder legacy|vnext]");
 };
 
 main().catch((error: unknown) => {
