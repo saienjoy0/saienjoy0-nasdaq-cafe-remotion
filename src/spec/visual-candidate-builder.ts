@@ -1,4 +1,6 @@
-import type {RenderSpec} from "./render-spec";
+import {renderSpecSchema, type RenderSpec} from "./render-spec";
+import {isFinancialVisualTemplate} from "./financial-visual-contract";
+import {assertStaticTemplateSoundness} from "./static-template-soundness";
 import {
   getVisualGrammarAppearance,
   isVisualGrammarTemplatePairAllowed,
@@ -61,10 +63,6 @@ const sourcePlacementIds = (scene: Scene, beat: Beat) => {
 const screenStateFor = (template: VisualTemplateId, beat: Beat, hasMedia: boolean) => {
   if (template === "news-media") return "News" as const;
   if (template === "entity-card-full") return beat.screenState === "MainWithEntity" ? "MainWithEntity" as const : "EntityFocus" as const;
-  // source-receipt is a dual-use card receipt. Without an actual media placement it
-  // must stay on the Data surface; inheriting an authored News state would create a
-  // Renderer-invalid News Beat that has neither cleared main-media nor a return state.
-  // When cleared media is actually present, News remains the legal media-backed path.
   if (template === "source-receipt") return hasMedia ? "News" as const : "Data" as const;
   const supported = getVisualComponentDescriptor(template).supportedScreenStates;
   return supported.includes(beat.screenState) ? beat.screenState : supported[0];
@@ -95,17 +93,40 @@ const canBuild = (
   return true;
 };
 
+const inferredLaneLabels = (beat: Beat) => {
+  const labels = unique(beat.viewerTexts.flatMap((item) => {
+    const separator = item.indexOf("｜");
+    if (separator <= 0) return [];
+    const label = item.slice(0, separator).trim();
+    return label.length > 0 ? [label] : [];
+  }));
+  return labels.length === 2 ? labels : [];
+};
+
 const templateConfigFor = (template: VisualTemplateId, scene: Scene, beat: Beat) => {
   if (template === beat.visualTemplate) return structuredClone(beat.templateConfig);
   const variant = getVisualComponentDescriptor(template).defaultVariant;
   const inventory = objectInventory(scene, beat);
+  const needsLanes = template === "verification-matrix" || template === "tailwind-headwind";
   return {
     variant,
     comparisonBasis: beat.templateConfig.comparisonBasis,
     dataBasis: beat.templateConfig.dataBasis,
     nodeOrder: inventory.nodes.map((item) => item.nodeId),
-    laneLabels: template === "verification-matrix" ? ["強める", "弱める"] : [],
+    laneLabels: needsLanes ? inferredLaneLabels(beat) : [],
     outcomeNodeId: inventory.nodes.at(-1)?.nodeId ?? null,
+    ...(beat.templateConfig.displayOrder
+      ? {displayOrder: [...beat.templateConfig.displayOrder]}
+      : {}),
+    ...(beat.templateConfig.metricIds
+      ? {metricIds: [...beat.templateConfig.metricIds]}
+      : {}),
+    ...(beat.templateConfig.causalStepIds
+      ? {causalStepIds: [...beat.templateConfig.causalStepIds]}
+      : {}),
+    ...(beat.templateConfig.highlightObjectIds
+      ? {highlightObjectIds: [...beat.templateConfig.highlightObjectIds]}
+      : {}),
     ...(template === "event-reaction-timeline" && beat.templateConfig.reactionTimeline
       ? {reactionTimeline: structuredClone(beat.templateConfig.reactionTimeline)}
       : {}),
@@ -151,24 +172,33 @@ const buildCatalog = ({
   const hintMap = new Map(hints?.beats.map((item) => [item.visualBeatId, item] as const) ?? []);
   const candidates: VisualCandidate[] = [];
 
-  for (const scene of spec.scenes) {
-    for (const beat of scene.visualBeats) {
+  for (const [sceneIndex, scene] of spec.scenes.entries()) {
+    for (const [beatIndex, beat] of scene.visualBeats.entries()) {
       const hint = hintMap.get(beat.beatId);
       const primaryCapability = primaryCapabilityForTemplate(beat.visualTemplate);
-      const capabilities = hint?.templatePolicy?.mode === "authored-only"
+      const financialOwned = beat.financialVisualTrace !== undefined;
+      const capabilities = financialOwned
         ? [primaryCapability]
-        : unique([
-            ...(hint?.capabilities ?? []),
-            ...(inventoryMap.get(beat.beatId) ?? []),
-            primaryCapability,
-          ]).sort();
+        : hint?.templatePolicy?.mode === "authored-only"
+          ? [primaryCapability]
+          : unique([
+              ...(hint?.capabilities ?? []),
+              ...(inventoryMap.get(beat.beatId) ?? []),
+              primaryCapability,
+            ]).sort();
       const drafts = new Map<string, Omit<VisualCandidate, "candidateId">>();
       for (const capability of capabilities) {
         const discoveryTemplates = candidateTemplatesForCapability(capability);
-        const templates = includeAuthoredCompatibility
+        const discovered = includeAuthoredCompatibility
           ? candidateTemplatesForPolicy(beat.visualTemplate, discoveryTemplates, hint?.templatePolicy)
           : templatesForNewPath(capability, hint?.templatePolicy);
+        const templates = financialOwned ? [beat.visualTemplate] : discovered;
         for (const template of templates) {
+          // v1.2 keeps genuine Financial Beats under their already-selected Financial
+          // presentation authority. Generic Beats may use dual-use source-receipt, but
+          // may not acquire a financial-only Template without explicit Financial trace.
+          if (financialOwned && template !== beat.visualTemplate) continue;
+          if (!financialOwned && isFinancialVisualTemplate(template)) continue;
           if (!canBuild(capability, template, scene, beat)) continue;
           const templateConfig = templateConfigFor(template, scene, beat);
           const variant = templateConfig.variant as VisualTemplateVariant;
@@ -178,6 +208,40 @@ const buildCatalog = ({
           const placementMap = new Map(scene.assetPlacements.map((item) => [item.placementId, item] as const));
           const assetIds = assetPlacementIds.map((id) => placementMap.get(id)!.assetId);
           const screenState = screenStateFor(template, beat, assetPlacementIds.length > 0);
+          const visualMode = visualModeForTemplate(template);
+          const assetState = assetPlacementIds.length === 0
+            ? "not-required" as const
+            : beat.assetState === "user-review-required"
+              ? "user-review-required" as const
+              : "ready" as const;
+          const projectedBeat: Beat = {
+            ...beat,
+            visualTemplate: template,
+            templateVariant: variant,
+            templateConfig,
+            screenState,
+            visualMode,
+            assetPlacementIds,
+            assetState,
+          };
+
+          // Candidate Local Soundness: a Candidate is catalog-eligible only if the
+          // projected Beat already satisfies the RenderSpec schema and the static
+          // Template/layout contract. AI-B must never receive a mechanically illegal
+          // option and discover that only after TTS or Chrome starts.
+          const projectedSpec = structuredClone(spec);
+          projectedSpec.scenes[sceneIndex].visualBeats[beatIndex] = projectedBeat;
+          if (!renderSpecSchema.safeParse(projectedSpec).success) continue;
+          try {
+            assertStaticTemplateSoundness(
+              scene,
+              projectedBeat,
+              `$.scenes[${sceneIndex}].visualBeats[${beatIndex}]`,
+            );
+          } catch {
+            continue;
+          }
+
           const appearance = getVisualGrammarAppearance(template, variant);
           const draft: Omit<VisualCandidate, "candidateId"> = {
             visualBeatId: beat.beatId,
@@ -185,11 +249,7 @@ const buildCatalog = ({
             visualTemplate: template,
             templateVariant: variant,
             screenState,
-            // Candidate legality belongs to the candidate Template Registry. Producer
-            // visualMode may be a stale scene-level value, so it must never override
-            // the Renderer-owned template -> visualMode contract, even for an authored
-            // template retained as a vNext candidate.
-            visualMode: visualModeForTemplate(template),
+            visualMode,
             templateConfig,
             appearanceClass: appearance.appearanceClass,
             dominantSurface: appearance.dominantSurface,
@@ -198,7 +258,7 @@ const buildCatalog = ({
             objectIds: [...beat.objectIds],
             assetPlacementIds,
             assetIds,
-            assetState: assetPlacementIds.length === 0 ? "not-required" : beat.assetState === "user-review-required" ? "user-review-required" : "ready",
+            assetState,
             requirementsSatisfied: true as const,
           };
           drafts.set(candidateSignature(draft), draft);
