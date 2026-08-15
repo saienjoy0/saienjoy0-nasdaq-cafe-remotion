@@ -1,4 +1,5 @@
 import type {RenderSpec} from "./render-spec";
+import {validateStaticTemplateLayout} from "./validate-static-template-layout";
 import {viewerVisibleObjectIds} from "./viewer-visible-object-ids";
 
 // These are the same public-surface budgets enforced again at composition time
@@ -64,6 +65,11 @@ const sourceReceiptOnlyCardIds = (scene: RenderSpec["scenes"][number]) => {
 };
 
 export const preflightStaticViewerLayout = (spec: RenderSpec) => {
+  // Template-specific static legality must be checked at the immutable RenderSpec
+  // boundary, before TTS and before Chromium starts. Composition-time validation
+  // remains defense-in-depth, but it must never be the first place these errors appear.
+  validateStaticTemplateLayout(spec);
+
   spec.scenes.forEach((scene, sceneIndex) => {
     const base = `$.scenes[${sceneIndex}]`;
     const visibleObjectIds = viewerVisibleObjectIds(scene);
