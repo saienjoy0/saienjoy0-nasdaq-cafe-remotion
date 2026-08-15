@@ -7,6 +7,24 @@ import {planSourceReceiptLayout} from "./template-layout/source-receipt-layout";
 
 type Scene = RenderSpec["scenes"][number];
 type Beat = Scene["visualBeats"][number];
+type StaticScene = Pick<
+  Scene,
+  "sceneNumber" | "headline" | "uncertainty" | "cards" | "numbers" | "nodes" | "arrows"
+>;
+type StaticBeat = Pick<
+  Beat,
+  | "objectIds"
+  | "visualTemplate"
+  | "visualMode"
+  | "templateConfig"
+  | "viewerTexts"
+  | "screenState"
+  | "entity"
+  | "primaryElement"
+  | "screenQuestion"
+  | "financialVisualTrace"
+  | "evidenceSourceIds"
+>;
 
 const arraysEqual = (left: readonly string[], right: readonly string[]) =>
   left.length === right.length && left.every((value, index) => value === right[index]);
@@ -50,8 +68,8 @@ const assertCausalShape = (
 };
 
 export const assertStaticTemplateSoundness = (
-  scene: Scene,
-  beat: Beat,
+  scene: StaticScene,
+  beat: StaticBeat,
   path: string,
 ) => {
   const objectIds = new Set(beat.objectIds);
