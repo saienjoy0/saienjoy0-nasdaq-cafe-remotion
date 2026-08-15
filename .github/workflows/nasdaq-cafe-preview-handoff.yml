@@ -272,9 +272,13 @@ jobs:
         run: mkdir -p .cache/spec-tts-blocks
 
       - name: Generate handoff-driven preview
+        shell: bash
         env:
           NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: ${{ steps.intake.outputs.registry_path }}
-        run: npm run episode:spec:preview -- "${{ steps.intake.outputs.spec_path }}"
+        run: |
+          set -o pipefail
+          mkdir -p "build/${EPISODE_DATE}"
+          npm run episode:spec:preview -- "${{ steps.intake.outputs.spec_path }}" 2>&1 | tee "build/${EPISODE_DATE}/preview-render.log"
 
       - name: Upload preview and technical evidence
         if: always()
@@ -286,6 +290,7 @@ jobs:
             build/${{ inputs.episode_date }}/technical_report.json
             build/${{ inputs.episode_date }}/render_data.production.json
             build/${{ inputs.episode_date }}/visual_grammar_timing_report.json
+            build/${{ inputs.episode_date }}/preview-render.log
             build/handoff/
           if-no-files-found: warn
           retention-days: 14
