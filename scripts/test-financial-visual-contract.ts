@@ -8,6 +8,7 @@ import {
   FINANCIAL_TEMPLATE_REGISTRY_VERSION,
   FINANCIAL_VISUAL_COMPATIBILITY,
   FINANCIAL_VISUAL_TEMPLATE_IDS,
+  isFinancialVisualTemplate,
 } from "../src/spec/financial-visual-contract";
 import {renderSpecSchema} from "../src/spec/render-spec";
 import {
@@ -100,6 +101,22 @@ for (const [visualTemplate, recipeId, variant] of preferredCases) {
   assert.equal(firstBeat(parsed).visualTemplate, visualTemplate);
   assert.equal(firstBeat(parsed).financialVisualTrace?.recipeId, recipeId);
 }
+
+// source-receipt is dual-use: financial lineage remains valid when explicitly
+// traced, while generic source-document evidence must not acquire fabricated
+// financial lineage merely because AI-B selected the same visual Template.
+const genericSourceReceipt = financialSpec({
+  visualTemplate: "source-receipt",
+  recipeId: "source-receipt",
+  variant: "receipt",
+});
+delete firstBeat(genericSourceReceipt).financialVisualTrace;
+delete genericSourceReceipt.financialVisualContract;
+const parsedGenericSourceReceipt = renderSpecSchema.parse(genericSourceReceipt);
+assert.equal(firstBeat(parsedGenericSourceReceipt).visualTemplate, "source-receipt");
+assert.equal(firstBeat(parsedGenericSourceReceipt).financialVisualTrace, undefined);
+assert.equal(isFinancialVisualTemplate("source-receipt"), false, "source-receipt must not force financial lineage by template name");
+assert.equal(isFinancialVisualTemplate("earnings-surprise"), true, "financial-only templates must still require financial lineage");
 
 const fallback = renderSpecSchema.parse(financialSpec({
   visualTemplate: "expected-actual-bullet",
