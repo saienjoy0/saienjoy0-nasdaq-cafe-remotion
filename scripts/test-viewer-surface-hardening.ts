@@ -4,6 +4,7 @@ import fixtureJson from "../render-specs/fixtures/complete-9scene/render_spec.js
 import {localizeStageViewerLabel} from "../src/components/spec/StageSafeArea";
 import {renderSpecSchema} from "../src/spec/render-spec";
 import {preflightStaticViewerLayout} from "../src/spec/preflight-static-viewer-layout";
+import {preflightViewerSurface} from "../src/spec/preflight-viewer-surface";
 import {planSourceReceiptLayout} from "../src/spec/template-layout/source-receipt-layout";
 import {visualCapabilityHintsSchema} from "../src/spec/visual-director-contract";
 import {candidateTemplatesForPolicy} from "../src/spec/visual-template-policy";
@@ -68,6 +69,48 @@ test("static viewer layout ignores unreachable producer inventory but not visibl
   assert.throws(
     () => preflightStaticViewerLayout(value),
     /card title limit 18/,
+  );
+});
+
+test("receipt-only cards use the specialized stacked budget while shared cards keep generic limits", () => {
+  const value = renderSpecSchema.parse(structuredClone(fixtureJson));
+  const scene = value.scenes[0];
+  const receiptBeat = scene.visualBeats[0];
+  const otherBeat = scene.visualBeats[2];
+  const card = scene.cards[0];
+
+  for (const beat of scene.visualBeats) {
+    beat.objectIds = beat.objectIds.filter((id) => id !== card.cardId);
+  }
+  receiptBeat.objectIds = [card.cardId];
+  receiptBeat.visualTemplate = "source-receipt";
+  receiptBeat.visualMode = "text-focus";
+  receiptBeat.screenState = "Data";
+  receiptBeat.primaryElement = "Nvidia AI infrastructure financing";
+  receiptBeat.screenQuestion = "AI投資は止まった？";
+  receiptBeat.viewerTexts = ["第3者資本 5000億ドル超を目指す", "実行済み投資額ではない"];
+  card.title = "Nvidia AI infrastructure financing";
+  card.lines = [
+    {label: "確認", value: "第3者資本 5000億ドル超を目指す", tone: "neutral"},
+    {label: "境界", value: "実行済み投資額ではない", tone: "neutral"},
+  ];
+
+  assert.equal(
+    planSourceReceiptLayout({
+      primaryElement: receiptBeat.primaryElement,
+      screenQuestion: receiptBeat.screenQuestion,
+      evidence: receiptBeat.viewerTexts,
+    }).mode,
+    "stacked",
+  );
+  assert.doesNotThrow(() => preflightStaticViewerLayout(value));
+  assert.doesNotThrow(() => preflightViewerSurface(value));
+
+  otherBeat.objectIds.push(card.cardId);
+  assert.throws(
+    () => preflightStaticViewerLayout(value),
+    /card title limit 18/,
+    "a card reused outside source-receipt must remain under generic card-board limits",
   );
 });
 

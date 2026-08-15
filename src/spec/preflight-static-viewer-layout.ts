@@ -45,10 +45,29 @@ const assertWrapped = (
   }
 };
 
+const sourceReceiptOnlyCardIds = (scene: RenderSpec["scenes"][number]) => {
+  const cardIds = new Set(scene.cards.map((card) => card.cardId));
+  const uses = new Map<string, Set<string>>();
+  for (const beat of scene.visualBeats) {
+    for (const objectId of beat.objectIds) {
+      if (!cardIds.has(objectId)) continue;
+      const templates = uses.get(objectId) ?? new Set<string>();
+      templates.add(beat.visualTemplate);
+      uses.set(objectId, templates);
+    }
+  }
+  return new Set(
+    [...uses.entries()]
+      .filter(([, templates]) => templates.size === 1 && templates.has("source-receipt"))
+      .map(([cardId]) => cardId),
+  );
+};
+
 export const preflightStaticViewerLayout = (spec: RenderSpec) => {
   spec.scenes.forEach((scene, sceneIndex) => {
     const base = `$.scenes[${sceneIndex}]`;
     const visibleObjectIds = viewerVisibleObjectIds(scene);
+    const receiptOnlyCardIds = sourceReceiptOnlyCardIds(scene);
     assertWrapped(
       scene.headline,
       limits.headline.perLine,
@@ -67,6 +86,11 @@ export const preflightStaticViewerLayout = (spec: RenderSpec) => {
     );
     scene.cards.forEach((card, cardIndex) => {
       if (!visibleObjectIds.has(card.cardId)) return;
+      // source-receipt has its own fail-closed responsive planner with a stacked
+      // layout budget (up to 56 visible title characters). Applying the generic
+      // 18-character card-board budget first creates a contradictory double gate.
+      // Generic budgets still apply if the same card is visible in any other Template.
+      if (receiptOnlyCardIds.has(card.cardId)) return;
       assertWrapped(
         card.title,
         limits.cardTitle.perLine,
