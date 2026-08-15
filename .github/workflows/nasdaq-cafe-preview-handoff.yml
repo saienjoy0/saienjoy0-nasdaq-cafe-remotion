@@ -28,7 +28,7 @@ on:
         required: true
         type: string
       signed_artifact_url:
-        description: "cross-repo token不在時だけ使う短寿命の署名済みH4 Artifact URL"
+        description: "cross-repo token不在時の初回取得だけに使う短寿命の署名済みH4 Artifact URL"
         required: false
         type: string
       signed_artifact_digest_sha256:
@@ -123,8 +123,15 @@ jobs:
                   raise SystemExit('signed_artifact_digest_sha256 must be SHA-256')
           PY
 
+      - name: Restore verified immutable handoff cache
+        id: handoff-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .handoff-download
+          key: nasdaq-cafe-handoff-v1-${{ inputs.expected_bundle_id }}-${{ inputs.expected_manifest_sha256 }}
+
       - name: Resolve signed Artifact transport from verified promotion request
-        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' && inputs.signed_artifact_url == '' }}
+        if: ${{ steps.handoff-cache.outputs.cache-hit != 'true' && env.PLOT_ARTIFACT_TOKEN == '' && inputs.signed_artifact_url == '' }}
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -159,6 +166,7 @@ jobs:
           echo "SIGNED_ARTIFACT_DIGEST=$DIGEST" >> "$GITHUB_ENV"
 
       - name: Require an authenticated or digest-pinned Artifact transport
+        if: ${{ steps.handoff-cache.outputs.cache-hit != 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -191,7 +199,7 @@ jobs:
           fi
 
       - name: Download immutable Plot handoff Artifact with configured token
-        if: ${{ env.PLOT_ARTIFACT_TOKEN != '' }}
+        if: ${{ steps.handoff-cache.outputs.cache-hit != 'true' && env.PLOT_ARTIFACT_TOKEN != '' }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.handoff_artifact_name }}
@@ -201,7 +209,7 @@ jobs:
           github-token: ${{ env.PLOT_ARTIFACT_TOKEN }}
 
       - name: Download digest-pinned signed Plot handoff Artifact
-        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' }}
+        if: ${{ steps.handoff-cache.outputs.cache-hit != 'true' && env.PLOT_ARTIFACT_TOKEN == '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -250,6 +258,13 @@ jobs:
           test -s "$REGISTRY_PATH"
           echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
           echo "registry_path=$REGISTRY_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Save verified immutable handoff cache
+        if: ${{ steps.handoff-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v5
+        with:
+          path: .handoff-download
+          key: nasdaq-cafe-handoff-v1-${{ inputs.expected_bundle_id }}-${{ inputs.expected_manifest_sha256 }}
 
       - name: Validate handoff-driven render spec
         env:
