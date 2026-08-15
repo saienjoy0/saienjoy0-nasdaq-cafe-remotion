@@ -18,6 +18,7 @@ const [
   renderStateSource,
   publicViewModelSource,
   layoutValidatorSource,
+  staticTemplateSoundnessSource,
   episodeSpecSource,
   approvedPlanSource,
 ] = await Promise.all([
@@ -30,6 +31,7 @@ const [
   readFile(path.join(project, "src/spec/render-state.ts"), "utf8"),
   readFile(path.join(project, "src/spec/public-view-model.ts"), "utf8"),
   readFile(path.join(project, "src/spec/validate-render-layout.ts"), "utf8"),
+  readFile(path.join(project, "src/spec/static-template-soundness.ts"), "utf8"),
   readFile(path.join(project, "render-specs/2026-07-31/render_spec.json"), "utf8"),
   readFile(approvedPlanPath, "utf8"),
 ]);
@@ -85,7 +87,16 @@ for (const component of [
 assert.match(rendererSource, /switch \(content\.visualTemplate\)/);
 assert.match(shotRecipesSource, /switch \(content\.shot!\.shotRecipe\)/);
 assert.doesNotMatch(shotRecipesSource, /componentPath|new Function|eval\(|Math\.random/);
-assert.match(layoutValidatorSource, /causal diagram supports at most four visible nodes/);
+assert.match(
+  layoutValidatorSource,
+  /assertStaticTemplateSoundness\(scene, beat, path\)/,
+  "composition layout must invoke the shared Template-static authority",
+);
+assert.match(
+  staticTemplateSoundnessSource,
+  /causal diagram supports at most four visible nodes/,
+  "shared Template-static authority must retain causal layout constraints",
+);
 assert.match(assetLayerSource, /PublicPlacedAsset/);
 let shotCount = 0;
 for (const scene of episodeSpec.scenes) {
@@ -99,5 +110,5 @@ assert.equal(
   "rendered presentation Shot count must match the approved measured Shot plan",
 );
 console.log(
-  `PASS: Visual Story v3.2 dedicated Shot presentation, ${shotCount} approved Shots, v2 no-Shot fallback, stable transition, and layout constraints`,
+  `PASS: Visual Story v3.2 dedicated Shot presentation, ${shotCount} approved Shots, v2 no-Shot fallback, stable transition, and shared layout constraints`,
 );
