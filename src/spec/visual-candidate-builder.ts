@@ -61,7 +61,11 @@ const sourcePlacementIds = (scene: Scene, beat: Beat) => {
 const screenStateFor = (template: VisualTemplateId, beat: Beat, hasMedia: boolean) => {
   if (template === "news-media") return "News" as const;
   if (template === "entity-card-full") return beat.screenState === "MainWithEntity" ? "MainWithEntity" as const : "EntityFocus" as const;
-  if (template === "source-receipt" && hasMedia) return "News" as const;
+  // source-receipt is a dual-use card receipt. Without an actual media placement it
+  // must stay on the Data surface; inheriting an authored News state would create a
+  // Renderer-invalid News Beat that has neither cleared main-media nor a return state.
+  // When cleared media is actually present, News remains the legal media-backed path.
+  if (template === "source-receipt") return hasMedia ? "News" as const : "Data" as const;
   const supported = getVisualComponentDescriptor(template).supportedScreenStates;
   return supported.includes(beat.screenState) ? beat.screenState : supported[0];
 };
