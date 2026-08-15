@@ -4,6 +4,7 @@ import type {RenderSpec} from "../src/spec/render-spec";
 import {isFinancialVisualTemplate} from "../src/spec/financial-visual-contract";
 import {preflightStaticViewerLayout} from "../src/spec/preflight-static-viewer-layout";
 import {buildVisualCandidateCatalogVNext} from "../src/spec/visual-candidate-builder";
+import {getVisualComponentDescriptor} from "../src/spec/visual-component-registry";
 import {sha256Json} from "../src/spec/visual-director-contract";
 import {makeCurrentVisualDirectorFixture} from "./test-support/current-visual-grammar-fixture";
 
@@ -57,17 +58,25 @@ test("vNext derives bilateral lane labels only from existing viewer text", () =>
   const source = makeCurrentVisualDirectorFixture();
   const found = findBeat(source, (beat) => beat.visualTemplate === "verification-checklist");
   const value = singleBeatSpec(source, found.sceneIndex, found.beat.beatId);
-  const scene = value.scenes[0];
-  const beat = scene.visualBeats[0];
-  const card = scene.cards[0];
-  assert.ok(card, "verification test requires one card");
+  const beat = value.scenes[0].visualBeats[0];
 
-  beat.objectIds = [card.cardId];
+  // This synthetic test isolates the matrix Candidate. Grammar is taken from the
+  // current Registry rather than hard-coded, and the allow-list guarantees no other
+  // Template can hide a malformed matrix by keeping the Catalog non-empty.
+  beat.objectIds = [];
+  beat.visualGrammarId = getVisualComponentDescriptor("verification-matrix").allowedGrammarIds[0];
   beat.viewerTexts = ["強める｜確認材料", "弱める｜反対材料"];
   const hints = {
-    contractVersion: "1.0.0" as const,
+    contractVersion: "1.1.0" as const,
     episodeDate: value.episode.targetDate,
-    beats: [{visualBeatId: beat.beatId, capabilities: ["verification" as const]}],
+    beats: [{
+      visualBeatId: beat.beatId,
+      capabilities: ["verification" as const],
+      templatePolicy: {
+        mode: "allow-list" as const,
+        allowedTemplateIds: ["verification-matrix" as const],
+      },
+    }],
   };
   const catalog = buildVisualCandidateCatalogVNext({
     spec: value,
@@ -82,15 +91,14 @@ test("vNext derives bilateral lane labels only from existing viewer text", () =>
 
   const malformed = structuredClone(value);
   malformed.scenes[0].visualBeats[0].viewerTexts = ["確認材料だけ"];
-  const malformedCatalog = buildVisualCandidateCatalogVNext({
-    spec: malformed,
-    sourceRenderSpecSha256: sha256Json(malformed),
-    hints: {...hints, episodeDate: malformed.episode.targetDate},
-  });
-  assert.ok(
-    !malformedCatalog.candidates.some((candidate) =>
-      candidate.visualBeatId === beat.beatId && candidate.visualTemplate === "verification-matrix"),
-    "machine must not invent lane semantics when viewer text does not expose two lanes",
+  assert.throws(
+    () => buildVisualCandidateCatalogVNext({
+      spec: malformed,
+      sourceRenderSpecSha256: sha256Json(malformed),
+      hints: {...hints, episodeDate: malformed.episode.targetDate},
+    }),
+    /Candidate Builder produced no legal candidate/,
+    "machine must fail closed instead of inventing lane semantics",
   );
 });
 
