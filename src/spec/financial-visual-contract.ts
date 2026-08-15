@@ -100,8 +100,14 @@ export const FINANCIAL_VISUAL_COMPATIBILITY = {
   },
 } as const;
 
+// `source-receipt` is intentionally dual-use. It is a valid preferred Template
+// for the financial `source-receipt` recipe when a financialVisualTrace is present,
+// but the Visual Component Registry also exposes it as a generic source-document
+// Reality Anchor. Therefore the template name alone must not force financial lineage.
+// The existing helper name is retained for compatibility with the RenderSpec gate;
+// it answers whether a Template is financial-only by construction.
 export const isFinancialVisualTemplate = (value: string): value is FinancialVisualTemplateId =>
-  (FINANCIAL_VISUAL_TEMPLATE_IDS as readonly string[]).includes(value);
+  value !== "source-receipt" && (FINANCIAL_VISUAL_TEMPLATE_IDS as readonly string[]).includes(value);
 
 export const isFinancialRecipeTemplatePairAllowed = (
   recipeId: FinancialRecipeId,
