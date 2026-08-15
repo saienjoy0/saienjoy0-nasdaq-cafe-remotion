@@ -73,4 +73,51 @@ assert.equal(
   "Candidate visualMode must be derived from the candidate Template Registry, never stale producer mode",
 );
 
+// A source receipt with no cleared media is a card/data Reality Anchor even when
+// the producer Beat arrived with a stale News screenState from the legacy financial
+// source-evidence path. Candidate generation must not create an invalid News Beat.
+const receiptSpec = cloneTestValue(makeCurrentVisualDirectorFixture());
+const receiptScene = receiptSpec.scenes[0];
+const receiptBeat = receiptScene.visualBeats[0];
+receiptBeat.visualTemplate = "source-receipt";
+receiptBeat.templateVariant = sourceReceiptDescriptor.defaultVariant;
+receiptBeat.visualMode = sourceReceiptDescriptor.visualMode;
+receiptBeat.visualGrammarId = sourceReceiptDescriptor.allowedGrammarIds[0];
+receiptBeat.screenState = "News";
+receiptBeat.returnScreenState = null;
+receiptBeat.assetPlacementIds = [];
+receiptBeat.assetState = "not-required";
+receiptBeat.objectIds = [
+  ...pick(receiptScene.cards, sourceReceiptDescriptor.inventory.cards.min, sourceReceiptDescriptor.inventory.cards.max, (item) => item.cardId),
+  ...pick(receiptScene.numbers, sourceReceiptDescriptor.inventory.numbers.min, sourceReceiptDescriptor.inventory.numbers.max, (item) => item.numberId),
+];
+receiptBeat.templateConfig = {
+  variant: sourceReceiptDescriptor.defaultVariant,
+  comparisonBasis: null,
+  dataBasis: "synthetic source receipt without media",
+  nodeOrder: [],
+  laneLabels: [],
+  outcomeNodeId: null,
+};
+const receiptIsolated = cloneTestValue(receiptSpec);
+receiptIsolated.scenes = [cloneTestValue(receiptScene)];
+receiptIsolated.scenes[0].visualBeats = [cloneTestValue(receiptBeat)];
+const receiptCatalog = buildVisualCandidateCatalogVNext({
+  spec: receiptIsolated,
+  sourceRenderSpecSha256: sha256Json(receiptIsolated),
+  hints: {
+    contractVersion: "1.0.0",
+    episodeDate: receiptIsolated.episode.targetDate,
+    beats: [{visualBeatId: receiptBeat.beatId, capabilities: ["source-document"]}],
+  },
+});
+const receiptCandidate = receiptCatalog.candidates.find((item) => item.visualTemplate === "source-receipt");
+assert.ok(receiptCandidate, "vNext must build source-receipt from source-bound evidence");
+assert.equal(receiptCandidate.assetPlacementIds.length, 0);
+assert.equal(
+  receiptCandidate.screenState,
+  "Data",
+  "source-receipt without media must normalize to Data rather than inherit an invalid News state",
+);
+
 console.log("visual candidate template-mode authority test passed");
