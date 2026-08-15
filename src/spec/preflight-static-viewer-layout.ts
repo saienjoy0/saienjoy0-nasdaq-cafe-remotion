@@ -1,4 +1,5 @@
 import type {RenderSpec} from "./render-spec";
+import {assertStaticTemplateSoundness} from "./static-template-soundness";
 import {viewerVisibleObjectIds} from "./viewer-visible-object-ids";
 
 // These are the same public-surface budgets enforced again at composition time
@@ -149,6 +150,11 @@ export const preflightStaticViewerLayout = (spec: RenderSpec) => {
         limits.sourceLabel.lines,
         `${base}.sourceLabel`,
         "source label",
+      );
+    }
+    if (spec.schemaVersion === "2.4.0") {
+      scene.visualBeats.forEach((beat, beatIndex) =>
+        assertStaticTemplateSoundness(scene, beat, `${base}.visualBeats[${beatIndex}]`),
       );
     }
   });

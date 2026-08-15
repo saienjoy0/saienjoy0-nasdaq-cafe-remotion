@@ -66,7 +66,7 @@
     "episode:spec:fixtures": "tsx scripts/generate-render-spec-fixtures.ts",
     "visual-director:build": "tsx scripts/visual-director-cli.ts build",
     "visual-director:compile": "tsx scripts/visual-director-cli.ts compile",
-    "test:visual-director": "node --import tsx scripts/test-visual-director.ts",
+    "test:visual-director": "node --import tsx scripts/test-visual-director.ts && node --import tsx scripts/test-candidate-static-soundness.ts",
     "episode:spec:golden": "tsx scripts/render-spec-golden-stills.ts",
     "episode:spec:beat-stills": "tsx scripts/render-visual-beat-stills.ts",
     "handoff:intake": "tsx scripts/handoff-intake.ts",
