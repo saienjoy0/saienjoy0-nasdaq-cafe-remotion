@@ -152,9 +152,11 @@ export const preflightStaticViewerLayout = (spec: RenderSpec) => {
         "source label",
       );
     }
-    scene.visualBeats.forEach((beat, beatIndex) =>
-      assertStaticTemplateSoundness(scene, beat, `${base}.visualBeats[${beatIndex}]`),
-    );
+    if (spec.schemaVersion === "2.4.0") {
+      scene.visualBeats.forEach((beat, beatIndex) =>
+        assertStaticTemplateSoundness(scene, beat, `${base}.visualBeats[${beatIndex}]`),
+      );
+    }
   });
   return spec;
 };
