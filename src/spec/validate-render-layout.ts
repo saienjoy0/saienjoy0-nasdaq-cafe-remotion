@@ -29,6 +29,24 @@ const assertWrapped = (value: string, perLine: number, lines: number, path: stri
   if (total > perLine * lines) throw new Error(`${path}: ${total} characters exceed ${area} capacity ${perLine * lines}`);
 };
 
+const sourceReceiptOnlyCardIds = (scene: RenderProductionData["scenes"][number]) => {
+  const cardIds = new Set(scene.cards.map((card) => card.cardId));
+  const uses = new Map<string, Set<string>>();
+  for (const beat of scene.visualBeats) {
+    for (const objectId of beat.objectIds) {
+      if (!cardIds.has(objectId)) continue;
+      const templates = uses.get(objectId) ?? new Set<string>();
+      templates.add(beat.visualTemplate);
+      uses.set(objectId, templates);
+    }
+  }
+  return new Set(
+    [...uses.entries()]
+      .filter(([, templates]) => templates.size === 1 && templates.has("source-receipt"))
+      .map(([cardId]) => cardId),
+  );
+};
+
 export type SubtitleLayoutChunk = {
   speechText: string;
   startMs: number;
@@ -95,11 +113,15 @@ export const assertSpecLayoutFits = (data: RenderProductionData) => {
   data.scenes.forEach((scene, sceneIndex) => {
     const base = `$.scenes[${sceneIndex}]`;
     const visibleObjectIds = viewerVisibleObjectIds(scene);
+    const receiptOnlyCardIds = sourceReceiptOnlyCardIds(scene);
     assertWrapped(scene.headline, limits.headline.perLine, limits.headline.lines, `${base}.headline`, "headline");
     scene.supportingTexts.forEach((text, index) => assertWrapped(text, limits.supportingText.perLine, limits.supportingText.lines, `${base}.supportingTexts[${index}]`, "supporting text"));
     scene.narrationChunks.forEach((chunk, index) => assertNarrationChunkSubtitleLayoutFits(chunk, `${base}.narrationChunks[${index}]`));
     scene.cards.forEach((card, cardIndex) => {
       if (!visibleObjectIds.has(card.cardId)) return;
+      // source-receipt is rendered by its own fail-closed responsive layout planner.
+      // Do not re-apply generic card-board budgets to receipt-only card inventory.
+      if (receiptOnlyCardIds.has(card.cardId)) return;
       assertWrapped(card.title, limits.cardTitle.perLine, limits.cardTitle.lines, `${base}.cards[${cardIndex}].title`, "card title");
       card.lines.forEach((line, lineIndex) => {
         assertWrapped(line.label, limits.cardLabel.perLine, limits.cardLabel.lines, `${base}.cards[${cardIndex}].lines[${lineIndex}].label`, "card label");
