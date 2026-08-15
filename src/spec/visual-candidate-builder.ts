@@ -1,4 +1,4 @@
-import {renderSpecSchema, type RenderSpec} from "./render-spec";
+import type {RenderSpec} from "./render-spec";
 import {isFinancialVisualTemplate} from "./financial-visual-contract";
 import {assertStaticTemplateSoundness} from "./static-template-soundness";
 import {
@@ -194,9 +194,6 @@ const buildCatalog = ({
           : templatesForNewPath(capability, hint?.templatePolicy);
         const templates = financialOwned ? [beat.visualTemplate] : discovered;
         for (const template of templates) {
-          // v1.2 keeps genuine Financial Beats under their already-selected Financial
-          // presentation authority. Generic Beats may use dual-use source-receipt, but
-          // may not acquire a financial-only Template without explicit Financial trace.
           if (financialOwned && template !== beat.visualTemplate) continue;
           if (!financialOwned && isFinancialVisualTemplate(template)) continue;
           if (!canBuild(capability, template, scene, beat)) continue;
@@ -225,13 +222,8 @@ const buildCatalog = ({
             assetState,
           };
 
-          // Candidate Local Soundness: a Candidate is catalog-eligible only if the
-          // projected Beat already satisfies the RenderSpec schema and the static
-          // Template/layout contract. AI-B must never receive a mechanically illegal
-          // option and discover that only after TTS or Chrome starts.
-          const projectedSpec = structuredClone(spec);
-          projectedSpec.scenes[sceneIndex].visualBeats[beatIndex] = projectedBeat;
-          if (!renderSpecSchema.safeParse(projectedSpec).success) continue;
+          // Candidate Local Soundness is deliberately Beat-local. Full RenderSpec,
+          // cross-Beat variety and measured timing remain later plan-level gates.
           try {
             assertStaticTemplateSoundness(
               scene,
