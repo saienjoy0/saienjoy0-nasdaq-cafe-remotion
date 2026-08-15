@@ -1,5 +1,6 @@
 import type {RenderProductionData} from "./render-spec";
 import {createSubtitleCues} from "./subtitle-cues";
+import {assertStaticTemplateLayoutForBeat} from "./validate-static-template-layout";
 import {viewerVisibleObjectIds} from "./viewer-visible-object-ids";
 
 const limits = {
@@ -144,6 +145,11 @@ export const assertSpecLayoutFits = (data: RenderProductionData) => {
 
     scene.visualBeats.forEach((beat, beatIndex) => {
       const path = `${base}.visualBeats[${beatIndex}]`;
+      // Use the same static Template contract that runs at immutable RenderSpec
+      // preflight and Candidate Catalog construction. The legacy checks below stay
+      // temporarily as defense-in-depth while the shared contract is proven in CI.
+      assertStaticTemplateLayoutForBeat({scene, beat, path});
+
       const objectIds = new Set(beat.objectIds);
       const visibleNumbers = scene.numbers.filter((number) => objectIds.has(number.numberId));
       const visibleCards = scene.cards.filter((card) => objectIds.has(card.cardId));
