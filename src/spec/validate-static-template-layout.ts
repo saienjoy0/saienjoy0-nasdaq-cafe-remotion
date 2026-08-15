@@ -1,7 +1,15 @@
 import type {RenderSpec} from "./render-spec";
 
-type Scene = RenderSpec["scenes"][number];
-type Beat = Scene["visualBeats"][number];
+type RenderScene = RenderSpec["scenes"][number];
+type RenderBeat = RenderScene["visualBeats"][number];
+type StaticScene = Pick<
+  RenderScene,
+  "sceneNumber" | "uncertainty" | "cards" | "numbers" | "nodes" | "arrows"
+>;
+type StaticBeat = Pick<
+  RenderBeat,
+  "objectIds" | "visualTemplate" | "visualMode" | "templateConfig" | "viewerTexts" | "screenState" | "entity"
+>;
 
 const assertCausalShape = (
   nodeIds: string[],
@@ -47,8 +55,8 @@ export const assertStaticTemplateLayoutForBeat = ({
   beat,
   path,
 }: {
-  scene: Scene;
-  beat: Beat;
+  scene: StaticScene;
+  beat: StaticBeat;
   path: string;
 }) => {
   const objectIds = new Set(beat.objectIds);
