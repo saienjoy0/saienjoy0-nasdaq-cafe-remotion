@@ -79,7 +79,7 @@
     "test:gemini-key-pool": "node --import tsx scripts/test-gemini-api-key-pool.ts",
     "test:duration-policy": "tsx scripts/test-duration-policy.ts",
     "test:handoff-intake": "tsx scripts/test-handoff-intake.ts",
-    "test:workflow-contract": "tsx scripts/test-workflow-contract.ts && tsx scripts/test-handoff-retry-contract.ts && tsx scripts/test-handoff-promote-contract.ts && tsx scripts/test-tts-cache-export-contract.ts && python3 scripts/test_restore_exported_tts_cache.py && PYTHONPATH=scripts python3 scripts/test_causal_motion_request.py && tsx scripts/test-handoff-intake.ts",
+    "test:workflow-contract": "tsx scripts/test-post-tts-ownership-contract.ts && tsx scripts/test-workflow-contract.ts && tsx scripts/test-handoff-retry-contract.ts && tsx scripts/test-handoff-promote-contract.ts && tsx scripts/test-tts-cache-export-contract.ts && python3 scripts/test_restore_exported_tts_cache.py && PYTHONPATH=scripts python3 scripts/test_causal_motion_request.py && tsx scripts/test-handoff-intake.ts",
     "test:visual-sequence": "tsx scripts/test-visual-sequence.ts",
     "test:visual-variety": "tsx scripts/test-visual-variety.ts",
     "test:visual-templates": "tsx scripts/test-visual-templates.ts",
