@@ -6,9 +6,6 @@ on:
       - main
     paths:
       - "final-render-requests/*.json"
-  schedule:
-    - cron: "*/10 * * * *"
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,34 +17,38 @@ concurrency:
 
 jobs:
   resolve-request:
-    name: Resolve one explicit final request
+    name: Resolve explicit lineage-bound Final request
     if: >-
       github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
-      (github.event_name == 'schedule' || github.actor == github.repository_owner)
+      github.actor == github.repository_owner
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
-      has_request: ${{ steps.resolve.outputs.has_request }}
       request_path: ${{ steps.resolve.outputs.request_path }}
       request_fingerprint: ${{ steps.resolve.outputs.request_fingerprint }}
       outcome_path: ${{ steps.resolve.outputs.outcome_path }}
+      approval_artifact_name: ${{ steps.resolve.outputs.approval_artifact_name }}
       episode_date: ${{ steps.resolve.outputs.episode_date }}
       expected_spec_sha256: ${{ steps.resolve.outputs.expected_spec_sha256 }}
+      plot_authorization_commit: ${{ steps.resolve.outputs.plot_authorization_commit }}
+      plot_authorization_path: ${{ steps.resolve.outputs.plot_authorization_path }}
+      plot_authorization_sha256: ${{ steps.resolve.outputs.plot_authorization_sha256 }}
+      preview_run_id: ${{ steps.resolve.outputs.preview_run_id }}
+      approved_preview_sha256: ${{ steps.resolve.outputs.approved_preview_sha256 }}
 
     steps:
-      - name: Checkout current main queue
+      - name: Checkout immutable request commit
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
           clean: true
 
-      - name: Resolve and validate one immutable final request
+      - name: Resolve exactly one append-only v1.1 Final request
         id: resolve
         shell: bash
         env:
-          EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
           TRIGGER_SHA: ${{ github.sha }}
         run: |
@@ -55,7 +56,6 @@ jobs:
           python3 - "$GITHUB_OUTPUT" <<'PY'
           import hashlib
           import json
-          import math
           import os
           import pathlib
           import re
@@ -64,92 +64,247 @@ jobs:
 
           root = pathlib.Path.cwd()
           output = pathlib.Path(sys.argv[1])
-          event_name = os.environ["EVENT_NAME"]
           before_sha = os.environ.get("BEFORE_SHA", "")
           trigger_sha = os.environ.get("TRIGGER_SHA", "")
+          if not before_sha or not trigger_sha:
+              raise SystemExit("push before/trigger SHAs are required")
 
-          def git_lines(*args):
-              result = subprocess.run(["git", *args], cwd=root, check=True, text=True, stdout=subprocess.PIPE)
-              return [line for line in result.stdout.splitlines() if line.strip()]
+          result = subprocess.run(
+              ["git", "diff", "--name-status", before_sha, trigger_sha, "--", "final-render-requests/*.json"],
+              cwd=root,
+              check=True,
+              text=True,
+              stdout=subprocess.PIPE,
+          )
+          changed = [line for line in result.stdout.splitlines() if line.strip()]
+          if len(changed) != 1:
+              raise SystemExit(f"push must add exactly one Final request; found {len(changed)}")
+          parts = changed[0].split("\t")
+          if len(parts) != 2 or parts[0] != "A":
+              raise SystemExit("Final requests are append-only and must be newly added files")
+          relative_path = parts[1]
+          if not re.fullmatch(r"final-render-requests/[A-Za-z0-9._-]+\.json", relative_path):
+              raise SystemExit("Final request path is invalid")
 
-          if event_name == "push":
-              if not before_sha:
-                  raise SystemExit("push before SHA is required")
-              changed = git_lines("diff", "--name-status", before_sha, trigger_sha, "--", "final-render-requests/*.json")
-              if len(changed) != 1:
-                  raise SystemExit(f"push must add exactly one final request; found {len(changed)}")
-              parts = changed[0].split("\t")
-              if len(parts) != 2 or parts[0] != "A":
-                  raise SystemExit("final requests are append-only")
-              candidates = [parts[1]]
-          else:
-              request_dir = root / "final-render-requests"
-              candidates = [path.relative_to(root).as_posix() for path in sorted(request_dir.glob("*.json"), reverse=True)] if request_dir.is_dir() else []
+          request_path = root / relative_path
+          raw = request_path.read_bytes()
+          try:
+              value = json.loads(raw.decode("utf-8"))
+          except Exception as exc:
+              raise SystemExit(f"Final request JSON is invalid: {exc}") from exc
 
-          selected = None
-          for relative_path in candidates:
-              if not re.fullmatch(r"final-render-requests/[A-Za-z0-9._-]+\.json", relative_path):
-                  continue
-              path = root / relative_path
-              raw = path.read_bytes()
-              try:
-                  value = json.loads(raw.decode("utf-8"))
-              except Exception:
-                  continue
-              required = {"requestVersion", "episodeDate", "expectedSpecSha256", "confirmation"}
-              if not isinstance(value, dict) or set(value) != required:
-                  continue
-              if value["requestVersion"] != "1.0" or value["confirmation"] != "FINAL_RENDER":
-                  continue
-              episode_date = value["episodeDate"]
-              expected_sha = value["expectedSpecSha256"]
-              if not isinstance(episode_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", episode_date):
-                  continue
-              if not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_sha):
-                  continue
-              canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
-              digest = hashlib.sha256()
-              digest.update(relative_path.encode("utf-8"))
-              digest.update(b"\0")
-              digest.update(canonical)
-              fingerprint = digest.hexdigest()
-              outcome_path = root / "final-render-state" / "outcomes" / f"{fingerprint}.json"
-              if outcome_path.exists():
-                  continue
-              spec_path = root / "render-specs" / episode_date / "render_spec.json"
-              if not spec_path.is_file():
-                  continue
-              actual_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
-              if actual_sha != expected_sha:
-                  continue
-              selected = {
-                  "request_path": relative_path,
-                  "request_fingerprint": fingerprint,
-                  "outcome_path": outcome_path.relative_to(root).as_posix(),
-                  "episode_date": episode_date,
-                  "expected_spec_sha256": actual_sha,
-              }
-              break
+          required = {
+              "requestVersion",
+              "episodeDate",
+              "expectedSpecSha256",
+              "plotAuthorizationCommit",
+              "plotAuthorizationPath",
+              "plotAuthorizationSha256",
+              "previewRunId",
+              "approvedPreviewSha256",
+              "confirmation",
+          }
+          if not isinstance(value, dict) or set(value) != required:
+              raise SystemExit(f"Final request fields mismatch: {sorted(value) if isinstance(value, dict) else type(value).__name__}")
+          if value["requestVersion"] != "1.1":
+              raise SystemExit("Final requestVersion must be 1.1")
+          if value["confirmation"] != "FINAL_RENDER":
+              raise SystemExit("Final confirmation must be FINAL_RENDER")
 
-          values = {"has_request": "true", **selected} if selected else {"has_request": "false"}
+          date = value["episodeDate"]
+          spec_sha = value["expectedSpecSha256"]
+          plot_commit = value["plotAuthorizationCommit"]
+          plot_path = value["plotAuthorizationPath"]
+          plot_sha = value["plotAuthorizationSha256"]
+          preview_run_id = str(value["previewRunId"])
+          preview_sha = value["approvedPreviewSha256"]
+          if not isinstance(date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+              raise SystemExit("episodeDate must be YYYY-MM-DD")
+          for label, item in (
+              ("expectedSpecSha256", spec_sha),
+              ("plotAuthorizationSha256", plot_sha),
+              ("approvedPreviewSha256", preview_sha),
+          ):
+              if not isinstance(item, str) or not re.fullmatch(r"[0-9a-f]{64}", item):
+                  raise SystemExit(f"{label} must be lowercase SHA-256")
+          if not isinstance(plot_commit, str) or not re.fullmatch(r"[0-9a-f]{40}", plot_commit):
+              raise SystemExit("plotAuthorizationCommit must be 40 lowercase hex characters")
+          expected_plot_path = f"verification/{date}/final_render_authorization.json"
+          if plot_path != expected_plot_path:
+              raise SystemExit(f"plotAuthorizationPath must be {expected_plot_path}")
+          if not re.fullmatch(r"[0-9]+", preview_run_id):
+              raise SystemExit("previewRunId must be numeric")
+
+          spec_path = root / "render-specs" / date / "render_spec.json"
+          if not spec_path.is_file():
+              raise SystemExit(f"render_spec is missing for {date}")
+          actual_spec_sha = hashlib.sha256(spec_path.read_bytes()).hexdigest()
+          if actual_spec_sha != spec_sha:
+              raise SystemExit(f"render_spec SHA mismatch expected={spec_sha} actual={actual_spec_sha}")
+
+          canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+          digest = hashlib.sha256()
+          digest.update(relative_path.encode("utf-8"))
+          digest.update(b"\0")
+          digest.update(canonical)
+          fingerprint = digest.hexdigest()
+          outcome_path = root / "final-render-state" / "outcomes" / f"{fingerprint}.json"
+          if outcome_path.exists():
+              raise SystemExit("Final request already has a terminal outcome")
+
+          values = {
+              "request_path": relative_path,
+              "request_fingerprint": fingerprint,
+              "outcome_path": outcome_path.relative_to(root).as_posix(),
+              "approval_artifact_name": f"nasdaq-cafe-final-approval-{fingerprint}",
+              "episode_date": date,
+              "expected_spec_sha256": spec_sha,
+              "plot_authorization_commit": plot_commit,
+              "plot_authorization_path": plot_path,
+              "plot_authorization_sha256": plot_sha,
+              "preview_run_id": preview_run_id,
+              "approved_preview_sha256": preview_sha,
+          }
           with output.open("a", encoding="utf-8") as handle:
-              for key, value in values.items():
-                  handle.write(f"{key}={value}\n")
+              for key, item in values.items():
+                  handle.write(f"{key}={item}\n")
           PY
 
-      - name: Summarize request decision
+      - name: Summarize immutable Final request
         shell: bash
         run: |
-          if [[ "${{ steps.resolve.outputs.has_request }}" == "true" ]]; then
-            echo "Final request accepted: ${{ steps.resolve.outputs.request_path }}"
-          else
-            echo "No pending final request"
-          fi
+          echo "Final request: ${{ steps.resolve.outputs.request_path }}"
+          echo "Episode: ${{ steps.resolve.outputs.episode_date }}"
+          echo "Approved Preview run: ${{ steps.resolve.outputs.preview_run_id }}"
+
+  validate-lineage:
+    name: Validate approved Preview lineage
+    needs: resolve-request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout immutable request commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download exact approved Preview Artifact
+        uses: actions/download-artifact@v6
+        with:
+          pattern: nasdaq-cafe*preview*${{ needs.resolve-request.outputs.episode_date }}-${{ needs.resolve-request.outputs.preview_run_id }}
+          path: .final-lineage/preview-download
+          merge-multiple: true
+          repository: ${{ github.repository }}
+          run-id: ${{ needs.resolve-request.outputs.preview_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Resolve exact Preview evidence bytes
+        id: preview
+        shell: bash
+        env:
+          EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+          APPROVED_PREVIEW_SHA256: ${{ needs.resolve-request.outputs.approved_preview_sha256 }}
+        run: |
+          set -euo pipefail
+          mapfile -t MP4S < <(find .final-lineage/preview-download -type f -name '*.mp4' -print)
+          mapfile -t REPORTS < <(find .final-lineage/preview-download -type f -name 'technical_report.json' -print)
+          [[ "${#MP4S[@]}" -eq 1 ]] || { echo "::error::expected exactly one Preview MP4; found ${#MP4S[@]}"; exit 1; }
+          [[ "${#REPORTS[@]}" -eq 1 ]] || { echo "::error::expected exactly one Preview technical_report.json; found ${#REPORTS[@]}"; exit 1; }
+          mkdir -p .final-lineage/evidence
+          cp "${MP4S[0]}" .final-lineage/evidence/approved-preview.mp4
+          cp "${REPORTS[0]}" .final-lineage/evidence/technical_report.json
+          ACTUAL="$(sha256sum .final-lineage/evidence/approved-preview.mp4 | awk '{print $1}')"
+          [[ "$ACTUAL" == "$APPROVED_PREVIEW_SHA256" ]] || {
+            echo "::error::approved Preview SHA mismatch expected=$APPROVED_PREVIEW_SHA256 actual=$ACTUAL"
+            exit 1
+          }
+
+      - name: Fetch immutable Plot authorization evidence
+        shell: bash
+        env:
+          EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+          PLOT_COMMIT: ${{ needs.resolve-request.outputs.plot_authorization_commit }}
+          PLOT_AUTH_PATH: ${{ needs.resolve-request.outputs.plot_authorization_path }}
+          PLOT_AUTH_SHA256: ${{ needs.resolve-request.outputs.plot_authorization_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p .final-lineage/plot
+          BASE="https://raw.githubusercontent.com/saienjoy0/nasdaq-plot-creator-/${PLOT_COMMIT}"
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors \
+            "${BASE}/${PLOT_AUTH_PATH}" \
+            --output .final-lineage/plot/final_render_authorization.json
+          ACTUAL_AUTH="$(sha256sum .final-lineage/plot/final_render_authorization.json | awk '{print $1}')"
+          [[ "$ACTUAL_AUTH" == "$PLOT_AUTH_SHA256" ]] || {
+            echo "::error::Plot authorization SHA mismatch expected=$PLOT_AUTH_SHA256 actual=$ACTUAL_AUTH"
+            exit 1
+          }
+          REVIEW_PATH="verification/${EPISODE_DATE}/human_preview_review.json"
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors \
+            "${BASE}/${REVIEW_PATH}" \
+            --output .final-lineage/plot/human_preview_review.json
+
+      - name: Require exact approved Preview lineage
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ needs.resolve-request.outputs.request_path }}
+          EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
+          PLOT_COMMIT: ${{ needs.resolve-request.outputs.plot_authorization_commit }}
+        run: |
+          set -euo pipefail
+          python3 scripts/validate-final-approval-lineage.py \
+            --request "$REQUEST_PATH" \
+            --authorization .final-lineage/plot/final_render_authorization.json \
+            --human-review .final-lineage/plot/human_preview_review.json \
+            --preview-mp4 .final-lineage/evidence/approved-preview.mp4 \
+            --technical-report .final-lineage/evidence/technical_report.json \
+            --render-spec "render-specs/${EPISODE_DATE}/render_spec.json" \
+            --output .final-lineage/final_approval_lineage.json
+          python3 scripts/create-final-approval-sidecar.py \
+            --plot-authorization .final-lineage/plot/final_render_authorization.json \
+            --plot-commit "$PLOT_COMMIT" \
+            --output "final-render-authorizations/${EPISODE_DATE}.json"
+          python3 - "$REQUEST_PATH" "final-render-authorizations/${EPISODE_DATE}.json" .final-lineage/final_approval_lineage.json <<'PY'
+          import json, pathlib, sys
+          request=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+          sidecar=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8'))
+          report=json.loads(pathlib.Path(sys.argv[3]).read_text(encoding='utf-8'))
+          if report.get('status') != 'PASS': raise SystemExit('Final lineage report must PASS')
+          pairs={
+              'episodeDate':'episodeDate',
+              'expectedSpecSha256':'expectedSpecSha256',
+              'previewRunId':'previewRunId',
+              'approvedPreviewSha256':'approvedPreviewSha256',
+              'plotAuthorizationCommit':'plotAuthorizationCommit',
+              'plotAuthorizationPath':'plotAuthorizationPath',
+              'plotAuthorizationSha256':'plotAuthorizationSha256',
+          }
+          for request_key, sidecar_key in pairs.items():
+              if str(request[request_key]) != str(sidecar[sidecar_key]):
+                  raise SystemExit(f'Final sidecar/request mismatch: {request_key}')
+          PY
+
+      - name: Upload validated Final approval evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ needs.resolve-request.outputs.approval_artifact_name }}
+          path: |
+            final-render-authorizations/${{ needs.resolve-request.outputs.episode_date }}.json
+            .final-lineage/final_approval_lineage.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
 
   wake-codespace:
     name: Wake the registered Codespace runner
-    needs: resolve-request
-    if: needs.resolve-request.outputs.has_request == 'true'
+    needs: [resolve-request, validate-lineage]
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     outputs:
@@ -219,20 +374,20 @@ jobs:
           PY
 
   render-final:
-    name: Execute explicit final render
-    needs: [resolve-request, wake-codespace]
-    if: needs.resolve-request.outputs.has_request == 'true'
+    name: Execute lineage-approved Final render
+    needs: [resolve-request, validate-lineage, wake-codespace]
     uses: ./.github/workflows/nasdaq-cafe-final.yml
     with:
       episode_date: ${{ needs.resolve-request.outputs.episode_date }}
       expected_spec_sha256: ${{ needs.resolve-request.outputs.expected_spec_sha256 }}
+      approval_artifact_name: ${{ needs.resolve-request.outputs.approval_artifact_name }}
       confirmation: FINAL
     secrets: inherit
 
   persist-outcome:
-    name: Persist terminal final outcome
-    needs: [resolve-request, wake-codespace, render-final]
-    if: always() && needs.resolve-request.outputs.has_request == 'true'
+    name: Persist terminal Final outcome
+    needs: [resolve-request, validate-lineage, wake-codespace, render-final]
+    if: always() && needs.resolve-request.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -255,6 +410,7 @@ jobs:
           OUTCOME_PATH: ${{ needs.resolve-request.outputs.outcome_path }}
           EPISODE_DATE: ${{ needs.resolve-request.outputs.episode_date }}
           SPEC_SHA: ${{ needs.resolve-request.outputs.expected_spec_sha256 }}
+          LINEAGE_RESULT: ${{ needs.validate-lineage.result }}
           WAKE_RESULT: ${{ needs.wake-codespace.result }}
           FINAL_RESULT: ${{ needs.render-final.result }}
         run: |
@@ -265,17 +421,29 @@ jobs:
           import os
           from datetime import datetime, timezone
 
-          status = "succeeded" if os.environ["FINAL_RESULT"] == "success" else "failed"
+          lineage = os.environ["LINEAGE_RESULT"]
+          wake = os.environ["WAKE_RESULT"]
+          final = os.environ["FINAL_RESULT"]
+          status = "succeeded" if final == "success" else "failed"
+          if status == "succeeded":
+              stage = "complete"
+          elif lineage != "success":
+              stage = "approval-lineage"
+          elif wake != "success":
+              stage = "wake-codespace"
+          else:
+              stage = "render-final"
           value = {
-              "outcomeVersion": "1.0",
+              "outcomeVersion": "1.1",
               "status": status,
-              "stage": "complete" if status == "succeeded" else "render-final",
+              "stage": stage,
               "requestPath": os.environ["REQUEST_PATH"],
               "requestFingerprint": os.environ["REQUEST_FINGERPRINT"],
               "episodeDate": os.environ["EPISODE_DATE"],
               "expectedSpecSha256": os.environ["SPEC_SHA"],
-              "wakeResult": os.environ["WAKE_RESULT"],
-              "finalResult": os.environ["FINAL_RESULT"],
+              "lineageResult": lineage,
+              "wakeResult": wake,
+              "finalResult": final,
               "workflow": "Nasdaq Cafe Final Request",
               "runId": os.environ["GITHUB_RUN_ID"],
               "recordedAt": datetime.now(timezone.utc).isoformat(),
@@ -287,5 +455,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- "$OUTCOME_PATH"
-          git commit -m "Record final render outcome ${REQUEST_FINGERPRINT}"
+          git commit -m "Record Final render outcome ${REQUEST_FINGERPRINT}"
           git push origin HEAD:main
