@@ -138,6 +138,9 @@ const bridgeWarning = bridgeReport.warnings.find(
   (warning) => warning.code === "VG_BRIDGE_TEXT_OVERUSED",
 );
 assert.ok(bridgeWarning);
+if (bridgeWarning.code !== "VG_BRIDGE_TEXT_OVERUSED") {
+  throw new Error("bridge-text quality warning not found");
+}
 assert.equal(bridgeWarning.unit, "ratio");
 assert.equal(bridgeWarning.actual, 0.125);
 assert.equal(bridgeWarning.limit, 0.12);
