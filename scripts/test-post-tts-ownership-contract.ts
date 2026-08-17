@@ -20,12 +20,13 @@ const forbiddenWorkflowNames = new Set([
   "nasdaq-cafe-post-tts-repair-observer.yml",
   "nasdaq-cafe-scene5-tailwind-repair-observer.yml",
   "nasdaq-cafe-tailwind-lanes-observer.yml",
+  "nasdaq-cafe-layout-text-repair.yml",
 ]);
 
 for (const file of forbiddenWorkflowNames) {
   assert(
     !workflowFiles.includes(file),
-    `Renderer must not own semantic Post-TTS repair workflow: ${file}`,
+    `Renderer must not own semantic repair workflow: ${file}`,
   );
 }
 
@@ -34,6 +35,8 @@ const forbiddenSemanticExecutors = [
   "apply-post-tts-event-copies.py",
   "apply-post-tts-object-id-overrides.py",
   "post-tts-visual-patch",
+  "PATCH_DISPLAY_TEXT_ONLY",
+  "layout-text-repair-requests/",
 ];
 
 for (const file of workflowFiles) {
@@ -41,7 +44,7 @@ for (const file of workflowFiles) {
   for (const marker of forbiddenSemanticExecutors) {
     assert(
       !text.includes(marker),
-      `${file}: Renderer workflow may measure/report Post-TTS state but may not execute semantic repair via ${marker}`,
+      `${file}: Renderer workflow may measure/report or adjust mechanical layout/timing, but may not execute authored semantic text repair via ${marker}`,
     );
   }
 }
@@ -60,5 +63,5 @@ assert(
 );
 
 console.log(
-  "PASS: Renderer Post-TTS ownership is measurement/timing-only; semantic visual repair entrypoints are absent",
+  "PASS: Renderer production workflows are measurement/layout/timing-only; authored semantic repair entrypoints are absent",
 );

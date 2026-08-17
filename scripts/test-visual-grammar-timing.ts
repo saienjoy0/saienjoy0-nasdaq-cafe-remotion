@@ -61,6 +61,9 @@ const evaluate = (
   beats,
 });
 
+const warningCodes = (report: ReturnType<typeof evaluate>) =>
+  new Set(report.warnings.map((warning) => warning.code));
+
 const valid = evaluate(validBeats());
 assert.equal(valid.contractVersion, "1.1.0");
 assert.equal(valid.status, "PASS");
@@ -71,7 +74,8 @@ assert.equal(valid.unresolvedStateCount, 0);
 assert.equal(valid.metrics.nonAnalysisDurationMs, 14000);
 assert.equal(valid.staticState.mode, "report-only");
 assert.equal(valid.staticState.failureCandidateCount, 0);
-console.log("PASS: standard measured timing report passes with report-only Static State 1.1.0");
+assert.deepEqual(valid.failures, []);
+console.log("PASS: standard measured timing report passes with report-only quality findings");
 
 const longRunBeats = validBeats();
 for (let index = 0; index < 5; index += 1) {
@@ -82,17 +86,20 @@ for (let index = 0; index < 5; index += 1) {
   };
 }
 const longRun = evaluate(longRunBeats);
-assert.equal(longRun.status, "FAIL");
-assert.ok(longRun.failures.some((failure) => failure.code === "VG_SAME_APPEARANCE_RUN_TOO_LONG"));
-console.log("PASS: same Appearance run over 28 seconds is rejected");
+assert.equal(longRun.status, "PASS");
+assert.deepEqual(longRun.failures, []);
+assert.ok(warningCodes(longRun).has("VG_SAME_APPEARANCE_RUN_TOO_LONG"));
+console.log("PASS: same Appearance run over 28 seconds is advisory");
 
 const surfaceHeavy = validBeats().map((item, index) => ({
   ...item,
   dominantSurface: index < 5 ? "plot" as const : item.dominantSurface,
 }));
 const surfaceReport = evaluate(surfaceHeavy);
-assert.ok(surfaceReport.failures.some((failure) => failure.code === "VG_DOMINANT_SURFACE_OVERWEIGHT"));
-console.log("PASS: Dominant Surface occupancy over 45 percent is rejected");
+assert.equal(surfaceReport.status, "PASS");
+assert.deepEqual(surfaceReport.failures, []);
+assert.ok(warningCodes(surfaceReport).has("VG_DOMINANT_SURFACE_OVERWEIGHT"));
+console.log("PASS: Dominant Surface occupancy over 45 percent is advisory");
 
 const cardHeavy = validBeats().map((item, index) => ({
   ...item,
@@ -100,8 +107,10 @@ const cardHeavy = validBeats().map((item, index) => ({
   dominantSurface: index < 5 ? "card-board" as const : item.dominantSurface,
 }));
 const cardReport = evaluate(cardHeavy);
-assert.ok(cardReport.failures.some((failure) => failure.code === "VG_CARD_BOARD_OVERWEIGHT"));
-console.log("PASS: card-board occupancy over 55 percent is rejected");
+assert.equal(cardReport.status, "PASS");
+assert.deepEqual(cardReport.failures, []);
+assert.ok(warningCodes(cardReport).has("VG_CARD_BOARD_OVERWEIGHT"));
+console.log("PASS: card-board occupancy over 55 percent is advisory");
 
 const noNonAnalysis = validBeats().map((item) =>
   ["entity-canvas", "document-media", "picturebook-canvas"].includes(item.appearanceClass)
@@ -109,8 +118,10 @@ const noNonAnalysis = validBeats().map((item) =>
     : item,
 );
 const noNonAnalysisReport = evaluate(noNonAnalysis);
-assert.ok(noNonAnalysisReport.failures.some((failure) => failure.code === "VG_NON_ANALYSIS_DURATION_TOO_LOW"));
-console.log("PASS: insufficient non-analysis duration is rejected");
+assert.equal(noNonAnalysisReport.status, "PASS");
+assert.deepEqual(noNonAnalysisReport.failures, []);
+assert.ok(warningCodes(noNonAnalysisReport).has("VG_NON_ANALYSIS_DURATION_TOO_LOW"));
+console.log("PASS: insufficient non-analysis duration is advisory");
 
 const bridgeHeavy = validBeats();
 bridgeHeavy[6] = {
@@ -120,24 +131,43 @@ bridgeHeavy[6] = {
   dominantSurface: "text",
 };
 const bridgeReport = evaluate(bridgeHeavy);
-assert.ok(bridgeReport.failures.some((failure) => failure.code === "VG_BRIDGE_TEXT_OVERUSED"));
-console.log("PASS: bridge-text over 12 percent is rejected");
+assert.equal(bridgeReport.status, "PASS");
+assert.deepEqual(bridgeReport.failures, []);
+assert.ok(warningCodes(bridgeReport).has("VG_BRIDGE_TEXT_OVERUSED"));
+const bridgeWarning = bridgeReport.warnings.find(
+  (warning) => warning.code === "VG_BRIDGE_TEXT_OVERUSED",
+);
+assert.ok(bridgeWarning);
+if (bridgeWarning.code !== "VG_BRIDGE_TEXT_OVERUSED") {
+  throw new Error("bridge-text quality warning not found");
+}
+assert.equal(bridgeWarning.unit, "ratio");
+assert.equal(bridgeWarning.actual, 0.125);
+assert.equal(bridgeWarning.limit, 0.12);
+console.log("PASS: bridge-text ratio warning reports ratio actual/limit consistently");
 
 const shortMajorShift = validBeats();
 shortMajorShift[2] = {...shortMajorShift[2], durationMs: 3000, endMs: 3000};
 const shortMajorShiftReport = evaluate(shortMajorShift);
-assert.ok(shortMajorShiftReport.failures.some((failure) => failure.code === "VG_MAJOR_SHIFT_HOLD_TOO_SHORT"));
-console.log("PASS: major shift Stage under four seconds is rejected");
+assert.equal(shortMajorShiftReport.status, "PASS");
+assert.deepEqual(shortMajorShiftReport.failures, []);
+assert.ok(warningCodes(shortMajorShiftReport).has("VG_MAJOR_SHIFT_HOLD_TOO_SHORT"));
+console.log("PASS: major shift Stage under four seconds is advisory");
 
 const shortenedBeats = validBeats();
 shortenedBeats[1] = {...shortenedBeats[1], durationMs: 4000, endMs: 4000};
 shortenedBeats[2] = {...shortenedBeats[2], durationMs: 4000, endMs: 4000};
 const shortened = evaluate(shortenedBeats, "shortened");
 assert.equal(shortened.thresholds.nonAnalysisMinMs, 8000);
-assert.equal(shortened.failures.some((failure) => failure.code === "VG_NON_ANALYSIS_DURATION_TOO_LOW"), false);
-console.log("PASS: shortened episode uses the eight-second non-analysis threshold");
+assert.equal(warningCodes(shortened).has("VG_NON_ANALYSIS_DURATION_TOO_LOW"), false);
+console.log("PASS: shortened episode uses the eight-second non-analysis advisory threshold");
 
-assert.ok(valid.warnings.every((warning) => warning.recommendedMinMs === 5000 && warning.recommendedMaxMs === 8000));
+const beatRangeWarnings = valid.warnings.filter(
+  (warning) => warning.code === "VG_NON_ANALYSIS_BEAT_OUTSIDE_RECOMMENDED_RANGE",
+);
+assert.ok(beatRangeWarnings.every(
+  (warning) => warning.recommendedMinMs === 5000 && warning.recommendedMaxMs === 8000,
+));
 console.log("PASS: non-analysis five-to-eight-second guidance remains advisory");
 
 const staticData = {
