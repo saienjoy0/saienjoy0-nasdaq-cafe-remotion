@@ -436,16 +436,17 @@ export const evaluateVisualGrammarTiming = (input: {
     bridgeTextDurationMs > thresholds.bridgeTextMaxMs ||
     bridgeTextRatio > thresholds.bridgeTextMaxRatio
   ) {
+    const bridgeTextAbsoluteExceeded = bridgeTextDurationMs > thresholds.bridgeTextMaxMs;
     warnings.push({
       code: "VG_BRIDGE_TEXT_OVERUSED",
       path: "$.metrics.bridgeTextDurationMs",
       beatId: null,
       message: "bridge-text exceeds the editorial absolute or proportional target",
-      actual: Math.max(bridgeTextDurationMs, bridgeTextRatio),
-      limit: bridgeTextDurationMs > thresholds.bridgeTextMaxMs
+      actual: bridgeTextAbsoluteExceeded ? bridgeTextDurationMs : bridgeTextRatio,
+      limit: bridgeTextAbsoluteExceeded
         ? thresholds.bridgeTextMaxMs
         : thresholds.bridgeTextMaxRatio,
-      unit: bridgeTextDurationMs > thresholds.bridgeTextMaxMs ? "ms" : "ratio",
+      unit: bridgeTextAbsoluteExceeded ? "ms" : "ratio",
     });
   }
 
