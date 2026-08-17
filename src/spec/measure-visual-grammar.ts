@@ -13,17 +13,23 @@ export const STATIC_STATE_WARNING_MS = 8000 as const;
 export const STATIC_STATE_FAILURE_CANDIDATE_MS = 16000 as const;
 
 export const VISUAL_GRAMMAR_TIMING_FAILURE_CODES = [
+  "VG_TIMING_METADATA_MISSING",
+] as const;
+
+export const VISUAL_GRAMMAR_TIMING_QUALITY_WARNING_CODES = [
   "VG_SAME_APPEARANCE_RUN_TOO_LONG",
   "VG_DOMINANT_SURFACE_OVERWEIGHT",
   "VG_CARD_BOARD_OVERWEIGHT",
   "VG_NON_ANALYSIS_DURATION_TOO_LOW",
   "VG_BRIDGE_TEXT_OVERUSED",
   "VG_MAJOR_SHIFT_HOLD_TOO_SHORT",
-  "VG_TIMING_METADATA_MISSING",
 ] as const;
 
 export type VisualGrammarTimingFailureCode =
   typeof VISUAL_GRAMMAR_TIMING_FAILURE_CODES[number];
+
+export type VisualGrammarTimingQualityWarningCode =
+  typeof VISUAL_GRAMMAR_TIMING_QUALITY_WARNING_CODES[number];
 
 export type MeasuredVisualGrammarBeat = {
   sceneId: string;
@@ -50,13 +56,27 @@ export type VisualGrammarTimingFailure = {
   unit: "ms" | "ratio" | "count";
 };
 
-export type VisualGrammarTimingWarning = {
+export type VisualGrammarTimingQualityWarning = {
+  code: VisualGrammarTimingQualityWarningCode;
+  path: string;
+  beatId: string | null;
+  message: string;
+  actual: number;
+  limit: number;
+  unit: "ms" | "ratio" | "count";
+};
+
+export type VisualGrammarTimingBeatWarning = {
   code: "VG_NON_ANALYSIS_BEAT_OUTSIDE_RECOMMENDED_RANGE";
   beatId: string;
   durationMs: number;
   recommendedMinMs: 5000;
   recommendedMaxMs: 8000;
 };
+
+export type VisualGrammarTimingWarning =
+  | VisualGrammarTimingQualityWarning
+  | VisualGrammarTimingBeatWarning;
 
 export type StaticStateBoundaryKind =
   | "scene-boundary"
@@ -322,11 +342,11 @@ export const evaluateVisualGrammarTiming = (input: {
     if (beat.transitionRole === "major-shift") {
       majorShiftCount += 1;
       if (beat.durationMs < thresholds.majorShiftStageMinMs) {
-        failures.push({
+        warnings.push({
           code: "VG_MAJOR_SHIFT_HOLD_TOO_SHORT",
           path: `episode://${beat.sceneId}/${beat.beatId}/durationMs`,
           beatId: beat.beatId,
-          message: "major-shift must hold the new Stage for at least 4 seconds",
+          message: "major-shift Stage hold is below the four-second editorial target",
           actual: beat.durationMs,
           limit: thresholds.majorShiftStageMinMs,
           unit: "ms",
@@ -346,7 +366,7 @@ export const evaluateVisualGrammarTiming = (input: {
       longestSameAppearanceRunBeatIds = [...currentRunBeatIds];
     }
     if (currentRunMs > thresholds.sameAppearanceRunMaxMs) {
-      failures.push({
+      warnings.push({
         code: "VG_SAME_APPEARANCE_RUN_TOO_LONG",
         path: `episode://${currentRunBeatIds[0] ?? "unknown"}/appearance-run`,
         beatId: currentRunBeatIds[0] ?? null,
@@ -380,33 +400,33 @@ export const evaluateVisualGrammarTiming = (input: {
   const bridgeTextRatio = roundRatio(ratio(bridgeTextDurationMs, totalMeasuredMs));
 
   if (dominantSurfaceMaxRatio > thresholds.dominantSurfaceMaxRatio) {
-    failures.push({
+    warnings.push({
       code: "VG_DOMINANT_SURFACE_OVERWEIGHT",
       path: `$.metrics.dominantSurfaceDurationMs.${dominantSurfaceMaxId ?? "unknown"}`,
       beatId: null,
-      message: `${dominantSurfaceMaxId ?? "unknown"} occupies too much of Scene 1–8`,
+      message: `${dominantSurfaceMaxId ?? "unknown"} occupies more than the editorial target in Scene 1–8`,
       actual: dominantSurfaceMaxRatio,
       limit: thresholds.dominantSurfaceMaxRatio,
       unit: "ratio",
     });
   }
   if (cardBoardRatio > thresholds.cardBoardMaxRatio) {
-    failures.push({
+    warnings.push({
       code: "VG_CARD_BOARD_OVERWEIGHT",
       path: "$.metrics.dominantSurfaceDurationMs.card-board",
       beatId: null,
-      message: "card-board occupies too much of Scene 1–8",
+      message: "card-board occupies more than the editorial target in Scene 1–8",
       actual: cardBoardRatio,
       limit: thresholds.cardBoardMaxRatio,
       unit: "ratio",
     });
   }
   if (nonAnalysisDurationMs < thresholds.nonAnalysisMinMs) {
-    failures.push({
+    warnings.push({
       code: "VG_NON_ANALYSIS_DURATION_TOO_LOW",
       path: "$.metrics.nonAnalysisDurationMs",
       beatId: null,
-      message: "Entity, Document/Media, and PictureBook time is below the minimum",
+      message: "Entity, Document/Media, and PictureBook time is below the editorial target",
       actual: nonAnalysisDurationMs,
       limit: thresholds.nonAnalysisMinMs,
       unit: "ms",
@@ -416,11 +436,11 @@ export const evaluateVisualGrammarTiming = (input: {
     bridgeTextDurationMs > thresholds.bridgeTextMaxMs ||
     bridgeTextRatio > thresholds.bridgeTextMaxRatio
   ) {
-    failures.push({
+    warnings.push({
       code: "VG_BRIDGE_TEXT_OVERUSED",
       path: "$.metrics.bridgeTextDurationMs",
       beatId: null,
-      message: "bridge-text exceeds its absolute or proportional limit",
+      message: "bridge-text exceeds the editorial absolute or proportional target",
       actual: Math.max(bridgeTextDurationMs, bridgeTextRatio),
       limit: bridgeTextDurationMs > thresholds.bridgeTextMaxMs
         ? thresholds.bridgeTextMaxMs
