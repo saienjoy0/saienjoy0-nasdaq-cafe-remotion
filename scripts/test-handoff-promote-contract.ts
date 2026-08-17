@@ -57,23 +57,6 @@ assert(
   "preview inspection must validate the render spec with the promoted runtime asset registry",
 );
 
-const layoutRepairWorkflow = await readFile(
-  path.join(
-    PROJECT_DIR,
-    ".github",
-    "workflows",
-    "nasdaq-cafe-layout-text-repair.yml",
-  ),
-  "utf8",
+console.log(
+  "PASS: handoff promotion and preview inspection preserve runtime asset validation without any authored-text repair workflow",
 );
-assert(
-  layoutRepairWorkflow.includes(
-    "NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY: runtime-assets/${{ steps.repair.outputs.episode_date }}/runtime_asset_registry.json",
-  ) &&
-    layoutRepairWorkflow.includes(
-      "EPISODE_ID: ${{ steps.repair.outputs.episode_date }}",
-    ),
-  "layout text repair must validate and recreate ready with promoted runtime assets",
-);
-
-console.log("PASS: handoff promotion, preview inspection, and display-only repair preserve runtime asset validation");
