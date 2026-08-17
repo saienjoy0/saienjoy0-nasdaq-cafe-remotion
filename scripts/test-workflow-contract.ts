@@ -26,6 +26,8 @@ const scheduledName = "nasdaq-cafe-scheduled-preview.yml";
 const statusName = "nasdaq-cafe-preview-status.yml";
 const motionPreviewName = "nasdaq-cafe-motion-preview.yml";
 const motionRequestName = "nasdaq-cafe-motion-preview-request.yml";
+const finalName = "nasdaq-cafe-final.yml";
+const finalRequestName = "nasdaq-cafe-final-request.yml";
 const shotPlanName = "nasdaq-cafe-shot-plan-apply.yml";
 for (const required of [
   previewName,
@@ -34,6 +36,8 @@ for (const required of [
   statusName,
   motionPreviewName,
   motionRequestName,
+  finalName,
+  finalRequestName,
   shotPlanName,
 ]) {
   assert(contents.has(required), `required workflow is missing: ${required}`);
@@ -76,9 +80,11 @@ for (const [file, text] of contents) {
   }
 
   if (text.includes("episode:spec:final")) {
-    assert(hasEvent(text, "workflow_dispatch"), `${file}: final must be manual-only`);
+    assert.equal(file, finalName, `only ${finalName} may render Final: ${file}`);
+    assert(hasEvent(text, "workflow_call"), `${file}: Final renderer must be reusable-only`);
+    assert(!hasEvent(text, "workflow_dispatch"), `${file}: direct Final dispatch is forbidden`);
     for (const event of automaticEvents) {
-      assert(!hasEvent(text, event), `${file}: final cannot use automatic event ${event}`);
+      assert(!hasEvent(text, event), `${file}: Final renderer cannot own automatic event ${event}`);
     }
   }
 }
@@ -140,6 +146,59 @@ assert(hasEvent(status, "workflow_run"));
 assert(!status.includes("episode:spec:preview"));
 assert(!status.includes("GEMINI_API_KEY_"));
 console.log("PASS: status workflow is read-only with respect to production rendering");
+
+const final = contents.get(finalName)!;
+assert(hasEvent(final, "workflow_call"));
+assert(!hasEvent(final, "workflow_dispatch"));
+for (const event of automaticEvents) {
+  assert(!hasEvent(final, event), `${finalName}: unexpected automatic event ${event}`);
+}
+assert(
+  final.includes("github.workflow == 'Nasdaq Cafe Final Request'") &&
+    final.includes("github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'"),
+  `${finalName}: only the canonical Final Request caller may invoke Final`,
+);
+assert(
+  final.includes("Restore validated Final approval sidecar") &&
+    final.includes(".final-lineage/final_approval_lineage.json") &&
+    final.includes("final-render-authorizations/${EPISODE_DATE}.json"),
+  `${finalName}: validated lineage receipt and sidecar are mandatory`,
+);
+assert(final.includes("episode:spec:final"));
+console.log("PASS: Final renderer is reusable-only and lineage-receipt-gated");
+
+const finalRequest = contents.get(finalRequestName)!;
+assert(hasEvent(finalRequest, "push"));
+for (const event of ["pull_request", "issues", "schedule", "workflow_run", "workflow_dispatch"]) {
+  assert(!hasEvent(finalRequest, event), `${finalRequestName}: unexpected trigger ${event}`);
+}
+assert(
+  finalRequest.includes('      - "final-render-requests/*.json"'),
+  `${finalRequestName}: Final requests must be append-only files on main`,
+);
+assert(
+  finalRequest.includes("github.actor == github.repository_owner"),
+  `${finalRequestName}: only the repository owner may submit Final requests`,
+);
+assert(
+  finalRequest.includes('value["requestVersion"] != "1.1"') &&
+    finalRequest.includes('value["confirmation"] != "FINAL_RENDER"'),
+  `${finalRequestName}: v1.1 explicit Final request contract is required`,
+);
+assert(
+  finalRequest.includes("scripts/validate-final-approval-lineage.py") &&
+    finalRequest.includes("scripts/create-final-approval-sidecar.py") &&
+    finalRequest.includes("needs: [resolve-request, validate-lineage]"),
+  `${finalRequestName}: exact Preview/Plot/human approval lineage must PASS before runner wake`,
+);
+assert(
+  finalRequest.includes("uses: ./.github/workflows/nasdaq-cafe-final.yml") &&
+    finalRequest.includes("needs: [resolve-request, validate-lineage, wake-codespace]"),
+  `${finalRequestName}: canonical queue must call the reusable Final workflow only after lineage and runner readiness`,
+);
+assert(!finalRequest.includes("actions/workflows/nasdaq-cafe-final.yml/dispatches"));
+assert(!finalRequest.includes("episode:spec:final"));
+console.log("PASS: Final request queue is owner-only, append-only, lineage-bound, and single-entry");
 
 const motionPreview = contents.get(motionPreviewName)!;
 assert(hasEvent(motionPreview, "workflow_dispatch"));
