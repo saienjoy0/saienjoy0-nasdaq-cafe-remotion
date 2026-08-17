@@ -1,26 +1,15 @@
 name: Nasdaq Cafe Final
 
 on:
-  workflow_dispatch:
-    inputs:
-      episode_date:
-        description: "対象日（YYYY-MM-DD）"
-        required: true
-        type: string
-      expected_spec_sha256:
-        description: "確定済みrender_spec.jsonのSHA-256"
-        required: true
-        type: string
-      confirmation:
-        description: "ユーザーがfinalを明示承認済みなら FINAL"
-        required: true
-        type: string
   workflow_call:
     inputs:
       episode_date:
         required: true
         type: string
       expected_spec_sha256:
+        required: true
+        type: string
+      approval_artifact_name:
         required: true
         type: string
       confirmation:
@@ -39,8 +28,8 @@ jobs:
   render-final:
     name: Render cache-only final
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner && github.workflow == 'Nasdaq Cafe Final') ||
-      (github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.workflow == 'Nasdaq Cafe Final Request')
+      github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
+      github.workflow == 'Nasdaq Cafe Final Request'
     runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
     timeout-minutes: 120
 
@@ -53,15 +42,47 @@ jobs:
       GEMINI_TTS_VOICE: Charon
 
     steps:
-      - name: Checkout immutable final input
+      - name: Checkout immutable Final request commit
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
           clean: true
 
-      - name: Verify explicit final request and immutable spec
+      - name: Restore validated Final approval sidecar
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ inputs.approval_artifact_name }}
+          path: .
+
+      - name: Require validated lineage receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          SIDECAR="final-render-authorizations/${EPISODE_DATE}.json"
+          RECEIPT=".final-lineage/final_approval_lineage.json"
+          test -s "$SIDECAR"
+          test -s "$RECEIPT"
+          python3 - "$SIDECAR" "$RECEIPT" "$EPISODE_DATE" "$EXPECTED_SPEC_SHA256" <<'PY'
+          import json, pathlib, sys
+          sidecar=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+          receipt=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8'))
+          date=sys.argv[3]
+          spec_sha=sys.argv[4].lower()
+          if receipt.get('status') != 'PASS': raise SystemExit('Final lineage receipt must PASS')
+          if receipt.get('episodeDate') != date: raise SystemExit('Final lineage receipt episode mismatch')
+          if receipt.get('renderSpecSha256') != spec_sha: raise SystemExit('Final lineage receipt render_spec SHA mismatch')
+          if sidecar.get('contractVersion') != '1.0.0': raise SystemExit('Final authorization sidecar contractVersion mismatch')
+          if sidecar.get('episodeDate') != date: raise SystemExit('Final authorization sidecar episode mismatch')
+          if sidecar.get('expectedSpecSha256') != spec_sha: raise SystemExit('Final authorization sidecar render_spec SHA mismatch')
+          if sidecar.get('previewRunId') != receipt.get('previewRunId'): raise SystemExit('Final authorization sidecar Preview run mismatch')
+          if sidecar.get('approvedPreviewSha256') != receipt.get('approvedPreviewSha256'): raise SystemExit('Final authorization sidecar Preview SHA mismatch')
+          if sidecar.get('plotAuthorizationCommit') != receipt.get('plotAuthorizationCommit'): raise SystemExit('Final authorization sidecar Plot commit mismatch')
+          if sidecar.get('plotAuthorizationSha256') != receipt.get('plotAuthorizationSha256'): raise SystemExit('Final authorization sidecar Plot authorization SHA mismatch')
+          PY
+
+      - name: Verify explicit Final request and immutable spec
         id: preflight
         shell: bash
         run: |
@@ -131,18 +152,18 @@ jobs:
           [[ "$COUNT" -ge 2 ]] || { echo "::error::Exact two-block TTS cache is incomplete"; exit 1; }
           while IFS= read -r audio; do ffmpeg -nostdin -v error -i "$audio" -f null -; done < <(find .cache/spec-tts-blocks -type f -name audio.wav -print)
 
-      - name: Validate final contracts
+      - name: Validate Final contracts
         run: |
           npm run typecheck
           npm run test:gemini-tts
           npm run episode:spec:validate -- "${{ steps.preflight.outputs.spec_path }}"
           npm run test:runtime-stability
 
-      - name: Render full-resolution final
+      - name: Render full-resolution Final
         timeout-minutes: 90
         run: npm run episode:spec:final -- "${{ steps.preflight.outputs.spec_path }}"
 
-      - name: Decode and inspect final MP4
+      - name: Decode and inspect Final MP4
         timeout-minutes: 15
         shell: bash
         run: |
@@ -161,17 +182,17 @@ jobs:
           report = json.load(open(report_path, encoding="utf-8")); data = json.load(open(data_path, encoding="utf-8")); probe = json.load(open(probe_path, encoding="utf-8"))
           if report.get("status") != "final-generated" or report.get("inputSpecSha256") != expected_sha: raise SystemExit("technical report identity mismatch")
           video = next((s for s in probe.get("streams", []) if s.get("codec_type") == "video"), None); audio = next((s for s in probe.get("streams", []) if s.get("codec_type") == "audio"), None)
-          if video is None or audio is None: raise SystemExit("final MP4 must contain video and audio")
+          if video is None or audio is None: raise SystemExit("Final MP4 must contain video and audio")
           episode = data["episode"]
-          if video.get("codec_name") != "h264" or int(video.get("width", 0)) != int(episode["width"]) or int(video.get("height", 0)) != int(episode["height"]): raise SystemExit("final video contract mismatch")
-          if audio.get("codec_name") != "aac" or int(audio.get("sample_rate", 0)) != 48000 or int(audio.get("channels", 0)) != 2: raise SystemExit("final audio contract mismatch")
+          if video.get("codec_name") != "h264" or int(video.get("width", 0)) != int(episode["width"]) or int(video.get("height", 0)) != int(episode["height"]): raise SystemExit("Final video contract mismatch")
+          if audio.get("codec_name") != "aac" or int(audio.get("sample_rate", 0)) != 48000 or int(audio.get("channels", 0)) != 2: raise SystemExit("Final audio contract mismatch")
           expected_seconds = data["timeline"]["totalDurationInFrames"] / episode["fps"]; actual_seconds = float(probe.get("format", {}).get("duration", 0))
-          if abs(actual_seconds - expected_seconds) > 0.20: raise SystemExit(f"final duration mismatch: expected={expected_seconds} actual={actual_seconds}")
+          if abs(actual_seconds - expected_seconds) > 0.20: raise SystemExit(f"Final duration mismatch: expected={expected_seconds} actual={actual_seconds}")
           payload = pathlib.Path(mp4).read_bytes(); inspection = {"status": "valid", "inspectedAt": datetime.now(timezone.utc).isoformat(), "episodeDate": episode["id"], "renderSpecSha256": expected_sha, "path": mp4, "sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload), "width": int(video["width"]), "height": int(video["height"]), "durationSeconds": actual_seconds, "videoCodec": video["codec_name"], "audioCodec": audio["codec_name"], "audioSampleRate": int(audio["sample_rate"]), "audioChannels": int(audio["channels"]), "fullDecode": "pass"}
           pathlib.Path(inspection_path).write_text(json.dumps(inspection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
 
-      - name: Upload final delivery artifact
+      - name: Upload Final delivery artifact
         uses: actions/upload-artifact@v6
         with:
           name: nasdaq-cafe-final-${{ inputs.episode_date }}-${{ github.run_id }}
