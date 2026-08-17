@@ -134,7 +134,14 @@ const bridgeReport = evaluate(bridgeHeavy);
 assert.equal(bridgeReport.status, "PASS");
 assert.deepEqual(bridgeReport.failures, []);
 assert.ok(warningCodes(bridgeReport).has("VG_BRIDGE_TEXT_OVERUSED"));
-console.log("PASS: bridge-text over 12 percent is advisory");
+const bridgeWarning = bridgeReport.warnings.find(
+  (warning) => warning.code === "VG_BRIDGE_TEXT_OVERUSED",
+);
+assert.ok(bridgeWarning);
+assert.equal(bridgeWarning.unit, "ratio");
+assert.equal(bridgeWarning.actual, 0.125);
+assert.equal(bridgeWarning.limit, 0.12);
+console.log("PASS: bridge-text ratio warning reports ratio actual/limit consistently");
 
 const shortMajorShift = validBeats();
 shortMajorShift[2] = {...shortMajorShift[2], durationMs: 3000, endMs: 3000};
