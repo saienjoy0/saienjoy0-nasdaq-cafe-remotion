@@ -9,6 +9,7 @@ on:
       - "scripts/create-final-approval-sidecar.py"
       - "scripts/test-final-approval-preflight.ts"
       - "scripts/test-final-approval-lineage.py"
+      - "scripts/test-final-entrypoint-contract.py"
       - ".github/workflows/nasdaq-cafe-final.yml"
       - ".github/workflows/nasdaq-cafe-final-request.yml"
       - ".github/workflows/final-approval-lineage-ci.yml"
@@ -38,7 +39,9 @@ jobs:
         run: node --import tsx scripts/test-final-approval-preflight.ts
       - name: Cross-repo approval document regression
         run: python3 scripts/test-final-approval-lineage.py
+      - name: Final entrypoint contract regression
+        run: python3 scripts/test-final-entrypoint-contract.py
       - name: Python syntax
-        run: python3 -m py_compile scripts/validate-final-approval-lineage.py scripts/create-final-approval-sidecar.py
+        run: python3 -m py_compile scripts/validate-final-approval-lineage.py scripts/create-final-approval-sidecar.py scripts/test-final-entrypoint-contract.py
       - name: Diff hygiene
         run: git diff --check
