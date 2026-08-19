@@ -1,0 +1,84 @@
+name: Nasdaq Cafe Current Preview Request V4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "handoff-preview-requests-v4/*.json"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-current-preview-request-v4
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      episode_date: ${{ steps.r.outputs.episode_date }}
+      plot_run_id: ${{ steps.r.outputs.plot_run_id }}
+      artifact_name: ${{ steps.r.outputs.artifact_name }}
+      bundle_id: ${{ steps.r.outputs.bundle_id }}
+      manifest_sha: ${{ steps.r.outputs.manifest_sha }}
+      renderer_commit: ${{ steps.r.outputs.renderer_commit }}
+      renderer_contract: ${{ steps.r.outputs.renderer_contract }}
+      registry_sha: ${{ steps.r.outputs.registry_sha }}
+      signed_url: ${{ steps.r.outputs.signed_url }}
+      signed_digest: ${{ steps.r.outputs.signed_digest }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 2
+          persist-credentials: false
+      - id: r
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only HEAD^ HEAD -- 'handoff-preview-requests-v4/*.json')
+          [[ ${#changed[@]} -eq 1 ]]
+          python3 - "${changed[0]}" <<'PY'
+          import json, os, re, sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          required={'contractVersion','episodeDate','plotRunId','handoffArtifactName','expectedBundleId','expectedManifestSha256','expectedRendererCommit','expectedRendererContractVersion','expectedRegistrySnapshotSha256','signedArtifactUrl','signedArtifactDigestSha256','confirmation'}
+          if set(v)!=required: raise SystemExit(f'fields mismatch: {sorted(v)}')
+          if v['contractVersion']!='2.0.0' or v['confirmation']!='PREVIEW': raise SystemExit('request contract/confirmation mismatch')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',str(v['episodeDate'])): raise SystemExit('bad date')
+          if not isinstance(v['plotRunId'],int) or isinstance(v['plotRunId'],bool) or v['plotRunId']<=0: raise SystemExit('bad plotRunId')
+          for key in ('expectedBundleId','expectedManifestSha256','expectedRegistrySnapshotSha256'):
+              if not re.fullmatch(r'[0-9a-f]{64}',str(v[key])): raise SystemExit(f'bad {key}')
+          if not re.fullmatch(r'[0-9a-f]{40}',str(v['expectedRendererCommit'])): raise SystemExit('bad Renderer commit')
+          if not isinstance(v['expectedRendererContractVersion'],str) or not v['expectedRendererContractVersion']: raise SystemExit('bad Renderer contract')
+          if bool(v['signedArtifactUrl']) != bool(v['signedArtifactDigestSha256']): raise SystemExit('signed fallback pair mismatch')
+          if v['signedArtifactUrl']:
+              p=urlparse(v['signedArtifactUrl'])
+              if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'): raise SystemExit('unsafe signed URL')
+              if not re.fullmatch(r'[0-9a-f]{64}',v['signedArtifactDigestSha256']): raise SystemExit('bad signed digest')
+          values={'episode_date':v['episodeDate'],'plot_run_id':v['plotRunId'],'artifact_name':v['handoffArtifactName'],'bundle_id':v['expectedBundleId'],'manifest_sha':v['expectedManifestSha256'],'renderer_commit':v['expectedRendererCommit'],'renderer_contract':v['expectedRendererContractVersion'],'registry_sha':v['expectedRegistrySnapshotSha256'],'signed_url':v['signedArtifactUrl'],'signed_digest':v['signedArtifactDigestSha256']}
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              for k,x in values.items(): f.write(f'{k}={x}\n')
+          PY
+
+  preview:
+    needs: resolve
+    uses: ./.github/workflows/nasdaq-cafe-preview-handoff-v2.yml
+    with:
+      episode_date: ${{ needs.resolve.outputs.episode_date }}
+      plot_run_id: ${{ needs.resolve.outputs.plot_run_id }}
+      handoff_artifact_name: ${{ needs.resolve.outputs.artifact_name }}
+      expected_bundle_id: ${{ needs.resolve.outputs.bundle_id }}
+      expected_manifest_sha256: ${{ needs.resolve.outputs.manifest_sha }}
+      expected_renderer_commit: ${{ needs.resolve.outputs.renderer_commit }}
+      expected_renderer_contract_version: ${{ needs.resolve.outputs.renderer_contract }}
+      expected_registry_snapshot_sha256: ${{ needs.resolve.outputs.registry_sha }}
+      signed_artifact_url: ${{ needs.resolve.outputs.signed_url }}
+      signed_artifact_digest_sha256: ${{ needs.resolve.outputs.signed_digest }}
+      confirmation: PREVIEW
+    secrets: inherit
