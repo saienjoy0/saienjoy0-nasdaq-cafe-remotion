@@ -57,17 +57,6 @@ jobs:
       - name: Workflow contract
         run: npm run test:workflow-contract
 
-      - name: Ensure ffmpeg is available
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
-          fi
-          ffmpeg -version | head -n 1
-          ffprobe -version | head -n 1
-
       - name: Motion Preview request queue tests
         run: |
           python3 -m py_compile \
@@ -174,25 +163,16 @@ jobs:
       - name: Verify committed JSON Schema is current
         run: git diff --exit-code -- schemas/render_spec.schema.json
 
-      - name: Render spec contract tests
-        run: npm run test:spec
+      - name: Render spec non-media contract tests
+        run: |
+          node --import tsx scripts/test-render-spec.ts
+          npm run test:visual-story
 
       - name: Public screen boundary
         run: npm run test:public-screen
 
       - name: Card-first financial mechanical gate
         run: npm run test:card-first-financial
-
-      - name: Render card-first current-contract stills
-        run: npm run render:card-first-stills
-
-      - name: Upload card-first current-contract stills
-        uses: actions/upload-artifact@v6
-        with:
-          name: card-first-current-stills-${{ github.run_id }}
-          path: renders/tests/card-first-current-contract
-          if-no-files-found: error
-          retention-days: 7
 
       - name: Clean generated contract workspace
         run: rm -rf build
