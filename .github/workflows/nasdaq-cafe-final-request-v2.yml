@@ -1,0 +1,113 @@
+name: Nasdaq Cafe Current Final Request V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "final-render-requests-v2/*.json"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-current-final-request-v2-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      episode_date: ${{ steps.r.outputs.episode_date }}
+      preview_run_id: ${{ steps.r.outputs.preview_run_id }}
+      preview_sha: ${{ steps.r.outputs.preview_sha }}
+      identity_sha: ${{ steps.r.outputs.identity_sha }}
+      renderer_commit: ${{ steps.r.outputs.renderer_commit }}
+      renderer_contract: ${{ steps.r.outputs.renderer_contract }}
+      registry_sha: ${{ steps.r.outputs.registry_sha }}
+      spec_sha: ${{ steps.r.outputs.spec_sha }}
+      tts_input_sha: ${{ steps.r.outputs.tts_input_sha }}
+      audio_01_04_sha: ${{ steps.r.outputs.audio_01_04_sha }}
+      audio_05_09_sha: ${{ steps.r.outputs.audio_05_09_sha }}
+      authorization_run_id: ${{ steps.r.outputs.authorization_run_id }}
+      authorization_artifact_name: ${{ steps.r.outputs.authorization_artifact_name }}
+      authorization_manifest_sha: ${{ steps.r.outputs.authorization_manifest_sha }}
+      human_review_sha: ${{ steps.r.outputs.human_review_sha }}
+      final_authorization_sha: ${{ steps.r.outputs.final_authorization_sha }}
+      final_fingerprint: ${{ steps.r.outputs.final_fingerprint }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify shared Final request validator owns canonical source keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          for field in \
+            plotAuthorizationRunId \
+            humanPreviewReviewSha256 \
+            plotFinalAuthorizationSha256 \
+            finalFingerprint; do
+            grep -F "\"${field}\"" scripts/validate-current-request.py >/dev/null || {
+              echo "::error::Current Final validator is missing canonical source field: ${field}"
+              exit 1
+            }
+          done
+      - id: request-path
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGES < <(git diff --name-status "$BEFORE_SHA" "$TRIGGER_SHA")
+          [[ ${#CHANGES[@]} -eq 1 ]] || { echo "::error::Final request merge must change exactly one file"; exit 1; }
+          STATUS="$(awk '{print $1}' <<<"${CHANGES[0]}")"
+          PATH_VALUE="$(awk '{print $2}' <<<"${CHANGES[0]}")"
+          [[ "$STATUS" == "A" ]] || { echo "::error::Final request must be append-only"; exit 1; }
+          [[ "$PATH_VALUE" == final-render-requests-v2/*.json ]] || { echo "::error::Unexpected Final request path: $PATH_VALUE"; exit 1; }
+          echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
+      - id: r
+        run: python3 scripts/validate-current-request.py final "${{ steps.request-path.outputs.path }}" --github-output "$GITHUB_OUTPUT"
+      - name: Verify Final transport bytes against approved Renderer implementation
+        shell: bash
+        env:
+          RENDERER_COMMIT: ${{ steps.r.outputs.renderer_commit }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$RENDERER_COMMIT" --depth=1
+          for file in \
+            .github/workflows/nasdaq-cafe-final-request-v2.yml \
+            .github/workflows/nasdaq-cafe-final-v2.yml; do
+            EXPECTED="$(git show "$RENDERER_COMMIT:$file" | sha256sum | awk '{print $1}')"
+            ACTUAL="$(sha256sum "$file" | awk '{print $1}')"
+            [[ "$ACTUAL" == "$EXPECTED" ]] || { echo "::error::Current Final transport drift: $file"; exit 1; }
+          done
+
+  final:
+    needs: resolve
+    uses: ./.github/workflows/nasdaq-cafe-final-v2.yml
+    with:
+      episode_date: ${{ needs.resolve.outputs.episode_date }}
+      preview_run_id: ${{ needs.resolve.outputs.preview_run_id }}
+      approved_preview_sha256: ${{ needs.resolve.outputs.preview_sha }}
+      preview_identity_sha256: ${{ needs.resolve.outputs.identity_sha }}
+      renderer_commit: ${{ needs.resolve.outputs.renderer_commit }}
+      renderer_contract_version: ${{ needs.resolve.outputs.renderer_contract }}
+      registry_snapshot_sha256: ${{ needs.resolve.outputs.registry_sha }}
+      render_spec_sha256: ${{ needs.resolve.outputs.spec_sha }}
+      tts_input_sha256: ${{ needs.resolve.outputs.tts_input_sha }}
+      audio_01_04_sha256: ${{ needs.resolve.outputs.audio_01_04_sha }}
+      audio_05_09_sha256: ${{ needs.resolve.outputs.audio_05_09_sha }}
+      plot_authorization_run_id: ${{ needs.resolve.outputs.authorization_run_id }}
+      plot_authorization_artifact_name: ${{ needs.resolve.outputs.authorization_artifact_name }}
+      plot_authorization_manifest_sha256: ${{ needs.resolve.outputs.authorization_manifest_sha }}
+      human_preview_review_sha256: ${{ needs.resolve.outputs.human_review_sha }}
+      plot_final_authorization_sha256: ${{ needs.resolve.outputs.final_authorization_sha }}
+      final_fingerprint: ${{ needs.resolve.outputs.final_fingerprint }}
+      confirmation: FINAL
+    secrets: inherit

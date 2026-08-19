@@ -1,0 +1,28 @@
+name: Preview Reusable Contract CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/nasdaq-cafe-handoff-preview-request-v3.yml"
+      - ".github/workflows/nasdaq-cafe-preview-handoff.yml"
+      - ".github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml"
+      - ".github/workflows/nasdaq-cafe-preview-handoff-v2.yml"
+      - "scripts/test-preview-reusable-current-spine-contract.py"
+      - ".github/workflows/preview-reusable-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate reusable Preview candidate topology
+        run: python3 scripts/test-preview-reusable-current-spine-contract.py
+      - name: Syntax hygiene
+        run: |
+          python3 -m py_compile scripts/test-preview-reusable-current-spine-contract.py
+          git diff --check

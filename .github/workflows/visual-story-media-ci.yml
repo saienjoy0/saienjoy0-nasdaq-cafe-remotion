@@ -1,0 +1,61 @@
+name: Visual Story Media CI
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "render-specs/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-story-media-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  media:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure ffmpeg is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Spec media inspection tests
+        run: node --import tsx scripts/test-spec-inspect.ts
+
+      - name: Render card-first current-contract stills
+        run: npm run render:card-first-stills
+
+      - name: Upload card-first current-contract stills
+        uses: actions/upload-artifact@v6
+        with:
+          name: card-first-current-stills-${{ github.run_id }}
+          path: renders/tests/card-first-current-contract
+          if-no-files-found: error
+          retention-days: 7

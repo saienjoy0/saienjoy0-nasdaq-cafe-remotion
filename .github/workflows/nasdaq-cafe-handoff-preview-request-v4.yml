@@ -1,0 +1,81 @@
+name: Nasdaq Cafe Current Preview Request V4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "handoff-preview-requests-v4/*.json"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-current-preview-request-v4-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      episode_date: ${{ steps.r.outputs.episode_date }}
+      plot_run_id: ${{ steps.r.outputs.plot_run_id }}
+      artifact_name: ${{ steps.r.outputs.artifact_name }}
+      bundle_id: ${{ steps.r.outputs.bundle_id }}
+      manifest_sha: ${{ steps.r.outputs.manifest_sha }}
+      renderer_commit: ${{ steps.r.outputs.renderer_commit }}
+      renderer_contract: ${{ steps.r.outputs.renderer_contract }}
+      registry_sha: ${{ steps.r.outputs.registry_sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - id: request-path
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGES < <(git diff --name-status "$BEFORE_SHA" "$TRIGGER_SHA")
+          [[ ${#CHANGES[@]} -eq 1 ]] || { echo "::error::Preview request merge must change exactly one file"; exit 1; }
+          STATUS="$(awk '{print $1}' <<<"${CHANGES[0]}")"
+          PATH_VALUE="$(awk '{print $2}' <<<"${CHANGES[0]}")"
+          [[ "$STATUS" == "A" ]] || { echo "::error::Preview request must be append-only"; exit 1; }
+          [[ "$PATH_VALUE" == handoff-preview-requests-v4/*.json ]] || { echo "::error::Unexpected Preview request path: $PATH_VALUE"; exit 1; }
+          echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
+      - id: r
+        run: python3 scripts/validate-current-request.py preview "${{ steps.request-path.outputs.path }}" --github-output "$GITHUB_OUTPUT"
+      - name: Verify request transport bytes against expected Renderer implementation
+        shell: bash
+        env:
+          RENDERER_COMMIT: ${{ steps.r.outputs.renderer_commit }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$RENDERER_COMMIT" --depth=1
+          for file in \
+            .github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml \
+            .github/workflows/nasdaq-cafe-preview-handoff-v2.yml; do
+            EXPECTED="$(git show "$RENDERER_COMMIT:$file" | sha256sum | awk '{print $1}')"
+            ACTUAL="$(sha256sum "$file" | awk '{print $1}')"
+            [[ "$ACTUAL" == "$EXPECTED" ]] || { echo "::error::Current Preview transport drift: $file"; exit 1; }
+          done
+
+  preview:
+    needs: resolve
+    uses: ./.github/workflows/nasdaq-cafe-preview-handoff-v2.yml
+    with:
+      episode_date: ${{ needs.resolve.outputs.episode_date }}
+      plot_run_id: ${{ needs.resolve.outputs.plot_run_id }}
+      handoff_artifact_name: ${{ needs.resolve.outputs.artifact_name }}
+      expected_bundle_id: ${{ needs.resolve.outputs.bundle_id }}
+      expected_manifest_sha256: ${{ needs.resolve.outputs.manifest_sha }}
+      expected_renderer_commit: ${{ needs.resolve.outputs.renderer_commit }}
+      expected_renderer_contract_version: ${{ needs.resolve.outputs.renderer_contract }}
+      expected_registry_snapshot_sha256: ${{ needs.resolve.outputs.registry_sha }}
+      confirmation: PREVIEW
+    secrets: inherit
