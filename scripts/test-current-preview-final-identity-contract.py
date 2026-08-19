@@ -49,7 +49,7 @@ for token in ('approved-preview-inputs/', 'preview_identity.json', 'approved-tts
     if token not in preview_worker + capture:
         raise AssertionError(f'Preview immutable data contract missing: {token}')
 for block in ('scenes-01-04', 'scenes-05-09'):
-    if block not in capture or block not in restore or block not in final_request:
+    if block not in capture or block not in restore or block not in validator:
         raise AssertionError(f'Exact TTS block identity missing: {block}')
 
 # Final request binds authorization evidence and deterministic idempotency identity.
