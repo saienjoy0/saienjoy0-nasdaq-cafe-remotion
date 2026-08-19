@@ -1,0 +1,168 @@
+name: Nasdaq Cafe Preview From Handoff V2
+
+on:
+  workflow_call:
+    inputs:
+      episode_date: {required: true, type: string}
+      plot_run_id: {required: true, type: string}
+      handoff_artifact_name: {required: true, type: string}
+      expected_bundle_id: {required: true, type: string}
+      expected_manifest_sha256: {required: true, type: string}
+      expected_renderer_commit: {required: true, type: string}
+      expected_renderer_contract_version: {required: true, type: string}
+      expected_registry_snapshot_sha256: {required: true, type: string}
+      signed_artifact_url: {required: false, type: string}
+      signed_artifact_digest_sha256: {required: false, type: string}
+      confirmation: {required: true, type: string}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      CI: "true"
+      EPISODE_DATE: ${{ inputs.episode_date }}
+      PLOT_RUN_ID: ${{ inputs.plot_run_id }}
+      PLOT_ARTIFACT_NAME: ${{ inputs.handoff_artifact_name }}
+      PLOT_ARTIFACT_TOKEN: ${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}
+      SIGNED_ARTIFACT_URL: ${{ inputs.signed_artifact_url }}
+      SIGNED_ARTIFACT_DIGEST: ${{ inputs.signed_artifact_digest_sha256 }}
+      EXPECTED_BUNDLE_ID: ${{ inputs.expected_bundle_id }}
+      EXPECTED_MANIFEST_SHA256: ${{ inputs.expected_manifest_sha256 }}
+      EXPECTED_RENDERER_COMMIT: ${{ inputs.expected_renderer_commit }}
+      RENDERER_CONTRACT_VERSION: ${{ inputs.expected_renderer_contract_version }}
+      EXPECTED_REGISTRY_SNAPSHOT_SHA256: ${{ inputs.expected_registry_snapshot_sha256 }}
+      HANDOFF_DOWNLOAD_ROOT: ${{ github.workspace }}/.handoff-download
+      RUNTIME_ASSET_REGISTRY: ${{ github.workspace }}/build/handoff/runtime_asset_registry.json
+      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      TTS_PROVIDER: gemini
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+      GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
+      GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
+
+    steps:
+      - name: Validate immutable Preview request identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "${{ inputs.confirmation }}" == "PREVIEW" ]]
+          [[ "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]
+          [[ "$PLOT_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$EXPECTED_BUNDLE_ID" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_RENDERER_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ -n "$RENDERER_CONTRACT_VERSION" ]]
+          [[ "$EXPECTED_REGISTRY_SNAPSHOT_SHA256" =~ ^[0-9a-f]{64}$ ]]
+
+      - name: Checkout exact Renderer implementation
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.expected_renderer_commit }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Verify Renderer implementation identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_RENDERER_COMMIT"
+          test "$(sha256sum contracts/visual_component_registry_snapshot.json | awk '{print $1}')" = "$EXPECTED_REGISTRY_SNAPSHOT_SHA256"
+          test -x scripts/nasdaq-cafe-preview-entry.sh || chmod +x scripts/nasdaq-cafe-preview-entry.sh
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install locked Renderer dependencies
+        run: npm ci
+
+      - name: Restore immutable Plot handoff with configured token
+        if: ${{ env.PLOT_ARTIFACT_TOKEN != '' }}
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ inputs.handoff_artifact_name }}
+          path: .handoff-download
+          repository: saienjoy0/nasdaq-plot-creator-
+          run-id: ${{ inputs.plot_run_id }}
+          github-token: ${{ env.PLOT_ARTIFACT_TOKEN }}
+
+      - name: Restore digest-pinned signed Plot handoff fallback
+        if: ${{ env.PLOT_ARTIFACT_TOKEN == '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "$SIGNED_ARTIFACT_URL" ]]
+          [[ "$SIGNED_ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          p=urlparse(os.environ['SIGNED_ARTIFACT_URL'])
+          if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'):
+              raise SystemExit('unsafe signed Artifact URL')
+          PY
+          ZIP="$RUNNER_TEMP/plot-handoff.zip"
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors "$SIGNED_ARTIFACT_URL" --output "$ZIP"
+          test "$(sha256sum "$ZIP" | awk '{print $1}')" = "$SIGNED_ARTIFACT_DIGEST"
+          mkdir -p .handoff-download
+          unzip -q "$ZIP" -d .handoff-download
+
+      - name: Intake exact handoff bytes
+        id: intake
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/handoff
+          npm run handoff:intake -- \
+            --download-root="$HANDOFF_DOWNLOAD_ROOT" \
+            --expected-bundle-id="$EXPECTED_BUNDLE_ID" \
+            --expected-manifest-sha256="$EXPECTED_MANIFEST_SHA256" \
+            --episode-date="$EPISODE_DATE" \
+            --renderer-commit="$EXPECTED_RENDERER_COMMIT" \
+            --renderer-contract-version="$RENDERER_CONTRACT_VERSION" \
+            --registry-output="$RUNTIME_ASSET_REGISTRY" | tee build/handoff/intake-output.log
+          JSON_LINE="$(tail -n 1 build/handoff/intake-output.log)"
+          SPEC_PATH="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.specPath)' "$JSON_LINE")"
+          REGISTRY_PATH="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.runtimeRegistryPath)' "$JSON_LINE")"
+          test -s "$SPEC_PATH"; test -s "$REGISTRY_PATH"
+          echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
+          echo "registry_path=$REGISTRY_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure media tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Execute checked-out Renderer Preview procedure
+        env:
+          SPEC_PATH: ${{ steps.intake.outputs.spec_path }}
+          RUNTIME_ASSET_REGISTRY: ${{ steps.intake.outputs.registry_path }}
+        run: bash scripts/nasdaq-cafe-preview-entry.sh
+
+      - name: Upload immutable approved Preview production data
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-current-preview-${{ inputs.episode_date }}-${{ github.run_id }}
+          path: |
+            renders/preview/
+            build/${{ inputs.episode_date }}/technical_report.json
+            build/${{ inputs.episode_date }}/render_data.production.json
+            build/${{ inputs.episode_date }}/visual_grammar_timing_report.json
+            build/${{ inputs.episode_date }}/preview-render.log
+            build/${{ inputs.episode_date }}/approved-preview-inputs/
+            build/handoff/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
