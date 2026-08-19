@@ -1,0 +1,161 @@
+name: Nasdaq Cafe Final V2
+
+on:
+  workflow_call:
+    inputs:
+      episode_date: {required: true, type: string}
+      preview_run_id: {required: true, type: string}
+      approved_preview_sha256: {required: true, type: string}
+      preview_identity_sha256: {required: true, type: string}
+      renderer_commit: {required: true, type: string}
+      renderer_contract_version: {required: true, type: string}
+      registry_snapshot_sha256: {required: true, type: string}
+      render_spec_sha256: {required: true, type: string}
+      tts_input_sha256: {required: true, type: string}
+      audio_01_04_sha256: {required: true, type: string}
+      audio_05_09_sha256: {required: true, type: string}
+      confirmation: {required: true, type: string}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  final:
+    if: inputs.confirmation == 'FINAL'
+    runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
+    timeout-minutes: 120
+    env:
+      CI: "true"
+      EPISODE_DATE: ${{ inputs.episode_date }}
+      EXPECTED_SPEC_SHA256: ${{ inputs.render_spec_sha256 }}
+      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_VOICE: Charon
+    steps:
+      - name: Download exact approved Preview Artifact before checkout
+        uses: actions/download-artifact@v6
+        with:
+          pattern: nasdaq-cafe-current-preview-${{ inputs.episode_date }}-${{ inputs.preview_run_id }}
+          path: ${{ runner.temp }}/approved-preview
+          merge-multiple: true
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.preview_run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Verify approved Preview MP4 SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t mp4s < <(find "${RUNNER_TEMP}/approved-preview" -type f -name '*.mp4' -print)
+          [[ ${#mp4s[@]} -eq 1 ]]
+          test "$(sha256sum "${mp4s[0]}" | awk '{print $1}')" = "${{ inputs.approved_preview_sha256 }}"
+
+      - name: Checkout exact approved Renderer commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.renderer_commit }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Verify exact Renderer identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ inputs.renderer_commit }}"
+          test "$(sha256sum contracts/visual_component_registry_snapshot.json | awk '{print $1}')" = "${{ inputs.registry_snapshot_sha256 }}"
+          test -f scripts/restore-approved-preview-for-final.py
+          test -f scripts/nasdaq-cafe-final-entry.sh
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install locked Renderer dependencies
+        run: npm ci
+
+      - name: Restore exact approved production bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/restore-approved-preview-for-final.py \
+            --preview-root "${RUNNER_TEMP}/approved-preview" \
+            --episode-date "$EPISODE_DATE" \
+            --renderer-commit "${{ inputs.renderer_commit }}" \
+            --renderer-contract-version "${{ inputs.renderer_contract_version }}" \
+            --registry-sha256 "${{ inputs.registry_snapshot_sha256 }}" \
+            --spec-sha256 "${{ inputs.render_spec_sha256 }}" \
+            --tts-input-sha256 "${{ inputs.tts_input_sha256 }}" \
+            --audio-01-04-sha256 "${{ inputs.audio_01_04_sha256 }}" \
+            --audio-05-09-sha256 "${{ inputs.audio_05_09_sha256 }}" \
+            --preview-identity-sha256 "${{ inputs.preview_identity_sha256 }}" \
+            --output-root build/final-approved-inputs
+          rm -rf .cache/spec-tts-blocks .handoff-download
+          cp -a build/final-approved-inputs/tts-cache .cache/spec-tts-blocks
+          cp -a build/final-approved-inputs/handoff .handoff-download
+
+      - name: Materialize runtime assets from exact approved handoff
+        id: intake
+        shell: bash
+        run: |
+          set -euo pipefail
+          IDENTITY="$(find "${RUNNER_TEMP}/approved-preview" -type f -name preview_identity.json -print -quit)"
+          BUNDLE="$(jq -r '.expectedBundleId' "$IDENTITY")"
+          MANIFEST="$(jq -r '.expectedManifestSha256' "$IDENTITY")"
+          mkdir -p build/final-handoff
+          npm run handoff:intake -- \
+            --download-root=.handoff-download \
+            --expected-bundle-id="$BUNDLE" \
+            --expected-manifest-sha256="$MANIFEST" \
+            --episode-date="$EPISODE_DATE" \
+            --renderer-commit="${{ inputs.renderer_commit }}" \
+            --renderer-contract-version="${{ inputs.renderer_contract_version }}" \
+            --registry-output=build/final-handoff/generated_runtime_asset_registry.json >/tmp/final-intake.log
+          test -s build/final-handoff/generated_runtime_asset_registry.json
+          test "$(sha256sum build/final-approved-inputs/render_spec.json | awk '{print $1}')" = "$EXPECTED_SPEC_SHA256"
+
+      - name: Verify exact cached TTS bytes again
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/restore-approved-preview-for-final.py \
+            --preview-root "${RUNNER_TEMP}/approved-preview" --episode-date "$EPISODE_DATE" \
+            --renderer-commit "${{ inputs.renderer_commit }}" --renderer-contract-version "${{ inputs.renderer_contract_version }}" \
+            --registry-sha256 "${{ inputs.registry_snapshot_sha256 }}" --spec-sha256 "$EXPECTED_SPEC_SHA256" \
+            --tts-input-sha256 "${{ inputs.tts_input_sha256 }}" --audio-01-04-sha256 "${{ inputs.audio_01_04_sha256 }}" \
+            --audio-05-09-sha256 "${{ inputs.audio_05_09_sha256 }}" --preview-identity-sha256 "${{ inputs.preview_identity_sha256 }}" \
+            --output-root "$RUNNER_TEMP/reverified-approved-inputs" >/tmp/final-byte-verify.json
+
+      - name: Execute checked-out Renderer Final procedure
+        env:
+          SPEC_PATH: build/final-approved-inputs/render_spec.json
+          RUNTIME_ASSET_REGISTRY: build/final-approved-inputs/runtime_asset_registry.json
+        run: bash scripts/nasdaq-cafe-final-entry.sh
+
+      - name: Inspect and upload Final
+        shell: bash
+        run: |
+          set -euo pipefail
+          MP4="renders/final/${EPISODE_DATE}_nasdaq-cafe-spec.mp4"
+          test -s "$MP4"
+          ffmpeg -nostdin -v error -i "$MP4" -f null -
+          mkdir -p "build/${EPISODE_DATE}"
+          python3 - "$MP4" "build/${EPISODE_DATE}/final_current_spine_receipt.json" <<'PY'
+          import hashlib,json,pathlib,subprocess,sys
+          mp4,out=sys.argv[1:]
+          identity=json.loads(next(pathlib.Path('/tmp').glob('no-such-file')).read_text()) if False else None
+          value={'status':'PASS','path':mp4,'sha256':hashlib.sha256(pathlib.Path(mp4).read_bytes()).hexdigest()}
+          pathlib.Path(out).write_text(json.dumps(value,indent=2)+'\n')
+          PY
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-current-final-${{ inputs.episode_date }}-${{ github.run_id }}
+          path: |
+            renders/final/${{ inputs.episode_date }}_nasdaq-cafe-spec.mp4
+            build/${{ inputs.episode_date }}/technical_report.json
+            build/${{ inputs.episode_date }}/render_data.production.json
+            build/${{ inputs.episode_date }}/final_current_spine_receipt.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
