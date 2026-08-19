@@ -11,12 +11,12 @@ permissions:
   actions: read
 
 concurrency:
-  group: nasdaq-cafe-current-final-request-v2
+  group: nasdaq-cafe-current-final-request-v2-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   resolve:
-    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -31,38 +31,48 @@ jobs:
       tts_input_sha: ${{ steps.r.outputs.tts_input_sha }}
       audio_01_04_sha: ${{ steps.r.outputs.audio_01_04_sha }}
       audio_05_09_sha: ${{ steps.r.outputs.audio_05_09_sha }}
+      authorization_run_id: ${{ steps.r.outputs.authorization_run_id }}
+      authorization_artifact_name: ${{ steps.r.outputs.authorization_artifact_name }}
+      authorization_manifest_sha: ${{ steps.r.outputs.authorization_manifest_sha }}
+      human_review_sha: ${{ steps.r.outputs.human_review_sha }}
+      final_authorization_sha: ${{ steps.r.outputs.final_authorization_sha }}
+      final_fingerprint: ${{ steps.r.outputs.final_fingerprint }}
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 2
           persist-credentials: false
-      - id: r
+      - id: request-path
         shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          mapfile -t changed < <(git diff --name-only HEAD^ HEAD -- 'final-render-requests-v2/*.json')
-          [[ ${#changed[@]} -eq 1 ]]
-          python3 - "${changed[0]}" <<'PY'
-          import json, os, re, sys
-          from pathlib import Path
-          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
-          required={'requestVersion','episodeDate','previewRunId','approvedPreviewSha256','previewIdentitySha256','rendererCommit','rendererContractVersion','registrySnapshotSha256','renderSpecSha256','ttsInputSha256','ttsBlockAudioSha256','confirmation'}
-          if set(v)!=required: raise SystemExit(f'fields mismatch: {sorted(v)}')
-          if v['requestVersion']!='2.0.0' or v['confirmation']!='FINAL_RENDER': raise SystemExit('Final request contract/confirmation mismatch')
-          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',str(v['episodeDate'])): raise SystemExit('bad date')
-          if not isinstance(v['previewRunId'],int) or isinstance(v['previewRunId'],bool) or v['previewRunId']<=0: raise SystemExit('bad previewRunId')
-          for key in ('approvedPreviewSha256','previewIdentitySha256','registrySnapshotSha256','renderSpecSha256','ttsInputSha256'):
-              if not re.fullmatch(r'[0-9a-f]{64}',str(v[key])): raise SystemExit(f'bad {key}')
-          if not re.fullmatch(r'[0-9a-f]{40}',str(v['rendererCommit'])): raise SystemExit('bad Renderer commit')
-          audio=v['ttsBlockAudioSha256']
-          if set(audio)!={'scenes-01-04','scenes-05-09'}: raise SystemExit('audio block map mismatch')
-          for x in audio.values():
-              if not re.fullmatch(r'[0-9a-f]{64}',str(x)): raise SystemExit('bad audio SHA')
-          out={'episode_date':v['episodeDate'],'preview_run_id':v['previewRunId'],'preview_sha':v['approvedPreviewSha256'],'identity_sha':v['previewIdentitySha256'],'renderer_commit':v['rendererCommit'],'renderer_contract':v['rendererContractVersion'],'registry_sha':v['registrySnapshotSha256'],'spec_sha':v['renderSpecSha256'],'tts_input_sha':v['ttsInputSha256'],'audio_01_04_sha':audio['scenes-01-04'],'audio_05_09_sha':audio['scenes-05-09']}
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              for k,x in out.items(): f.write(f'{k}={x}\n')
-          PY
+          mapfile -t CHANGES < <(git diff --name-status "$BEFORE_SHA" "$TRIGGER_SHA")
+          [[ ${#CHANGES[@]} -eq 1 ]] || { echo "::error::Final request merge must change exactly one file"; exit 1; }
+          STATUS="$(awk '{print $1}' <<<"${CHANGES[0]}")"
+          PATH_VALUE="$(awk '{print $2}' <<<"${CHANGES[0]}")"
+          [[ "$STATUS" == "A" ]] || { echo "::error::Final request must be append-only"; exit 1; }
+          [[ "$PATH_VALUE" == final-render-requests-v2/*.json ]] || { echo "::error::Unexpected Final request path: $PATH_VALUE"; exit 1; }
+          echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
+      - id: r
+        run: python3 scripts/validate-current-request.py final "${{ steps.request-path.outputs.path }}" --github-output "$GITHUB_OUTPUT"
+      - name: Verify Final transport bytes against approved Renderer implementation
+        shell: bash
+        env:
+          RENDERER_COMMIT: ${{ steps.r.outputs.renderer_commit }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$RENDERER_COMMIT" --depth=1
+          for file in \
+            .github/workflows/nasdaq-cafe-final-request-v2.yml \
+            .github/workflows/nasdaq-cafe-final-v2.yml; do
+            EXPECTED="$(git show "$RENDERER_COMMIT:$file" | sha256sum | awk '{print $1}')"
+            ACTUAL="$(sha256sum "$file" | awk '{print $1}')"
+            [[ "$ACTUAL" == "$EXPECTED" ]] || { echo "::error::Current Final transport drift: $file"; exit 1; }
+          done
 
   final:
     needs: resolve
@@ -79,5 +89,11 @@ jobs:
       tts_input_sha256: ${{ needs.resolve.outputs.tts_input_sha }}
       audio_01_04_sha256: ${{ needs.resolve.outputs.audio_01_04_sha }}
       audio_05_09_sha256: ${{ needs.resolve.outputs.audio_05_09_sha }}
+      plot_authorization_run_id: ${{ needs.resolve.outputs.authorization_run_id }}
+      plot_authorization_artifact_name: ${{ needs.resolve.outputs.authorization_artifact_name }}
+      plot_authorization_manifest_sha256: ${{ needs.resolve.outputs.authorization_manifest_sha }}
+      human_preview_review_sha256: ${{ needs.resolve.outputs.human_review_sha }}
+      plot_final_authorization_sha256: ${{ needs.resolve.outputs.final_authorization_sha }}
+      final_fingerprint: ${{ needs.resolve.outputs.final_fingerprint }}
       confirmation: FINAL
     secrets: inherit

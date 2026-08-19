@@ -1,32 +1,44 @@
 name: Nasdaq Cafe Preview From Handoff
 
 on:
-  workflow_call:
-    inputs:
-      episode_date: {required: true, type: string}
-      plot_run_id: {required: true, type: string}
-      handoff_artifact_name: {required: true, type: string}
-      expected_bundle_id: {required: true, type: string}
-      expected_manifest_sha256: {required: true, type: string}
-      expected_renderer_commit: {required: true, type: string}
-      expected_renderer_contract_version: {required: true, type: string}
-      expected_registry_snapshot_sha256: {required: true, type: string}
-      signed_artifact_url: {required: false, type: string}
-      signed_artifact_digest_sha256: {required: false, type: string}
-      confirmation: {required: true, type: string}
   workflow_dispatch:
     inputs:
-      episode_date: {description: "対象日（YYYY-MM-DD）", required: true, type: string}
-      plot_run_id: {description: "Plot Actions run ID", required: true, type: string}
-      handoff_artifact_name: {description: "Plot immutable handoff Artifact名", required: true, type: string}
-      expected_bundle_id: {description: "handoff bundle SHA-256", required: true, type: string}
-      expected_manifest_sha256: {description: "handoff_manifest SHA-256", required: true, type: string}
-      expected_renderer_commit: {description: "handoff pinned Renderer commit", required: true, type: string}
-      expected_renderer_contract_version: {description: "handoff pinned Renderer contract", required: true, type: string}
-      expected_registry_snapshot_sha256: {description: "handoff pinned Registry SHA-256", required: true, type: string}
-      signed_artifact_url: {description: "fallback signed Artifact URL", required: false, type: string}
-      signed_artifact_digest_sha256: {description: "fallback Artifact ZIP SHA-256", required: false, type: string}
-      confirmation: {description: "PREVIEW", required: true, type: string}
+      episode_date:
+        description: "対象日（YYYY-MM-DD）"
+        required: true
+        type: string
+      plot_run_id:
+        description: "nasdaq-plot-creator- の正式handoffを生成したActions run ID"
+        required: true
+        type: string
+      handoff_artifact_name:
+        description: "Plot側のimmutable handoff Artifact名"
+        required: true
+        type: string
+      expected_bundle_id:
+        description: "handoff_manifest.json のbundle_id（SHA-256）"
+        required: true
+        type: string
+      expected_manifest_sha256:
+        description: "handoff_manifest.json 自体のSHA-256"
+        required: true
+        type: string
+      expected_renderer_commit:
+        description: "handoffがpinしたRenderer commit（40-hex）"
+        required: true
+        type: string
+      signed_artifact_url:
+        description: "cross-repo token不在時の初回取得だけに使う短寿命の署名済みH4 Artifact URL"
+        required: false
+        type: string
+      signed_artifact_digest_sha256:
+        description: "署名済みH4 Artifact ZIP自体のSHA-256"
+        required: false
+        type: string
+      confirmation:
+        description: "台本・画像採用・validator・整合確認済みなら PREVIEW"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -51,8 +63,7 @@ jobs:
       EXPECTED_BUNDLE_ID: ${{ inputs.expected_bundle_id }}
       EXPECTED_MANIFEST_SHA256: ${{ inputs.expected_manifest_sha256 }}
       EXPECTED_RENDERER_COMMIT: ${{ inputs.expected_renderer_commit }}
-      RENDERER_CONTRACT_VERSION: ${{ inputs.expected_renderer_contract_version }}
-      EXPECTED_REGISTRY_SNAPSHOT_SHA256: ${{ inputs.expected_registry_snapshot_sha256 }}
+      RENDERER_CONTRACT_VERSION: 2.4.0
       HANDOFF_DOWNLOAD_ROOT: ${{ github.workspace }}/.handoff-download
       RUNTIME_ASSET_REGISTRY: ${{ github.workspace }}/build/handoff/runtime_asset_registry.json
       GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
@@ -65,28 +76,51 @@ jobs:
       GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
 
     steps:
-      - name: Require explicit preview confirmation and identities
+      - name: Require explicit preview confirmation
         shell: bash
         run: |
           set -euo pipefail
-          test "${{ inputs.confirmation }}" = "PREVIEW"
-          [[ "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]
-          [[ "$PLOT_RUN_ID" =~ ^[0-9]+$ ]]
-          [[ -n "$PLOT_ARTIFACT_NAME" ]]
-          [[ "$EXPECTED_BUNDLE_ID" =~ ^[0-9a-f]{64}$ ]]
-          [[ "$EXPECTED_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]]
-          [[ "$EXPECTED_RENDERER_COMMIT" =~ ^[0-9a-f]{40}$ ]]
-          [[ -n "$RENDERER_CONTRACT_VERSION" ]]
-          [[ "$EXPECTED_REGISTRY_SNAPSHOT_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          test "${{ inputs.confirmation }}" = "PREVIEW" || {
+            echo "::error::confirmation must be exactly PREVIEW"
+            exit 1
+          }
+          [[ "$EPISODE_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || {
+            echo "::error::episode_date must be YYYY-MM-DD"
+            exit 1
+          }
+          [[ "$PLOT_RUN_ID" =~ ^[0-9]+$ ]] || {
+            echo "::error::plot_run_id must be numeric"
+            exit 1
+          }
+          [[ -n "$PLOT_ARTIFACT_NAME" ]] || {
+            echo "::error::handoff_artifact_name is required"
+            exit 1
+          }
+          [[ "$EXPECTED_BUNDLE_ID" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "::error::expected_bundle_id must be SHA-256"
+            exit 1
+          }
+          [[ "$EXPECTED_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "::error::expected_manifest_sha256 must be SHA-256"
+            exit 1
+          }
+          [[ "$EXPECTED_RENDERER_COMMIT" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::expected_renderer_commit must be 40-hex"
+            exit 1
+          }
           python3 - <<'PY'
           import os, re
           from urllib.parse import urlparse
-          url=os.environ.get('SIGNED_ARTIFACT_URL',''); digest=os.environ.get('SIGNED_ARTIFACT_DIGEST','')
-          if bool(url) != bool(digest): raise SystemExit('signed URL/digest must be supplied together')
+          url=os.environ.get('SIGNED_ARTIFACT_URL','')
+          digest=os.environ.get('SIGNED_ARTIFACT_DIGEST','')
+          if bool(url) != bool(digest):
+              raise SystemExit('signed_artifact_url and signed_artifact_digest_sha256 must be supplied together')
           if url:
-              p=urlparse(url)
-              if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'): raise SystemExit('unsafe signed URL')
-              if not re.fullmatch(r'[0-9a-f]{64}', digest): raise SystemExit('bad signed digest')
+              parsed=urlparse(url)
+              if parsed.scheme != 'https' or not parsed.hostname or not parsed.hostname.endswith('.oaiusercontent.com'):
+                  raise SystemExit('signed_artifact_url must be an HTTPS oaiusercontent.com URL')
+              if not re.fullmatch(r'[0-9a-f]{64}', digest):
+                  raise SystemExit('signed_artifact_digest_sha256 must be SHA-256')
           PY
 
       - name: Restore verified immutable handoff cache
@@ -105,23 +139,28 @@ jobs:
           set -euo pipefail
           PREFIX="${EXPECTED_BUNDLE_ID:0:12}"
           REQUEST_PATH="handoff-promote-requests/${EPISODE_DATE}-${PREFIX}.json"
-          CONTENT="$(gh api -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' "repos/${GITHUB_REPOSITORY}/contents/${REQUEST_PATH}?ref=main" --jq '.content' | tr -d '\n' | base64 --decode)"
+          CONTENT="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/${GITHUB_REPOSITORY}/contents/${REQUEST_PATH}?ref=main" \
+            --jq '.content' | tr -d '\n' | base64 --decode)"
           CONTRACT="$(jq -r '.contractVersion // empty' <<<"$CONTENT")"
           DATE_VALUE="$(jq -r '.episodeDate // empty' <<<"$CONTENT")"
           BUNDLE="$(jq -r '.expectedBundleId // empty' <<<"$CONTENT")"
           MANIFEST="$(jq -r '.expectedManifestSha256 // empty' <<<"$CONTENT")"
           URL="$(jq -r '.artifactDownloadUrl // empty' <<<"$CONTENT")"
           DIGEST="$(jq -r '.artifactDigestSha256 // empty' <<<"$CONTENT")"
-          [[ "$CONTRACT" == "1.0.0" ]]
-          [[ "$DATE_VALUE" == "$EPISODE_DATE" ]]
-          [[ "$BUNDLE" == "$EXPECTED_BUNDLE_ID" ]]
-          [[ "$MANIFEST" == "$EXPECTED_MANIFEST_SHA256" ]]
-          [[ "$DIGEST" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$CONTRACT" == "1.0.0" ]] || { echo "::error::promotion request contractVersion mismatch"; exit 1; }
+          [[ "$DATE_VALUE" == "$EPISODE_DATE" ]] || { echo "::error::promotion request episodeDate mismatch"; exit 1; }
+          [[ "$BUNDLE" == "$EXPECTED_BUNDLE_ID" ]] || { echo "::error::promotion request bundle mismatch"; exit 1; }
+          [[ "$MANIFEST" == "$EXPECTED_MANIFEST_SHA256" ]] || { echo "::error::promotion request manifest mismatch"; exit 1; }
+          [[ "$DIGEST" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::promotion request Artifact digest is invalid"; exit 1; }
           python3 - "$URL" <<'PY'
           import sys
           from urllib.parse import urlparse
           p=urlparse(sys.argv[1])
-          if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'): raise SystemExit('unsafe promotion URL')
+          if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'):
+              raise SystemExit('promotion request signed URL is unsafe')
           PY
           echo "SIGNED_ARTIFACT_URL=$URL" >> "$GITHUB_ENV"
           echo "SIGNED_ARTIFACT_DIGEST=$DIGEST" >> "$GITHUB_ENV"
@@ -131,8 +170,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "$PLOT_ARTIFACT_TOKEN" && -z "$SIGNED_ARTIFACT_URL" ]]; then exit 1; fi
-          if [[ -z "$PLOT_ARTIFACT_TOKEN" && ! "$SIGNED_ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]; then exit 1; fi
+          if [[ -z "$PLOT_ARTIFACT_TOKEN" && -z "$SIGNED_ARTIFACT_URL" ]]; then
+            echo "::error::No usable Plot Artifact transport is available"
+            exit 1
+          fi
+          if [[ -z "$PLOT_ARTIFACT_TOKEN" && ! "$SIGNED_ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Signed Artifact transport is missing its SHA-256 digest"
+            exit 1
+          fi
 
       - name: Checkout pinned renderer
         uses: actions/checkout@v6
@@ -141,12 +186,17 @@ jobs:
           persist-credentials: false
           clean: true
 
-      - name: Verify renderer implementation identity
+      - name: Verify renderer commit pin
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_RENDERER_COMMIT"
-          test "$(sha256sum contracts/visual_component_registry_snapshot.json | awk '{print $1}')" = "$EXPECTED_REGISTRY_SNAPSHOT_SHA256"
+          ACTUAL="$(git rev-parse HEAD)"
+          if [[ "$ACTUAL" != "$EXPECTED_RENDERER_COMMIT" ]]; then
+            echo "::error::Renderer checkout does not match handoff pin"
+            echo "::error::expected=$EXPECTED_RENDERER_COMMIT"
+            echo "::error::actual=$ACTUAL"
+            exit 1
+          fi
 
       - name: Download immutable Plot handoff Artifact with configured token
         if: ${{ steps.handoff-cache.outputs.cache-hit != 'true' && env.PLOT_ARTIFACT_TOKEN != '' }}
@@ -165,12 +215,20 @@ jobs:
           set -euo pipefail
           mkdir -p "$HANDOFF_DOWNLOAD_ROOT"
           ZIP="$RUNNER_TEMP/plot-handoff.zip"
-          curl --fail --location --silent --show-error --retry 2 --retry-all-errors "$SIGNED_ARTIFACT_URL" --output "$ZIP"
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors \
+            "$SIGNED_ARTIFACT_URL" --output "$ZIP"
           test -s "$ZIP"
-          test "$(sha256sum "$ZIP" | awk '{print $1}')" = "$SIGNED_ARTIFACT_DIGEST"
+          ACTUAL="$(sha256sum "$ZIP" | awk '{print $1}')"
+          if [[ "$ACTUAL" != "$SIGNED_ARTIFACT_DIGEST" ]]; then
+            echo "::error::signed H4 Artifact digest mismatch"
+            echo "::error::expected=$SIGNED_ARTIFACT_DIGEST"
+            echo "::error::actual=$ACTUAL"
+            exit 1
+          fi
           unzip -q "$ZIP" -d "$HANDOFF_DOWNLOAD_ROOT"
 
-      - uses: actions/setup-node@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
@@ -191,11 +249,13 @@ jobs:
             --episode-date="$EPISODE_DATE" \
             --renderer-commit="$EXPECTED_RENDERER_COMMIT" \
             --renderer-contract-version="$RENDERER_CONTRACT_VERSION" \
-            --registry-output="$RUNTIME_ASSET_REGISTRY" | tee build/handoff/intake-output.log
+            --registry-output="$RUNTIME_ASSET_REGISTRY" \
+            | tee build/handoff/intake-output.log
           JSON_LINE="$(tail -n 1 build/handoff/intake-output.log)"
           SPEC_PATH="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.specPath)' "$JSON_LINE")"
           REGISTRY_PATH="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.runtimeRegistryPath)' "$JSON_LINE")"
-          test -s "$SPEC_PATH"; test -s "$REGISTRY_PATH"
+          test -s "$SPEC_PATH"
+          test -s "$REGISTRY_PATH"
           echo "spec_path=$SPEC_PATH" >> "$GITHUB_OUTPUT"
           echo "registry_path=$REGISTRY_PATH" >> "$GITHUB_OUTPUT"
 
@@ -214,7 +274,11 @@ jobs:
       - name: Ensure ffmpeg is available
         shell: bash
         run: |
-          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then sudo apt-get update && sudo apt-get install -y ffmpeg; fi
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
 
       - name: Run deterministic runtime stability tests
         run: npm run test:runtime-stability

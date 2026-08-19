@@ -22,6 +22,11 @@ const shotPlanScript = await readFile(
 
 const previewName = "nasdaq-cafe-preview.yml";
 const handoffPreviewName = "nasdaq-cafe-preview-handoff.yml";
+const candidatePreviewRequestName = "nasdaq-cafe-handoff-preview-request-v4.yml";
+const candidatePreviewWorkerName = "nasdaq-cafe-preview-handoff-v2.yml";
+const candidateFinalRequestName = "nasdaq-cafe-final-request-v2.yml";
+const candidateFinalWorkerName = "nasdaq-cafe-final-v2.yml";
+const currentRequestGateName = "current-request-publication-gate.yml";
 const scheduledName = "nasdaq-cafe-scheduled-preview.yml";
 const statusName = "nasdaq-cafe-preview-status.yml";
 const motionPreviewName = "nasdaq-cafe-motion-preview.yml";
@@ -32,6 +37,11 @@ const shotPlanName = "nasdaq-cafe-shot-plan-apply.yml";
 for (const required of [
   previewName,
   handoffPreviewName,
+  candidatePreviewRequestName,
+  candidatePreviewWorkerName,
+  candidateFinalRequestName,
+  candidateFinalWorkerName,
+  currentRequestGateName,
   scheduledName,
   statusName,
   motionPreviewName,
@@ -57,13 +67,21 @@ for (const [file, text] of contents) {
   const startsPreview =
     text.includes("episode:spec:preview") || text.includes("GEMINI_API_KEY_");
   if (startsPreview) {
-    assert(
-      officialPreviewWorkflows.has(file),
-      `only official manual preview workflows may call Gemini TTS or render a preview: ${file}`,
-    );
-    assert(hasEvent(text, "workflow_dispatch"), `${file}: preview must be manual-only`);
-    for (const event of automaticEvents) {
-      assert(!hasEvent(text, event), `${file}: preview cannot use automatic event ${event}`);
+    if (file === candidatePreviewWorkerName) {
+      assert(hasEvent(text, "workflow_call"), `${file}: candidate Preview worker must be reusable`);
+      assert(!hasEvent(text, "workflow_dispatch"), `${file}: candidate Preview worker cannot be manually dispatched`);
+      for (const event of automaticEvents) {
+        assert(!hasEvent(text, event), `${file}: candidate Preview worker cannot own automatic event ${event}`);
+      }
+    } else {
+      assert(
+        officialPreviewWorkflows.has(file),
+        `only official legacy/manual Preview workflows or the qualified candidate worker may call Gemini TTS or render a preview: ${file}`,
+      );
+      assert(hasEvent(text, "workflow_dispatch"), `${file}: preview must be manual-only`);
+      for (const event of automaticEvents) {
+        assert(!hasEvent(text, event), `${file}: preview cannot use automatic event ${event}`);
+      }
     }
   }
 
@@ -134,6 +152,24 @@ assert(
 assert(!handoffPreview.includes("episode:spec:final"));
 console.log("PASS: handoff preview is manual-only, immutable-input-driven, and preview-only");
 
+const candidatePreviewRequest = contents.get(candidatePreviewRequestName)!;
+const candidatePreviewWorker = contents.get(candidatePreviewWorkerName)!;
+const currentRequestGate = contents.get(currentRequestGateName)!;
+assert(hasEvent(candidatePreviewRequest, "push"));
+assert(candidatePreviewRequest.includes("uses: ./.github/workflows/nasdaq-cafe-preview-handoff-v2.yml"));
+assert(candidatePreviewRequest.includes("ref: ${{ github.sha }}"));
+assert(!candidatePreviewRequest.includes("github.actor == github.repository_owner"));
+assert(!candidatePreviewRequest.includes("signedArtifactUrl"));
+assert(hasEvent(candidatePreviewWorker, "workflow_call"));
+assert(!hasEvent(candidatePreviewWorker, "workflow_dispatch"));
+assert(candidatePreviewWorker.includes("NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN is required for Current Preview"));
+assert(candidatePreviewWorker.includes("retention-days: 90"));
+assert(!candidatePreviewWorker.includes("signed_artifact_url"));
+assert(hasEvent(currentRequestGate, "pull_request"));
+assert(currentRequestGate.includes('      - "handoff-preview-requests-v4/*.json"'));
+assert(currentRequestGate.includes('      - "final-render-requests-v2/*.json"'));
+console.log("PASS: candidate Current Preview is reusable, event-pinned, token-only, and pre-merge request-gated");
+
 const scheduled = contents.get(scheduledName)!;
 assert(hasEvent(scheduled, "schedule"));
 assert(hasEvent(scheduled, "workflow_dispatch"));
@@ -199,6 +235,24 @@ assert(
 assert(!finalRequest.includes("actions/workflows/nasdaq-cafe-final.yml/dispatches"));
 assert(!finalRequest.includes("episode:spec:final"));
 console.log("PASS: Final request queue is owner-only, append-only, lineage-bound, and single-entry");
+
+const candidateFinalRequest = contents.get(candidateFinalRequestName)!;
+const candidateFinalWorker = contents.get(candidateFinalWorkerName)!;
+assert(hasEvent(candidateFinalRequest, "push"));
+assert(candidateFinalRequest.includes("uses: ./.github/workflows/nasdaq-cafe-final-v2.yml"));
+assert(candidateFinalRequest.includes("ref: ${{ github.sha }}"));
+assert(!candidateFinalRequest.includes("github.actor == github.repository_owner"));
+for (const token of ("plotAuthorizationRunId", "humanPreviewReviewSha256", "plotFinalAuthorizationSha256", "finalFingerprint")) {
+  assert(candidateFinalRequest.includes(token), `${candidateFinalRequestName}: missing ${token}`);
+}
+assert(hasEvent(candidateFinalWorker, "workflow_call"));
+assert(candidateFinalWorker.includes("verify-final-authorization-bundle.py"));
+assert(candidateFinalWorker.includes("NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN"));
+assert(candidateFinalWorker.includes("nasdaq-cafe-final-outcome-${{ inputs.final_fingerprint }}"));
+assert(candidateFinalWorker.includes("ALREADY_COMPLETED"));
+assert(candidateFinalWorker.includes("retention-days: 90"));
+assert(!candidateFinalWorker.includes("signed_artifact_url"));
+console.log("PASS: candidate Current Final is authorization-bound, token-only, idempotent, and reusable");
 
 const motionPreview = contents.get(motionPreviewName)!;
 assert(hasEvent(motionPreview, "workflow_dispatch"));
