@@ -1,0 +1,83 @@
+name: Nasdaq Cafe Current Final Request V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "final-render-requests-v2/*.json"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nasdaq-cafe-current-final-request-v2
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      episode_date: ${{ steps.r.outputs.episode_date }}
+      preview_run_id: ${{ steps.r.outputs.preview_run_id }}
+      preview_sha: ${{ steps.r.outputs.preview_sha }}
+      identity_sha: ${{ steps.r.outputs.identity_sha }}
+      renderer_commit: ${{ steps.r.outputs.renderer_commit }}
+      renderer_contract: ${{ steps.r.outputs.renderer_contract }}
+      registry_sha: ${{ steps.r.outputs.registry_sha }}
+      spec_sha: ${{ steps.r.outputs.spec_sha }}
+      tts_input_sha: ${{ steps.r.outputs.tts_input_sha }}
+      audio_01_04_sha: ${{ steps.r.outputs.audio_01_04_sha }}
+      audio_05_09_sha: ${{ steps.r.outputs.audio_05_09_sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 2
+          persist-credentials: false
+      - id: r
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only HEAD^ HEAD -- 'final-render-requests-v2/*.json')
+          [[ ${#changed[@]} -eq 1 ]]
+          python3 - "${changed[0]}" <<'PY'
+          import json, os, re, sys
+          from pathlib import Path
+          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          required={'requestVersion','episodeDate','previewRunId','approvedPreviewSha256','previewIdentitySha256','rendererCommit','rendererContractVersion','registrySnapshotSha256','renderSpecSha256','ttsInputSha256','ttsBlockAudioSha256','confirmation'}
+          if set(v)!=required: raise SystemExit(f'fields mismatch: {sorted(v)}')
+          if v['requestVersion']!='2.0.0' or v['confirmation']!='FINAL_RENDER': raise SystemExit('Final request contract/confirmation mismatch')
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',str(v['episodeDate'])): raise SystemExit('bad date')
+          if not isinstance(v['previewRunId'],int) or isinstance(v['previewRunId'],bool) or v['previewRunId']<=0: raise SystemExit('bad previewRunId')
+          for key in ('approvedPreviewSha256','previewIdentitySha256','registrySnapshotSha256','renderSpecSha256','ttsInputSha256'):
+              if not re.fullmatch(r'[0-9a-f]{64}',str(v[key])): raise SystemExit(f'bad {key}')
+          if not re.fullmatch(r'[0-9a-f]{40}',str(v['rendererCommit'])): raise SystemExit('bad Renderer commit')
+          audio=v['ttsBlockAudioSha256']
+          if set(audio)!={'scenes-01-04','scenes-05-09'}: raise SystemExit('audio block map mismatch')
+          for x in audio.values():
+              if not re.fullmatch(r'[0-9a-f]{64}',str(x)): raise SystemExit('bad audio SHA')
+          out={'episode_date':v['episodeDate'],'preview_run_id':v['previewRunId'],'preview_sha':v['approvedPreviewSha256'],'identity_sha':v['previewIdentitySha256'],'renderer_commit':v['rendererCommit'],'renderer_contract':v['rendererContractVersion'],'registry_sha':v['registrySnapshotSha256'],'spec_sha':v['renderSpecSha256'],'tts_input_sha':v['ttsInputSha256'],'audio_01_04_sha':audio['scenes-01-04'],'audio_05_09_sha':audio['scenes-05-09']}
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              for k,x in out.items(): f.write(f'{k}={x}\n')
+          PY
+
+  final:
+    needs: resolve
+    uses: ./.github/workflows/nasdaq-cafe-final-v2.yml
+    with:
+      episode_date: ${{ needs.resolve.outputs.episode_date }}
+      preview_run_id: ${{ needs.resolve.outputs.preview_run_id }}
+      approved_preview_sha256: ${{ needs.resolve.outputs.preview_sha }}
+      preview_identity_sha256: ${{ needs.resolve.outputs.identity_sha }}
+      renderer_commit: ${{ needs.resolve.outputs.renderer_commit }}
+      renderer_contract_version: ${{ needs.resolve.outputs.renderer_contract }}
+      registry_snapshot_sha256: ${{ needs.resolve.outputs.registry_sha }}
+      render_spec_sha256: ${{ needs.resolve.outputs.spec_sha }}
+      tts_input_sha256: ${{ needs.resolve.outputs.tts_input_sha }}
+      audio_01_04_sha256: ${{ needs.resolve.outputs.audio_01_04_sha }}
+      audio_05_09_sha256: ${{ needs.resolve.outputs.audio_05_09_sha }}
+      confirmation: FINAL
+    secrets: inherit
