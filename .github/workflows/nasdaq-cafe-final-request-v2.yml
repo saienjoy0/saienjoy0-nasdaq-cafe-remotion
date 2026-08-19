@@ -43,6 +43,20 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
           persist-credentials: false
+      - name: Verify shared Final request validator owns canonical source keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          for field in \
+            plotAuthorizationRunId \
+            humanPreviewReviewSha256 \
+            plotFinalAuthorizationSha256 \
+            finalFingerprint; do
+            grep -F "\"${field}\"" scripts/validate-current-request.py >/dev/null || {
+              echo "::error::Current Final validator is missing canonical source field: ${field}"
+              exit 1
+            }
+          done
       - id: request-path
         shell: bash
         env:
