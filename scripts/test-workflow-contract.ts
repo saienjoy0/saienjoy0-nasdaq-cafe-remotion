@@ -242,7 +242,7 @@ assert(hasEvent(candidateFinalRequest, "push"));
 assert(candidateFinalRequest.includes("uses: ./.github/workflows/nasdaq-cafe-final-v2.yml"));
 assert(candidateFinalRequest.includes("ref: ${{ github.sha }}"));
 assert(!candidateFinalRequest.includes("github.actor == github.repository_owner"));
-for (const token of ("plotAuthorizationRunId", "humanPreviewReviewSha256", "plotFinalAuthorizationSha256", "finalFingerprint")) {
+for (const token of ["plotAuthorizationRunId", "humanPreviewReviewSha256", "plotFinalAuthorizationSha256", "finalFingerprint"]) {
   assert(candidateFinalRequest.includes(token), `${candidateFinalRequestName}: missing ${token}`);
 }
 assert(hasEvent(candidateFinalWorker, "workflow_call"));
