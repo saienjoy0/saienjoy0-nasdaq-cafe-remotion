@@ -8,6 +8,7 @@ preview_worker = read('.github/workflows/nasdaq-cafe-preview-handoff-v2.yml')
 final_request = read('.github/workflows/nasdaq-cafe-final-request-v2.yml')
 final_worker = read('.github/workflows/nasdaq-cafe-final-v2.yml')
 request_gate = read('.github/workflows/current-request-publication-gate.yml')
+preview_status = read('.github/workflows/nasdaq-cafe-preview-status.yml')
 preview_entry = read('scripts/nasdaq-cafe-preview-entry.sh')
 final_entry = read('scripts/nasdaq-cafe-final-entry.sh')
 restore = read('scripts/restore-approved-preview-for-final.py')
@@ -19,6 +20,18 @@ auth_verify = read('scripts/verify-final-authorization-bundle.py')
 for token in ('pull_request:', 'git diff --name-status', 'Current requests are append-only'):
     if token not in request_gate:
         raise AssertionError(f'Current request publication gate missing: {token}')
+if '--require-publication-path' not in request_gate or '--require-publication-path' not in preview_request:
+    raise AssertionError('Preview publication path is not revalidated before and after merge')
+for token in (
+    'Nasdaq Cafe Current Preview Request V4',
+    "github.event.workflow_run.event == 'push'",
+    'nasdaq-cafe-current-preview-',
+    'RENDER_SUCCEEDED',
+    'plot_run_id',
+    'request_sha256',
+):
+    if token not in preview_status:
+        raise AssertionError(f'Current Preview terminal receipt missing: {token}')
 for workflow, label in ((preview_request, 'Preview V4'), (final_request, 'Final V2 request')):
     if 'ref: ${{ github.sha }}' not in workflow:
         raise AssertionError(f'{label} does not execute immutable event SHA')

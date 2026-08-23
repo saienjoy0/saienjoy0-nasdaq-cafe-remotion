@@ -12,6 +12,7 @@ SHA256_RE = re.compile(r"[0-9a-f]{64}")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 SAFE_NAME_RE = re.compile(r"[A-Za-z0-9._-]+")
+PREVIEW_REQUEST_DIR = "handoff-preview-requests-v4"
 
 
 class RequestError(ValueError):
@@ -61,6 +62,9 @@ def validate_preview(value: dict[str, Any]) -> dict[str, str]:
         raise RequestError("bad plotRunId")
     if not isinstance(value["handoffArtifactName"], str) or not SAFE_NAME_RE.fullmatch(value["handoffArtifactName"]):
         raise RequestError("unsafe handoffArtifactName")
+    expected_artifact_name = f"nasdaq-cafe-handoff-{value['episodeDate']}-{value['plotRunId']}"
+    if value["handoffArtifactName"] != expected_artifact_name:
+        raise RequestError("handoffArtifactName is not bound to episodeDate/plotRunId")
     for key in ("expectedBundleId", "expectedManifestSha256", "expectedRegistrySnapshotSha256"):
         require_sha(value[key], key)
     require_commit(value["expectedRendererCommit"], "expectedRendererCommit")
@@ -76,6 +80,21 @@ def validate_preview(value: dict[str, Any]) -> dict[str, str]:
         "renderer_contract": value["expectedRendererContractVersion"],
         "registry_sha": value["expectedRegistrySnapshotSha256"],
     }
+
+
+def require_preview_publication_path(path: Path, value: dict[str, Any]) -> str:
+    """Require the Plot-issued deterministic append-only request identity."""
+    request_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+    expected = (
+        f"{PREVIEW_REQUEST_DIR}/{value['episodeDate']}-plot-"
+        f"{value['plotRunId']}-{request_sha[:12]}.json"
+    )
+    actual = path.as_posix()
+    while actual.startswith("./"):
+        actual = actual[2:]
+    if actual != expected:
+        raise RequestError(f"preview publication path mismatch: expected {expected}, got {actual}")
+    return request_sha
 
 
 def validate_final(value: dict[str, Any]) -> dict[str, str]:
@@ -146,11 +165,17 @@ def main() -> int:
     parser.add_argument("kind", choices=("preview", "final"))
     parser.add_argument("path", type=Path)
     parser.add_argument("--github-output", type=Path)
+    parser.add_argument("--require-publication-path", action="store_true")
     args = parser.parse_args()
     try:
         value = load(args.path)
         outputs = validate_preview(value) if args.kind == "preview" else validate_final(value)
-    except RequestError as exc:
+        if args.require_publication_path:
+            if args.kind != "preview":
+                raise RequestError("--require-publication-path is Preview-only")
+            outputs["request_sha256"] = require_preview_publication_path(args.path, value)
+            outputs["request_path"] = args.path.as_posix()
+    except (OSError, RequestError) as exc:
         print(json.dumps({"status": "FAIL", "error": str(exc)}))
         return 2
     if args.github_output:

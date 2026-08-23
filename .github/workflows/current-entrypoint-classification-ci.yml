@@ -1,0 +1,25 @@
+name: Current Entrypoint Classification CI
+
+on:
+  pull_request:
+    paths:
+      - "docs/current-spine/CURRENT_ENTRYPOINTS.md"
+      - "scripts/test-current-entrypoint-classification.py"
+      - ".github/workflows/current-entrypoint-classification-ci.yml"
+      - ".github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml"
+      - ".github/workflows/current-request-publication-gate.yml"
+      - ".github/workflows/nasdaq-cafe-preview-status.yml"
+      - ".github/workflows/nasdaq-cafe-final-request-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - run: python3 scripts/test-current-entrypoint-classification.py
+      - run: git diff --check

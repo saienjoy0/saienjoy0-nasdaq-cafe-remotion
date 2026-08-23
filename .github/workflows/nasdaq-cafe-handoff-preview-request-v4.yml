@@ -49,7 +49,11 @@ jobs:
           [[ "$PATH_VALUE" == handoff-preview-requests-v4/*.json ]] || { echo "::error::Unexpected Preview request path: $PATH_VALUE"; exit 1; }
           echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
       - id: r
-        run: python3 scripts/validate-current-request.py preview "${{ steps.request-path.outputs.path }}" --github-output "$GITHUB_OUTPUT"
+        run: >-
+          python3 scripts/validate-current-request.py preview
+          "${{ steps.request-path.outputs.path }}"
+          --require-publication-path
+          --github-output "$GITHUB_OUTPUT"
       - name: Verify request transport bytes against expected Renderer implementation
         shell: bash
         env:

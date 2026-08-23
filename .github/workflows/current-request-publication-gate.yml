@@ -39,7 +39,7 @@ jobs:
           [[ "$STATUS" == "A" ]] || { echo "::error::Current requests are append-only"; exit 1; }
           case "$PATH_VALUE" in
             handoff-preview-requests-v4/*.json)
-              python3 scripts/validate-current-request.py preview "$PATH_VALUE"
+              python3 scripts/validate-current-request.py preview "$PATH_VALUE" --require-publication-path
               ;;
             final-render-requests-v2/*.json)
               python3 scripts/validate-current-request.py final "$PATH_VALUE"
