@@ -11,12 +11,12 @@ permissions:
   actions: read
 
 concurrency:
-  group: nasdaq-cafe-current-preview-request-v4
+  group: nasdaq-cafe-current-preview-request-v4-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   resolve:
-    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -28,43 +28,46 @@ jobs:
       renderer_commit: ${{ steps.r.outputs.renderer_commit }}
       renderer_contract: ${{ steps.r.outputs.renderer_contract }}
       registry_sha: ${{ steps.r.outputs.registry_sha }}
-      signed_url: ${{ steps.r.outputs.signed_url }}
-      signed_digest: ${{ steps.r.outputs.signed_digest }}
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 2
           persist-credentials: false
-      - id: r
+      - id: request-path
         shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          mapfile -t changed < <(git diff --name-only HEAD^ HEAD -- 'handoff-preview-requests-v4/*.json')
-          [[ ${#changed[@]} -eq 1 ]]
-          python3 - "${changed[0]}" <<'PY'
-          import json, os, re, sys
-          from pathlib import Path
-          from urllib.parse import urlparse
-          v=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
-          required={'contractVersion','episodeDate','plotRunId','handoffArtifactName','expectedBundleId','expectedManifestSha256','expectedRendererCommit','expectedRendererContractVersion','expectedRegistrySnapshotSha256','signedArtifactUrl','signedArtifactDigestSha256','confirmation'}
-          if set(v)!=required: raise SystemExit(f'fields mismatch: {sorted(v)}')
-          if v['contractVersion']!='2.0.0' or v['confirmation']!='PREVIEW': raise SystemExit('request contract/confirmation mismatch')
-          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}',str(v['episodeDate'])): raise SystemExit('bad date')
-          if not isinstance(v['plotRunId'],int) or isinstance(v['plotRunId'],bool) or v['plotRunId']<=0: raise SystemExit('bad plotRunId')
-          for key in ('expectedBundleId','expectedManifestSha256','expectedRegistrySnapshotSha256'):
-              if not re.fullmatch(r'[0-9a-f]{64}',str(v[key])): raise SystemExit(f'bad {key}')
-          if not re.fullmatch(r'[0-9a-f]{40}',str(v['expectedRendererCommit'])): raise SystemExit('bad Renderer commit')
-          if not isinstance(v['expectedRendererContractVersion'],str) or not v['expectedRendererContractVersion']: raise SystemExit('bad Renderer contract')
-          if bool(v['signedArtifactUrl']) != bool(v['signedArtifactDigestSha256']): raise SystemExit('signed fallback pair mismatch')
-          if v['signedArtifactUrl']:
-              p=urlparse(v['signedArtifactUrl'])
-              if p.scheme!='https' or not p.hostname or not p.hostname.endswith('.oaiusercontent.com'): raise SystemExit('unsafe signed URL')
-              if not re.fullmatch(r'[0-9a-f]{64}',v['signedArtifactDigestSha256']): raise SystemExit('bad signed digest')
-          values={'episode_date':v['episodeDate'],'plot_run_id':v['plotRunId'],'artifact_name':v['handoffArtifactName'],'bundle_id':v['expectedBundleId'],'manifest_sha':v['expectedManifestSha256'],'renderer_commit':v['expectedRendererCommit'],'renderer_contract':v['expectedRendererContractVersion'],'registry_sha':v['expectedRegistrySnapshotSha256'],'signed_url':v['signedArtifactUrl'],'signed_digest':v['signedArtifactDigestSha256']}
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              for k,x in values.items(): f.write(f'{k}={x}\n')
-          PY
+          mapfile -t CHANGES < <(git diff --name-status "$BEFORE_SHA" "$TRIGGER_SHA")
+          [[ ${#CHANGES[@]} -eq 1 ]] || { echo "::error::Preview request merge must change exactly one file"; exit 1; }
+          STATUS="$(awk '{print $1}' <<<"${CHANGES[0]}")"
+          PATH_VALUE="$(awk '{print $2}' <<<"${CHANGES[0]}")"
+          [[ "$STATUS" == "A" ]] || { echo "::error::Preview request must be append-only"; exit 1; }
+          [[ "$PATH_VALUE" == handoff-preview-requests-v4/*.json ]] || { echo "::error::Unexpected Preview request path: $PATH_VALUE"; exit 1; }
+          echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
+      - id: r
+        run: >-
+          python3 scripts/validate-current-request.py preview
+          "${{ steps.request-path.outputs.path }}"
+          --require-publication-path
+          --github-output "$GITHUB_OUTPUT"
+      - name: Verify request transport bytes against expected Renderer implementation
+        shell: bash
+        env:
+          RENDERER_COMMIT: ${{ steps.r.outputs.renderer_commit }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$RENDERER_COMMIT" --depth=1
+          for file in \
+            .github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml \
+            .github/workflows/nasdaq-cafe-preview-handoff-v2.yml; do
+            EXPECTED="$(git show "$RENDERER_COMMIT:$file" | sha256sum | awk '{print $1}')"
+            ACTUAL="$(sha256sum "$file" | awk '{print $1}')"
+            [[ "$ACTUAL" == "$EXPECTED" ]] || { echo "::error::Current Preview transport drift: $file"; exit 1; }
+          done
 
   preview:
     needs: resolve
@@ -78,7 +81,5 @@ jobs:
       expected_renderer_commit: ${{ needs.resolve.outputs.renderer_commit }}
       expected_renderer_contract_version: ${{ needs.resolve.outputs.renderer_contract }}
       expected_registry_snapshot_sha256: ${{ needs.resolve.outputs.registry_sha }}
-      signed_artifact_url: ${{ needs.resolve.outputs.signed_url }}
-      signed_artifact_digest_sha256: ${{ needs.resolve.outputs.signed_digest }}
       confirmation: PREVIEW
     secrets: inherit

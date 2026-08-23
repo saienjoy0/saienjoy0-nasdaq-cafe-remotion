@@ -163,7 +163,11 @@ npm run episode:spec:inspect -- render-specs/YYYY-MM-DD/render_spec.json
 
 ## 7. GitHub Actionsの役割
 
-本番動画生成は`workflow_dispatch`による手動実行です。PR用CIはコード、契約、bundleの読取検査だけを実行し、TTSや動画生成を行いません。
+Current Previewは、Plotのpublication receiptが指定したpathへexact request bytesだけを
+追加するrequest-only PRをpublication gateで検証し、mainへmergeした時だけV4 workflowが
+一度起動します。同じrequest bytesは同じpathを使い、既存pathを更新しません。Current
+Finalもhuman approvalに結び付いた明示的なrequest-only PRが必要です。通常のPR用CIは
+コード、契約、bundleの読取検査だけを実行し、TTSや動画生成を行いません。
 
 本番Actionsの担当：
 
@@ -179,6 +183,7 @@ checkout
 → preview / 明示時のみfinal
 → 軽量機械チェック
 → Artifact保存
+→ Plot run IDとrequest SHAに結び付いたterminal status receipt
 ```
 
 Actionsが行わないこと：

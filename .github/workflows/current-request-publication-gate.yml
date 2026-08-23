@@ -1,0 +1,55 @@
+name: Current Request Publication Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "handoff-preview-requests-v4/*.json"
+      - "final-render-requests-v2/*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-request-only-pr:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require exactly one append-only Current request
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          test "$BASE_REF" = "main"
+          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA" --depth=1
+          mapfile -t CHANGES < <(git diff --name-status "$BASE_SHA" "$HEAD_SHA")
+          [[ ${#CHANGES[@]} -eq 1 ]] || { echo "::error::Current request PR must change exactly one file"; exit 1; }
+          STATUS="$(awk '{print $1}' <<<"${CHANGES[0]}")"
+          PATH_VALUE="$(awk '{print $2}' <<<"${CHANGES[0]}")"
+          [[ "$STATUS" == "A" ]] || { echo "::error::Current requests are append-only"; exit 1; }
+          case "$PATH_VALUE" in
+            handoff-preview-requests-v4/*.json)
+              python3 scripts/validate-current-request.py preview "$PATH_VALUE" --require-publication-path
+              ;;
+            final-render-requests-v2/*.json)
+              python3 scripts/validate-current-request.py final "$PATH_VALUE"
+              ;;
+            *)
+              echo "::error::Current request path is not allowed: $PATH_VALUE"
+              exit 1
+              ;;
+          esac
+      - name: Validate helper syntax
+        run: |
+          python3 -m py_compile scripts/validate-current-request.py
+          git diff --check

@@ -5,6 +5,8 @@ on:
     paths:
       - ".github/workflows/nasdaq-cafe-handoff-preview-request-v3.yml"
       - ".github/workflows/nasdaq-cafe-preview-handoff.yml"
+      - ".github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml"
+      - ".github/workflows/nasdaq-cafe-preview-handoff-v2.yml"
       - "scripts/test-preview-reusable-current-spine-contract.py"
       - ".github/workflows/preview-reusable-contract-ci.yml"
   workflow_dispatch:
@@ -18,5 +20,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-      - name: Validate reusable Preview topology
+      - name: Validate reusable Preview candidate topology
         run: python3 scripts/test-preview-reusable-current-spine-contract.py
+      - name: Syntax hygiene
+        run: |
+          python3 -m py_compile scripts/test-preview-reusable-current-spine-contract.py
+          git diff --check

@@ -8,7 +8,7 @@ on:
       - "handoff-preview-requests-v3/*.json"
 
 permissions:
-  actions: read
+  actions: write
   contents: read
 
 concurrency:
@@ -16,21 +16,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  resolve-request:
+  dispatch:
     if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' && github.actor == github.repository_owner
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    outputs:
-      episode_date: ${{ steps.request.outputs.episode_date }}
-      plot_run_id: ${{ steps.request.outputs.plot_run_id }}
-      artifact_name: ${{ steps.request.outputs.artifact_name }}
-      bundle_id: ${{ steps.request.outputs.bundle_id }}
-      manifest_sha: ${{ steps.request.outputs.manifest_sha }}
-      renderer_commit: ${{ steps.request.outputs.renderer_commit }}
-      renderer_contract_version: ${{ steps.request.outputs.renderer_contract_version }}
-      registry_snapshot_sha: ${{ steps.request.outputs.registry_snapshot_sha }}
-      signed_url: ${{ steps.request.outputs.signed_url }}
-      signed_digest: ${{ steps.request.outputs.signed_digest }}
+    timeout-minutes: 80
     steps:
       - name: Checkout owner request
         uses: actions/checkout@v6
@@ -65,13 +54,12 @@ jobs:
           required = {
               "contractVersion", "episodeDate", "plotRunId", "handoffArtifactName",
               "expectedBundleId", "expectedManifestSha256", "expectedRendererCommit",
-              "expectedRendererContractVersion", "expectedRegistrySnapshotSha256",
-              "signedArtifactUrl", "signedArtifactDigestSha256", "confirmation",
+              "rendererRef", "signedArtifactUrl", "signedArtifactDigestSha256", "confirmation",
           }
           if set(value) != required:
               raise SystemExit(f"request fields mismatch: {sorted(value)}")
-          if value["contractVersion"] != "1.1.0":
-              raise SystemExit("contractVersion must be 1.1.0")
+          if value["contractVersion"] != "1.0.0":
+              raise SystemExit("contractVersion must be 1.0.0")
           if value["confirmation"] != "PREVIEW":
               raise SystemExit("confirmation must be PREVIEW")
           if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(value["episodeDate"])):
@@ -80,19 +68,16 @@ jobs:
               raise SystemExit("bad plotRunId")
           if not re.fullmatch(r"[A-Za-z0-9._-]+", str(value["handoffArtifactName"])):
               raise SystemExit("unsafe handoffArtifactName")
-          for key in ("expectedBundleId", "expectedManifestSha256", "expectedRegistrySnapshotSha256", "signedArtifactDigestSha256"):
-              if value[key] and not re.fullmatch(r"[0-9a-f]{64}", str(value[key])):
+          for key in ("expectedBundleId", "expectedManifestSha256", "signedArtifactDigestSha256"):
+              if not re.fullmatch(r"[0-9a-f]{64}", str(value[key])):
                   raise SystemExit(f"bad {key}")
           if not re.fullmatch(r"[0-9a-f]{40}", str(value["expectedRendererCommit"])):
               raise SystemExit("bad expectedRendererCommit")
-          if not isinstance(value["expectedRendererContractVersion"], str) or not value["expectedRendererContractVersion"]:
-              raise SystemExit("bad expectedRendererContractVersion")
+          if not re.fullmatch(r"[A-Za-z0-9._/-]+", str(value["rendererRef"])):
+              raise SystemExit("unsafe rendererRef")
           parsed = urlparse(str(value["signedArtifactUrl"]))
-          if value["signedArtifactUrl"]:
-              if parsed.scheme != "https" or not parsed.hostname or not parsed.hostname.endswith(".oaiusercontent.com"):
-                  raise SystemExit("unsafe signedArtifactUrl")
-          elif value["signedArtifactDigestSha256"]:
-              raise SystemExit("signed Artifact digest requires URL")
+          if parsed.scheme != "https" or not parsed.hostname or not parsed.hostname.endswith(".oaiusercontent.com"):
+              raise SystemExit("unsafe signedArtifactUrl")
 
           mapping = {
               "episode_date": "episodeDate",
@@ -101,8 +86,7 @@ jobs:
               "bundle_id": "expectedBundleId",
               "manifest_sha": "expectedManifestSha256",
               "renderer_commit": "expectedRendererCommit",
-              "renderer_contract_version": "expectedRendererContractVersion",
-              "registry_snapshot_sha": "expectedRegistrySnapshotSha256",
+              "renderer_ref": "rendererRef",
               "signed_url": "signedArtifactUrl",
               "signed_digest": "signedArtifactDigestSha256",
           }
@@ -111,19 +95,58 @@ jobs:
                   out.write(f"{output_key}={value[input_key]}\n")
           PY
 
-  preview:
-    needs: resolve-request
-    uses: ./.github/workflows/nasdaq-cafe-preview-handoff.yml
-    with:
-      episode_date: ${{ needs.resolve-request.outputs.episode_date }}
-      plot_run_id: ${{ needs.resolve-request.outputs.plot_run_id }}
-      handoff_artifact_name: ${{ needs.resolve-request.outputs.artifact_name }}
-      expected_bundle_id: ${{ needs.resolve-request.outputs.bundle_id }}
-      expected_manifest_sha256: ${{ needs.resolve-request.outputs.manifest_sha }}
-      expected_renderer_commit: ${{ needs.resolve-request.outputs.renderer_commit }}
-      expected_renderer_contract_version: ${{ needs.resolve-request.outputs.renderer_contract_version }}
-      expected_registry_snapshot_sha256: ${{ needs.resolve-request.outputs.registry_snapshot_sha }}
-      signed_artifact_url: ${{ needs.resolve-request.outputs.signed_url }}
-      signed_artifact_digest_sha256: ${{ needs.resolve-request.outputs.signed_digest }}
-      confirmation: PREVIEW
-    secrets: inherit
+      - name: Dispatch official immutable handoff Preview
+        id: child
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODE_DATE: ${{ steps.request.outputs.episode_date }}
+          PLOT_RUN_ID: ${{ steps.request.outputs.plot_run_id }}
+          ARTIFACT_NAME: ${{ steps.request.outputs.artifact_name }}
+          BUNDLE_ID: ${{ steps.request.outputs.bundle_id }}
+          MANIFEST_SHA: ${{ steps.request.outputs.manifest_sha }}
+          RENDERER_COMMIT: ${{ steps.request.outputs.renderer_commit }}
+          RENDERER_REF: ${{ steps.request.outputs.renderer_ref }}
+          SIGNED_URL: ${{ steps.request.outputs.signed_url }}
+          SIGNED_DIGEST: ${{ steps.request.outputs.signed_digest }}
+        run: |
+          set -euo pipefail
+          WORKFLOW="nasdaq-cafe-preview-handoff.yml"
+          BEFORE_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$WORKFLOW" --limit 1 --json databaseId --jq '.[0].databaseId // 0')"
+          gh api --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/${WORKFLOW}/dispatches" \
+            -f ref="$RENDERER_REF" \
+            -f inputs[episode_date]="$EPISODE_DATE" \
+            -f inputs[plot_run_id]="$PLOT_RUN_ID" \
+            -f inputs[handoff_artifact_name]="$ARTIFACT_NAME" \
+            -f inputs[expected_bundle_id]="$BUNDLE_ID" \
+            -f inputs[expected_manifest_sha256]="$MANIFEST_SHA" \
+            -f inputs[expected_renderer_commit]="$RENDERER_COMMIT" \
+            -f inputs[signed_artifact_url]="$SIGNED_URL" \
+            -f inputs[signed_artifact_digest_sha256]="$SIGNED_DIGEST" \
+            -f inputs[confirmation]="PREVIEW"
+
+          RUN_ID=""
+          RUN_URL=""
+          for _ in $(seq 1 60); do
+            RESPONSE="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$WORKFLOW" --limit 30 --json databaseId,url,headBranch,event)"
+            RUN_ID="$(printf '%s' "$RESPONSE" | jq -r --argjson before "$BEFORE_ID" --arg branch "$RENDERER_REF" '[.[] | select(.databaseId > $before and .headBranch == $branch and .event == "workflow_dispatch")] | sort_by(.databaseId) | .[0].databaseId // empty')"
+            RUN_URL="$(printf '%s' "$RESPONSE" | jq -r --argjson before "$BEFORE_ID" --arg branch "$RENDERER_REF" '[.[] | select(.databaseId > $before and .headBranch == $branch and .event == "workflow_dispatch")] | sort_by(.databaseId) | .[0].url // empty')"
+            [[ -n "$RUN_ID" ]] && break
+            sleep 2
+          done
+          [[ -n "$RUN_ID" ]] || { echo "::error::child handoff Preview run not found"; exit 1; }
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+          echo "Dispatched official Preview run $RUN_ID"
+
+      - name: Wait for official Preview result
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.child.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status

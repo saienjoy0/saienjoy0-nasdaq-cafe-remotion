@@ -7,7 +7,9 @@ for heading in ('CURRENT PRODUCTION','LEGACY READ-ONLY / COMPATIBILITY','TEST / 
     if heading not in doc: raise AssertionError(f'missing entrypoint class: {heading}')
 for current in (
     '.github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml',
+    '.github/workflows/current-request-publication-gate.yml',
     '.github/workflows/nasdaq-cafe-preview-handoff-v2.yml',
+    '.github/workflows/nasdaq-cafe-preview-status.yml',
     '.github/workflows/nasdaq-cafe-final-request-v2.yml',
     '.github/workflows/nasdaq-cafe-final-v2.yml',
     'scripts/nasdaq-cafe-preview-entry.sh',
@@ -24,6 +26,9 @@ for legacy in (
 preview=(ROOT/'.github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml').read_text(encoding='utf-8')
 final=(ROOT/'.github/workflows/nasdaq-cafe-final-request-v2.yml').read_text(encoding='utf-8')
 if 'nasdaq-cafe-preview-handoff-v2.yml' not in preview: raise AssertionError('Current Preview request targets wrong worker')
+if '--require-publication-path' not in preview: raise AssertionError('Current Preview does not enforce deterministic publication path')
+if 'owner-triggered immutable Current Preview request' in doc: raise AssertionError('Current Preview documentation still describes the retired owner gate')
 if 'nasdaq-cafe-final-v2.yml' not in final: raise AssertionError('Current Final request targets wrong worker')
-if "v['confirmation']!='FINAL_RENDER'" not in final: raise AssertionError('Current Final is not explicit')
+if 'validate-current-request.py final' not in final or 'confirmation: FINAL' not in final:
+    raise AssertionError('Current Final is not explicit')
 print('Renderer current entrypoint classification PASS')

@@ -7,6 +7,8 @@ on:
       - "scripts/test-current-entrypoint-classification.py"
       - ".github/workflows/current-entrypoint-classification-ci.yml"
       - ".github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml"
+      - ".github/workflows/current-request-publication-gate.yml"
+      - ".github/workflows/nasdaq-cafe-preview-status.yml"
       - ".github/workflows/nasdaq-cafe-final-request-v2.yml"
   workflow_dispatch:
 

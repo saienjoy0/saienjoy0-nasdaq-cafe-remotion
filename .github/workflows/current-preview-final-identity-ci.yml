@@ -3,15 +3,20 @@ name: Current Preview Final Identity CI
 on:
   pull_request:
     paths:
+      - ".github/workflows/current-request-publication-gate.yml"
       - ".github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml"
       - ".github/workflows/nasdaq-cafe-preview-handoff-v2.yml"
+      - ".github/workflows/nasdaq-cafe-preview-status.yml"
       - ".github/workflows/nasdaq-cafe-final-request-v2.yml"
       - ".github/workflows/nasdaq-cafe-final-v2.yml"
+      - "scripts/validate-current-request.py"
+      - "scripts/verify-final-authorization-bundle.py"
       - "scripts/nasdaq-cafe-preview-entry.sh"
       - "scripts/nasdaq-cafe-final-entry.sh"
       - "scripts/capture-preview-current-spine-identity.py"
       - "scripts/restore-approved-preview-for-final.py"
       - "scripts/test-current-preview-final-identity-contract.py"
+      - "scripts/test-current-preview-publication-path.py"
       - ".github/workflows/current-preview-final-identity-ci.yml"
   workflow_dispatch:
 
@@ -25,10 +30,18 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Validate exact Preview Final identity topology
-        run: python3 scripts/test-current-preview-final-identity-contract.py
+        run: |
+          python3 scripts/test-current-preview-final-identity-contract.py
+          python3 scripts/test-current-preview-publication-path.py
       - name: Syntax and shell hygiene
         run: |
-          python3 -m py_compile scripts/capture-preview-current-spine-identity.py scripts/restore-approved-preview-for-final.py scripts/test-current-preview-final-identity-contract.py
+          python3 -m py_compile \
+            scripts/capture-preview-current-spine-identity.py \
+            scripts/restore-approved-preview-for-final.py \
+            scripts/validate-current-request.py \
+            scripts/verify-final-authorization-bundle.py \
+            scripts/test-current-preview-final-identity-contract.py \
+            scripts/test-current-preview-publication-path.py
           bash -n scripts/nasdaq-cafe-preview-entry.sh
           bash -n scripts/nasdaq-cafe-final-entry.sh
           git diff --check
