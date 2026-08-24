@@ -11,9 +11,11 @@ import type {
 } from "./visual-template-contract";
 import {
   visualCandidateCatalogSchema,
+  visualCandidateCoverageSchema,
   type EvidenceCapability,
   type VisualCandidate,
   type VisualCandidateCatalog,
+  type VisualCandidateCoverage,
   type VisualCapabilityHints,
   type VisualTemplatePolicy,
 } from "./visual-director-contract";
@@ -32,6 +34,11 @@ import {
 
 type Beat = RenderSpec["scenes"][number]["visualBeats"][number];
 type Scene = RenderSpec["scenes"][number];
+
+type CatalogAnalysis = {
+  catalog: VisualCandidateCatalog | null;
+  coverage: VisualCandidateCoverage | null;
+};
 
 const realityCapabilities = new Set<EvidenceCapability>([
   "source-document", "quote-social", "time-series", "entity", "image-media",
@@ -149,17 +156,19 @@ const templatesForNewPath = (
   return capabilityTemplates.filter((template) => allowed.has(template));
 };
 
-const buildCatalog = ({
+const buildCatalogAnalysis = ({
   spec,
   sourceRenderSpecSha256,
   hints,
   includeAuthoredCompatibility,
+  collectCoverage,
 }: {
   spec: RenderSpec;
   sourceRenderSpecSha256: string;
   hints?: VisualCapabilityHints;
   includeAuthoredCompatibility: boolean;
-}): VisualCandidateCatalog => {
+  collectCoverage: boolean;
+}): CatalogAnalysis => {
   if (spec.schemaVersion !== "2.4.0") throw new Error("Visual Director requires render_spec 2.4.0");
   if (hints && hints.episodeDate !== spec.episode.targetDate) throw new Error("capability hint episodeDate mismatch");
 
@@ -171,19 +180,22 @@ const buildCatalog = ({
   const inventoryMap = new Map(capabilityInventory.beats.map((item) => [item.visualBeatId, item.capabilities] as const));
   const hintMap = new Map(hints?.beats.map((item) => [item.visualBeatId, item] as const) ?? []);
   const candidates: VisualCandidate[] = [];
+  const coverageBeats: VisualCandidateCoverage["beats"] = [];
+  const unavailableBeats: string[] = [];
 
   for (const [sceneIndex, scene] of spec.scenes.entries()) {
     for (const [beatIndex, beat] of scene.visualBeats.entries()) {
       const hint = hintMap.get(beat.beatId);
       const primaryCapability = primaryCapabilityForTemplate(beat.visualTemplate);
       const financialOwned = beat.financialVisualTrace !== undefined;
+      const inferredCapabilities = [...(inventoryMap.get(beat.beatId) ?? [])];
       const capabilities = financialOwned
         ? [primaryCapability]
         : hint?.templatePolicy?.mode === "authored-only"
           ? [primaryCapability]
           : unique([
               ...(hint?.capabilities ?? []),
-              ...(inventoryMap.get(beat.beatId) ?? []),
+              ...inferredCapabilities,
               primaryCapability,
             ]).sort();
       const drafts = new Map<string, Omit<VisualCandidate, "candidateId">>();
@@ -222,8 +234,6 @@ const buildCatalog = ({
             assetState,
           };
 
-          // Candidate Local Soundness is deliberately Beat-local. Full RenderSpec,
-          // cross-Beat variety and measured timing remain later plan-level gates.
           try {
             assertStaticTemplateSoundness(
               scene,
@@ -257,7 +267,31 @@ const buildCatalog = ({
         }
       }
       const ordered = [...drafts.values()].sort((left, right) => candidateSignature(left).localeCompare(candidateSignature(right)));
-      if (ordered.length === 0) throw new Error(`${beat.beatId}: Candidate Builder produced no legal candidate`);
+      if (ordered.length === 0 && !collectCoverage) {
+        throw new Error(`${beat.beatId}: Candidate Builder produced no legal candidate`);
+      }
+      if (collectCoverage) {
+        const inventory = objectInventory(scene, beat);
+        coverageBeats.push({
+          visualBeatId: beat.beatId,
+          visualGrammarId: beat.visualGrammarId ?? "missing",
+          authoredVisualTemplate: beat.visualTemplate,
+          requestedCapabilities: [...(hint?.capabilities ?? [])],
+          inferredCapabilities,
+          inventory: {
+            cards: inventory.cards.length,
+            numbers: inventory.numbers.length,
+            nodes: inventory.nodes.length,
+            arrows: inventory.arrows.length,
+          },
+          legalCandidateCount: ordered.length,
+          failureCode: ordered.length === 0 ? "E_VISUAL_CANDIDATE_NONE" : null,
+        });
+      }
+      if (ordered.length === 0) {
+        unavailableBeats.push(beat.beatId);
+        continue;
+      }
       ordered.forEach((draft, index) => candidates.push({
         candidateId: `vc-${beat.beatId}-${String(index + 1).padStart(2, "0")}`,
         ...draft,
@@ -265,13 +299,54 @@ const buildCatalog = ({
     }
   }
 
-  return visualCandidateCatalogSchema.parse({
+  const coverage = collectCoverage
+    ? visualCandidateCoverageSchema.parse({
+        contractVersion: "1.0.0",
+        episodeDate: spec.episode.targetDate,
+        rendererContractVersion: "2.4.0",
+        sourceRenderSpecSha256,
+        status: unavailableBeats.length === 0 ? "PASS" : "UNAVAILABLE",
+        beatCount: coverageBeats.length,
+        unavailableBeatCount: unavailableBeats.length,
+        beats: coverageBeats,
+        unavailableBeats,
+      })
+    : null;
+
+  if (unavailableBeats.length > 0) {
+    return {catalog: null, coverage};
+  }
+
+  const catalog = visualCandidateCatalogSchema.parse({
     contractVersion: "1.0.0",
     episodeDate: spec.episode.targetDate,
     rendererContractVersion: "2.4.0",
     sourceRenderSpecSha256,
     candidates,
   });
+  return {catalog, coverage};
+};
+
+const buildCatalog = ({
+  spec,
+  sourceRenderSpecSha256,
+  hints,
+  includeAuthoredCompatibility,
+}: {
+  spec: RenderSpec;
+  sourceRenderSpecSha256: string;
+  hints?: VisualCapabilityHints;
+  includeAuthoredCompatibility: boolean;
+}): VisualCandidateCatalog => {
+  const result = buildCatalogAnalysis({
+    spec,
+    sourceRenderSpecSha256,
+    hints,
+    includeAuthoredCompatibility,
+    collectCoverage: false,
+  });
+  if (!result.catalog) throw new Error("Candidate Builder produced no legal candidate");
+  return result.catalog;
 };
 
 export const buildVisualCandidateCatalog = ({
@@ -303,6 +378,26 @@ export const buildVisualCandidateCatalogVNext = ({
   hints,
   includeAuthoredCompatibility: false,
 });
+
+export const analyzeVisualCandidateCatalogVNext = ({
+  spec,
+  sourceRenderSpecSha256,
+  hints,
+}: {
+  spec: RenderSpec;
+  sourceRenderSpecSha256: string;
+  hints?: VisualCapabilityHints;
+}): {catalog: VisualCandidateCatalog | null; coverage: VisualCandidateCoverage} => {
+  const result = buildCatalogAnalysis({
+    spec,
+    sourceRenderSpecSha256,
+    hints,
+    includeAuthoredCompatibility: false,
+    collectCoverage: true,
+  });
+  if (!result.coverage) throw new Error("Visual Candidate coverage missing");
+  return {catalog: result.catalog, coverage: result.coverage};
+};
 
 export const candidateTemplatesForCapabilities = (capabilities: readonly EvidenceCapability[]) =>
   unique(capabilities.flatMap((capability) => candidateTemplatesForCapability(capability))).sort();
