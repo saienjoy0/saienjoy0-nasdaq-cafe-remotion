@@ -3,6 +3,7 @@ import {readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import {renderSpecSchema} from "../src/spec/render-spec";
 import {
+  analyzeVisualCandidateCatalogVNext,
   buildVisualCandidateCatalog,
   buildVisualCandidateCatalogVNext,
 } from "../src/spec/visual-candidate-builder";
@@ -49,6 +50,7 @@ const main = async () => {
       }
       const candidateInputPath = arg("--candidate-input");
       const capabilityInventoryPath = arg("--capability-inventory");
+      const coveragePath = optionalArg("--coverage");
       const candidateInput = buildVisualCandidateInputFromRenderSpec({
         spec,
         editorialSnapshotSha256,
@@ -56,6 +58,19 @@ const main = async () => {
       const capabilityInventory = buildVisualCapabilityInventory(candidateInput);
       await writeJson(candidateInputPath, candidateInput);
       await writeJson(capabilityInventoryPath, capabilityInventory);
+      if (coveragePath) {
+        const analysis = analyzeVisualCandidateCatalogVNext({spec, sourceRenderSpecSha256, hints});
+        await writeJson(coveragePath, analysis.coverage);
+        if (!analysis.catalog) {
+          const error = new Error(
+            `E_VISUAL_CANDIDATE_COVERAGE_UNAVAILABLE:${analysis.coverage.unavailableBeats.join(",")}`,
+          );
+          error.name = "VisualCandidateCoverageUnavailable";
+          throw error;
+        }
+        await writeJson(arg("--catalog"), analysis.catalog);
+        return;
+      }
       await writeJson(
         arg("--catalog"),
         buildVisualCandidateCatalogVNext({spec, sourceRenderSpecSha256, hints}),
@@ -80,6 +95,7 @@ const main = async () => {
 };
 
 main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(message);
+  process.exitCode = message.startsWith("E_VISUAL_CANDIDATE_COVERAGE_UNAVAILABLE:") ? 3 : 1;
 });

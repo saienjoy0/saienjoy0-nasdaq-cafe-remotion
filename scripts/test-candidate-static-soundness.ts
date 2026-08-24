@@ -1,3 +1,4 @@
+import "./test-visual-candidate-coverage";
 import assert from "node:assert/strict";
 import {assertStaticTemplateSoundness} from "../src/spec/static-template-soundness";
 import {buildVisualCandidateCatalogVNext} from "../src/spec/visual-candidate-builder";

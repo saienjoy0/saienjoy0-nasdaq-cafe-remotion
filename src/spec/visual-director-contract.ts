@@ -57,6 +57,36 @@ export const visualCandidateCatalogSchema = z.object({
   candidates: z.array(visualCandidateSchema).min(1),
 }).strict();
 
+const visualCandidateCoverageInventorySchema = z.object({
+  cards: z.number().int().nonnegative(),
+  numbers: z.number().int().nonnegative(),
+  nodes: z.number().int().nonnegative(),
+  arrows: z.number().int().nonnegative(),
+}).strict();
+
+export const visualCandidateCoverageBeatSchema = z.object({
+  visualBeatId: safeId,
+  visualGrammarId: z.string().min(1),
+  authoredVisualTemplate: visualTemplateSchema,
+  requestedCapabilities: z.array(evidenceCapabilitySchema),
+  inferredCapabilities: z.array(evidenceCapabilitySchema),
+  inventory: visualCandidateCoverageInventorySchema,
+  legalCandidateCount: z.number().int().nonnegative(),
+  failureCode: z.literal("E_VISUAL_CANDIDATE_NONE").nullable(),
+}).strict();
+
+export const visualCandidateCoverageSchema = z.object({
+  contractVersion: z.literal("1.0.0"),
+  episodeDate: episodeDateSchema,
+  rendererContractVersion: z.literal("2.4.0"),
+  sourceRenderSpecSha256: sha256Schema,
+  status: z.enum(["PASS", "UNAVAILABLE"]),
+  beatCount: z.number().int().positive(),
+  unavailableBeatCount: z.number().int().nonnegative(),
+  beats: z.array(visualCandidateCoverageBeatSchema).min(1),
+  unavailableBeats: z.array(safeId),
+}).strict();
+
 export const visualDirectionPlanSchema = z.object({
   contractVersion: z.literal("1.0.0"),
   episodeDate: episodeDateSchema,
@@ -103,6 +133,7 @@ export const visualCapabilityHintsSchema = z.object({
 export type EvidenceCapability = z.infer<typeof evidenceCapabilitySchema>;
 export type VisualCandidate = z.infer<typeof visualCandidateSchema>;
 export type VisualCandidateCatalog = z.infer<typeof visualCandidateCatalogSchema>;
+export type VisualCandidateCoverage = z.infer<typeof visualCandidateCoverageSchema>;
 export type VisualDirectionPlan = z.infer<typeof visualDirectionPlanSchema>;
 export type VisualTemplatePolicy = z.infer<typeof visualTemplatePolicySchema>;
 export type VisualCapabilityHints = z.infer<typeof visualCapabilityHintsSchema>;
