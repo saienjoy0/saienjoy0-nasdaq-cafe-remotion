@@ -1,3 +1,4 @@
+import "./test-reaction-timeline-candidate-eligibility";
 import assert from "node:assert/strict";
 import {renderToStaticMarkup} from "react-dom/server";
 import {EventReactionTimelineTemplate} from "../src/components/spec/EventReactionTimelineTemplate";
