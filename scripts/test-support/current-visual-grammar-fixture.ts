@@ -124,5 +124,40 @@ export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
     }
   }
 
+  // This fixture drives the exact production Visual Director path, so it must
+  // satisfy the same whole-episode closure as any non-fixture RenderSpec. Keep
+  // the synthetic inventory and meaning stable while assigning the mandatory
+  // opening and final assembly templates to compatible one-card Beats.
+  const openingBeat = value.scenes[0].visualBeats[0];
+  openingBeat.visualTemplate = "opening-contradiction";
+  openingBeat.visualMode = "conclusion-card";
+  openingBeat.visualGrammarId = "contradiction";
+  openingBeat.templateVariant = "default";
+  openingBeat.templateConfig.variant = "default";
+  value.scenes[0].visualMode = "conclusion-card";
+
+  const finalAssemblyBeat = value.scenes[8].visualBeats[0];
+  finalAssemblyBeat.visualTemplate = "final-assembly";
+  finalAssemblyBeat.visualMode = "conclusion-card";
+  finalAssemblyBeat.visualGrammarId = "assembly";
+  finalAssemblyBeat.templateVariant = "default";
+  finalAssemblyBeat.templateConfig.variant = "default";
+  value.scenes[8].visualMode = "conclusion-card";
+
+  // Historical TEST labels embed the Scene ordinal. It is fixture metadata, not
+  // a market claim, and must not appear as a novel Scene 9 numeric assertion.
+  const withoutSyntheticSceneNumber = (text: string) => text.replace(/\b9\b/g, "nine");
+  value.scenes[8].headline = withoutSyntheticSceneNumber(value.scenes[8].headline);
+  value.scenes[8].supportingTexts = value.scenes[8].supportingTexts.map(withoutSyntheticSceneNumber);
+  for (const beat of value.scenes[8].visualBeats) {
+    beat.viewerTexts = beat.viewerTexts.map(withoutSyntheticSceneNumber);
+  }
+  for (const card of value.scenes[8].cards) {
+    for (const line of card.lines) line.value = withoutSyntheticSceneNumber(line.value);
+  }
+  for (const number of value.scenes[8].numbers) {
+    number.value = withoutSyntheticSceneNumber(number.value);
+  }
+
   return renderSpecSchema.parse(value);
 };
