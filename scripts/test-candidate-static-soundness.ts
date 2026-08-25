@@ -4,12 +4,17 @@ import {assertStaticTemplateSoundness} from "../src/spec/static-template-soundne
 import {buildVisualCandidateCatalogVNext} from "../src/spec/visual-candidate-builder";
 import {getVisualComponentDescriptor} from "../src/spec/visual-component-registry";
 import {sha256Json} from "../src/spec/visual-director-contract";
+import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
 import {
   cloneTestValue,
   makeCurrentVisualDirectorFixture,
 } from "./test-support/current-visual-grammar-fixture";
 
 const source = makeCurrentVisualDirectorFixture();
+assert.doesNotThrow(
+  () => validateVisualStoryContract(source),
+  "the shared Current Visual Director fixture must itself satisfy the official Visual Story contract",
+);
 const verificationScene = source.scenes.find((scene) =>
   scene.visualBeats.some((beat) => beat.visualTemplate === "verification-checklist"),
 );
