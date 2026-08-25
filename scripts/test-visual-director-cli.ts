@@ -60,6 +60,69 @@ try {
   assert.equal(capabilityInventory.visualCandidateInputSha256, sha256Json(candidateInput));
   assert.equal(catalog.sourceRenderSpecSha256, createHash("sha256").update(specBytes).digest("hex"));
   assert.ok(catalog.candidates.length >= candidateInput.beats.length);
+
+  // Production compile must validate the compiled Visual Story, not only the broad
+  // RenderSpec enum/schema. A hand-corrupted Candidate remains schema-valid because
+  // `reported-sequence` is a global variant ID, but it is illegal for
+  // verification-checklist and must therefore be rejected by the official visual
+  // story contract before Visual Intelligence can report PASS.
+  const invalidCatalog = structuredClone(catalog);
+  const invalidCandidate = invalidCatalog.candidates.find(
+    (candidate: {visualTemplate: string}) => candidate.visualTemplate === "verification-checklist",
+  );
+  assert.ok(invalidCandidate, "fixture must expose a verification-checklist Candidate");
+  invalidCandidate.templateVariant = "reported-sequence";
+  invalidCandidate.templateConfig.variant = "reported-sequence";
+
+  const selections = candidateInput.beats.map((inputBeat: {visualBeatId: string}) => {
+    const candidates = invalidCatalog.candidates.filter(
+      (candidate: {visualBeatId: string}) => candidate.visualBeatId === inputBeat.visualBeatId,
+    );
+    assert.ok(candidates.length > 0, `missing Candidate for ${inputBeat.visualBeatId}`);
+    const selected = inputBeat.visualBeatId === invalidCandidate.visualBeatId
+      ? invalidCandidate
+      : candidates[0];
+    return {visualBeatId: inputBeat.visualBeatId, candidateId: selected.candidateId};
+  });
+  const invalidCatalogPath = path.join(root, "invalid_visual_candidate_catalog.json");
+  const invalidPlanPath = path.join(root, "invalid_visual_direction_plan.json");
+  const invalidOutputPath = path.join(root, "invalid_visual_direction_compiled.json");
+  const invalidReportPath = path.join(root, "invalid_visual_direction_report.json");
+  writeFileSync(invalidCatalogPath, JSON.stringify(invalidCatalog, null, 2) + "\n");
+  writeFileSync(
+    invalidPlanPath,
+    JSON.stringify({
+      contractVersion: "1.0.0",
+      episodeDate: spec.episode.targetDate,
+      candidateCatalogSha256: sha256Json(invalidCatalog),
+      selections,
+    }, null, 2) + "\n",
+  );
+
+  const invalidCompile = spawnSync(
+    process.execPath,
+    [
+      "--import", "tsx",
+      "scripts/visual-director-cli.ts", "compile",
+      "--spec", specPath,
+      "--catalog", invalidCatalogPath,
+      "--plan", invalidPlanPath,
+      "--output", invalidOutputPath,
+      "--report", invalidReportPath,
+    ],
+    {cwd: process.cwd(), encoding: "utf8"},
+  );
+  assert.notEqual(
+    invalidCompile.status,
+    0,
+    "production Visual Director compile must reject a template-specific illegal variant",
+  );
+  assert.match(
+    `${invalidCompile.stderr}\n${invalidCompile.stdout}`,
+    /reported-sequence is not registered for verification-checklist/,
+    "compile rejection must come from the official Visual Story template-variant contract",
+  );
+
   console.log(`visual director CLI vNext tests passed: ${catalog.candidates.length} candidates`);
 } finally {
   rmSync(root, {recursive: true, force: true});
