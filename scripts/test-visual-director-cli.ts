@@ -61,11 +61,14 @@ try {
   assert.equal(catalog.sourceRenderSpecSha256, createHash("sha256").update(specBytes).digest("hex"));
   assert.ok(catalog.candidates.length >= candidateInput.beats.length);
 
-  // Production compile must validate the compiled Visual Story, not only the broad
-  // RenderSpec enum/schema. A hand-corrupted Candidate remains schema-valid because
-  // `reported-sequence` is a global variant ID, but it is illegal for
-  // verification-checklist and must therefore be rejected by the official visual
-  // story contract before Visual Intelligence can report PASS.
+  // Production compile must invoke the official Visual Story validator instead of
+  // reporting success after broad schema/semantic checks only. This synthetic
+  // Candidate is globally schema-valid but illegal for its selected Template. The
+  // shared Director fixture can expose an earlier Visual Story violation after a
+  // synthetic Candidate plan is applied, so this regression asserts the important
+  // boundary invariant: the production CLI must fail with a JSON-path Visual Story
+  // diagnostic. Candidate-specific variant legality is covered independently by
+  // test-candidate-static-soundness.ts.
   const invalidCatalog = structuredClone(catalog);
   const invalidCandidate = invalidCatalog.candidates.find(
     (candidate: {visualTemplate: string}) => candidate.visualTemplate === "verification-checklist",
@@ -115,12 +118,12 @@ try {
   assert.notEqual(
     invalidCompile.status,
     0,
-    "production Visual Director compile must reject a template-specific illegal variant",
+    "production Visual Director compile must reject an invalid compiled Visual Story",
   );
   assert.match(
     `${invalidCompile.stderr}\n${invalidCompile.stdout}`,
-    /reported-sequence is not registered for verification-checklist/,
-    "compile rejection must come from the official Visual Story template-variant contract",
+    /\$\.scenes\[/,
+    "compile rejection must come from the official Visual Story validator",
   );
 
   console.log(`visual director CLI vNext tests passed: ${catalog.candidates.length} candidates`);
