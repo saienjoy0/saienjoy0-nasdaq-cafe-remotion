@@ -11,35 +11,6 @@ import {makeCurrentVisualDirectorFixture} from "./test-support/current-visual-gr
 const root = mkdtempSync(path.join(tmpdir(), "nasdaq-cafe-vnext-cli-"));
 try {
   const spec = makeCurrentVisualDirectorFixture();
-  // The shared fixture targets local grammar coverage. Specialize this copy into
-  // a whole-episode production baseline so strict compile validation has one
-  // unambiguous boundary to exercise.
-  const openingBeat = spec.scenes[0].visualBeats[0];
-  openingBeat.visualTemplate = "opening-contradiction";
-  openingBeat.visualMode = "conclusion-card";
-  openingBeat.visualGrammarId = "contradiction";
-  openingBeat.templateVariant = "default";
-  openingBeat.templateConfig.variant = "default";
-  spec.scenes[0].visualMode = "conclusion-card";
-  const finalAssemblyBeat = spec.scenes[8].visualBeats[0];
-  finalAssemblyBeat.visualTemplate = "final-assembly";
-  finalAssemblyBeat.visualMode = "conclusion-card";
-  finalAssemblyBeat.visualGrammarId = "assembly";
-  finalAssemblyBeat.templateVariant = "default";
-  finalAssemblyBeat.templateConfig.variant = "default";
-  spec.scenes[8].visualMode = "conclusion-card";
-  const withoutSyntheticSceneNumber = (value: string) => value.replace(/\b9\b/g, "nine");
-  spec.scenes[8].headline = withoutSyntheticSceneNumber(spec.scenes[8].headline);
-  spec.scenes[8].supportingTexts = spec.scenes[8].supportingTexts.map(withoutSyntheticSceneNumber);
-  for (const beat of spec.scenes[8].visualBeats) {
-    beat.viewerTexts = beat.viewerTexts.map(withoutSyntheticSceneNumber);
-  }
-  for (const card of spec.scenes[8].cards) {
-    for (const line of card.lines) line.value = withoutSyntheticSceneNumber(line.value);
-  }
-  for (const number of spec.scenes[8].numbers) {
-    number.value = withoutSyntheticSceneNumber(number.value);
-  }
   const specPath = path.join(root, "render_spec.json");
   const hintsPath = path.join(root, "visual_capability_hints.json");
   const candidateInputPath = path.join(root, "visual_candidate_input.json");
