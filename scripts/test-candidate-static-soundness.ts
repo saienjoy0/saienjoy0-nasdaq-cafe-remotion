@@ -77,6 +77,43 @@ assert.deepEqual(
   "lane labels must be derived from existing viewer text rather than invented by Machine",
 );
 
+const illegalVariantSpec = cloneTestValue(source);
+const illegalVariantSceneIndex = illegalVariantSpec.scenes.findIndex((scene) =>
+  scene.visualBeats.some((beat) => beat.beatId === verificationBeat.beatId),
+);
+assert.ok(illegalVariantSceneIndex >= 0);
+const illegalVariantScene = illegalVariantSpec.scenes[illegalVariantSceneIndex];
+const illegalVariantBeat = illegalVariantScene.visualBeats.find(
+  (beat) => beat.beatId === verificationBeat.beatId,
+)!;
+illegalVariantBeat.visualTemplate = "verification-matrix";
+illegalVariantBeat.templateVariant = "default" as never;
+illegalVariantBeat.visualMode = "verification-points";
+illegalVariantBeat.screenState = "Data";
+illegalVariantBeat.viewerTexts = ["支持｜確認材料", "反証｜反対材料"];
+illegalVariantBeat.templateConfig = {
+  ...illegalVariantBeat.templateConfig,
+  variant: "default" as never,
+  laneLabels: ["支持", "反証"],
+};
+illegalVariantSpec.scenes = [illegalVariantScene];
+illegalVariantScene.visualBeats = [illegalVariantBeat];
+const illegalVariantCatalog = buildVisualCandidateCatalogVNext({
+  spec: illegalVariantSpec,
+  sourceRenderSpecSha256: sha256Json(illegalVariantSpec),
+  hints: {
+    contractVersion: "1.0.0",
+    episodeDate: illegalVariantSpec.episode.targetDate,
+    beats: [{visualBeatId: illegalVariantBeat.beatId, capabilities: ["verification"]}],
+  },
+});
+assert.ok(
+  !illegalVariantCatalog.candidates.some(
+    (candidate) => candidate.visualTemplate === "verification-matrix" && candidate.templateVariant === ("default" as never),
+  ),
+  "Candidate Builder must never expose a template variant that is not registered for that template",
+);
+
 const noLaneEvidenceSpec = cloneTestValue(source);
 const noLaneSceneIndex = noLaneEvidenceSpec.scenes.findIndex((scene) =>
   scene.visualBeats.some((beat) => beat.beatId === verificationBeat.beatId),
