@@ -3,6 +3,7 @@ import {
   isFinancialRecipeTemplatePairAllowed,
   isFinancialVisualTemplate,
 } from "./financial-visual-contract";
+import {getVisualComponentDescriptor} from "./visual-component-registry";
 import {planSourceReceiptLayout} from "./template-layout/source-receipt-layout";
 
 type Scene = RenderSpec["scenes"][number];
@@ -72,6 +73,13 @@ export const assertStaticTemplateSoundness = (
   beat: StaticBeat,
   path: string,
 ) => {
+  const descriptor = getVisualComponentDescriptor(beat.visualTemplate);
+  if (!descriptor.variants.includes(beat.templateConfig.variant)) {
+    throw new Error(
+      `${path}.templateConfig.variant: ${beat.templateConfig.variant} is not registered for ${beat.visualTemplate}`,
+    );
+  }
+
   const objectIds = new Set(beat.objectIds);
   const visibleNumbers = scene.numbers.filter((number) => objectIds.has(number.numberId));
   const visibleCards = scene.cards.filter((card) => objectIds.has(card.cardId));
