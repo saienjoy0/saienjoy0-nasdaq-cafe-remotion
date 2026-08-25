@@ -10,7 +10,7 @@ import {
   type VisualTemplateId,
 } from "../../src/spec/visual-template-contract";
 
-export const cloneTestValue = <T>(value: T): T => structuredClone(value);
+export const cloneTestValue = <T,>(value: T): T => structuredClone(value);
 
 export const makeCurrentVisualGrammarFixture = (): RenderSpec => {
   const value = cloneTestValue(fixtureJson) as unknown as Record<string, unknown>;
@@ -58,6 +58,34 @@ const chooseIds = <T,>(
   return ids;
 };
 
+const currentSequencePolicyFor = (
+  scene: RenderSpec["scenes"][number],
+  beat: RenderSpec["scenes"][number]["visualBeats"][number],
+) => {
+  if (beat.objectIds.length === 0) return "static" as const;
+
+  const chunkOrder = new Map(scene.narrationChunks.map((chunk, index) => [chunk.chunkId, index]));
+  const startIndex = chunkOrder.get(beat.startChunkId);
+  const endIndex = chunkOrder.get(beat.endChunkId);
+  if (startIndex === undefined || endIndex === undefined) {
+    throw new Error(`synthetic fixture cannot resolve Beat chunk range: ${beat.beatId}`);
+  }
+
+  const showTargets = new Set(
+    scene.visualEvents
+      .filter((event) => {
+        if (event.action !== "show" || !event.targetId || !beat.objectIds.includes(event.targetId)) return false;
+        const eventChunkIndex = chunkOrder.get(event.atChunkId);
+        return eventChunkIndex !== undefined && startIndex <= eventChunkIndex && eventChunkIndex <= endIndex;
+      })
+      .map((event) => event.targetId as string),
+  );
+
+  if (showTargets.size === 0) return "static" as const;
+  if (beat.objectIds.every((objectId) => showTargets.has(objectId))) return "explicit" as const;
+  return "object-order-fallback" as const;
+};
+
 export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
   const value = makeCurrentVisualGrammarFixture();
 
@@ -85,6 +113,11 @@ export const makeCurrentVisualDirectorFixture = (): RenderSpec => {
       if (!contract.supportedScreenStates.includes(beat.screenState)) {
         beat.screenState = contract.supportedScreenStates[0];
       }
+      // The source fixture is historical and may carry sequence metadata whose show
+      // events fall outside the current Beat range. Derive only the synthetic fixture's
+      // sequence policy from the events that actually exist inside the Beat; never invent
+      // events and never apply this normalization to production RenderSpecs.
+      beat.sequencePolicy = currentSequencePolicyFor(scene, beat);
     }
     if (scene.visualBeats.length > 0) {
       scene.visualMode = scene.visualBeats[0].visualMode;
