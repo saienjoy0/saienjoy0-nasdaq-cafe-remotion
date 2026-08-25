@@ -2,6 +2,7 @@ import "./test-visual-candidate-coverage";
 import assert from "node:assert/strict";
 import {assertStaticTemplateSoundness} from "../src/spec/static-template-soundness";
 import {buildVisualCandidateCatalogVNext} from "../src/spec/visual-candidate-builder";
+import {getVisualComponentDescriptor} from "../src/spec/visual-component-registry";
 import {sha256Json} from "../src/spec/visual-director-contract";
 import {
   cloneTestValue,
@@ -48,6 +49,11 @@ assert.doesNotThrow(() => assertStaticTemplateSoundness(
   "$.synthetic.verification-matrix",
 ));
 
+// Exact Current-v2 compatibility shape: the pre-VI RenderSpec has the authored
+// template but no explicit templateVariant, while templateConfig.variant carries
+// the schema-compatible placeholder "default". Candidate Builder owns the
+// Renderer registry and must never publish that placeholder as a legal Candidate
+// when the selected template does not register it.
 const matrixCandidateSpec = cloneTestValue(source);
 const matrixSceneIndex = matrixCandidateSpec.scenes.findIndex((scene) =>
   scene.visualBeats.some((beat) => beat.beatId === verificationBeat.beatId),
@@ -55,7 +61,16 @@ const matrixSceneIndex = matrixCandidateSpec.scenes.findIndex((scene) =>
 assert.ok(matrixSceneIndex >= 0);
 const matrixScene = matrixCandidateSpec.scenes[matrixSceneIndex];
 const matrixBeat = matrixScene.visualBeats.find((beat) => beat.beatId === verificationBeat.beatId)!;
+matrixBeat.visualTemplate = "verification-matrix";
+matrixBeat.templateVariant = undefined;
+matrixBeat.visualMode = "verification-points";
+matrixBeat.screenState = "Data";
 matrixBeat.viewerTexts = ["支持｜確認材料", "反証｜反対材料"];
+matrixBeat.templateConfig = {
+  ...matrixBeat.templateConfig,
+  variant: "default",
+  laneLabels: ["支持", "反証"],
+};
 matrixCandidateSpec.scenes = [matrixScene];
 matrixScene.visualBeats = [matrixBeat];
 const matrixCatalog = buildVisualCandidateCatalogVNext({
@@ -76,6 +91,32 @@ assert.deepEqual(
   ["支持", "反証"],
   "lane labels must be derived from existing viewer text rather than invented by Machine",
 );
+assert.equal(
+  matrixCandidate.templateVariant,
+  "strengthen-vs-weaken",
+  "an unsupported pre-VI placeholder must resolve to the Renderer registry default",
+);
+assert.equal(
+  matrixCandidate.templateConfig.variant,
+  "strengthen-vs-weaken",
+  "Candidate templateConfig.variant must match the Renderer registry default",
+);
+for (const candidate of matrixCatalog.candidates) {
+  const descriptor = getVisualComponentDescriptor(candidate.visualTemplate);
+  assert.ok(
+    descriptor.variants.includes(candidate.templateVariant),
+    `${candidate.candidateId}: Candidate templateVariant must be registered for ${candidate.visualTemplate}`,
+  );
+  assert.ok(
+    descriptor.variants.includes(candidate.templateConfig.variant),
+    `${candidate.candidateId}: Candidate templateConfig.variant must be registered for ${candidate.visualTemplate}`,
+  );
+  assert.equal(
+    candidate.templateVariant,
+    candidate.templateConfig.variant,
+    `${candidate.candidateId}: Candidate variant fields must stay identical`,
+  );
+}
 
 const noLaneEvidenceSpec = cloneTestValue(source);
 const noLaneSceneIndex = noLaneEvidenceSpec.scenes.findIndex((scene) =>

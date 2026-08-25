@@ -111,8 +111,15 @@ const inferredLaneLabels = (beat: Beat) => {
 };
 
 const templateConfigFor = (template: VisualTemplateId, scene: Scene, beat: Beat) => {
-  if (template === beat.visualTemplate) return structuredClone(beat.templateConfig);
-  const variant = getVisualComponentDescriptor(template).defaultVariant;
+  const descriptor = getVisualComponentDescriptor(template);
+  if (template === beat.visualTemplate) {
+    const config = structuredClone(beat.templateConfig);
+    if (!descriptor.variants.includes(config.variant)) {
+      config.variant = descriptor.defaultVariant;
+    }
+    return config;
+  }
+  const variant = descriptor.defaultVariant;
   const inventory = objectInventory(scene, beat);
   const needsLanes = template === "verification-matrix" || template === "tailwind-headwind";
   return {

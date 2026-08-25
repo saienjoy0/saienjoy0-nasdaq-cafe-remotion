@@ -12,6 +12,7 @@ import {
   buildVisualCapabilityInventory,
 } from "../src/spec/visual-candidate-input";
 import {compileVisualDirection} from "../src/spec/visual-direction-compiler";
+import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
 import {
   visualCandidateCatalogSchema,
   visualCapabilityHintsSchema,
@@ -86,7 +87,13 @@ const main = async () => {
   if (command === "compile") {
     const catalog = visualCandidateCatalogSchema.parse(await readJson(arg("--catalog")));
     const plan = visualDirectionPlanSchema.parse(await readJson(arg("--plan")));
-    const result = compileVisualDirection({spec, sourceRenderSpecSha256, catalog, plan});
+    const result = compileVisualDirection({
+      spec,
+      sourceRenderSpecSha256,
+      catalog,
+      plan,
+      validateOutput: validateVisualStoryContract,
+    });
     await writeJson(arg("--output"), result.spec);
     await writeJson(arg("--report"), result.report);
     return;
