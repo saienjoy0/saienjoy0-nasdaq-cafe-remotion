@@ -88,12 +88,12 @@ const main = async () => {
     const catalog = visualCandidateCatalogSchema.parse(await readJson(arg("--catalog")));
     const plan = visualDirectionPlanSchema.parse(await readJson(arg("--plan")));
     const result = compileVisualDirection({
-    spec,
-    sourceRenderSpecSha256,
-    catalog,
-    plan,
-    validateOutput: validateVisualStoryContract,
-  });
+      spec,
+      sourceRenderSpecSha256,
+      catalog,
+      plan,
+      validateOutput: validateVisualStoryContract,
+    });
     await writeJson(arg("--output"), result.spec);
     await writeJson(arg("--report"), result.report);
     return;
