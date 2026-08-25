@@ -92,7 +92,7 @@ const main = async () => {
       sourceRenderSpecSha256,
       catalog,
       plan,
-      validateOutput: validateVisualStoryContract,
+      validateOutput: (value) => validateVisualStoryContract(value, {enforceVariety: true}),
     });
     await writeJson(arg("--output"), result.spec);
     await writeJson(arg("--report"), result.report);
