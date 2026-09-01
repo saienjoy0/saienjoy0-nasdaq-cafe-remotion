@@ -9,11 +9,7 @@ import {
   type AssetManifestForSpec,
 } from "../src/spec/validate-render-spec";
 import {validateRenderSpecReferencesMultiBeat} from "../src/spec/validate-render-spec-multibeat";
-import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
-import {validateShotStoryContract} from "../src/spec/validate-shot-story";
-import {preflightProductionExpressions} from "../src/spec/preflight-render-spec";
-import {preflightViewerSurface} from "../src/spec/preflight-viewer-surface";
-import {preflightStaticViewerLayout} from "../src/spec/preflight-static-viewer-layout";
+import {validateRenderSpecStaticProductionContract} from "../src/spec/validate-render-spec-static";
 import {verifyFinalApprovalPreflight} from "./final-approval-preflight";
 
 export const resolveSpecPath = (input: string) => path.resolve(process.cwd(), input);
@@ -32,11 +28,8 @@ export const loadRenderSpec = async (
   }
   validateRenderSpecReferencesMultiBeat(parsed.data, assetManifest, voiceProfilesJson);
   const enforceVariety = !resolved.includes(`${path.sep}fixtures${path.sep}`);
-  validateVisualStoryContract(parsed.data, {enforceVariety});
-  validateShotStoryContract(parsed.data, {enforceVariety});
-  preflightStaticViewerLayout(parsed.data);
-  const expressionPreflight = preflightProductionExpressions(parsed.data);
-  const viewerSurfacePreflight = preflightViewerSurface(parsed.data);
+  const {expressionPreflight, viewerSurfacePreflight} =
+    validateRenderSpecStaticProductionContract(parsed.data, {enforceVariety});
   return {
     spec: parsed.data,
     resolved,

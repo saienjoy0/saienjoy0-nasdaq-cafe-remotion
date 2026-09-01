@@ -11,6 +11,13 @@ import {makeCurrentVisualDirectorFixture} from "./test-support/current-visual-gr
 const root = mkdtempSync(path.join(tmpdir(), "nasdaq-cafe-vnext-cli-"));
 try {
   const spec = makeCurrentVisualDirectorFixture();
+  // Visual Direction compile runs before Plot's final package materializer expands
+  // expression-specific fox placements. The semantic expression is already fixed,
+  // but compile must not require the later foxSlightSurprise placement yet.
+  spec.scenes[0].initialExpression = "軽い驚き";
+  spec.scenes[0].assetPlacements = spec.scenes[0].assetPlacements.filter(
+    (placement) => placement.assetId !== "foxSlightSurprise",
+  );
   const specPath = path.join(root, "render_spec.json");
   const hintsPath = path.join(root, "visual_capability_hints.json");
   const candidateInputPath = path.join(root, "visual_candidate_input.json");
@@ -217,6 +224,87 @@ try {
     `${closureCompile.stderr}\n${closureCompile.stdout}`,
     /\$\.scenes\[8\]\.visualBeats: Scene 9 requires final-assembly/,
     "Director compile must enforce the same Scene 9 production closure as build-production",
+  );
+
+  // Director compile is the first production boundary for the selected visual.
+  // A visible card title that cannot fit the static viewer must fail here, before
+  // Critic/PASS and before final build-production validates the same bytes.
+  const layoutSpec = structuredClone(spec);
+  const layoutScene = layoutSpec.scenes.find((scene) => scene.cards.length > 0);
+  assert.ok(layoutScene, "production fixture must expose a visible card");
+  const layoutCard = layoutScene.cards.find((card) =>
+    layoutScene.visualBeats.some((beat) => beat.objectIds.includes(card.cardId))
+  );
+  assert.ok(layoutCard, "production fixture must expose a card referenced by a Visual Beat");
+  layoutCard.title = "X".repeat(19);
+
+  const layoutSpecPath = path.join(root, "layout_render_spec.json");
+  const layoutCandidateInputPath = path.join(root, "layout_visual_candidate_input.json");
+  const layoutCapabilityInventoryPath = path.join(root, "layout_visual_capability_inventory.json");
+  const layoutCatalogPath = path.join(root, "layout_visual_candidate_catalog.json");
+  const layoutPlanPath = path.join(root, "layout_visual_direction_plan.json");
+  const layoutOutputPath = path.join(root, "layout_visual_direction_compiled.json");
+  const layoutReportPath = path.join(root, "layout_visual_direction_report.json");
+  writeFileSync(layoutSpecPath, JSON.stringify(layoutSpec, null, 2) + "\n");
+
+  const layoutBuild = spawnSync(
+    process.execPath,
+    [
+      "--import", "tsx",
+      "scripts/visual-director-cli.ts", "build",
+      "--spec", layoutSpecPath,
+      "--catalog", layoutCatalogPath,
+      "--hints", hintsPath,
+      "--candidate-builder", "vnext",
+      "--editorial-snapshot-sha256", editorialSnapshotSha256,
+      "--candidate-input", layoutCandidateInputPath,
+      "--capability-inventory", layoutCapabilityInventoryPath,
+    ],
+    {cwd: process.cwd(), encoding: "utf8"},
+  );
+  assert.equal(layoutBuild.status, 0, layoutBuild.stderr || layoutBuild.stdout);
+
+  const layoutCandidateInput = JSON.parse(readFileSync(layoutCandidateInputPath, "utf8"));
+  const layoutCatalog = JSON.parse(readFileSync(layoutCatalogPath, "utf8"));
+  const layoutSelections = layoutCandidateInput.beats.map((inputBeat: {visualBeatId: string}) => {
+    const candidate = layoutCatalog.candidates.find(
+      (item: {visualBeatId: string}) => item.visualBeatId === inputBeat.visualBeatId,
+    );
+    assert.ok(candidate, `missing layout Candidate for ${inputBeat.visualBeatId}`);
+    return {visualBeatId: inputBeat.visualBeatId, candidateId: candidate.candidateId};
+  });
+  writeFileSync(
+    layoutPlanPath,
+    JSON.stringify({
+      contractVersion: "1.0.0",
+      episodeDate: layoutSpec.episode.targetDate,
+      candidateCatalogSha256: sha256Json(layoutCatalog),
+      selections: layoutSelections,
+    }, null, 2) + "\n",
+  );
+
+  const layoutCompile = spawnSync(
+    process.execPath,
+    [
+      "--import", "tsx",
+      "scripts/visual-director-cli.ts", "compile",
+      "--spec", layoutSpecPath,
+      "--catalog", layoutCatalogPath,
+      "--plan", layoutPlanPath,
+      "--output", layoutOutputPath,
+      "--report", layoutReportPath,
+    ],
+    {cwd: process.cwd(), encoding: "utf8"},
+  );
+  assert.notEqual(
+    layoutCompile.status,
+    0,
+    "production Visual Director compile must reject a visible card-title overflow",
+  );
+  assert.match(
+    `${layoutCompile.stderr}\n${layoutCompile.stdout}`,
+    /\$\.scenes\[\d+\]\.cards\[\d+\]\.title\[line 1\]: 19 characters exceed card title limit 18/,
+    "Director compile must enforce the same static viewer layout as build-production",
   );
 
   console.log(`visual director CLI vNext tests passed: ${catalog.candidates.length} candidates`);
