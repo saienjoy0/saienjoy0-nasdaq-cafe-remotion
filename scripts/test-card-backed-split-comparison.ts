@@ -63,16 +63,9 @@ assert.deepEqual(candidate.objectIds, [card.cardId], "candidate must preserve au
 const publicItems = splitComparisonCardItems({
   cards: [{
     key: card.cardId,
-    title: card.title,
-    role: card.role,
     revealAtMs: 0,
-    highlighted: false,
-    enterMotion: null,
-    exitMotion: null,
-    highlightMotion: null,
-    unhighlightMotion: null,
     lines: card.lines,
-  }],
+  } as Parameters<typeof splitComparisonCardItems>[0]["cards"][number]],
 });
 assert.deepEqual(
   publicItems.map((item) => item.value),
