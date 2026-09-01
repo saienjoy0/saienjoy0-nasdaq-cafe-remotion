@@ -167,6 +167,7 @@ jobs:
         run: |
           node --import tsx scripts/test-render-spec.ts
           npm run test:visual-story
+          node --import tsx scripts/test-card-backed-split-comparison.ts
 
       - name: Public screen boundary
         run: npm run test:public-screen
