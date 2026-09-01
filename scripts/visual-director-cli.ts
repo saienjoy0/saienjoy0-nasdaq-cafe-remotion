@@ -12,7 +12,7 @@ import {
   buildVisualCapabilityInventory,
 } from "../src/spec/visual-candidate-input";
 import {compileVisualDirection} from "../src/spec/visual-direction-compiler";
-import {validateVisualStoryContract} from "../src/spec/validate-visual-story";
+import {validateRenderSpecVisualProductionContract} from "../src/spec/validate-render-spec-static";
 import {
   visualCandidateCatalogSchema,
   visualCapabilityHintsSchema,
@@ -92,7 +92,9 @@ const main = async () => {
       sourceRenderSpecSha256,
       catalog,
       plan,
-      validateOutput: (value) => validateVisualStoryContract(value, {enforceVariety: true}),
+      validateOutput: (value) => {
+        validateRenderSpecVisualProductionContract(value, {enforceVariety: true});
+      },
     });
     await writeJson(arg("--output"), result.spec);
     await writeJson(arg("--report"), result.report);
