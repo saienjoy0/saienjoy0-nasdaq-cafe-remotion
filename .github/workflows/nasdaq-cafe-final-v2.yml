@@ -156,6 +156,7 @@ jobs:
       PLOT_ARTIFACT_TOKEN: ${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}
       GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
       GEMINI_TTS_VOICE: Charon
+      FINAL_CONTROL_PLANE_ROOT: ${{ runner.temp }}/final-control-plane
     steps:
       - name: Require configured Plot Artifact token
         shell: bash
@@ -185,6 +186,14 @@ jobs:
           mapfile -t mp4s < <(find "${RUNNER_TEMP}/approved-preview" -type f -name '*.mp4' -print)
           [[ ${#mp4s[@]} -eq 1 ]]
           test "$(sha256sum "${mp4s[0]}" | awk '{print $1}')" = "${{ inputs.approved_preview_sha256 }}"
+      - name: Checkout exact current Final control-plane helper
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: ${{ runner.temp }}/final-control-plane
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
       - name: Checkout exact approved Renderer commit
         uses: actions/checkout@v6
         with:
@@ -197,8 +206,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ inputs.renderer_commit }}"
+          test "$(git -C "$FINAL_CONTROL_PLANE_ROOT" rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(sha256sum contracts/visual_component_registry_snapshot.json | awk '{print $1}')" = "${{ inputs.registry_snapshot_sha256 }}"
-          test -f scripts/restore-approved-preview-for-final.py
+          test -f "$FINAL_CONTROL_PLANE_ROOT/scripts/restore-approved-preview-for-final.py"
           test -f scripts/nasdaq-cafe-final-entry.sh
           python3 scripts/verify-final-authorization-bundle.py \
             --root "${RUNNER_TEMP}/plot-final-authorization" \
@@ -219,7 +229,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/restore-approved-preview-for-final.py \
+          python3 "${FINAL_CONTROL_PLANE_ROOT}/scripts/restore-approved-preview-for-final.py" \
             --preview-root "${RUNNER_TEMP}/approved-preview" \
             --episode-date "$EPISODE_DATE" \
             --renderer-commit "${{ inputs.renderer_commit }}" \
@@ -256,7 +266,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/restore-approved-preview-for-final.py \
+          python3 "${FINAL_CONTROL_PLANE_ROOT}/scripts/restore-approved-preview-for-final.py" \
             --preview-root "${RUNNER_TEMP}/approved-preview" --episode-date "$EPISODE_DATE" \
             --renderer-commit "${{ inputs.renderer_commit }}" --renderer-contract-version "${{ inputs.renderer_contract_version }}" \
             --registry-sha256 "${{ inputs.registry_snapshot_sha256 }}" --spec-sha256 "$EXPECTED_SPEC_SHA256" \
