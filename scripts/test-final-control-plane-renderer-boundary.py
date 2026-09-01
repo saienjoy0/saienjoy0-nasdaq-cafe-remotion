@@ -43,4 +43,13 @@ for required in (
     if required not in worker:
         raise AssertionError(f'Final control-plane workspace binding missing: {required}')
 
+# Root Renderer checkout uses clean=true, so it must happen before the nested control-plane
+# checkout. Otherwise git clean -ffdx removes .final-control-plane before verification.
+renderer_checkout = worker.find('- name: Checkout exact approved Renderer commit')
+control_checkout = worker.find('- name: Checkout exact current Final control-plane helper')
+if renderer_checkout < 0 or control_checkout < 0:
+    raise AssertionError('Final checkout steps are missing')
+if renderer_checkout > control_checkout:
+    raise AssertionError('Final Renderer checkout must precede nested control-plane checkout')
+
 print('Final control-plane / approved Renderer boundary PASS')
