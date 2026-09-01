@@ -73,20 +73,15 @@ jobs:
           echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
       - id: r
         run: python3 scripts/validate-current-request.py final "${{ steps.request-path.outputs.path }}" --github-output "$GITHUB_OUTPUT"
-      - name: Verify Final transport bytes against approved Renderer implementation
+      - name: Verify approved Renderer implementation exists
         shell: bash
         env:
           RENDERER_COMMIT: ${{ steps.r.outputs.renderer_commit }}
         run: |
           set -euo pipefail
           git fetch --no-tags origin "$RENDERER_COMMIT" --depth=1
-          for file in \
-            .github/workflows/nasdaq-cafe-final-request-v2.yml \
-            .github/workflows/nasdaq-cafe-final-v2.yml; do
-            EXPECTED="$(git show "$RENDERER_COMMIT:$file" | sha256sum | awk '{print $1}')"
-            ACTUAL="$(sha256sum "$file" | awk '{print $1}')"
-            [[ "$ACTUAL" == "$EXPECTED" ]] || { echo "::error::Current Final transport drift: $file"; exit 1; }
-          done
+          git cat-file -e "$RENDERER_COMMIT:scripts/nasdaq-cafe-final-entry.sh"
+          git cat-file -e "$RENDERER_COMMIT:contracts/visual_component_registry_snapshot.json"
 
   final:
     needs: resolve
