@@ -1,0 +1,155 @@
+name: Nasdaq Cafe Codespace Wake
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "codespace-wake-requests/*.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nasdaq-cafe-codespace-wake
+  cancel-in-progress: false
+
+jobs:
+  wake:
+    if: >-
+      github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion' &&
+      github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+          clean: true
+
+      - name: Require exactly one append-only wake request
+        id: request
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          TRIGGER_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t CHANGES < <(git diff --name-status "$BEFORE_SHA" "$TRIGGER_SHA" -- 'codespace-wake-requests/*.json')
+          [[ ${#CHANGES[@]} -eq 1 ]] || { echo "::error::Codespace wake commit must add exactly one request"; exit 1; }
+          STATUS="$(awk '{print $1}' <<<"${CHANGES[0]}")"
+          PATH_VALUE="$(awk '{print $2}' <<<"${CHANGES[0]}")"
+          [[ "$STATUS" == "A" ]] || { echo "::error::Codespace wake requests are append-only"; exit 1; }
+          [[ "$PATH_VALUE" == codespace-wake-requests/*.json ]] || { echo "::error::Unexpected Codespace wake request path: $PATH_VALUE"; exit 1; }
+          python3 - "$PATH_VALUE" <<'PY'
+          import json, pathlib, sys
+          path=pathlib.Path(sys.argv[1])
+          value=json.loads(path.read_text(encoding='utf-8'))
+          required={'requestVersion','confirmation'}
+          if not isinstance(value,dict) or set(value)!=required:
+              raise SystemExit(f'Codespace wake request fields must be exactly {sorted(required)}')
+          if value['requestVersion']!='1.0':
+              raise SystemExit('Codespace wake requestVersion must be 1.0')
+          if value['confirmation']!='WAKE_CODESPACE':
+              raise SystemExit('Codespace wake confirmation must be WAKE_CODESPACE')
+          PY
+          echo "path=$PATH_VALUE" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(sha256sum "$PATH_VALUE" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+
+      - name: Start the most recently used repository Codespace
+        id: wake
+        shell: bash
+        env:
+          CODESPACE_LIFECYCLE_TOKEN: ${{ secrets.CODESPACE_LIFECYCLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CODESPACE_LIFECYCLE_TOKEN:-}" ]]; then
+            echo "::error::CODESPACE_LIFECYCLE_TOKEN is required"
+            exit 1
+          fi
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          token = os.environ['CODESPACE_LIFECYCLE_TOKEN']
+          repository = os.environ['GITHUB_REPOSITORY']
+          headers = {
+              'Accept': 'application/vnd.github+json',
+              'Authorization': f'Bearer {token}',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'User-Agent': 'nasdaq-cafe-codespace-wake',
+          }
+
+          def request(method: str, url: str):
+              req = urllib.request.Request(url, method=method, headers=headers)
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = response.read()
+                      return json.loads(payload) if payload else None
+              except urllib.error.HTTPError as exc:
+                  detail = exc.read().decode('utf-8', errors='replace')
+                  raise SystemExit(f'GitHub Codespaces API failed: HTTP {exc.code}: {detail}') from exc
+
+          listing = request('GET', 'https://api.github.com/user/codespaces?per_page=100')
+          candidates = [
+              item for item in listing.get('codespaces', [])
+              if item.get('repository', {}).get('full_name') == repository
+          ]
+          if not candidates:
+              raise SystemExit(f'No Codespace found for {repository}')
+          selected = max(candidates, key=lambda item: item.get('last_used_at') or item.get('updated_at') or '')
+          name = selected['name']
+          if selected.get('state') != 'Available':
+              start_url = selected.get('start_url') or f'https://api.github.com/user/codespaces/{name}/start'
+              try:
+                  request('POST', start_url)
+              except SystemExit as exc:
+                  if 'HTTP 409' not in str(exc):
+                      raise
+          deadline = time.monotonic() + 420
+          while True:
+              current = request('GET', f'https://api.github.com/user/codespaces/{name}')
+              state = current.get('state')
+              if state == "Available":
+                  break
+              if time.monotonic() >= deadline:
+                  raise SystemExit(f'Codespace {name} did not become Available')
+              time.sleep(7)
+          print(f'name={name}')
+          PY
+
+      - name: Write Codespace wake receipt
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ steps.request.outputs.path }}
+          REQUEST_SHA256: ${{ steps.request.outputs.sha256 }}
+          CODESPACE_NAME: ${{ steps.wake.outputs.name }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          value={
+              'contractVersion':'1.0.0',
+              'status':'PASS',
+              'repository':os.environ['GITHUB_REPOSITORY'],
+              'requestPath':os.environ['REQUEST_PATH'],
+              'requestSha256':os.environ['REQUEST_SHA256'],
+              'codespaceName':os.environ['CODESPACE_NAME'],
+              'runId':os.environ['GITHUB_RUN_ID'],
+          }
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'codespace_wake_receipt.json'
+          path.write_text(json.dumps(value,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print(path)
+          PY
+
+      - name: Upload Codespace wake receipt
+        uses: actions/upload-artifact@v6
+        with:
+          name: nasdaq-cafe-codespace-wake-${{ github.run_id }}
+          path: ${{ runner.temp }}/codespace_wake_receipt.json
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
