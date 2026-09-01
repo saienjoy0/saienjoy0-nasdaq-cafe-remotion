@@ -91,6 +91,17 @@ if 'restore-approved-preview-for-final.py' not in final_worker or 'bash scripts/
 if 'npm run episode:spec:final' not in final_entry or 'SPEC_TTS_CACHE_ONLY=1' not in final_entry:
     raise AssertionError('Final entry may diverge from approved cached TTS procedure')
 
+# Mechanical restore helper belongs to the current Final control plane, while render execution remains pinned.
+for token in (
+    'path: ${{ runner.temp }}/final-control-plane',
+    'FINAL_CONTROL_PLANE_ROOT:',
+    '${FINAL_CONTROL_PLANE_ROOT}/scripts/restore-approved-preview-for-final.py',
+):
+    if token not in final_worker:
+        raise AssertionError(f'Final restore control-plane separation missing: {token}')
+if 'bash scripts/nasdaq-cafe-final-entry.sh' not in final_worker:
+    raise AssertionError('Final renderer execution is no longer delegated to exact approved Renderer checkout')
+
 # Helpers are mechanical and exact-schema based.
 if 'preview fields mismatch' not in validator or 'final fields mismatch' not in validator or 'finalFingerprint mismatch' not in validator:
     raise AssertionError('Current request validator is not exact-schema/fingerprint bound')
