@@ -11,6 +11,7 @@ request_gate = read('.github/workflows/current-request-publication-gate.yml')
 preview_status = read('.github/workflows/nasdaq-cafe-preview-status.yml')
 preview_entry = read('scripts/nasdaq-cafe-preview-entry.sh')
 final_entry = read('scripts/nasdaq-cafe-final-entry.sh')
+final_adapter = read('scripts/render-approved-current-final.ts')
 restore = read('scripts/restore-approved-preview-for-final.py')
 capture = read('scripts/capture-preview-current-spine-identity.py')
 validator = read('scripts/validate-current-request.py')
@@ -77,7 +78,7 @@ for field in (
 if 'uses: ./.github/workflows/nasdaq-cafe-final-v2.yml' not in final_request:
     raise AssertionError('Final request does not call Final V2 directly')
 if 'verify-final-authorization-bundle.py' not in final_worker or 'NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN' not in final_worker:
-    raise AssertionError('Renderer Final does not independently verify Plot authorization Artifact')
+    raise AssertionError('Current Final does not independently verify Plot authorization Artifact')
 if 'nasdaq-cafe-final-outcome-${{ inputs.final_fingerprint }}' not in final_worker:
     raise AssertionError('Final outcome Artifact name is not fingerprint-addressed')
 if 'ALREADY_COMPLETED' not in final_worker or 'Multiple unexpired Final outcomes' not in final_worker:
@@ -86,23 +87,54 @@ if 'concurrency:' not in final_worker or 'nasdaq-cafe-final-${{ inputs.final_fin
     raise AssertionError('Final concurrency is not fingerprint-scoped')
 if 'actions/cache/restore' in final_worker:
     raise AssertionError('Final V2 uses Actions cache as production authority')
-if 'restore-approved-preview-for-final.py' not in final_worker or 'bash scripts/nasdaq-cafe-final-entry.sh' not in final_worker:
-    raise AssertionError('Final does not restore approved bytes and delegate to checked-out Renderer entry')
-if 'npm run episode:spec:final' not in final_entry or 'SPEC_TTS_CACHE_ONLY=1' not in final_entry:
-    raise AssertionError('Final entry may diverge from approved cached TTS procedure')
 
-# Mechanical restore helper belongs to the current Final control plane, while render execution remains pinned.
+# Current V2 restores exact approved bytes, then uses the approved Renderer checkout for
+# validation/cache-only compilation. Its historical legacy Final approval gate is not
+# re-entered because modern authorization was already verified by Current V2.
+for token in (
+    'restore-approved-preview-for-final.py',
+    'export SPEC_TTS_CACHE_ONLY=1',
+    'npm run typecheck',
+    'npm run test:gemini-tts',
+    'npm run episode:spec:validate -- "$SPEC_PATH"',
+    'npm run test:runtime-stability',
+    'npm run episode:spec:compile -- "$SPEC_PATH"',
+    'npx tsx "${GITHUB_WORKSPACE}/.final-control-plane/scripts/render-approved-current-final.ts"',
+):
+    if token not in final_worker:
+        raise AssertionError(f'Current Final approved Renderer procedure missing: {token}')
+for forbidden in ('bash scripts/nasdaq-cafe-final-entry.sh', 'npm run episode:spec:final'):
+    if forbidden in final_worker:
+        raise AssertionError(f'Current Final re-enters obsolete Renderer approval route: {forbidden}')
+if 'npm run episode:spec:final' not in final_entry or 'SPEC_TTS_CACHE_ONLY=1' not in final_entry:
+    raise AssertionError('Historical Final entry changed unexpectedly; compatibility must live in Current control plane')
+
+# Render-only adapter must remain mechanical and preserve the approved Renderer final
+# composition/encode settings while refusing cache misses or Renderer contract drift.
+for token in (
+    'render_data.production.json', 'technical_report.json', 'EXPECTED_SPEC_SHA256',
+    'approved cache-only compile mismatch', 'approved Renderer final render contract drift',
+    '"NasdaqCafeSpec"', 'codec: "h264"', 'audioCodec: "aac"', 'sampleRate: 48000',
+    'imageFormat: "jpeg"', 'pixelFormat: "yuv420p"', 'crf: 18', 'scale: 1',
+):
+    if token not in final_adapter:
+        raise AssertionError(f'Current Final render-only adapter contract missing: {token}')
+for forbidden in ('speechText =', 'narrationText =', 'visualMode =', 'templateId =', 'assetId ='):
+    if forbidden in final_adapter:
+        raise AssertionError(f'Current Final render-only adapter may author semantics: {forbidden}')
+
+# Mechanical helpers belong to the current Final control plane, while the Renderer checkout
+# remains pinned to the approved commit.
 for token in (
     'path: .final-control-plane',
     '${GITHUB_WORKSPACE}/.final-control-plane/scripts/restore-approved-preview-for-final.py',
+    '${GITHUB_WORKSPACE}/.final-control-plane/scripts/render-approved-current-final.ts',
     'git -C "${GITHUB_WORKSPACE}/.final-control-plane" rev-parse HEAD',
 ):
     if token not in final_worker:
-        raise AssertionError(f'Final restore control-plane separation missing: {token}')
+        raise AssertionError(f'Final control-plane separation missing: {token}')
 if 'FINAL_CONTROL_PLANE_ROOT: ${{ runner.temp }}' in final_worker:
-    raise AssertionError('Final restore control plane uses runner context before a runner exists')
-if 'bash scripts/nasdaq-cafe-final-entry.sh' not in final_worker:
-    raise AssertionError('Final renderer execution is no longer delegated to exact approved Renderer checkout')
+    raise AssertionError('Final control plane uses runner context before a runner exists')
 
 # Helpers are mechanical and exact-schema based.
 if 'preview fields mismatch' not in validator or 'final fields mismatch' not in validator or 'finalFingerprint mismatch' not in validator:
