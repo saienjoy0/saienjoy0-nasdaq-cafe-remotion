@@ -52,4 +52,15 @@ if renderer_checkout < 0 or control_checkout < 0:
 if renderer_checkout > control_checkout:
     raise AssertionError('Final Renderer checkout must precede nested control-plane checkout')
 
+# Restoring the approved TTS cache targets .cache/spec-tts-blocks. The parent .cache may
+# legitimately be absent after a clean checkout, so materialization must create it first.
+cache_mkdir = worker.find('mkdir -p .cache')
+cache_copy = worker.find('cp -a build/final-approved-inputs/tts-cache .cache/spec-tts-blocks')
+if cache_mkdir < 0:
+    raise AssertionError('Final restore does not create the .cache parent before TTS cache copy')
+if cache_copy < 0:
+    raise AssertionError('Final restore TTS cache copy is missing')
+if cache_mkdir > cache_copy:
+    raise AssertionError('Final restore must create .cache before copying TTS cache')
+
 print('Final control-plane / approved Renderer boundary PASS')
