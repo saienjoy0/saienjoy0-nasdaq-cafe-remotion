@@ -14,6 +14,7 @@ on:
       - "scripts/verify-final-authorization-bundle.py"
       - "scripts/nasdaq-cafe-preview-entry.sh"
       - "scripts/nasdaq-cafe-final-entry.sh"
+      - "scripts/render-approved-current-final.ts"
       - "scripts/capture-preview-current-spine-identity.py"
       - "scripts/restore-approved-preview-for-final.py"
       - "scripts/test-current-preview-final-identity-contract.py"
@@ -21,6 +22,7 @@ on:
       - "scripts/test-capture-preview-current-spine-identity.py"
       - "scripts/test-restore-approved-preview-for-final.py"
       - "scripts/test-final-control-plane-renderer-boundary.py"
+      - "scripts/test-current-final-render-adapter.py"
       - "scripts/test_codespace_wake_gateway.py"
       - ".github/workflows/current-preview-final-identity-ci.yml"
   workflow_dispatch:
@@ -41,6 +43,7 @@ jobs:
           python3 scripts/test-capture-preview-current-spine-identity.py
           python3 scripts/test-restore-approved-preview-for-final.py
           python3 scripts/test-final-control-plane-renderer-boundary.py
+          python3 scripts/test-current-final-render-adapter.py
           python3 scripts/test_codespace_wake_gateway.py
       - name: Syntax and shell hygiene
         run: |
@@ -54,6 +57,7 @@ jobs:
             scripts/test-capture-preview-current-spine-identity.py \
             scripts/test-restore-approved-preview-for-final.py \
             scripts/test-final-control-plane-renderer-boundary.py \
+            scripts/test-current-final-render-adapter.py \
             scripts/test_codespace_wake_gateway.py
           bash -n scripts/nasdaq-cafe-preview-entry.sh
           bash -n scripts/nasdaq-cafe-final-entry.sh
