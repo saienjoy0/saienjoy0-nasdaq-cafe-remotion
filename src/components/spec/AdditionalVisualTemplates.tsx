@@ -79,14 +79,40 @@ export const HeroNumberTemplate: React.FC<{content: PublicMainContent}> = ({cont
   </Surface>;
 };
 
+export const splitComparisonCardItems = (content: Pick<PublicMainContent, "cards">) =>
+  content.cards.flatMap((card) =>
+    card.lines
+      .filter((line) => line.value.trim().length > 0)
+      .map((line, index) => ({
+        key: `${card.key}-line-${index}`,
+        value: line.value,
+        tone: line.tone,
+        revealAtMs: card.revealAtMs,
+      })),
+  );
+
 export const SplitComparisonTemplate: React.FC<{content: PublicMainContent}> = ({content}) => {
   const left = content.numbers[0];
   const rightItems = content.numbers.slice(1);
   const right = rightItems[0];
-  const startLeft = left?.revealAtMs ?? content.beatStartMs;
-  const startRight = right?.revealAtMs ?? content.beatStartMs + 700;
-  const panel = (number: PublicNumber | undefined, side: "left" | "right", extras: PublicNumber[]) => <div style={{...revealStyle(content, side === "left" ? startLeft : startRight, side), position: "relative", padding: "34px 36px", borderRadius: 24, background: side === "left" ? "rgba(7,134,95,.09)" : "rgba(199,68,82,.08)", border: `3px solid ${number ? toneColor(number.tone) : palette.neutral}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}}><div style={{fontSize: 32, color: palette.muted, fontWeight: 900}}>{number?.label ?? (side === "left" ? "支援" : "相殺")}</div>{number ? <div style={{marginTop: 20}}><Value content={content} number={number} size={82}/></div> : null}{number?.comparison ? <div style={{marginTop: 16, fontSize: 25, color: toneColor(number.tone), fontWeight: 900}}>{number.comparison}</div> : null}{extras.length > 1 ? <div style={{marginTop: 22, display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center"}}>{extras.slice(1).map((item) => <div key={item.key} style={{padding: "9px 14px", borderRadius: 14, background: `${toneColor(item.tone)}12`, border: `2px solid ${toneColor(item.tone)}`, fontSize: 23, fontWeight: 900}}>{item.label} {item.value}{item.unit}</div>)}</div> : null}</div>;
-  return <Surface accent={palette.emphasis} style={{padding: "30px 36px", display: "grid", gridTemplateColumns: "1fr 90px 1fr", gap: 18, alignItems: "stretch"}}>{panel(left, "left", left ? [left] : [])}<div style={{display: "flex", alignItems: "center", justifyContent: "center", color: palette.emphasis, fontSize: 52, fontWeight: 950}}>VS</div>{panel(right, "right", rightItems)}</Surface>;
+  const cardItems = content.numbers.length === 0 ? splitComparisonCardItems(content) : [];
+  if (content.numbers.length === 0 && cardItems.length !== 2) {
+    throw new Error("split-comparison card form requires exactly two authored card items");
+  }
+  const textLeft = cardItems[0];
+  const textRight = cardItems[1];
+  const startLeft = left?.revealAtMs ?? textLeft?.revealAtMs ?? content.beatStartMs;
+  const startRight = right?.revealAtMs ?? (textRight ? Math.max(textRight.revealAtMs, content.beatStartMs + 700) : content.beatStartMs + 700);
+  const panel = (
+    number: PublicNumber | undefined,
+    textItem: (typeof cardItems)[number] | undefined,
+    side: "left" | "right",
+    extras: PublicNumber[],
+  ) => {
+    const tone = number?.tone ?? textItem?.tone ?? "neutral";
+    return <div style={{...revealStyle(content, side === "left" ? startLeft : startRight, side), position: "relative", padding: "34px 36px", borderRadius: 24, background: side === "left" ? "rgba(7,134,95,.09)" : "rgba(199,68,82,.08)", border: `3px solid ${toneColor(tone)}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center"}}>{number ? <><div style={{fontSize: 32, color: palette.muted, fontWeight: 900}}>{number.label}</div><div style={{marginTop: 20}}><Value content={content} number={number} size={82}/></div>{number.comparison ? <div style={{marginTop: 16, fontSize: 25, color: toneColor(number.tone), fontWeight: 900}}>{number.comparison}</div> : null}</> : <div style={{fontSize: 46, lineHeight: 1.2, color: toneColor(tone), fontWeight: 950}}>{textItem?.value}</div>}{extras.length > 1 ? <div style={{marginTop: 22, display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center"}}>{extras.slice(1).map((item) => <div key={item.key} style={{padding: "9px 14px", borderRadius: 14, background: `${toneColor(item.tone)}12`, border: `2px solid ${toneColor(item.tone)}`, fontSize: 23, fontWeight: 900}}>{item.label} {item.value}{item.unit}</div>)}</div> : null}</div>;
+  };
+  return <Surface accent={palette.emphasis} style={{padding: "30px 36px", display: "grid", gridTemplateColumns: "1fr 90px 1fr", gap: 18, alignItems: "stretch"}}>{panel(left, textLeft, "left", left ? [left] : [])}<div style={{display: "flex", alignItems: "center", justifyContent: "center", color: palette.emphasis, fontSize: 52, fontWeight: 950}}>VS</div>{panel(right, textRight, "right", rightItems)}</Surface>;
 };
 
 export const FocusMatrixTemplate: React.FC<{content: PublicMainContent}> = ({content}) => {
