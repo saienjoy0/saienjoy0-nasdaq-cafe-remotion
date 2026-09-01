@@ -93,12 +93,14 @@ if 'npm run episode:spec:final' not in final_entry or 'SPEC_TTS_CACHE_ONLY=1' no
 
 # Mechanical restore helper belongs to the current Final control plane, while render execution remains pinned.
 for token in (
-    'path: ${{ runner.temp }}/final-control-plane',
-    'FINAL_CONTROL_PLANE_ROOT:',
-    '${FINAL_CONTROL_PLANE_ROOT}/scripts/restore-approved-preview-for-final.py',
+    'path: .final-control-plane',
+    '${GITHUB_WORKSPACE}/.final-control-plane/scripts/restore-approved-preview-for-final.py',
+    'git -C "${GITHUB_WORKSPACE}/.final-control-plane" rev-parse HEAD',
 ):
     if token not in final_worker:
         raise AssertionError(f'Final restore control-plane separation missing: {token}')
+if 'FINAL_CONTROL_PLANE_ROOT: ${{ runner.temp }}' in final_worker:
+    raise AssertionError('Final restore control plane uses runner context before a runner exists')
 if 'bash scripts/nasdaq-cafe-final-entry.sh' not in final_worker:
     raise AssertionError('Final renderer execution is no longer delegated to exact approved Renderer checkout')
 
