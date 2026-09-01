@@ -166,7 +166,7 @@ const RULES_BY_TEMPLATE: Partial<Record<VisualTemplateId, readonly VisualEligibi
   "dual-asset-split": ["aligned-comparison", "numeric-values-present"],
   "index-return-bars": ["aligned-comparison", "numeric-values-present"],
   "diverging-stock-bars": ["aligned-comparison", "numeric-values-present"],
-  "split-comparison": ["aligned-comparison", "numeric-values-present"],
+  "split-comparison": ["aligned-comparison"],
   "focus-matrix": ["aligned-comparison", "numeric-values-present"],
   "expected-actual-bullet": ["numeric-values-present"],
   "entity-card-full": ["entity-bound", "single-main-media"],
