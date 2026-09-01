@@ -241,6 +241,7 @@ jobs:
             --preview-identity-sha256 "${{ inputs.preview_identity_sha256 }}" \
             --output-root build/final-approved-inputs
           rm -rf .cache/spec-tts-blocks .handoff-download
+          mkdir -p .cache
           cp -a build/final-approved-inputs/tts-cache .cache/spec-tts-blocks
           cp -a build/final-approved-inputs/handoff .handoff-download
       - name: Materialize runtime assets from exact approved handoff
