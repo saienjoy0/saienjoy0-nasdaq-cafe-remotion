@@ -90,7 +90,7 @@ assert.throws(
 );
 
 const mixed = makeCardBackedComparison();
-const sourceNumber = cloneTestValue(mixed.scene.numbers[0]);
+const sourceNumber = cloneTestValue(mixed.spec.scenes.flatMap((item) => item.numbers)[0]);
 assert.ok(sourceNumber, "fixture requires a number for mixed-form rejection");
 sourceNumber.numberId = "mixed-comparison-number";
 sourceNumber.numericValue = 5;
