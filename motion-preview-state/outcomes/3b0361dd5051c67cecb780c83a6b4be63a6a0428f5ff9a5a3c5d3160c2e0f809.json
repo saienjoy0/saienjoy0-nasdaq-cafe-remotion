@@ -1,0 +1,19 @@
+{
+  "outcomeVersion": "1.0",
+  "status": "rejected",
+  "stage": "validation",
+  "requestPath": "motion-preview-requests/2026-08-17-final-runner-wake.json",
+  "requestFingerprint": "3b0361dd5051c67cecb780c83a6b4be63a6a0428f5ff9a5a3c5d3160c2e0f809",
+  "requestValid": false,
+  "validationError": "render spec not found: render-specs/2026-08-17/render_spec.json",
+  "episodeDate": null,
+  "expectedSpecSha256": null,
+  "sceneNumber": null,
+  "offsetSeconds": null,
+  "durationSeconds": null,
+  "wakeResult": "skipped",
+  "renderResult": "skipped",
+  "workflow": "Nasdaq Cafe Motion Preview Request",
+  "runId": "33501182988",
+  "recordedAt": "2026-09-01T11:11:32.734533Z"
+}
