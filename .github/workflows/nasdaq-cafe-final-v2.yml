@@ -208,7 +208,9 @@ jobs:
           test "$(git -C "${GITHUB_WORKSPACE}/.final-control-plane" rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(sha256sum contracts/visual_component_registry_snapshot.json | awk '{print $1}')" = "${{ inputs.registry_snapshot_sha256 }}"
           test -f "${GITHUB_WORKSPACE}/.final-control-plane/scripts/restore-approved-preview-for-final.py"
-          test -f scripts/nasdaq-cafe-final-entry.sh
+          test -f "${GITHUB_WORKSPACE}/.final-control-plane/scripts/render-approved-current-final.ts"
+          test -f scripts/spec-cli.ts
+          test -f src/index.ts
           python3 scripts/verify-final-authorization-bundle.py \
             --root "${RUNNER_TEMP}/plot-final-authorization" \
             --episode-date "$EPISODE_DATE" \
@@ -273,11 +275,24 @@ jobs:
             --tts-input-sha256 "${{ inputs.tts_input_sha256 }}" --audio-01-04-sha256 "${{ inputs.audio_01_04_sha256 }}" \
             --audio-05-09-sha256 "${{ inputs.audio_05_09_sha256 }}" --preview-identity-sha256 "${{ inputs.preview_identity_sha256 }}" \
             --output-root "$RUNNER_TEMP/reverified-approved-inputs" >/tmp/final-byte-verify.json
-      - name: Execute checked-out Renderer Final procedure
+      - name: Execute approved Renderer Current Final procedure
+        shell: bash
         env:
           SPEC_PATH: build/final-approved-inputs/render_spec.json
           RUNTIME_ASSET_REGISTRY: build/final-approved-inputs/runtime_asset_registry.json
-        run: bash scripts/nasdaq-cafe-final-entry.sh
+        run: |
+          set -euo pipefail
+          export NASDAQ_CAFE_RUNTIME_ASSET_REGISTRY="$RUNTIME_ASSET_REGISTRY"
+          export SPEC_TTS_CACHE_ONLY=1
+          ACTUAL="$(sha256sum "$SPEC_PATH" | awk '{print $1}')"
+          [[ "$ACTUAL" == "$EXPECTED_SPEC_SHA256" ]]
+          bash scripts/ensure-remotion-browser-deps.sh
+          npm run typecheck
+          npm run test:gemini-tts
+          npm run episode:spec:validate -- "$SPEC_PATH"
+          npm run test:runtime-stability
+          npm run episode:spec:compile -- "$SPEC_PATH"
+          npx tsx "${GITHUB_WORKSPACE}/.final-control-plane/scripts/render-approved-current-final.ts"
       - name: Inspect Final and write immutable receipt
         shell: bash
         env:
