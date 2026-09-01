@@ -13,18 +13,11 @@ def load(path:Path)->dict[str,Any]:
     if not isinstance(v,dict): raise SystemExit(f'JSON root must be object: {path}')
     return v
 
-def identify(audio:Path)->str:
-    hay=[]
-    for base in (audio.parent,audio.parent.parent):
-        if not base.exists(): continue
-        hay.append(str(base))
-        for p in base.iterdir():
-            if p.is_file() and p.suffix.lower() in {'.json','.txt'}:
-                try: hay.append(p.read_text(encoding='utf-8',errors='ignore'))
-                except OSError: pass
-    text='\n'.join(hay); m=[b for b in BLOCK_IDS if b in text]
-    if len(m)!=1: raise SystemExit(f'cannot identify TTS block for {audio}')
-    return m[0]
+def identify(audio:Path,audio_expected:dict[str,str])->tuple[str,str]:
+    actual=sha(audio)
+    matches=[block for block,expected in audio_expected.items() if actual==expected]
+    if len(matches)!=1: raise SystemExit(f'cannot bind approved TTS audio SHA to exactly one block: {audio}')
+    return matches[0],actual
 
 def main()->int:
     p=argparse.ArgumentParser(); p.add_argument('--preview-root',type=Path,required=True); p.add_argument('--episode-date',required=True)
@@ -44,6 +37,7 @@ def main()->int:
         if identity.get(k)!=v: raise SystemExit(f'Preview identity mismatch: {k}')
     audio_expected={'scenes-01-04':a.audio_01_04_sha256,'scenes-05-09':a.audio_05_09_sha256}
     if identity.get('ttsBlockAudioSha256')!=audio_expected: raise SystemExit('Preview identity audio SHA map mismatch')
+    if len(set(audio_expected.values()))!=len(BLOCK_IDS): raise SystemExit('Preview identity audio SHA map must bind distinct blocks')
     approved=identity_path.parent
     cache=approved/'approved-tts-cache'; handoff=approved/'approved-handoff'; data=approved/'approved-production-data'
     for path in (cache,handoff,data):
@@ -52,7 +46,9 @@ def main()->int:
     if len(audios)!=2: raise SystemExit(f'approved TTS cache must contain exactly two audio.wav files; found {len(audios)}')
     seen={}
     for audio in audios:
-        block=identify(audio); seen[block]=sha(audio)
+        block,actual=identify(audio,audio_expected)
+        if block in seen: raise SystemExit(f'duplicate approved TTS audio for {block}')
+        seen[block]=actual
     if seen!=audio_expected: raise SystemExit(f'approved TTS audio bytes mismatch: {seen}')
     spec=data/'render_spec.json'; registry=data/'runtime_asset_registry.json'
     if sha(spec)!=a.spec_sha256: raise SystemExit('approved RenderSpec SHA mismatch')
