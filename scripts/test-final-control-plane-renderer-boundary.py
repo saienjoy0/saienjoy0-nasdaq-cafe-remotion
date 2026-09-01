@@ -30,4 +30,17 @@ for required in (
     if required not in worker:
         raise AssertionError(f'Final worker no longer executes the exact approved Renderer: {required}')
 
+# GitHub Actions graph compilation happens before a runner exists. runner.* is therefore
+# forbidden at jobs.<job_id>.env. Keep the helper checkout workspace-relative, and only
+# resolve the concrete workspace path inside runner-executed steps.
+if 'FINAL_CONTROL_PLANE_ROOT: ${{ runner.temp }}' in worker:
+    raise AssertionError('Final worker uses runner context in job-level env and cannot compile')
+for required in (
+    'path: .final-control-plane',
+    '${GITHUB_WORKSPACE}/.final-control-plane/scripts/restore-approved-preview-for-final.py',
+    'git -C "${GITHUB_WORKSPACE}/.final-control-plane" rev-parse HEAD',
+):
+    if required not in worker:
+        raise AssertionError(f'Final control-plane workspace binding missing: {required}')
+
 print('Final control-plane / approved Renderer boundary PASS')
