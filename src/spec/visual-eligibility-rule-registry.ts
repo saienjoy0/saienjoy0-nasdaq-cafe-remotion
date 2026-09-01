@@ -25,11 +25,21 @@ const selectedInventory = (scene: Scene, beat: Beat) => {
 };
 
 const alignedComparison = ({scene, beat}: VisualEligibilityContext) => {
-  const numbers = selectedInventory(scene, beat).numbers;
-  if (numbers.length < 2 || numbers.some((item) => item.numericValue == null)) return false;
-  const units = new Set(numbers.map((item) => item.unit));
-  const bases = new Set(numbers.map((item) => item.comparison));
-  return units.size === 1 && bases.size === 1 && !bases.has(null);
+  const inventory = selectedInventory(scene, beat);
+  const numbers = inventory.numbers;
+  if (numbers.length > 0) {
+    if (numbers.length < 2 || numbers.some((item) => item.numericValue == null)) return false;
+    const units = new Set(numbers.map((item) => item.unit));
+    const bases = new Set(numbers.map((item) => item.comparison));
+    return units.size === 1 && bases.size === 1 && !bases.has(null);
+  }
+
+  const cardItems = inventory.cards.flatMap((card) =>
+    card.lines
+      .map((line) => line.value.trim())
+      .filter((value) => value.length > 0),
+  );
+  return cardItems.length === 2;
 };
 
 const numericValuesPresent = ({scene, beat}: VisualEligibilityContext) =>
