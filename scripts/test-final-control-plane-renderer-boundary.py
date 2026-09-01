@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 request = (ROOT / '.github/workflows/nasdaq-cafe-final-request-v2.yml').read_text(encoding='utf-8')
 worker = (ROOT / '.github/workflows/nasdaq-cafe-final-v2.yml').read_text(encoding='utf-8')
+adapter = (ROOT / 'scripts/render-approved-current-final.ts').read_text(encoding='utf-8')
 
 # The request/control-plane workflow may evolve mechanically after Preview approval.
 # It must not require its own workflow bytes to equal the approved Renderer commit.
@@ -25,10 +26,38 @@ for required in (
 for required in (
     'ref: ${{ inputs.renderer_commit }}',
     'test "$(git rev-parse HEAD)" = "${{ inputs.renderer_commit }}"',
-    'bash scripts/nasdaq-cafe-final-entry.sh',
+    'npm run episode:spec:compile -- "$SPEC_PATH"',
+    'npx tsx "${GITHUB_WORKSPACE}/.final-control-plane/scripts/render-approved-current-final.ts"',
 ):
     if required not in worker:
-        raise AssertionError(f'Final worker no longer executes the exact approved Renderer: {required}')
+        raise AssertionError(f'Final worker no longer executes the exact approved Renderer through the Current adapter: {required}')
+for forbidden in (
+    'bash scripts/nasdaq-cafe-final-entry.sh',
+    'npm run episode:spec:final',
+):
+    if forbidden in worker:
+        raise AssertionError(f'Current Final worker re-enters obsolete Renderer approval route: {forbidden}')
+
+# The current control plane may replace only the historical approval gate. Renderer code,
+# compile output, runtime assets, cached audio, composition and final encode settings stay
+# owned by the exact approved Renderer checkout.
+for required in (
+    'render_data.production.json',
+    'technical_report.json',
+    'compiled production data is not bound to approved RenderSpec SHA',
+    'approved cache-only compile mismatch',
+    'approved Renderer final render contract drift',
+    '"NasdaqCafeSpec"',
+    'codec: "h264"',
+    'audioCodec: "aac"',
+    'sampleRate: 48000',
+    'imageFormat: "jpeg"',
+    'pixelFormat: "yuv420p"',
+    'crf: 18',
+    'scale: 1',
+):
+    if required not in adapter:
+        raise AssertionError(f'Current Final adapter does not preserve approved Renderer render contract: {required}')
 
 # GitHub Actions graph compilation happens before a runner exists. runner.* is therefore
 # forbidden at jobs.<job_id>.env. Keep the helper checkout workspace-relative, and only
@@ -38,6 +67,7 @@ if 'FINAL_CONTROL_PLANE_ROOT: ${{ runner.temp }}' in worker:
 for required in (
     'path: .final-control-plane',
     '${GITHUB_WORKSPACE}/.final-control-plane/scripts/restore-approved-preview-for-final.py',
+    '${GITHUB_WORKSPACE}/.final-control-plane/scripts/render-approved-current-final.ts',
     'git -C "${GITHUB_WORKSPACE}/.final-control-plane" rev-parse HEAD',
 ):
     if required not in worker:
