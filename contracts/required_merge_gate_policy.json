@@ -1,0 +1,93 @@
+{
+  "contractVersion": "1.0.0",
+  "protectedBranch": "main",
+  "statusContext": "Nasdaq Cafe Required Merge Gate",
+  "docsOnlyPatterns": [
+    "docs/**",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "requestOnlyGroups": [
+    {
+      "name": "current-render-requests",
+      "patterns": [
+        "handoff-preview-requests-v4/*.json",
+        "final-render-requests-v2/*.json"
+      ],
+      "workflows": [
+        "Current Request Publication Gate"
+      ]
+    }
+  ],
+  "workflowGroups": [
+    {
+      "name": "visual-story-engine",
+      "patterns": [
+        "src/**",
+        "scripts/**",
+        "schemas/**",
+        "contracts/**",
+        "render-specs/**",
+        "episode-packages/**",
+        "shot-timing-requests/**",
+        "shot-timing-reports/**",
+        "package.json",
+        "package-lock.json",
+        "tsconfig*.json",
+        "AGENTS.md",
+        ".github/workflows/**"
+      ],
+      "workflows": [
+        "Visual Story Engine CI"
+      ]
+    },
+    {
+      "name": "visual-story-media",
+      "patterns": [
+        "src/**",
+        "public/**",
+        "render-specs/**",
+        "scripts/*media*"
+      ],
+      "workflows": [
+        "Visual Story Media CI"
+      ]
+    },
+    {
+      "name": "preview-final-identity",
+      "patterns": [
+        ".github/workflows/current-request-publication-gate.yml",
+        ".github/workflows/nasdaq-cafe-handoff-preview-request-v4.yml",
+        ".github/workflows/nasdaq-cafe-preview-handoff-v2.yml",
+        ".github/workflows/nasdaq-cafe-preview-status.yml",
+        ".github/workflows/nasdaq-cafe-final-request-v2.yml",
+        ".github/workflows/nasdaq-cafe-final-v2.yml",
+        ".github/workflows/nasdaq-cafe-codespace-wake.yml",
+        ".github/workflows/required-merge-gate.yml",
+        "scripts/validate-current-request.py",
+        "scripts/verify-final-authorization-bundle.py",
+        "scripts/nasdaq-cafe-preview-entry.sh",
+        "scripts/nasdaq-cafe-final-entry.sh",
+        "scripts/render-approved-current-final.ts",
+        "scripts/capture-preview-current-spine-identity.py",
+        "scripts/restore-approved-preview-for-final.py",
+        "scripts/wake_repository_codespace.py",
+        "scripts/required_merge_gate.py",
+        "scripts/test-current-preview-final-identity-contract.py",
+        "scripts/test-current-preview-publication-path.py",
+        "scripts/test-capture-preview-current-spine-identity.py",
+        "scripts/test-restore-approved-preview-for-final.py",
+        "scripts/test-final-control-plane-renderer-boundary.py",
+        "scripts/test-current-final-render-adapter.py",
+        "scripts/test_codespace_wake_gateway.py",
+        "scripts/test_required_merge_gate.py",
+        "contracts/required_merge_gate_policy.json",
+        ".github/workflows/current-preview-final-identity-ci.yml"
+      ],
+      "workflows": [
+        "Current Preview Final Identity CI"
+      ]
+    }
+  ],
+  "unclassifiedNonDocs": "FAIL"
+}
