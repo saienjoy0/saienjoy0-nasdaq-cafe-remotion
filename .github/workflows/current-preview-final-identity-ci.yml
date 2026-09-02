@@ -10,6 +10,13 @@ on:
       - ".github/workflows/nasdaq-cafe-final-request-v2.yml"
       - ".github/workflows/nasdaq-cafe-final-v2.yml"
       - ".github/workflows/nasdaq-cafe-codespace-wake.yml"
+      - ".github/workflows/required-merge-gate.yml"
+      - "contracts/required_merge_gate_policy.json"
+      - "scripts/required_merge_gate.py"
+      - "scripts/test_required_merge_gate.py"
+      - "scripts/wake_repository_codespace.py"
+      - "scripts/test_wake_repository_codespace.py"
+      - "scripts/test_final_v2_runner_readiness.py"
       - "scripts/validate-current-request.py"
       - "scripts/verify-final-authorization-bundle.py"
       - "scripts/nasdaq-cafe-preview-entry.sh"
@@ -45,6 +52,9 @@ jobs:
           python3 scripts/test-final-control-plane-renderer-boundary.py
           python3 scripts/test-current-final-render-adapter.py
           python3 scripts/test_codespace_wake_gateway.py
+          python3 scripts/test_required_merge_gate.py
+          python3 scripts/test_final_v2_runner_readiness.py
+          python3 scripts/test_wake_repository_codespace.py
       - name: Syntax and shell hygiene
         run: |
           python3 -m py_compile \
@@ -52,13 +62,18 @@ jobs:
             scripts/restore-approved-preview-for-final.py \
             scripts/validate-current-request.py \
             scripts/verify-final-authorization-bundle.py \
+            scripts/required_merge_gate.py \
+            scripts/wake_repository_codespace.py \
             scripts/test-current-preview-final-identity-contract.py \
             scripts/test-current-preview-publication-path.py \
             scripts/test-capture-preview-current-spine-identity.py \
             scripts/test-restore-approved-preview-for-final.py \
             scripts/test-final-control-plane-renderer-boundary.py \
             scripts/test-current-final-render-adapter.py \
-            scripts/test_codespace_wake_gateway.py
+            scripts/test_codespace_wake_gateway.py \
+            scripts/test_required_merge_gate.py \
+            scripts/test_final_v2_runner_readiness.py \
+            scripts/test_wake_repository_codespace.py
           bash -n scripts/nasdaq-cafe-preview-entry.sh
           bash -n scripts/nasdaq-cafe-final-entry.sh
           git diff --check

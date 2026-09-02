@@ -13,6 +13,7 @@ on:
       - "shot-timing-reports/**"
       - "package.json"
       - "package-lock.json"
+      - "tsconfig*.json"
       - "AGENTS.md"
       - "docs/**"
       - ".github/workflows/**"

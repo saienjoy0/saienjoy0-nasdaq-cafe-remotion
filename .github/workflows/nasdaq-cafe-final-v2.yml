@@ -144,9 +144,35 @@ jobs:
             echo "already_completed=false" >> "$GITHUB_OUTPUT"
           fi
 
-  final:
+  wake-codespace:
     needs: preflight
     if: needs.preflight.outputs.already_completed != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current Final control plane
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+      - name: Ensure self-hosted Final runner is available
+        id: wake
+        shell: bash
+        env:
+          CODESPACE_LIFECYCLE_TOKEN: ${{ secrets.CODESPACE_LIFECYCLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 scripts/wake_repository_codespace.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --github-output "$GITHUB_OUTPUT"
+
+  final:
+    needs: [preflight, wake-codespace]
+    if: >-
+      needs.preflight.outputs.already_completed != 'true' &&
+      needs.wake-codespace.result == 'success'
     runs-on: [self-hosted, linux, x64, nasdaq-cafe-codespace]
     timeout-minutes: 120
     env:

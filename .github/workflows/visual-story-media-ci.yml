@@ -5,6 +5,7 @@ on:
     paths:
       - "src/**"
       - "scripts/**"
+      - "public/**"
       - "render-specs/**"
       - "package.json"
       - "package-lock.json"
