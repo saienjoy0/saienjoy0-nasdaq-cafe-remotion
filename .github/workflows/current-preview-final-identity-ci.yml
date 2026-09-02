@@ -21,7 +21,6 @@ on:
       - "scripts/nasdaq-cafe-final-entry.sh"
       - "scripts/render-approved-current-final.ts"
       - "scripts/capture-preview-current-spine-identity.py"
-      - "scripts/restore-approved_preview_for_final.py"
       - "scripts/restore-approved-preview-for-final.py"
       - "scripts/test-current-preview-final-identity-contract.py"
       - "scripts/test-current-preview-publication-path.py"
