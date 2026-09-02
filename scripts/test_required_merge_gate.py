@@ -39,7 +39,18 @@ POLICY = {
         },
         {
             "name": "identity",
-            "patterns": [".github/workflows/nasdaq-cafe-final-v2.yml", ".github/workflows/nasdaq-cafe-codespace-wake.yml", "scripts/wake_repository_codespace.py", "scripts/test_codespace_wake_gateway.py", "scripts/required_merge_gate.py", "scripts/test_required_merge_gate.py", "contracts/required_merge_gate_policy.json", ".github/workflows/required-merge-gate.yml"],
+            "patterns": [
+                ".github/workflows/nasdaq-cafe-final-v2.yml",
+                ".github/workflows/nasdaq-cafe-codespace-wake.yml",
+                "scripts/wake_repository_codespace.py",
+                "scripts/test_codespace_wake_gateway.py",
+                "scripts/required_merge_gate.py",
+                "scripts/test_required_merge_gate.py",
+                "scripts/test_final_v2_runner_readiness.py",
+                "scripts/test_wake_repository_codespace.py",
+                "contracts/required_merge_gate_policy.json",
+                ".github/workflows/required-merge-gate.yml",
+            ],
             "workflows": ["Current Preview Final Identity CI", "Visual Story Engine CI"],
         },
     ],
@@ -74,6 +85,19 @@ class RequiredMergeGateTests(unittest.TestCase):
         result = classify_changes(POLICY, [{"filename": ".github/workflows/nasdaq-cafe-final-v2.yml", "status": "modified"}])
         self.assertEqual(result["state"], "WORKFLOWS_REQUIRED")
         self.assertEqual(set(result["expectedWorkflows"]), {"Current Preview Final Identity CI", "Visual Story Engine CI"})
+
+    def test_runner_readiness_tests_require_identity_and_engine(self) -> None:
+        for filename in (
+            "scripts/test_final_v2_runner_readiness.py",
+            "scripts/test_wake_repository_codespace.py",
+        ):
+            with self.subTest(filename=filename):
+                result = classify_changes(POLICY, [{"filename": filename, "status": "modified"}])
+                self.assertEqual(result["state"], "WORKFLOWS_REQUIRED")
+                self.assertEqual(
+                    set(result["expectedWorkflows"]),
+                    {"Current Preview Final Identity CI", "Visual Story Engine CI"},
+                )
 
     def test_src_requires_engine_and_media(self) -> None:
         result = classify_changes(POLICY, [{"filename": "src/components/Card.tsx", "status": "modified"}])
