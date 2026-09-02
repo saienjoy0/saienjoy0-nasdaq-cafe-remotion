@@ -29,11 +29,14 @@ const lock = JSON.parse(readFileSync(lockPath, "utf8")) as {
 };
 
 if (lock.schemaVersion !== "1.0.0") fail("lock schemaVersion must be 1.0.0");
-if (!Array.isArray(lock.skills) || lock.skills.length !== 4) {
+const skills = Array.isArray(lock.skills)
+  ? lock.skills
+  : fail("lock skills must be an array");
+if (skills.length !== 4) {
   fail("lock must contain exactly four approved upstream skill sources");
 }
 
-const byId = new Map(lock.skills.map((skill) => [skill.id, skill]));
+const byId = new Map(skills.map((skill) => [skill.id, skill]));
 const requiredIds = [
   "ux-audit",
   "visual-cognition-slides",
@@ -45,7 +48,7 @@ for (const id of requiredIds) {
   if (!byId.has(id)) fail(`missing approved skill: ${id}`);
 }
 
-for (const skill of lock.skills) {
+for (const skill of skills) {
   if (!skill.repository || !skill.repository.includes("/")) {
     fail(`${skill.id}: repository must be owner/name`);
   }
