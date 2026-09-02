@@ -40,3 +40,9 @@ jobs:
 
       - name: Validate skill routing contract
         run: npm run test:agent-skills
+
+      - name: Materialize pinned upstream skills
+        run: npm run agent-skills:sync
+
+      - name: Verify synchronized skill receipts without network
+        run: npm run agent-skills:check
