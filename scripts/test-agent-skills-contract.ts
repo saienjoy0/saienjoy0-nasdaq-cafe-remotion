@@ -24,6 +24,7 @@ const lock = JSON.parse(readFileSync(lockPath, "utf8")) as {
     destination?: string;
     activation?: "auto" | "reference-only";
     license?: string;
+    copyMode?: "directory" | "directory-contents";
   }>;
 };
 
@@ -51,6 +52,7 @@ for (const skill of lock.skills) {
   if (!skill.commit || !/^[0-9a-f]{40}$/.test(skill.commit)) {
     fail(`${skill.id}: commit must be a pinned 40-hex SHA`);
   }
+  if (!skill.sourcePath) fail(`${skill.id}: sourcePath is required`);
   if (!skill.destination) fail(`${skill.id}: destination is required`);
   if (!skill.license) fail(`${skill.id}: license metadata is required`);
 }
@@ -66,9 +68,14 @@ if (!cognition.destination!.startsWith("third_party/agent-skills/")) {
 for (const id of ["ux-audit", "motion-design", "remotion-official"] as const) {
   const skill = byId.get(id)!;
   if (skill.activation !== "auto") fail(`${id} must be auto-discoverable`);
-  if (!skill.destination!.startsWith(".agents/skills/")) {
+  if (!(skill.destination === ".agents/skills" || skill.destination!.startsWith(".agents/skills/"))) {
     fail(`${id} must install under .agents/skills`);
   }
+}
+
+const remotion = byId.get("remotion-official")!;
+if (remotion.copyMode !== "directory-contents" || remotion.sourcePath !== "skills") {
+  fail("remotion-official must install the upstream skills directory contents into .agents/skills");
 }
 
 const routing = readFileSync(routingPath, "utf8");
