@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-09-02",
+  "policy": {
+    "updateMode": "explicit-review-only",
+    "runtimeNetworkFetch": false,
+    "projectInstructionsWin": true
+  },
+  "skills": [
+    {
+      "id": "ux-audit",
+      "repository": "EliaAlberti/ux-audit-skill",
+      "commit": "76eb1ab73560c90275823395fda52c3ca4ea8b2b",
+      "sourcePath": ".",
+      "destination": ".agents/skills/ux-audit",
+      "copyMode": "directory",
+      "activation": "auto",
+      "license": "MIT",
+      "purpose": "Evidence-bound visual diagnosis of representative frames and screenshot journeys"
+    },
+    {
+      "id": "visual-cognition-slides",
+      "repository": "edu-ai-builders/visual-cognition-slides",
+      "commit": "83fc4b55f409b6564c9c1b8aee93d3015af2da9c",
+      "sourcePath": ".",
+      "destination": "third_party/agent-skills/visual-cognition-slides",
+      "copyMode": "directory",
+      "activation": "reference-only",
+      "license": "MIT",
+      "purpose": "Visual translation and cognitive representation guidance without taking ownership of video generation"
+    },
+    {
+      "id": "motion-design",
+      "repository": "LottieFiles/motion-design-skill",
+      "commit": "f9a8a041b85185ee4881b3471d3415e939aac772",
+      "sourcePath": "skills/motion-design",
+      "destination": ".agents/skills/motion-design",
+      "copyMode": "directory",
+      "activation": "auto",
+      "license": "MIT",
+      "purpose": "Timing, easing, choreography, attention guidance and motion quality review"
+    },
+    {
+      "id": "remotion-official",
+      "repository": "remotion-dev/skills",
+      "commit": "54e9b19a612897171e0b3b242e01c2badba4a272",
+      "sourcePath": "skills",
+      "destination": ".agents/skills",
+      "copyMode": "directory-contents",
+      "activation": "auto",
+      "license": "Remotion License (eligibility-dependent; verify current upstream terms before commercial redistribution)",
+      "purpose": "Official Remotion implementation, markup, rendering, studio, multimedia and related guidance"
+    }
+  ]
+}
