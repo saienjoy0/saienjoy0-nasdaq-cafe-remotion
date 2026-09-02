@@ -1,3 +1,3 @@
-// Disposable Required Merge Gate negative probe. Do not merge.
-const reliabilityNegativeProbe: string = 1;
+// Disposable Required Merge Gate success probe. Do not merge.
+const reliabilityNegativeProbe: string = "valid";
 export {reliabilityNegativeProbe};
