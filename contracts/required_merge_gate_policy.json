@@ -81,6 +81,8 @@
         "scripts/test-current-final-render-adapter.py",
         "scripts/test_codespace_wake_gateway.py",
         "scripts/test_required_merge_gate.py",
+        "scripts/test_final_v2_runner_readiness.py",
+        "scripts/test_wake_repository_codespace.py",
         "contracts/required_merge_gate_policy.json",
         ".github/workflows/current-preview-final-identity-ci.yml"
       ],
