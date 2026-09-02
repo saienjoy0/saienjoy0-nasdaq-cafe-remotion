@@ -63,6 +63,7 @@ jobs:
             scripts/validate-current-request.py \
             scripts/verify-final-authorization-bundle.py \
             scripts/required_merge_gate.py \
+            scripts/wake_repository_codespace.py \
             scripts/test-current-preview-final-identity-contract.py \
             scripts/test-current-preview-publication-path.py \
             scripts/test-capture-preview-current-spine-identity.py \
