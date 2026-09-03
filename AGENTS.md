@@ -35,8 +35,11 @@ Remotion、Codex、GitHub Actionsは、episode packageや過去資料を読み�
 5. `docs/11_visual_beat_implementation.md`
 6. `docs/12_visual_template_contract.md`
 7. `docs/12_motion_design_reference.md`
-8. 現在のスキーマ、validator、テスト、実装コード
-9. READMEおよび旧実装資料のうち、上記と競合しない部分
+8. `docs/17_visual_skill_routing.md`
+9. 現在のスキーマ、validator、テスト、実装コード
+10. READMEおよび旧実装資料のうち、上記と競合しない部分
+
+外部Agent Skillはこの順位を上書きしません。映像改善時のSkill責任境界は`docs/17_visual_skill_routing.md`を正本とします。
 
 ## 3. 作業開始時
 
@@ -57,6 +60,34 @@ npx remotion studio src/index.ts --no-open
 ```bash
 npx remotion studio src/index.ts --no-open --webpack-poll 1000
 ```
+
+### 3.1 Visual Skill bootstrap
+
+映像の診断、図解方式の再設計、motion変更、Remotion visual code変更を行う場合だけ、次を確認します。
+
+```bash
+npm run test:agent-skills
+```
+
+project-local Skillが未同期の場合は、開発環境でだけ次を実行します。
+
+```bash
+npm run agent-skills:sync
+npm run agent-skills:check
+```
+
+Skill sourceは`config/agent-skills.lock.json`の40-hex commit SHAへ固定します。floating main/tagを本番判断へ使用しません。
+
+配置:
+
+- `.agents/skills/ux-audit`：preview / stillの見えている問題を証拠付きで診断
+- `.agents/skills/motion-design`：timing / easing / choreography判断
+- `.agents/skills/remotion-*`：Remotion公式実装ガイダンス
+- `third_party/agent-skills/visual-cognition-slides`：**reference-only**。図解・認知表現を考える時だけ明示的に読む
+
+`visual-cognition-slides`を自動発火Skillとして扱わず、HTML/PPT/video生成機能をNASDAQ Cafe本番制作へ使用しません。確定済みの意味をどのVisual表現へ翻訳するかだけを参考にします。
+
+Skill同期は開発作業です。通常の日次preview/final、GitHub Actions、Renderer runtimeから外部Skill repositoryを取得しません。
 
 ## 4. render_spec.jsonは不変入力
 
@@ -119,6 +150,25 @@ RendererはScene番号、文章、数値、オブジェクト件数からテン�
 - `text-focus`
 
 外部リポジトリのコードを実行時に取得しません。参考元の動作原理をローカル実装へ固定し、任意Reactコード、任意CSS、任意ファイルパス、動的importをJSONから指定させません。
+
+### 5.4 Visual Skill routing
+
+映像改善では次の順番を守ります。
+
+```text
+approved semantics
+→ preview / representative stills
+→ ux-audit
+→ 必要な場合だけ visual-cognition-slides を明示参照
+→ existing Visual Director Candidate Catalog
+→ motion-design
+→ Protected Semantic Diff
+→ remotion-official
+→ before / after確認
+→ 別日のfresh episode regression
+```
+
+SkillはCandidate Catalogを迂回して自由なTemplate JSON、自由SVG、自由Reactを日次入力へ注入しません。既存候補で表現できない場合は`CAPABILITY_GAP`としてReusable Templateのコード改善へ戻します。
 
 ## 6. 本番の日次コマンド
 
@@ -198,6 +248,8 @@ Actionsが行わないこと：
 - 日次asset IDの自動推測
 - AIによる代表フレーム検査
 - AIによる完成動画視聴
+- Agent Skill repositoryの同期・取得
+- ux-audit / visual-cognition / motion-designによるAI再判断
 - 自動commit / push
 
 ## 8. コード変更時の検証
@@ -221,6 +273,15 @@ npm run test:visual-variety
 npm run test:visual-templates
 npm run test:visual-story
 ```
+
+Agent Skillのlock、配置、routingを変更した場合は次も必須です。
+
+```bash
+npm run test:agent-skills
+npm run agent-skills:check
+```
+
+`agent-skills:check`は同期済み開発環境で実行します。通常のproduction renderでSkill同期を要求しません。
 
 validatorやテストを弱めて不正入力を通しません。契約変更では、Zod、JSON Schema、validator、fixture、テスト、文書を同時に更新します。
 
@@ -300,6 +361,8 @@ Visual Storyの変更をTTS identityへ含めません。`speechText`、pronunci
 - MP4、確認用PNG
 
 生成物はArtifactへ保存し、自動commitしません。依存関係やRemotionを明示依頼なしに更新せず、関連しないファイルを整形・改名・移動しません。
+
+外部Skillの同期内容をGitへvendorするか、開発bootstrapで復元するかは`docs/17_visual_skill_routing.md`とlock policyに従います。production runtimeでその判断をしません。
 
 ## 14. 完了報告
 
