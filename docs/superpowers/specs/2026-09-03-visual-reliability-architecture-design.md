@@ -1,36 +1,38 @@
 # Visual Reliability Architecture Design
 
-Date: 2026-09-03
-Status: design approved in chat; implementation not started
-Repository: `saienjoy0/saienjoy0-nasdaq-cafe-remotion`
+Date: 2026-09-03  
+Status: design approved in chat; implementation not started  
+Renderer repository: `saienjoy0/saienjoy0-nasdaq-cafe-remotion`  
 Related audit: `docs/audits/2026-08-17-current-preview-visual-audit.md`
 
 ## 1. Purpose
 
-This design converts the 2026-08-17 Current Preview audit into reusable production contracts. The goal is not to beautify one episode. The goal is to prevent four recurrent classes of failure across future episodes:
+Convert the 2026-08-17 Current Preview audit into reusable production contracts. This is not an episode-specific beautification pass.
 
-1. a visual diagram implying a causal relationship or market scope that the approved narration does not claim;
-2. Visual Beats completing their reveal in the first fraction of a long narration and then remaining visually stagnant;
-3. registered Stage Shells rendering as generic text/card surfaces instead of cognition-matched diagrams, comparisons, timelines, or verification structures;
-4. public subtitles or viewer-visible labels exposing broken line wrapping or renderer-internal vocabulary.
+The architecture must prevent four recurrent failure classes:
 
-The existing editorial ownership remains unchanged: ChatGPT/Plot owns market causality, Expected/Actual/Gap, evidence, uncertainty, Scene order, narration, Visual Beats, and final visual decisions. GitHub Actions and Remotion remain deterministic executors of a validated, frozen `render_spec.json`.
+1. a diagram implies a causal relationship or market scope that the approved narration does not claim;
+2. a long Visual Beat completes its meaningful reveal immediately and remains visually stagnant;
+3. registered Stage Shells behave like generic text/card boards instead of cognition-matched contradiction, gap, causal, timeline, verification, or evidence surfaces;
+4. subtitles or viewer surfaces expose broken wrapping or renderer-internal vocabulary.
+
+Editorial ownership does not change. ChatGPT/Plot owns market causality, Expected/Actual/Gap, evidence, uncertainty, Scene order, narration, Visual Beats, semantic scope, and final visual decisions. GitHub Actions and Remotion remain deterministic executors of a frozen, validated `render_spec.json`.
 
 ## 2. Non-goals
 
 This work does not:
 
-- let Remotion infer market causality from text, price direction, Scene number, or object inventory;
+- let Renderer infer causality from text, price direction, Scene number, or object inventory;
 - let GitHub Actions use AI to redesign a video;
 - fetch or execute external Skill code during production rendering;
-- replace the Visual Director with a free-form image or slide generator;
-- create episode-specific arbitrary SVG/React components when a registered reusable Template can express the same meaning;
-- rewrite narration, captions, evidence, numbers, sources, confidence, or counterevidence to make a visual fit;
-- automatically proceed from Preview to Final.
+- replace Visual Director with free-form slide/image generation;
+- create date/company-specific React/SVG components when a reusable registered Template can express the meaning;
+- rewrite narration, captions, numbers, evidence, sources, confidence, or counterevidence to make a visual fit;
+- automatically advance Preview to Final.
 
-## 3. Existing architecture to preserve
+## 3. Existing boundaries to preserve
 
-The current visual selection path remains the backbone:
+The visual selection backbone remains:
 
 ```text
 approved semantic render input
@@ -39,49 +41,37 @@ approved semantic render input
 → candidateId-only Visual Direction Plan
 → deterministic compiler
 → Protected Semantic Diff
-→ existing visual gates / renderer validator
+→ visual gates / renderer validator
 → freeze
 ```
 
-The following boundaries remain mandatory:
+Mandatory boundaries:
 
 - Visual Director selects only `candidateId`.
-- Candidate Builder only emits registered legal candidates.
-- Compiler may mutate only visual fields already designated as mutable.
-- Protected Semantic Diff must preserve narration, captions, Scene order, numbers, sources, Expected/Actual/Gap, causality, counterevidence, and confidence.
-- Renderer does not infer Template or display order.
-- Production Actions receive only the frozen validated spec and resolved assets.
+- Candidate Builder emits only registered legal candidates.
+- Compiler mutates only explicitly visual fields.
+- Protected Semantic Diff preserves narration, captions, Scene order, numbers, sources, Expected/Actual/Gap, causality, counterevidence, confidence, and the new semantic-scope field.
+- Renderer never infers Template or display order.
+- Production Actions receive only frozen spec + resolved assets.
 
-## 4. Design choice
+## 4. Selected approach
 
 Three approaches were considered:
 
-### A. Stage-only visual polish
+- **Stage-only polish:** rejected; cannot prevent semantic-scope errors or front-loaded reveal stagnation.
+- **Free-form AI visuals per episode:** rejected; conflicts with deterministic ownership and creates one-off surfaces.
+- **Contract-first visual reliability layer:** selected.
 
-Improve CSS, typography, and component presentation only.
+The selected design adds semantic-scope and rhythm contracts before freeze, then refreshes existing Stage Shells and public-surface validation inside those contracts.
 
-Rejected because it cannot prevent the Scene 5 scope error or long post-reveal stagnation.
-
-### B. Free-form AI visual generation per episode
-
-Allow a slide/data-visualization agent to generate diagrams or layouts directly.
-
-Rejected because it conflicts with deterministic Candidate ownership, risks changing editorial meaning, and creates one-off runtime surfaces.
-
-### C. Contract-first visual reliability layer — selected
-
-Add explicit semantic-scope and rhythm contracts before freeze, then refresh existing Stage Shells and public-surface validation within those contracts.
-
-This approach preserves the current ownership model and makes the fixes reusable.
-
-## 5. Architecture overview
+## 5. Target architecture
 
 ```text
 Editorial / episode_package
         ↓
 approved market causality + evidence
         ↓
-Visual Beat semantic scope + authored Visual Events
+Visual Beat semanticScope + authored Visual Events
         ↓
 Candidate Builder
   ├─ Evidence Capability
@@ -114,12 +104,12 @@ human visual review
 Final only on explicit request
 ```
 
-External visual Skills are design-time advisers only:
+External visual Skills remain design-time advisers only:
 
-- UX Audit: identify visible hierarchy, overload, grouping, consistency, and legibility defects;
-- Visual Cognition: map approved content type to a suitable visual form;
-- Motion Design: specify reveal/choreography principles after meaning and visual form are fixed;
-- Remotion Skills: implement frame-driven markup and rendering correctly.
+- UX Audit: visible hierarchy, overload, grouping, consistency, legibility;
+- Visual Cognition: approved knowledge type → suitable visual form;
+- Motion Design: choreography after meaning/form are fixed;
+- Remotion Skills: frame-driven implementation guidance.
 
 No Skill becomes a production runtime dependency.
 
@@ -127,13 +117,13 @@ No Skill becomes a production runtime dependency.
 
 ### 6.1 Problem
 
-The current Scene schema has `causalScope`, but Visual Beats and individual causal objects do not carry enough scope metadata to distinguish company-direct, sector, and NASDAQ-wide explanations. Current causal validation checks graph shape but not semantic market scope.
+Scene already has `causalScope`, but Visual Beats do not carry enough scope metadata to distinguish lead-stock, sector, and NASDAQ-wide explanations. Existing causal validation checks graph shape, not market scope.
 
-That allowed the 2026-08-17 Scene 5 visual to imply a serial path between a company-specific expectation explanation and NASDAQ-wide macro drivers even though the narration treated them as separate explanations.
+The 2026-08-17 Scene 5 visual therefore could serialize a company-specific explanation and NASDAQ-wide macro drivers even though narration treated them as separate explanations.
 
-### 6.2 New Beat-owned semantic field
+### 6.2 New Beat field
 
-Fresh production specs move to `render_spec` schema `2.5.0` and every Visual Beat carries:
+Fresh production specs move to schema `2.5.0`. Every Visual Beat carries:
 
 ```text
 semanticScope:
@@ -143,96 +133,103 @@ semanticScope:
   multiple
 ```
 
-`semanticScope` is authored upstream when the approved episode package fixes the market explanation. It is not chosen by Visual Director and is not inferred by Renderer.
+This value is authored upstream when the approved episode package fixes the explanation. Visual Director cannot choose it; Renderer cannot infer it.
 
-### 6.3 Protected semantic status
+### 6.3 Protected status
 
-`semanticScope` is added to the protected semantic inventory. Candidate compilation must not change it.
+`semanticScope` is a protected semantic field. Candidate compilation cannot modify it.
 
 ### 6.4 Candidate eligibility
 
-Candidate Builder rejects Templates whose semantic topology cannot safely express the Beat scope.
-
 Initial rules:
 
-- `causal-lane` and `macro-pressure`: single-scope causal explanation only; allowed for `lead-stock`, `sector`, or `nasdaq`, not `multiple`;
-- `tailwind-headwind`, `split-comparison`, `verification-matrix`, and other explicitly separated-lane structures may be eligible for `multiple` when their existing object inventory and grammar allow it;
-- `multiple` must not be flattened into a single causal chain merely because nodes/arrows are available;
-- Candidate Builder never invents a new scope or rewrites the causal graph.
+- `causal-lane` and `macro-pressure` are single-scope causal structures; they are eligible for `lead-stock`, `sector`, or `nasdaq`, never `multiple`;
+- explicitly separated structures such as `tailwind-headwind`, `split-comparison`, and `verification-matrix` may be eligible for `multiple` when existing grammar/inventory rules also pass;
+- `multiple` must never be flattened into one causal chain merely because nodes/arrows exist;
+- Candidate Builder never invents scope and never rewrites the causal graph.
 
-### 6.5 Capability gap behavior
+### 6.5 Capability gaps
 
-If the approved content requires two independent causal paths in the same Beat and no registered Template can express them without false serial causality, Candidate coverage reports a capability gap instead of manufacturing a candidate.
+If approved content needs multiple independent causal paths and no registered Template can express them without false serial causality, Candidate coverage returns a capability gap. It does not manufacture a candidate.
 
-Only after that gap is shown to recur beyond a one-off episode should a reusable multi-path Template be added.
+A new multi-path Template is added only if the gap is demonstrably reusable, not merely because one episode needs it.
 
-### 6.6 Backward compatibility
+### 6.6 Version and cross-repository boundary
 
-- Existing `2.2.0`–`2.4.0` fixtures remain accepted for compatibility/testing paths.
-- New daily production authoring targets `2.5.0` only after qualification.
-- No existing 2.4 production artifact is silently rewritten.
+`2.5.0` is a coordinated producer/transport/renderer change, not a Renderer-only version bump.
+
+PR-A therefore must define the compatibility handoff for:
+
+- the upstream author/Plot producer that writes `semanticScope`;
+- immutable handoff metadata that declares Renderer contract `2.5.0`;
+- Current Preview/Final request validation that rejects mismatched producer/renderer contracts;
+- Renderer schema/validator support.
+
+Existing `2.2.0`–`2.4.0` fixtures remain accepted only on compatibility/testing paths. Existing 2.4 production artifacts are never silently rewritten.
+
+Current Production remains on its existing contract until fresh qualification completes.
 
 ## 7. Contract B — Visual Rhythm Contract
 
 ### 7.1 Problem
 
-The current system validates that explicit sequences have show events, but does not reject a Beat where all objects appear immediately and the screen remains unchanged for most of the narration.
+The current system can require explicit `show` events but still accept a long Beat where every meaningful object appears at the start. `W_VISUAL_STAGNATION` detects repeated presentation signatures after eight seconds, but it is warning-only and Beat-level.
 
-The current `W_VISUAL_STAGNATION` mechanism detects repeated presentation signatures after eight seconds but remains warning-only and measures Beat-level appearance, not semantic progression inside a long Beat.
+### 7.2 Ownership principle
 
-### 7.2 Principle
+Renderer never auto-distributes timing. ChatGPT/Plot authors `visualEvents`; the new contract validates them before freeze.
 
-Renderer must never auto-distribute timing. Timing remains authored in `visualEvents`.
+### 7.3 Deterministic inputs only
 
-The new contract validates that authored timing is compatible with the selected motion language and narration span before freeze.
+The validator may use only:
 
-### 7.3 Rhythm validation inputs
+- Beat start/end chunk indices;
+- ordered Visual Events (`atChunkId`, `timing`, `offsetMs`, action, target);
+- selected object IDs/types;
+- selected Template and registered `motionLanguage`;
+- resolved production timing where available;
+- `sequencePolicy` and `finalHoldMs`.
 
-The validator may use only deterministic existing data:
+It must not read narration meaning with an LLM.
 
-- Beat start/end narration chunks;
-- ordered Visual Events (`atChunkId`, timing, offset);
-- selected objects and object types;
-- selected Template and its registered `motionLanguage`;
-- Beat duration as resolved by the production timing data where available;
-- final hold.
+### 7.4 Deterministic rhythm rules
 
-It must not analyze narration semantics with an LLM.
+Rules are motion-language-specific.
 
-### 7.4 Initial deterministic rules
+Initial contract:
 
-Rules are motion-language-specific rather than one universal timer.
+- **causal-path:** node-before-arrow order remains mandatory; when a Beat contains multiple causal steps and spans multiple narration chunks, meaningful `show`/focus events cannot all occur in the first chunk;
+- **timeline-track:** multi-event timelines reveal events in order; when the Beat spans multiple chunks, all timeline events cannot be exhausted in the first chunk;
+- **progressive-chart:** when multiple selected data objects are explicitly sequenced across a multi-chunk Beat, at least one meaningful reveal occurs after the first chunk;
+- **verification-gates / matrix:** multi-item checks/hypotheses reveal progressively; all items cannot be front-loaded when the Beat spans multiple chunks;
+- **gap:** Expected → Actual → Gap ordering remains mandatory;
+- **document-reveal:** source evidence may remain static only for the authored evidence Beat; it must not be stretched across later explanatory content by Renderer inference;
+- **static:** remains legal when explicitly authored and the selected Template/grammar permits it.
 
-Examples:
+The validator never decides that narration “needs a second act.” If authoring requires a second visual act, it must be represented explicitly as another Beat or later authored events. Machine validation only checks the explicit structure above.
 
-- `causal-path`: causal nodes/arrows must progress in valid node-before-arrow order; a multi-step causal Beat must not reveal every meaningful step at the same instant;
-- `timeline-track`: multi-event timelines must have ordered reveals; a long second act with no visual progression must be represented by another Beat/visual state rather than an inert completed timeline;
-- `progressive-chart`: chart/data progression must have at least one meaningful later reveal when the Beat contains multiple semantic steps;
-- `verification-gates` / matrix forms: hypotheses/checks reveal progressively rather than all appearing at Beat start;
-- `document-reveal`: evidence receipt is a bounded evidence anchor, not a default full-narration background for an unrelated explanatory span;
-- `gap` Templates: Expected → Actual → Gap ordering is preserved;
-- `static` remains legal only for genuinely static Beats whose selected Template/grammar supports it.
+### 7.5 Candidate rhythm compatibility
 
-Exact thresholds belong in the implementation plan and tests, but the design rule is fail-closed on structurally invalid choreography, not on arbitrary aesthetic preferences.
+Candidate Builder must not emit a candidate that cannot satisfy the Beat’s already-authored sequence/rhythm structure. A candidate that would require Renderer to invent timing is ineligible.
 
-### 7.5 Relationship with stagnation warning
+### 7.6 Relationship to stagnation diagnostics
 
-`W_VISUAL_STAGNATION` remains useful as a measured Preview/reporting signal. It is not removed.
+`W_VISUAL_STAGNATION` remains a measured Preview diagnostic.
 
-The new pre-freeze rhythm validator prevents clearly invalid authored choreography. The measured stagnation report remains a post-timing diagnostic used during Preview qualification and visual audit.
+Qualification treats any stagnation warning involving a non-`static` Beat as unresolved until authoring/layout is corrected. Warnings composed only of intentionally `static` Beats remain diagnostics and must be reviewed, not auto-rewritten.
 
 ## 8. Contract C — Stage Shell Refresh
 
 ### 8.1 Principle
 
-Do not create a new Template merely to make a screen prettier. Improve the registered Stage Shell/Template rendering so each existing semantic family communicates through an appropriate visual structure.
+Do not add a new Template merely for polish. Improve registered Stage Shell/Template rendering so each semantic family communicates through an appropriate visual structure.
 
-### 8.2 Priority Stage families
+### 8.2 Priority families
 
-Initial refresh targets the families implicated by the audit:
+Initial refresh scope:
 
 - `OpenHeroStage` / `opening-contradiction`;
-- `ProgressiveChartStage` and gap-oriented surfaces;
+- gap-oriented `ProgressiveChartStage` surfaces;
 - `DocumentMediaStage` / source evidence;
 - `CausalPathStage`;
 - `DualLaneStage`;
@@ -242,140 +239,133 @@ Initial refresh targets the families implicated by the audit:
 
 ### 8.3 Cognition-matched behavior
 
-Examples of intended rendering behavior:
+- contradiction: opposing facts are the hero visual; the question is subordinate;
+- Expected/Actual/Gap: build in that order; Gap becomes final anchor;
+- causal: nodes first, then connections; no cross-scope implication;
+- timeline: markers/reaction path progress rather than becoming an immediate completed card;
+- verification: hypotheses/checks are progressively classified while counterevidence remains visible;
+- source receipt: evidence is a proof surface, not the default visual for unrelated later explanation;
+- closing: only viewer-facing synthesis appears; no renderer/stage vocabulary.
 
-- contradiction: two opposing facts become the hero visual, with the unresolved question visually subordinate;
-- Expected/Actual/Gap: build in that order, with Gap becoming the final visual anchor;
-- causal: nodes first, then connections, with no cross-scope implication;
-- timeline: time markers and reaction path progress in stages rather than becoming a static card immediately;
-- verification: competing hypotheses/checks are progressively reduced or classified, preserving counterevidence;
-- source receipt: source/evidence is visible briefly as proof and then returns to the explanatory visual state when the narration continues;
-- closing: only viewer-facing synthesis is shown; internal transition/stage vocabulary never appears.
+### 8.4 Remotion motion rules
 
-### 8.4 Motion implementation rules
-
-Remotion implementation remains frame-driven:
-
-- `useCurrentFrame()` and `interpolate()` / Remotion easing/spring primitives;
+- use `useCurrentFrame()` + `interpolate()` / Remotion easing/spring primitives;
 - no CSS `transition`, CSS `animation`, or Tailwind animation classes for rendered motion;
-- minimum motion properties necessary to guide attention;
+- use the minimum motion properties needed to guide attention;
 - hero-first choreography;
-- avoid simultaneous movement of every object;
-- ambient motion is optional and must not compete with financial meaning.
+- avoid simultaneous motion of every object;
+- ambient motion is optional and must not compete with market meaning.
 
-### 8.5 New Template policy
+### 8.5 New Template gate
 
-A new reusable Template is allowed only when all are true:
+A new Template is legal only if all conditions hold:
 
-1. approved semantic content cannot be represented faithfully by any registered Template;
-2. the limitation is documented as a capability gap;
-3. the new visual form is reusable across future episodes, not named for a date/company;
-4. Template contract, registry, eligibility, Stage Shell mapping, validator, fixtures, and docs are added together;
-5. protected semantics remain unchanged.
+1. approved semantics cannot be represented faithfully by any registered Template;
+2. Candidate coverage records the capability gap;
+3. the new form is reusable across future episodes and has no date/company-specific identity;
+4. Template contract, registry, eligibility, Stage mapping, validator, fixtures, and docs land together;
+5. Protected Semantic Diff remains unchanged.
 
 ## 9. Contract D — Subtitle and Viewer Surface Guard
 
-### 9.1 Subtitle wrapping
+### 9.1 Token-aware subtitles
 
-The current subtitle formatter may hard-split character arrays and therefore split Latin tokens mid-word.
+The current final formatter can split raw character arrays, which can break Latin tokens mid-word.
 
-Replace the final wrap decision with token-aware public subtitle wrapping.
+Replace that final decision with token-aware public wrapping.
 
-The wrapper must:
+Requirements:
 
-- preserve Japanese/CJK natural wrapping;
-- avoid splitting Latin words when a legal neighboring break exists;
-- avoid splitting common financial numeric tokens and units where possible (`-5.12%`, `$123.45`, `S&P 500`-like tokens);
-- apply basic Japanese line-head/line-end punctuation constraints;
+- preserve natural Japanese/CJK wrapping;
+- avoid splitting Latin words when another legal break exists;
+- avoid splitting financial tokens/units such as `-5.12%`, `$123.45`, and `S&P 500`-like groups where a legal neighboring break exists;
+- apply a defined basic Japanese line-head/line-end punctuation set;
 - remain within the existing two-line public safe area;
-- fail layout validation when no legal representation fits instead of silently overflowing.
+- fail layout validation when no legal representation fits rather than overflow silently;
+- never modify `speechText`.
 
-`speechText` remains unchanged and remains the TTS surface.
+### 9.2 Internal/public type boundary
 
-### 9.2 Internal vocabulary boundary
+Renderer-internal metadata must never become viewer copy.
 
-Renderer/internal metadata must never become viewer copy.
-
-The implementation must establish a typed boundary between internal identifiers and public strings so fields such as the following are never rendered by accident:
+Public view-model APIs must not expose internal identifiers as display strings, including:
 
 - Stage Shell IDs;
 - transition roles such as `closing`;
-- screen state IDs;
+- screen-state IDs;
 - Template IDs;
 - sequence-policy values;
 - Beat/Scene technical IDs;
-- validator status text.
+- validator statuses.
 
-Tests should render/inspect the relevant public view-model inputs rather than relying only on a string denylist.
+Tests should validate the public view-model/data boundary, not merely maintain a denylist of words.
 
-## 10. Protected Semantic Diff changes
+## 10. Protected Semantic Diff
 
 `semanticScope` becomes protected.
 
-Visual Director may continue mutating only its current visual mutation set unless an implementation sub-design explicitly proves another visual-only field belongs there.
-
-In particular, Visual Director must not mutate:
+Visual Director must not mutate:
 
 - `semanticScope`;
 - Scene `causalScope`;
 - nodes/arrows themselves;
-- narration or captions;
+- narration/captions;
 - evidence source IDs;
 - Expected/Actual/Gap content;
-- counterevidence or confidence.
+- counterevidence/confidence.
 
-If a candidate cannot fit those semantics, it is ineligible.
+If a candidate cannot fit these semantics, it is ineligible.
 
 ## 11. Failure behavior
 
-Fail closed with exact paths/codes for contract violations.
-
-Target failure classes:
+Fail closed with exact paths/codes for:
 
 - semantic-scope/template mismatch;
-- multi-scope content flattened into illegal single-chain causal visual;
-- explicit rhythm missing required progression for a selected motion language;
-- selected candidate cannot satisfy rhythm compatibility;
-- subtitle has no legal token-aware fit within public bounds;
-- internal metadata reaches a public view-model field;
-- capability gap with no legal candidate.
+- `multiple` content flattened into an illegal single-chain causal visual;
+- explicit rhythm incompatible with selected motion language;
+- Candidate requiring invented timing;
+- no legal token-aware subtitle fit;
+- internal metadata crossing into a public view-model field;
+- no legal Candidate / reusable capability gap.
 
-No failure path may invoke a fallback that changes market meaning or invents a new Template choice inside Renderer/Actions.
+No failure path may select a semantic fallback inside Renderer or Actions.
 
 ## 12. Test strategy
 
 Implementation follows TDD.
 
-### 12.1 Semantic scope tests
+### 12.1 Semantic scope
 
-Add fixtures that prove:
+Fixtures prove:
 
-- lead-stock causal chain is legal;
-- NASDAQ causal chain is legal;
-- `multiple` cannot select `causal-lane`/single-chain macro pressure;
-- two independent explanations do not become serial arrows;
-- compiler preserves scope under Protected Semantic Diff;
-- older schema fixtures remain compatible where intended.
+- legal lead-stock causal chain;
+- legal NASDAQ causal chain;
+- `multiple` cannot select `causal-lane` or single-chain `macro-pressure`;
+- independent explanations do not become serial arrows;
+- compiler preserves `semanticScope` under Protected Semantic Diff;
+- intended older-schema compatibility remains intact;
+- producer/transport/renderer version mismatch fails closed.
 
-### 12.2 Rhythm tests
+### 12.2 Rhythm
 
-Add deterministic fixtures for:
+Fixtures prove:
 
 - valid progressive causal reveal;
-- invalid all-at-once causal reveal;
+- invalid all-in-first-chunk causal reveal for a multi-chunk/multi-step Beat;
 - valid Expected→Actual→Gap sequence;
 - invalid arrow-before-node sequence;
-- valid timeline progression;
-- invalid long completed-timeline state where the content actually requires a second visual act;
-- static Beat that remains intentionally legal.
+- valid ordered timeline reveal;
+- invalid all-in-first-chunk multi-event timeline for a multi-chunk Beat;
+- valid progressive verification reveal;
+- intentionally `static` Beat remains legal.
 
-### 12.3 Stage tests
+### 12.3 Stage Shells
 
-Extend existing Stage legibility/template tests and representative still rendering. The test should verify hierarchy/structure and public-data routing without attempting an AI aesthetic judgment in CI.
+Extend Stage legibility/template tests and representative still rendering. CI verifies structure, hierarchy contracts, routing, and overflow; it does not perform AI aesthetic judgment.
 
-### 12.4 Subtitle tests
+### 12.4 Subtitles
 
-Include mixed Japanese/English/financial strings such as:
+Include:
 
 - `Applied Materials`;
 - `NASDAQ`;
@@ -384,82 +374,96 @@ Include mixed Japanese/English/financial strings such as:
 - Japanese sentence + long English company name;
 - punctuation edge cases.
 
-Assert no illegal token break and no overflow.
+Assert no illegal token break and no public overflow.
 
-### 12.5 Viewer surface tests
+### 12.5 Viewer surface
 
-Assert technical values such as `closing`, Template IDs, screenState IDs, and sequence-policy IDs cannot appear through public view-model fields unless they are explicitly authored viewer text (which production authoring rules already disallow).
+Assert internal metadata cannot flow through the public view-model unless it was explicitly authored as viewer copy; production authoring rules separately prohibit technical metadata as viewer copy.
 
 ## 13. Delivery decomposition
 
-Implementation is deliberately split into independent PR-sized stages.
-
 ### PR-A — Semantic Scope Contract
+
+Renderer side:
 
 - schema 2.5.0 support;
 - Beat `semanticScope`;
-- protected semantic inventory;
+- Protected Semantic Diff;
 - Candidate eligibility;
 - static/visual-story validation;
-- compatibility docs and fixtures.
+- compatibility docs/fixtures.
+
+Paired producer/transport work:
+
+- upstream author/Plot emits `semanticScope`;
+- handoff declares 2.5.0 renderer contract;
+- Preview/Final request validation rejects incompatible contract versions.
 
 ### PR-B — Visual Rhythm Contract
 
-- rhythm validator;
+- deterministic rhythm validator;
 - motion-language rules;
 - Candidate rhythm compatibility;
 - regression fixtures;
-- stagnation reporting retained.
+- existing stagnation reporting retained.
 
 ### PR-C — Stage Shell Refresh
 
-- visual hierarchy/layout/motion refresh of existing registered Stage families;
+- hierarchy/layout/motion refresh of existing registered Stage families;
 - no editorial mutation;
-- representative still tests and visual regression review.
+- representative still tests and manual before/after visual audit.
 
 ### PR-D — Subtitle / Viewer Surface Guard
 
 - token-aware subtitle wrapper;
 - public/internal type boundary;
-- subtitle and public-screen regression tests.
+- subtitle/public-screen regression tests.
 
 ### Qualification
 
-After A–D pass repository CI:
+After A–D pass CI:
 
-1. produce a fresh episode from Collector/Plot rather than repairing the 2026-08-17 fixture;
-2. complete Candidate → compile → validators with no manual patch/retry to authoring bytes;
+1. use a fresh episode from Collector/Plot, not a repaired 2026-08-17 fixture;
+2. run Candidate → compile → validators without manual patch/retry to authoring bytes;
 3. generate Preview only;
-4. audit representative frames and motion using the same UX Audit / Visual Cognition / Motion Design workflow;
-5. require no unresolved image route and no semantic/rhythm/public-surface contract failure;
-6. user visually reviews Preview;
-7. only then qualify 2.5.0 for Current Production;
-8. Final remains explicit-user-request only.
+4. audit representative frames and motion using UX Audit → Visual Cognition → Motion Design;
+5. require no semantic/rhythm/public-surface failure and no unresolved image route;
+6. require no unresolved `W_VISUAL_STAGNATION` involving non-static Beats;
+7. user visually reviews Preview;
+8. only then qualify `2.5.0` for Current Production;
+9. Final remains explicit-user-request only.
 
 ## 14. Success criteria
 
-The architecture is considered qualified only when a fresh episode demonstrates all of the following:
+A fresh episode must demonstrate:
 
-- no visual edge connects different causal scopes unless the approved semantic model explicitly says it should;
-- no Candidate selection can erase the distinction between company-direct and NASDAQ-wide explanations;
-- Visual Events progress with the narration rather than front-loading the entire explanatory structure;
-- measured Preview stagnation is materially reduced without decorative motion for its own sake;
-- Expected/Actual/Gap, causal, timeline, verification, and source evidence visuals communicate their semantic role without relying on paragraph-like cards;
-- subtitles do not split protected Latin/financial tokens incorrectly;
-- internal renderer vocabulary is absent from viewer surfaces;
+- no visual edge crosses causal scopes unless the approved semantic model explicitly authorizes that relationship;
+- Candidate selection cannot erase the distinction between company-direct and NASDAQ-wide explanations;
+- multi-chunk explanatory Beats do not front-load all meaningful events when their motion language requires progression;
+- no unresolved stagnation warning involves a non-static Beat;
+- Expected/Actual/Gap, causal, timeline, verification, and evidence visuals communicate their semantic role without depending on paragraph-like generic boards;
+- protected Latin/financial subtitle tokens are not split illegally;
+- renderer-internal vocabulary is absent from viewer surfaces;
 - Protected Semantic Diff passes;
 - official validator passes;
 - existing Visual Grammar / Visual Story / handoff / build tests remain green;
-- production Actions remain deterministic and do not fetch or execute design Skills;
-- Preview is inspected before any Final request.
+- production Actions remain deterministic and do not fetch/execute visual Skills;
+- Preview is inspected before Final.
 
-## 15. Explicitly deferred decisions
+## 15. Explicitly deferred implementation choices
 
-The following are intentionally deferred to implementation planning/testing rather than guessed in this design:
+These choices are intentionally deferred to the implementation plan/tests because the design does not need to guess them:
 
-- exact numeric minimum spacing between meaningful visual events per motion language;
-- whether a reusable dual-independent-causal-path Template is necessary;
-- exact Stage Shell visual styling values;
-- exact list of Japanese kinsoku characters beyond the initial safe subset.
+- exact event-count/chunk thresholds for each motion language beyond the structural rules above;
+- whether repeated real episodes justify a new dual-independent-causal-path Template;
+- exact Stage Shell styling constants;
+- the exact initial Japanese kinsoku character set.
 
-These may be selected during implementation only if they satisfy the contracts above and are backed by focused tests. They must not weaken semantic ownership or move visual judgment into Actions/Renderer inference.
+Any chosen values must be deterministic, covered by focused tests, and must not move editorial or visual judgment into Renderer/Actions inference.
+
+## 16. Self-review result
+
+- **Placeholder scan:** no TBD/TODO or unresolved ownership decision remains.
+- **Consistency:** semanticScope is upstream-owned, protected, and never selected by Visual Director; rhythm is authored upstream and only validated downstream.
+- **Scope:** implementation is intentionally decomposed into PR-A through PR-D plus a fresh-episode qualification step rather than one monolithic patch.
+- **Ambiguity removed:** validator never infers whether narration needs a second visual act; producer/transport/renderer responsibilities for schema 2.5.0 are explicit.
