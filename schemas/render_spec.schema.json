@@ -15,6 +15,10 @@
         {
           "type": "string",
           "const": "2.4.0"
+        },
+        {
+          "type": "string",
+          "const": "2.5.0"
         }
       ]
     },
@@ -873,6 +877,15 @@
                     "news-media",
                     "event-reaction-timeline",
                     "text-focus"
+                  ]
+                },
+                "semanticScope": {
+                  "type": "string",
+                  "enum": [
+                    "lead-stock",
+                    "sector",
+                    "nasdaq",
+                    "multiple"
                   ]
                 },
                 "visualGrammarId": {
