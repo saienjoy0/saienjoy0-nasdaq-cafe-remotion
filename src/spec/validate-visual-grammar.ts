@@ -25,12 +25,12 @@ const fail = (issue: VisualGrammarValidationIssue): never => {
 const normalize = (value: string) => value.replace(/\s+/gu, "").trim();
 
 export const validateVisualGrammarContract = (spec: RenderSpec) => {
-  if (spec.schemaVersion !== "2.4.0") return;
+  if (spec.schemaVersion !== "2.4.0" && spec.schemaVersion !== "2.5.0") return;
 
   const root = spec.visualGrammarContract ?? fail({
     code: "VG_ROOT_CONTRACT_MISSING",
     path: "$.visualGrammarContract",
-    message: "render_spec 2.4.0 requires the Visual Grammar root contract",
+    message: `render_spec ${spec.schemaVersion} requires the Visual Grammar root contract`,
   });
 
   if (root.rendererCompatibilitySha256 !== VISUAL_GRAMMAR_RENDERER_COMPATIBILITY_SHA256) {
@@ -63,14 +63,14 @@ export const validateVisualGrammarContract = (spec: RenderSpec) => {
       fail({
         code: "VG_ROOT_CONTRACT_MISSING",
         path: `${path}.visualGrammarId`,
-        message: "render_spec 2.4.0 requires visualGrammarId on every Beat",
+        message: `render_spec ${spec.schemaVersion} requires visualGrammarId on every Beat`,
       });
     }
     if (beat.transitionRole === undefined) {
       fail({
         code: "VG_ROOT_CONTRACT_MISSING",
         path: `${path}.transitionRole`,
-        message: "render_spec 2.4.0 requires transitionRole on every Beat",
+        message: `render_spec ${spec.schemaVersion} requires transitionRole on every Beat`,
       });
     }
 
