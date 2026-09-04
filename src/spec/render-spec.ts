@@ -44,6 +44,9 @@ export const specVisualModeSchema = z.enum([
   "chart", "causal-diagram", "stock-comparison", "news-media",
   "verification-points", "text-focus",
 ]);
+export const semanticScopeSchema = z.enum([
+  "lead-stock", "sector", "nasdaq", "multiple",
+]);
 export const visualTemplateSchema = z.enum(VISUAL_TEMPLATE_IDS);
 export const visualTemplateVariantSchema = z.enum(VISUAL_TEMPLATE_VARIANT_IDS);
 export const sequencePolicySchema = z.enum(SEQUENCE_POLICY_IDS);
@@ -294,6 +297,7 @@ const visualBeatSchema = z.object({
   screenState: screenStateSchema,
   visualMode: specVisualModeSchema,
   visualTemplate: visualTemplateSchema,
+  semanticScope: semanticScopeSchema.optional(),
   visualGrammarId: visualGrammarIdSchema.optional(),
   transitionRole: transitionRoleSchema.optional(),
   templateVariant: visualTemplateVariantSchema.optional(),
@@ -413,6 +417,7 @@ export const renderSpecSchema = z.object({
     z.literal("2.2.0"),
     z.literal("2.3.0"),
     z.literal("2.4.0"),
+    z.literal("2.5.0"),
   ]),
   financialVisualContract: financialVisualRootContractSchema.optional(),
   visualGrammarContract: visualGrammarRootContractSchema.optional(),
@@ -518,12 +523,13 @@ export const renderSpecSchema = z.object({
   const visualGrammarBeats = spec.scenes.flatMap((scene, sceneIndex) =>
     scene.visualBeats.map((beat, beatIndex) => ({sceneIndex, beatIndex, beat})),
   );
-  if (spec.schemaVersion === "2.4.0") {
+  const usesVisualGrammar = spec.schemaVersion === "2.4.0" || spec.schemaVersion === "2.5.0";
+  if (usesVisualGrammar) {
     if (spec.visualGrammarContract === undefined) {
       context.addIssue({
         code: "custom",
         path: ["visualGrammarContract"],
-        message: "render_spec 2.4.0 requires visualGrammarContract",
+        message: `render_spec ${spec.schemaVersion} requires visualGrammarContract`,
       });
     } else if (spec.visualGrammarContract.beatCount !== visualGrammarBeats.length) {
       context.addIssue({
@@ -538,14 +544,28 @@ export const renderSpecSchema = z.object({
         context.addIssue({
           code: "custom",
           path: [...path, "visualGrammarId"],
-          message: "render_spec 2.4.0 requires visualGrammarId",
+          message: `render_spec ${spec.schemaVersion} requires visualGrammarId`,
         });
       }
       if (beat.transitionRole === undefined) {
         context.addIssue({
           code: "custom",
           path: [...path, "transitionRole"],
-          message: "render_spec 2.4.0 requires transitionRole",
+          message: `render_spec ${spec.schemaVersion} requires transitionRole`,
+        });
+      }
+      if (spec.schemaVersion === "2.5.0" && beat.semanticScope === undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "semanticScope"],
+          message: "render_spec 2.5.0 requires semanticScope",
+        });
+      }
+      if (spec.schemaVersion === "2.4.0" && beat.semanticScope !== undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "semanticScope"],
+          message: "render_spec 2.4.0 must not contain semanticScope",
         });
       }
     });
@@ -571,6 +591,13 @@ export const renderSpecSchema = z.object({
           code: "custom",
           path: [...path, "transitionRole"],
           message: `render_spec ${spec.schemaVersion} must not contain transitionRole`,
+        });
+      }
+      if (beat.semanticScope !== undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [...path, "semanticScope"],
+          message: `render_spec ${spec.schemaVersion} must not contain semanticScope`,
         });
       }
     });
