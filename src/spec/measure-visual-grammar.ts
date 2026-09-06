@@ -493,9 +493,11 @@ export const measureVisualGrammarTiming = (
   spec: RenderSpec,
   data: RenderProductionData,
 ): VisualGrammarTimingReport | null => {
-  if (spec.schemaVersion !== "2.4.0") return null;
+  if (spec.schemaVersion !== "2.4.0" && spec.schemaVersion !== "2.5.0") return null;
   const contract = spec.visualGrammarContract;
-  if (!contract) throw new Error("VG_TIMING_METADATA_MISSING $.visualGrammarContract: required for 2.4.0");
+  if (!contract) {
+    throw new Error(`VG_TIMING_METADATA_MISSING $.visualGrammarContract: required for ${spec.schemaVersion}`);
+  }
 
   const beats: MeasuredVisualGrammarBeat[] = data.scenes
     .filter((scene) => scene.sceneNumber <= 8)
