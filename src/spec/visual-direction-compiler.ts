@@ -100,6 +100,9 @@ export const compileVisualDirection = ({
 }): {spec: RenderSpec; report: VisualDirectionCompileReport} => {
   const catalog = visualCandidateCatalogSchema.parse(rawCatalog);
   const plan = visualDirectionPlanSchema.parse(rawPlan);
+  if (catalog.rendererContractVersion !== spec.schemaVersion) {
+    throw new Error(`renderer contract version mismatch: catalog=${catalog.rendererContractVersion} spec=${spec.schemaVersion}`);
+  }
   if (catalog.sourceRenderSpecSha256 !== sourceRenderSpecSha256) throw new Error("source render_spec SHA mismatch");
   if (catalog.episodeDate !== spec.episode.targetDate || plan.episodeDate !== spec.episode.targetDate) throw new Error("episodeDate mismatch");
   const catalogSha = sha256Json(catalog);
@@ -124,6 +127,9 @@ export const compileVisualDirection = ({
     const placements = new Map(scene.assetPlacements.map((item) => [item.placementId, item] as const));
     for (const beat of scene.visualBeats) {
       const candidate = selectionMap.get(beat.beatId)!;
+      if (spec.schemaVersion === "2.5.0" && candidate.semanticScope !== beat.semanticScope) {
+        throw new Error(`${beat.beatId}: semanticScope drift: candidate=${candidate.semanticScope ?? "missing"} authored=${beat.semanticScope ?? "missing"}`);
+      }
       if (sha256Json(candidate.evidenceSourceIds) !== sha256Json(beat.evidenceSourceIds)) throw new Error(`${beat.beatId}: evidence source drift`);
       const resolvedAssetIds = candidate.assetPlacementIds.map((id) => placements.get(id)?.assetId ?? (() => { throw new Error(`${beat.beatId}: unknown asset placement ${id}`); })());
       if (sha256Json(resolvedAssetIds) !== sha256Json(candidate.assetIds)) throw new Error(`${beat.beatId}: candidate asset inventory mismatch`);
