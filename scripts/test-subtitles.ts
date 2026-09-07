@@ -43,6 +43,57 @@ assert.equal(hardSplitCues[0].startMs, 500);
 assert.equal(hardSplitCues.at(-1)?.endMs, 6_500);
 assert.ok(hardSplitCues.every((cue) => cue.text.split("\n").length <= 2));
 
+const tokenRegression = "半導体ではApplied Materialsが102.5、売上高は$9.12B、騰落率は-5.12%でした。";
+const tokenRegressionCues = createSubtitleCues(tokenRegression, 0, 8_000);
+const tokenRegressionLines = tokenRegressionCues.flatMap((cue) => cue.text.split("\n"));
+assert.equal(
+  tokenRegressionCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  tokenRegression,
+  "token-aware wrapping must preserve Japanese and adjacent ASCII text",
+);
+for (const token of ["Applied", "Materials", "102.5", "$9.12B", "-5.12%"] as const) {
+  assert.ok(
+    tokenRegressionLines.some((line) => line.includes(token)),
+    `${token} must remain intact when it fits within one subtitle line`,
+  );
+}
+
+const alphanumericBoundary = "あ".repeat(21) + "N3 H100 GPT4";
+const alphanumericBoundaryLines = createSubtitleCues(alphanumericBoundary, 0, 4_000)
+  .flatMap((cue) => cue.text.split("\n"));
+assert.deepEqual(
+  alphanumericBoundaryLines,
+  ["あ".repeat(21), "N3 H100 GPT4"],
+  "fitting mixed alphanumeric tokens must wrap intact at a line boundary",
+);
+
+const commaDecimalRegression = "出来高1,234,567.89、価格-12,345.67、上昇率+10.25%です。";
+const commaDecimalCues = createSubtitleCues(commaDecimalRegression, 0, 6_000);
+const commaDecimalLines = commaDecimalCues.flatMap((cue) => cue.text.split("\n"));
+for (const token of ["1,234,567.89", "-12,345.67", "+10.25%"] as const) {
+  assert.ok(commaDecimalLines.some((line) => line.includes(token)), `${token} must remain intact`);
+}
+
+const exactBoundaryToken = "あ".repeat(22) + "1234567890123456789012";
+const exactBoundaryCues = createSubtitleCues(exactBoundaryToken, 100, 2_100);
+assert.deepEqual(
+  exactBoundaryCues.flatMap((cue) => cue.text.split("\n")),
+  ["あ".repeat(22), "1234567890123456789012"],
+  "a 22-character token must remain intact at the line boundary",
+);
+
+const oversizedToken = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const oversizedTokenCues = createSubtitleCues(oversizedToken, 0, 2_000);
+assert.equal(
+  oversizedTokenCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  oversizedToken,
+  "an oversized token may split but must preserve all characters",
+);
+assert.ok(
+  oversizedTokenCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)),
+  "oversized token fragments must remain bounded",
+);
+
 const layoutCues = assertNarrationChunkSubtitleLayoutFits({
   speechText: speech,
   startMs: 0,
