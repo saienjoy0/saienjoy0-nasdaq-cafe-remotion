@@ -4,11 +4,8 @@ export type SubtitleCue = {
   endMs: number;
 };
 
-const MAX_PAGE_CHARS = 44;
 const MAX_LINE_CHARS = 22;
 const cache = new Map<string, SubtitleCue[]>();
-
-const visibleLength = (value: string) => Array.from(value.replace(/\s+/gu, "")).length;
 
 const normalizeSpeech = (value?: string) => (value ?? "")
   .replace(/\r\n?/gu, "\n")
@@ -16,68 +13,43 @@ const normalizeSpeech = (value?: string) => (value ?? "")
   .replace(/\n+/gu, " ")
   .trim();
 
-const hardSplit = (value: string, maxChars: number) => {
-  const characters = Array.from(value);
+// Keep Latin words and financial expressions atomic when they fit. Everything
+// else remains a single code point so Japanese can wrap at any safe boundary.
+const TOKEN_PATTERN = /[$+-]?(?:\d[\d,]*(?:\.\d+)?|\.\d+)(?:%|[A-Za-z]+)?|[A-Za-z][A-Za-z0-9]*(?:[._'/-][A-Za-z0-9]+)*|\s|./gu;
+
+const subtitleTokens = (value: string) => value.match(TOKEN_PATTERN) ?? [];
+
+const boundedTokens = (value: string) => subtitleTokens(value).flatMap((token) => {
+  const characters = Array.from(token);
+  if (characters.length <= MAX_LINE_CHARS) return [token];
   const parts: string[] = [];
-  for (let offset = 0; offset < characters.length; offset += maxChars) {
-    parts.push(characters.slice(offset, offset + maxChars).join(""));
+  for (let offset = 0; offset < characters.length; offset += MAX_LINE_CHARS) {
+    parts.push(characters.slice(offset, offset + MAX_LINE_CHARS).join(""));
   }
   return parts;
-};
-
-const sentenceParts = (speechText?: string) => {
-  const normalized = normalizeSpeech(speechText);
-  if (!normalized) return [];
-  return normalized.match(/[^。！？!?]+[。！？!?]?/gu) ?? [normalized];
-};
-
-const clauseParts = (sentence: string) => {
-  if (visibleLength(sentence) <= MAX_PAGE_CHARS) return [sentence];
-  const clauses = sentence.match(/[^、，,]+[、，,]?/gu) ?? [sentence];
-  return clauses.flatMap((clause) => visibleLength(clause) > MAX_PAGE_CHARS
-    ? hardSplit(clause, MAX_PAGE_CHARS)
-    : [clause]);
-};
+});
 
 const buildPages = (speechText?: string) => {
-  const units = sentenceParts(speechText).flatMap(clauseParts);
+  const normalized = normalizeSpeech(speechText);
+  if (!normalized) return [];
+
+  const lines: string[] = [];
+  let line = "";
+  for (const token of boundedTokens(normalized)) {
+    if (line && Array.from(line + token).length > MAX_LINE_CHARS) {
+      lines.push(line);
+      line = token;
+    } else {
+      line += token;
+    }
+  }
+  if (line) lines.push(line);
+
   const pages: string[] = [];
-  let current = "";
-  for (const unit of units) {
-    if (!current) {
-      current = unit;
-      continue;
-    }
-    if (visibleLength(current + unit) <= MAX_PAGE_CHARS) {
-      current += unit;
-      continue;
-    }
-    pages.push(current);
-    current = unit;
+  for (let index = 0; index < lines.length; index += 2) {
+    pages.push(lines.slice(index, index + 2).join("\n"));
   }
-  if (current) pages.push(current);
-  return pages.flatMap((page) => visibleLength(page) > MAX_PAGE_CHARS
-    ? hardSplit(page, MAX_PAGE_CHARS)
-    : [page]);
-};
-
-const findLineBreak = (characters: string[]) => {
-  // A subtitle page can contain up to two 22-character lines. Prefer a
-  // punctuation boundary only when BOTH resulting lines fit the public safe
-  // area; otherwise a punctuation-first split can leave a 23+ character tail.
-  const minimum = Math.max(1, characters.length - MAX_LINE_CHARS);
-  const maximum = Math.min(MAX_LINE_CHARS, characters.length - 1);
-  for (let index = maximum; index >= minimum; index--) {
-    if (/[、，,。！？!?]/u.test(characters[index - 1] ?? "")) return index;
-  }
-  return Math.min(maximum, Math.max(minimum, Math.ceil(characters.length / 2)));
-};
-
-const formatPage = (value: string) => {
-  const characters = Array.from(value);
-  if (characters.length <= MAX_LINE_CHARS) return value;
-  const splitAt = findLineBreak(characters);
-  return `${characters.slice(0, splitAt).join("")}\n${characters.slice(splitAt).join("")}`;
+  return pages;
 };
 
 const speechWeight = (value: string) => Array.from(value).reduce((total, character) => {
@@ -115,7 +87,7 @@ export const createSubtitleCues = (
     const cueEnd = index === pages.length - 1 ? endMs : Math.min(endMs, cursor + duration);
     cursor = cueEnd;
     return {
-      text: formatPage(page),
+      text: page,
       startMs: cueStart,
       endMs: cueEnd,
     };
