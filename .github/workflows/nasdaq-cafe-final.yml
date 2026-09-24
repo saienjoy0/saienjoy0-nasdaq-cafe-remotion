@@ -38,7 +38,7 @@ jobs:
       EPISODE_DATE: ${{ inputs.episode_date }}
       EXPECTED_SPEC_SHA256: ${{ inputs.expected_spec_sha256 }}
       SPEC_TTS_CACHE_ONLY: "1"
-      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_MODEL: gemini-3.8-flash-tts
       GEMINI_TTS_VOICE: Charon
 
     steps:
@@ -104,7 +104,7 @@ jobs:
               if not speech:
                   raise SystemExit(f"TTS block {block_id} has no speechText")
               blocks.append({"id": block_id, "speechText": speech})
-          payload = {"synthesisVersion": "gemini-two-block-v1", "model": "gemini-3.1-flash-tts-preview", "voice": "Charon", "voiceProfileId": value.get("voiceProfileId"), "pronunciations": value.get("pronunciations"), "blocks": blocks}
+          payload = {"synthesisVersion": "gemini-two-block-v1", "model": "gemini-3.8-flash-tts", "voice": "Charon", "voiceProfileId": value.get("voiceProfileId"), "pronunciations": value.get("pronunciations"), "blocks": blocks}
           print(hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
           PY
           )"

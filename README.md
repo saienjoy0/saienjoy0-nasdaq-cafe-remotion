@@ -11,7 +11,7 @@
 - 一時表示後は`returnScreenState`で指定した次Beatへ戻る
 - `missing`、`invalid`のBeatは本番コンパイル前に拒否する。`user-review-required`はZIP・MP4を止めず、公開前のユーザー確認へ回す
 - 公開コンポーネントは`PublicSceneViewModel`だけを受け取り、Scene番号、Beat ID、表情名、画面モード名、検証結果を受け取らない
-- 本番音声はGemini `gemini-3.1-flash-tts-preview`＋`Charon`のみ
+- 本番音声はGemini `gemini-3.8-flash-tts`＋`Charon`のみ
 
 `NasdaqCafeEpisodeV2`は旧入力の確認用です。本番表示判断やカード表示には使用しません。
 
@@ -229,9 +229,9 @@ npm run render:episode -- C:\path\episode_data.json
 
 既存版は1350フレーム、V2は入力JSONの仮尺に応じて長くなります。レイアウトだけの確認は`npm run render:stills -- <episode_data.json>`を使ってください。
 
-## Gemini 3.1 Flash TTS
+## Gemini 3.8 Flash TTS
 
-本番ナレーションは`gemini-3.1-flash-tts-preview`、`Charon`、Interactions APIを既定値とします。APIキーはコードやJSONへ書かず、環境変数だけから読みます。
+本番ナレーションは`gemini-3.8-flash-tts`、`Charon`、Interactions APIを既定値とします。APIキーはコードやJSONへ書かず、環境変数だけから読みます。
 
 ```powershell
 Copy-Item .env.example .env.local
@@ -239,9 +239,9 @@ Copy-Item .env.example .env.local
 npm run generate:voiceover:gemini -- build/2026-07-10/episode_data.json
 ```
 
-9 SceneはSceneごとに生成・キャッシュされます。Geminiの24kHz mono PCMはWAV化後、既存パイプラインで48kHz mono PCMへ統一されます。読み直し時も変更Sceneだけを再生成し、キー・生レスポンス・プロンプト全文をログへ残しません。
+本番の9 Sceneは前半と後半の2ブロックで生成・キャッシュされます。Gemini 3.8からのWAVはヘッダーを二重付与せず保存し、既存パイプラインで48kHz mono PCMへ統一されます。読み直し時も変更ブロックだけを再生成し、キー・生レスポンス・本文全文をログへ残しません。
 
-VOICEVOX関連コードは旧経路の再現・回帰試験用に残していますが、`NasdaqCafeSpec`の本番検証はVOICEVOXプロファイルを拒否します。GeminiはPreviewモデルのため、生成済みWAVは公開素材とは別に保管してください。
+VOICEVOX関連コードは旧経路の再現・回帰試験用に残していますが、`NasdaqCafeSpec`の本番検証はVOICEVOXプロファイルを拒否します。生成済みWAVは公開素材とは別に保管してください。
 
 BGM・効果音、YouTube投稿、クラウドレンダリング、Remotion Lambda、Vercelデプロイは未実装です。
 

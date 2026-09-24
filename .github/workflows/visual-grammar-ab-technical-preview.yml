@@ -196,7 +196,7 @@ jobs:
           for block_id, first_scene, last_scene in (("scenes-01-04", 1, 4), ("scenes-05-09", 5, 9)):
               speech = [chunk["speechText"] for scene in value["scenes"] if first_scene <= scene["sceneNumber"] <= last_scene for chunk in scene["narrationChunks"]]
               blocks.append({"id": block_id, "speechText": speech})
-          payload = {"synthesisVersion": "gemini-two-block-v1", "model": "gemini-3.1-flash-tts-preview", "voice": "Charon", "voiceProfileId": value.get("voiceProfileId"), "pronunciations": value.get("pronunciations"), "blocks": blocks}
+          payload = {"synthesisVersion": "gemini-two-block-v1", "model": "gemini-3.8-flash-tts", "voice": "Charon", "voiceProfileId": value.get("voiceProfileId"), "pronunciations": value.get("pronunciations"), "blocks": blocks}
           print(hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
           PY
           )"

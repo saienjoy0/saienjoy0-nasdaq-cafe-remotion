@@ -272,7 +272,7 @@ validatorやテストを弱めて不正入力を通しません。契約変更�
 
 本番音声：
 
-- Provider / model：`gemini-3.1-flash-tts-preview`
+- Provider / model：`gemini-3.8-flash-tts`
 - Voice：`Charon`
 - 生成単位：Scene 1〜4、Scene 5〜9の2ブロック
 
