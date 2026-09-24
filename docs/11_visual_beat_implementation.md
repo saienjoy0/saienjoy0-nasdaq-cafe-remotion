@@ -13,7 +13,7 @@
 - Beat境界：実音声へ変換されるナレーションChunkの開始・終了
 - 一時表示の復帰：`returnScreenState`
 - 完成可能なアセット状態：`ready` / `user-review-required` / `not-required`
-- 本番音声：Gemini `gemini-3.1-flash-tts-preview` / `Charon`
+- 本番音声：Gemini `gemini-3.8-flash-tts` / `Charon`
 - 音声生成：Scene 1〜4 / Scene 5〜9の2ブロック、ブロック別キャッシュ
 
 生成データ識別子は既存実行系との互換用であり、入力契約の旧版利用を意味しない。本番入力は`2.2.0`だけを使用する。

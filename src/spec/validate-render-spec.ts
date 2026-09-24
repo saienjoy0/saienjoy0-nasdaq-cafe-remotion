@@ -35,13 +35,13 @@ export const resolveVoiceProfile = (
   const profile = result.data!;
   if (
     profile.provider !== "gemini" ||
-    profile.model !== "gemini-3.1-flash-tts-preview" ||
+    profile.model !== "gemini-3.8-flash-tts" ||
     profile.voice !== "Charon" ||
     profile.provisional
   ) {
     fail(
       "$.voiceProfileId",
-      "production requires non-provisional Gemini gemini-3.1-flash-tts-preview / Charon",
+      "production requires non-provisional Gemini gemini-3.8-flash-tts / Charon",
     );
   }
   return profile;

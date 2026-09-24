@@ -1,14 +1,16 @@
-# Gemini 3.1 Flash TTS 運用手順
+# Gemini 3.8 Flash TTS 運用手順
 
 ## 採用構成
 
-- 本番: `gemini-3.1-flash-tts-preview`
+- 本番: `gemini-3.8-flash-tts`
 - 音声: `Charon`
 - 生成単位: Scene 1〜4 / Scene 5〜9の2ブロック
-- Gemini出力: 24kHz / mono / PCM16
+- Gemini出力: WAV（返却ファイルの音声形式を確認）
 - Remotion用保存: 48kHz / mono / PCM16 WAV
 
 ブロックごとにキャッシュします。Scene 1〜4が成功してScene 5〜9が失敗した場合は、後半ブロックだけを再実行します。一文、字幕、Visual Beat、Scene単位のGemini呼び出しは禁止です。
+
+3.8では本文をそのまま読み上げるため、Director's Notesを本文に連結せず、`speech_metadata.style`へ分離します。返却されたWAVは二重にヘッダーを付けず保存し、その後48kHz/mono/PCM16へ統一します。
 
 ## 初回設定（Windows PowerShell）
 
@@ -35,7 +37,7 @@ npm run generate:voiceover:gemini -- render-specs/2026-07-10.json
 ## 安全運用
 
 - APIキーをログ・JSON・動画クレジットへ書かない
-- Previewモデル終了に備えて、採用済みWAVを保存する
+- 採用済みWAVを保存する
 - 無料枠へ機密情報や未公開情報を送らない
 - API障害時は制作を停止し、Charonで再試行する
 - VOICEVOXや別のGemini音声へ自動で切り替えない
@@ -43,5 +45,5 @@ npm run generate:voiceover:gemini -- render-specs/2026-07-10.json
 ## 公式資料
 
 - Speech generation: https://ai.google.dev/gemini-api/docs/speech-generation
-- Gemini 3.1 Flash TTS Preview: https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-tts-preview
+- Gemini 3.8 Flash TTS: https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash-tts
 - Pricing: https://ai.google.dev/gemini-api/docs/pricing
