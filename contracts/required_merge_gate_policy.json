@@ -25,6 +25,8 @@
       "patterns": [
         "src/**",
         "scripts/**",
+        "config/voice-profiles.json",
+        ".env.example",
         "schemas/**",
         "contracts/**",
         "render-specs/**",
