@@ -43,12 +43,18 @@ const protectedSemanticInventory = (spec: RenderSpec) => {
     }>;
   };
   for (const scene of inventory.scenes) {
+    const graphIds = new Set([...scene.nodes.map((node) => node.nodeId), ...scene.arrows.map((arrow) => arrow.arrowId)]);
     // Scene visualMode is a derived summary of the first Visual Beat, not an
     // independent editorial field. Candidate compilation may legitimately change
     // the first Beat's mode, so exclude the summary from protected semantics too.
     delete (scene as unknown as Record<string, unknown>).visualMode;
     for (const beat of scene.visualBeats) {
+      const causalConfig = {nodeOrder: beat.templateConfig.nodeOrder, outcomeNodeId: beat.templateConfig.outcomeNodeId};
+      const causalObjectIds = beat.objectIds.some((id: string) => graphIds.has(id)) ? beat.objectIds : [];
       for (const key of visualMutationKeys) delete beat[key];
+      const record = beat as unknown as Record<string, unknown>;
+      record.templateConfig = causalConfig;
+      record.causalObjectIds = causalObjectIds;
     }
   }
   return inventory;

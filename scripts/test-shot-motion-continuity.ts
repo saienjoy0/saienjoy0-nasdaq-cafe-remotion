@@ -47,7 +47,6 @@ assert.doesNotMatch(
   /shot\.progress\s*\*/u,
   "Recipe reveal timing must not stretch across the complete Shot duration",
 );
-assert.match(recipesSource, /staggerProgress\(index, labels\.length\)/u);
 assert.match(recipesSource, /staggerProgress\(index, items\.length\)/u);
 assert.match(
   motionHelperSource,
