@@ -43,6 +43,107 @@ assert.equal(hardSplitCues[0].startMs, 500);
 assert.equal(hardSplitCues.at(-1)?.endMs, 6_500);
 assert.ok(hardSplitCues.every((cue) => cue.text.split("\n").length <= 2));
 
+const tokenRegression = "半導体ではApplied Materialsが102.5、売上高は$9.12B、騰落率は-5.12%でした。";
+const tokenRegressionCues = createSubtitleCues(tokenRegression, 0, 8_000);
+const tokenRegressionLines = tokenRegressionCues.flatMap((cue) => cue.text.split("\n"));
+assert.equal(
+  tokenRegressionCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  tokenRegression,
+  "token-aware wrapping must preserve Japanese and adjacent ASCII text",
+);
+for (const token of ["Applied", "Materials", "102.5", "$9.12B", "-5.12%"] as const) {
+  assert.ok(
+    tokenRegressionLines.some((line) => line.includes(token)),
+    `${token} must remain intact when it fits within one subtitle line`,
+  );
+}
+
+const alphanumericBoundary = "あ".repeat(21) + "N3 H100 GPT4";
+const alphanumericBoundaryLines = createSubtitleCues(alphanumericBoundary, 0, 4_000)
+  .flatMap((cue) => cue.text.split("\n"));
+assert.deepEqual(
+  alphanumericBoundaryLines,
+  ["あ".repeat(21), "N3 H100 GPT4"],
+  "fitting mixed alphanumeric tokens must wrap intact at a line boundary",
+);
+
+const commaDecimalRegression = "出来高1,234,567.89、価格-12,345.67、上昇率+10.25%です。";
+const commaDecimalCues = createSubtitleCues(commaDecimalRegression, 0, 6_000);
+const commaDecimalLines = commaDecimalCues.flatMap((cue) => cue.text.split("\n"));
+for (const token of ["1,234,567.89", "-12,345.67", "+10.25%"] as const) {
+  assert.ok(commaDecimalLines.some((line) => line.includes(token)), `${token} must remain intact`);
+}
+
+const exactBoundaryToken = "あ".repeat(22) + "1234567890123456789012";
+const exactBoundaryCues = createSubtitleCues(exactBoundaryToken, 100, 2_100);
+assert.deepEqual(
+  exactBoundaryCues.flatMap((cue) => cue.text.split("\n")),
+  ["あ".repeat(22), "1234567890123456789012"],
+  "a 22-character token must remain intact at the line boundary",
+);
+
+const oversizedToken = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const oversizedTokenCues = createSubtitleCues(oversizedToken, 0, 2_000);
+assert.equal(
+  oversizedTokenCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""),
+  oversizedToken,
+  "an oversized token may split but must preserve all characters",
+);
+assert.ok(
+  oversizedTokenCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)),
+  "oversized token fragments must remain bounded",
+);
+
+for (const [prefixLength, token] of [
+  [41, "24H2"],
+  [43, "-$9.12B"],
+  [43, "$-9.12B"],
+  [43, "−5.12%"],
+  [39, "Nestlé"],
+  [42, "O’Reilly"],
+  [38, "3D-NAND"],
+  [37, "5G-Advanced"],
+  [38, "3GPP-R17"],
+  [39, "S&P500"],
+  [37, "US$9.12B"],
+  [37, "HK$9.12B"],
+  [40, "GPT‑4"],
+  [37, "5G‑Advanced"],
+] as const) {
+  const caption = "あ".repeat(prefixLength) + token;
+  const boundaryCues = createSubtitleCues(caption, 100, 2_100);
+  const boundaryLines = boundaryCues.flatMap((cue) => cue.text.split("\n"));
+  assert.ok(
+    boundaryLines.some((line) => line.includes(token)),
+    `${token} must stay whole across a subtitle page boundary`,
+  );
+  assert.equal(boundaryCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""), caption);
+  assert.equal(boundaryCues[0].startMs, 100);
+  assert.equal(boundaryCues.at(-1)?.endMs, 2_100);
+  assert.ok(boundaryLines.every((line) => Array.from(line).length <= 22));
+  assert.ok(boundaryCues.every((cue) => cue.text.split("\n").length <= 2));
+}
+
+const punctuationCaption = "きょうの注目銘柄はApplied Materialsの利益の成長を慎重に見ます。";
+const punctuationCues = createSubtitleCues(punctuationCaption, 0, 8_000);
+assert.ok(
+  punctuationCues.every((cue) => /[\p{L}\p{N}]/u.test(cue.text)),
+  "closing punctuation must not occupy its own subtitle page",
+);
+assert.equal(punctuationCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""), punctuationCaption);
+assert.ok(punctuationCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)));
+assert.ok(punctuationCues.every((cue) => cue.text.split("\n").length <= 2));
+
+for (const punctuation of ["。", ".", ",", "\"", "。 」"] as const) {
+  const fullWidthWordCaption = "あ".repeat(22) + "ABCDEFGHIJKLMNOPQRSTUV" + punctuation;
+  const fullWidthWordCues = createSubtitleCues(fullWidthWordCaption, 100, 2_100);
+  assert.ok(fullWidthWordCues.every((cue) => /[\p{L}\p{N}]/u.test(cue.text)));
+  assert.ok(fullWidthWordCues.some((cue) => cue.text.includes("ABCDEFGHIJKLMNOPQRSTUV")));
+  assert.equal(fullWidthWordCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""), fullWidthWordCaption);
+  assert.ok(fullWidthWordCues.every((cue) => cue.text.split("\n").length <= 2));
+  assert.ok(fullWidthWordCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)));
+}
+
 const layoutCues = assertNarrationChunkSubtitleLayoutFits({
   speechText: speech,
   startMs: 0,
