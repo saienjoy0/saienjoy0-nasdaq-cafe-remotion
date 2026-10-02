@@ -9,7 +9,6 @@ import {
   StepCard,
   TakeawayCard,
   TextCard,
-  type FinancialCardTone,
 } from "./cards/FinancialCards";
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
@@ -28,8 +27,6 @@ const numberById = (content: PublicMainContent, id: string | null | undefined) =
   id ? content.numbers.find((item) => item.key === id) ?? null : null;
 const cardById = (content: PublicMainContent, id: string | null | undefined) =>
   id ? content.cards.find((item) => item.key === id) ?? null : null;
-
-const toneForIndex = (index: number): FinancialCardTone => index === 0 ? "neutral" : index === 1 ? "warning" : index === 2 ? "emphasis" : "neutral";
 
 const uniqueViewerText = (candidates: Array<string | null | undefined>, excluded: string[] = []) => {
   const excludedSet = new Set(excluded.filter(Boolean));
@@ -129,22 +126,27 @@ const SplitCards: React.FC<{content: PublicMainContent}> = ({content}) => {
 };
 
 const orderedNodes = (content: PublicMainContent): PublicNode[] => {
-  const order = content.templateConfig.nodeOrder.length > 0 ? content.templateConfig.nodeOrder : content.nodes.map((item) => item.key);
+  const order = content.templateConfig.nodeOrder;
   const map = new Map(content.nodes.map((node) => [node.key, node] as const));
-  return order.map((id) => map.get(id)).filter((node): node is PublicNode => Boolean(node)).slice(0, 4);
+  return order.map((id) => map.get(id)).filter((node): node is PublicNode => Boolean(node));
 };
 
-const CausalStepCards: React.FC<{content: PublicMainContent}> = ({content}) => {
+export const CausalStepCards: React.FC<{content: PublicMainContent}> = ({content}) => {
+  // Native validation checks the complete authored graph before rendering.
+  // Public content contains only objects visible at this time, so an empty or
+  // partially revealed path is valid and must never be replaced with text.
   const nodes = orderedNodes(content);
-  const fallbacks = nodes.length > 0 ? [] : content.texts.slice(0, 4);
-  const items = nodes.length > 0 ? nodes.map((node) => ({key: node.key, text: node.label, revealAtMs: node.revealAtMs, highlighted: node.highlighted})) : fallbacks.map((text, index) => ({key: `text-${index}`, text, revealAtMs: content.beatStartMs + index * 220, highlighted: false}));
   return <SafeContent reserveTypography={Boolean(content.shot?.typographyTreatment)} style={{display: "grid", gridTemplateRows: "auto 1fr", gap: 18}}>
-    <SectionTitle>NASDAQまでの経路</SectionTitle>
-    <div data-causal-card-path={items.length} style={{display: "flex", alignItems: "center", justifyContent: "center", minWidth: 0}}>
-      {items.map((item, index) => <div key={item.key} style={{display: "contents"}}>
-        <div style={{flex: "1 1 0", minWidth: 0, ...revealStyle(content, item.revealAtMs)}}><StepCard index={index + 1} text={item.text} tone={index === items.length - 1 ? "emphasis" : toneForIndex(index)} highlighted={item.highlighted}/></div>
-        {index < items.length - 1 ? <CardConnector label={content.arrows[index]?.label || null}/> : null}
-      </div>)}
+    <SectionTitle>{content.screenQuestion}</SectionTitle>
+    <div data-causal-card-path={nodes.length} style={{display: "flex", alignItems: "center", justifyContent: "center", minWidth: 0}}>
+      {nodes.map((node, index) => {
+        const next = nodes[index + 1];
+        const arrow = next ? content.arrows.find((item) => item.fromKey === node.key && item.toKey === next.key) : undefined;
+        return <div key={node.key} style={{display: "contents"}}>
+          <div data-causal-node={node.key} style={{flex: "1 1 0", minWidth: 0, ...revealStyle(content, node.revealAtMs)}}><StepCard index={index + 1} text={node.label} tone={content.templateConfig.outcomeNodeId === node.key ? "emphasis" : "neutral"} highlighted={node.highlighted}/></div>
+          {arrow ? <div data-causal-arrow={arrow.key} style={revealStyle(content, arrow.revealAtMs)}><CardConnector label={arrow.label || null}/></div> : next ? <div data-causal-separation="true" style={{width: 38, flexShrink: 0}}/> : null}
+        </div>;
+      })}
     </div>
   </SafeContent>;
 };

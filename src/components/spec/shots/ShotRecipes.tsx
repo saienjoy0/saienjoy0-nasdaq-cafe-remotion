@@ -3,12 +3,12 @@ import type {PublicCard, PublicMainContent, PublicNumber, PublicShot} from "../.
 import {SafeCameraViewport} from "../SafeCameraViewport";
 import {palette, SafeContent, safeFontSize, StageEyebrow, StageShell} from "../StageSafeArea";
 import {useShotMotion} from "./useShotMotion";
+import {CausalStepCards} from "../CardFirstFinancialRenderer";
 
 const toneColor = (tone: PublicNumber["tone"]) => palette[tone];
 const useMotionFor = (shot: PublicShot) => useShotMotion(shot);
 const numberById = (content: PublicMainContent, id: string | null | undefined) => id ? content.numbers.find((item) => item.key === id) ?? null : null;
 const cardById = (content: PublicMainContent, id: string | null | undefined) => id ? content.cards.find((item) => item.key === id) ?? null : null;
-const nodeById = (content: PublicMainContent, id: string | null | undefined) => id ? content.nodes.find((item) => item.key === id) ?? null : null;
 const targetText = (content: PublicMainContent, shot: PublicShot) => shot.typographyText ?? content.primaryElement;
 
 const Metric: React.FC<{number: PublicNumber; size?: number}> = ({number, size = 112}) => <div style={{display: "flex", alignItems: "baseline", justifyContent: "center", gap: 10, color: toneColor(number.tone), whiteSpace: "nowrap"}}>
@@ -119,23 +119,8 @@ const GapMacro: React.FC<{content: PublicMainContent}> = ({content}) => {
 
 const CausalBuild: React.FC<{content: PublicMainContent}> = ({content}) => {
   const shot = content.shot!;
-  const orderedIds = content.templateConfig.nodeOrder.length > 0 ? content.templateConfig.nodeOrder : content.nodes.map((item) => item.key);
-  const nodes = orderedIds.map((id) => nodeById(content, id)).filter(Boolean).slice(0, 4) as NonNullable<ReturnType<typeof nodeById>>[];
-  const fallbackTexts = content.texts.length > 1 ? content.texts : ["材料", "経路", "結果"];
-  const labels = nodes.length > 0 ? nodes.map((item) => item.label) : fallbackTexts.slice(0, 4);
-  const {staggerProgress} = useMotionFor(shot);
   return <StageShell accent={palette.cyan}>
-    <SafeContent style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-      <SafeCameraViewport shot={shot}>
-        <div style={{position: "absolute", inset: 0, display: "grid", gridTemplateColumns: `repeat(${Math.max(1, labels.length)},minmax(0,1fr))`, gap: 42, alignItems: "center"}}>{labels.map((label, index) => {
-          const reveal = staggerProgress(index, labels.length);
-          return <div key={`${label}-${index}`} style={{position: "relative", opacity: reveal, transform: `translateY(${interpolate(reveal, [0, 1], [30, 0])}px)`, minWidth: 0}}>
-            <div style={{minHeight: 142, display: "flex", alignItems: "center", justifyContent: "center", padding: 22, borderRadius: 22, background: "rgba(41,215,240,.10)", border: `3px solid ${index === labels.length - 1 ? palette.emphasis : palette.cyan}`, textAlign: "center", fontSize: safeFontSize(label, 34, 25, 260), lineHeight: 1.17, fontWeight: 950, overflowWrap: "anywhere"}}>{label}</div>
-            {index < labels.length - 1 ? <div style={{position: "absolute", left: "100%", top: "50%", width: 42, height: 4, background: palette.cyan, transform: `scaleX(${reveal})`, transformOrigin: "0 50%"}}><div style={{position: "absolute", right: -1, top: -7, width: 0, height: 0, borderTop: "9px solid transparent", borderBottom: "9px solid transparent", borderLeft: `14px solid ${palette.cyan}`}}/></div> : null}
-          </div>;
-        })}</div>
-      </SafeCameraViewport>
-    </SafeContent>
+    <SafeCameraViewport shot={shot}><CausalStepCards content={content}/></SafeCameraViewport>
   </StageShell>;
 };
 

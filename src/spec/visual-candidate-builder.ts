@@ -1,6 +1,7 @@
 import type {RenderSpec} from "./render-spec";
 import {isFinancialVisualTemplate} from "./financial-visual-contract";
 import {assertStaticTemplateSoundness} from "./static-template-soundness";
+import {assertBeatAuthoredCausalPath} from "./authored-causal-path";
 import {
   getVisualGrammarAppearance,
   isVisualGrammarTemplatePairAllowed,
@@ -110,7 +111,7 @@ const inferredLaneLabels = (beat: Beat) => {
   return labels.length === 2 ? labels : [];
 };
 
-const templateConfigFor = (template: VisualTemplateId, scene: Scene, beat: Beat) => {
+const templateConfigFor = (template: VisualTemplateId, beat: Beat) => {
   const descriptor = getVisualComponentDescriptor(template);
   if (template === beat.visualTemplate) {
     const config = structuredClone(beat.templateConfig);
@@ -120,15 +121,14 @@ const templateConfigFor = (template: VisualTemplateId, scene: Scene, beat: Beat)
     return config;
   }
   const variant = descriptor.defaultVariant;
-  const inventory = objectInventory(scene, beat);
   const needsLanes = template === "verification-matrix" || template === "tailwind-headwind";
   return {
     variant,
     comparisonBasis: beat.templateConfig.comparisonBasis,
     dataBasis: beat.templateConfig.dataBasis,
-    nodeOrder: inventory.nodes.map((item) => item.nodeId),
+    nodeOrder: [...beat.templateConfig.nodeOrder],
     laneLabels: needsLanes ? inferredLaneLabels(beat) : [],
-    outcomeNodeId: inventory.nodes.at(-1)?.nodeId ?? null,
+    outcomeNodeId: beat.templateConfig.outcomeNodeId,
     ...(beat.templateConfig.displayOrder
       ? {displayOrder: [...beat.templateConfig.displayOrder]}
       : {}),
@@ -192,6 +192,7 @@ const buildCatalogAnalysis = ({
 
   for (const [sceneIndex, scene] of spec.scenes.entries()) {
     for (const [beatIndex, beat] of scene.visualBeats.entries()) {
+      assertBeatAuthoredCausalPath(scene, beat, `$.scenes[${sceneIndex}].visualBeats[${beatIndex}]`);
       const hint = hintMap.get(beat.beatId);
       const primaryCapability = primaryCapabilityForTemplate(beat.visualTemplate);
       const financialOwned = beat.financialVisualTrace !== undefined;
@@ -216,7 +217,7 @@ const buildCatalogAnalysis = ({
           if (financialOwned && template !== beat.visualTemplate) continue;
           if (!financialOwned && isFinancialVisualTemplate(template)) continue;
           if (!canBuild(capability, template, scene, beat)) continue;
-          const templateConfig = templateConfigFor(template, scene, beat);
+          const templateConfig = templateConfigFor(template, beat);
           const variant = templateConfig.variant as VisualTemplateVariant;
           const assetPlacementIds = template === beat.visualTemplate
             ? [...beat.assetPlacementIds]

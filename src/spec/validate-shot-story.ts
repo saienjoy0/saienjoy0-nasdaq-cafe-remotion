@@ -1,6 +1,7 @@
 import type {RenderProductionData, RenderSpec} from "./render-spec";
 import {resolveBeatShots} from "./shot-timeline";
 import {DEDICATED_SHOT_RECIPE_IDS, SHOT_RECIPE_FAMILIES} from "./shot-contract";
+import {assertBeatAuthoredCausalPath} from "./authored-causal-path";
 
 const fail = (path: string, message: string): never => {throw new Error(`${path}: ${message}`);};
 const normalize = (value: string) => value.replace(/\s+/gu, "").trim();
@@ -59,7 +60,13 @@ export const validateShotStoryContract = (spec: RenderSpec, options: {enforceVar
         if (shot.shotRecipe === "expected-anchor" && shot.primaryTargetId && cardRole.has(shot.primaryTargetId) && cardRole.get(shot.primaryTargetId) !== "expected") fail(`${shotPath}.primaryTargetId`, "expected-anchor card target must have role expected");
         if (shot.shotRecipe === "actual-crosses-expected" && shot.primaryTargetId && cardRole.has(shot.primaryTargetId) && cardRole.get(shot.primaryTargetId) !== "actual") fail(`${shotPath}.primaryTargetId`, "actual-crosses-expected card target must have role actual");
         if (shot.shotRecipe === "gap-macro" && shot.primaryTargetId && cardRole.has(shot.primaryTargetId) && cardRole.get(shot.primaryTargetId) !== "gap") fail(`${shotPath}.primaryTargetId`, "gap-macro card target must have role gap");
-        if (shot.shotRecipe === "causal-build" && scene.nodes.filter((node) => beat.objectIds.includes(node.nodeId)).length === 0 && beat.viewerTexts.length < 2) fail(shotPath, "causal-build requires nodes or at least two viewerTexts");
+        if (shot.shotRecipe === "causal-build") {
+          if (spec.schemaVersion === "2.4.0") {
+            assertBeatAuthoredCausalPath(scene, beat, `${scenePath}.visualBeats[${beatIndex}]`);
+          } else if (scene.nodes.filter((node) => beat.objectIds.includes(node.nodeId)).length === 0 && beat.viewerTexts.length < 2) {
+            fail(shotPath, "causal-build requires nodes or at least two viewerTexts");
+          }
+        }
         if (shot.shotRecipe === "split-opposition" && scene.numbers.filter((number) => beat.objectIds.includes(number.numberId)).length < 2 && beat.viewerTexts.length < 2) fail(shotPath, "split-opposition requires two comparison targets");
         if (shot.shotRecipe === "recap-assembly" && beat.viewerTexts.length < 3) fail(shotPath, "recap-assembly requires at least three existing recap elements");
         if (shot.typographyText && Array.from(shot.typographyText).length > 22) fail(`${shotPath}.typographyText`, "kinetic typography must be at most 22 characters");

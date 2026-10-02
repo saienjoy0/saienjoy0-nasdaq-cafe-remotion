@@ -4,6 +4,7 @@ import {
   isFinancialVisualTemplate,
 } from "./financial-visual-contract";
 import {planSourceReceiptLayout} from "./template-layout/source-receipt-layout";
+import {assertBeatAuthoredCausalPath} from "./authored-causal-path";
 
 type Scene = RenderSpec["scenes"][number];
 type Beat = Scene["visualBeats"][number];
@@ -24,6 +25,7 @@ type StaticBeat = Pick<
   | "screenQuestion"
   | "financialVisualTrace"
   | "evidenceSourceIds"
+  | "shots"
 >;
 
 const arraysEqual = (left: readonly string[], right: readonly string[]) =>
@@ -62,8 +64,19 @@ const assertCausalShape = (
       .filter((id) => id !== sink)
       .every((id) => arrows.some((arrow) => arrow.fromNodeId === id && arrow.toNodeId === sink));
 
-  if (!isSingleChain && !isDirectConvergence) {
-    throw new Error(`${path}: causal diagram must be a single chain or direct convergence without crossing paths`);
+  const isChainForest = nodeIds.every((start) => {
+    const visited = new Set<string>();
+    let current: string | undefined = start;
+    while (current !== undefined) {
+      if (visited.has(current)) return false;
+      visited.add(current);
+      current = arrows.find((arrow) => arrow.fromNodeId === current)?.toNodeId;
+    }
+    return true;
+  }) && nodeIds.every((id) => (incoming.get(id) ?? 0) <= 1 && (outgoing.get(id) ?? 0) <= 1);
+
+  if (!isSingleChain && !isChainForest && !isDirectConvergence) {
+    throw new Error(`${path}: causal diagram must be a single chain, independent chains or direct convergence without crossing paths`);
   }
 };
 
@@ -83,6 +96,8 @@ export const assertStaticTemplateSoundness = (
       visibleNodeIds.has(arrow.fromNodeId) &&
       visibleNodeIds.has(arrow.toNodeId),
   );
+
+  assertBeatAuthoredCausalPath(scene, beat, path);
 
   if (isFinancialVisualTemplate(beat.visualTemplate) && beat.financialVisualTrace === undefined) {
     throw new Error(`${path}.visualTemplate: ${beat.visualTemplate} requires financialVisualTrace`);
@@ -146,12 +161,6 @@ export const assertStaticTemplateSoundness = (
     if (beat.templateConfig.nodeOrder.length !== visibleNodes.length || beat.templateConfig.nodeOrder.length < 2) {
       throw new Error(`${path}.templateConfig.nodeOrder: causal-lane requires the complete two-to-four node order`);
     }
-    const order = beat.templateConfig.nodeOrder;
-    for (let index = 0; index < order.length - 1; index += 1) {
-      if (!visibleArrows.some((arrow) => arrow.fromNodeId === order[index] && arrow.toNodeId === order[index + 1])) {
-        throw new Error(`${path}.templateConfig.nodeOrder: missing sequential arrow ${order[index]} -> ${order[index + 1]}`);
-      }
-    }
   }
   if (["tailwind-headwind", "verification-matrix"].includes(template)) {
     if (beat.templateConfig.laneLabels.length !== 2) {
@@ -192,11 +201,6 @@ export const assertStaticTemplateSoundness = (
     const order = beat.templateConfig.nodeOrder;
     if (order.length !== visibleNodes.length) {
       throw new Error(`${path}.templateConfig.nodeOrder: macro-pressure requires the complete visible node order`);
-    }
-    for (let index = 0; index < order.length - 1; index += 1) {
-      if (!visibleArrows.some((arrow) => arrow.fromNodeId === order[index] && arrow.toNodeId === order[index + 1])) {
-        throw new Error(`${path}.templateConfig.nodeOrder: missing sequential arrow ${order[index]} -> ${order[index + 1]}`);
-      }
     }
   }
   if (template === "source-receipt") {
