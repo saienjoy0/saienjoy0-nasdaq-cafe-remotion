@@ -18,3 +18,11 @@ Token-aware subtitle wrapping preserves fitting Latin words, mixed alphanumeric 
 Existing render_spec files, approved video artifacts, final requests, voices and scene contracts are unchanged. Re-rendering an existing approved episode with new subtitle layout requires a new preview/approval; old approval does not certify the changed pixels. Renderer 2.4.0 remains nine-scene. The programme design records a coordinated future scene-contract migration rather than claiming it is enabled.
 
 The corresponding Plot change prevents Current production from inventing graph edges from card order, strengthens five existing Skills and changes editorial canon02 with a new manifest hash. New editorial productions must freeze against that updated canon. Historical bundles must retain their original identity and approval.
+
+## Review repair requalification (2026-10-02)
+
+PR224 was refreshed onto current main `2063215`. Boundary regressions initially failed for digit-first identifiers, signed currency, accented Latin names, typographic apostrophes and closing punctuation. The repaired token grammar also covers qualified currencies, ampersand identifiers and Unicode non-breaking hyphens. Closing punctuation remains with readable text even after a full-width atomic word; exact caption text, line/page bounds and audio endpoints are preserved.
+
+Fresh typecheck, all 26 underlying spec/public-screen/handoff entrypoints and Remotion bundle build passed. Local execution used `node --import tsx` for the same scripts because the tsx CLI IPC socket is denied here. Whole lint still reports the same 30 errors and 3 warnings as unchanged main; normalized diagnostics differ only by the existing subtitle test warning's shifted line number. Lint is not claimed green.
+
+Independent scoped re-review passed after 2,376 token-offset cases, 105 punctuation boundary cases and 6,000 generated preservation/layout/timing cases. This is a mechanical code receipt, not media appearance, forced alignment or audio approval. Exact-head GitHub checks are still required before integration.

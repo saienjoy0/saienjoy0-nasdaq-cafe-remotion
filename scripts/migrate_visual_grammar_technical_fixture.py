@@ -87,7 +87,7 @@ def tts_identity(spec: dict[str, Any]) -> str:
         blocks.append({"id": block_id, "speechText": speech})
     return canonical_sha({
         "synthesisVersion": "gemini-two-block-v1",
-        "model": "gemini-3.1-flash-tts-preview",
+        "model": "gemini-3.8-flash-tts",
         "voice": "Charon",
         "voiceProfileId": spec.get("voiceProfileId"),
         "pronunciations": spec.get("pronunciations"),

@@ -44,7 +44,7 @@ def tts_input_sha(spec: dict[str, Any]) -> str:
         blocks.append({"id": block_id, "speechText": speech})
     payload = {
         "synthesisVersion": "gemini-two-block-v1",
-        "model": os.environ.get("GEMINI_TTS_MODEL", "gemini-3.1-flash-tts-preview"),
+        "model": os.environ.get("GEMINI_TTS_MODEL", "gemini-3.8-flash-tts"),
         "voice": os.environ.get("GEMINI_TTS_VOICE", "Charon"),
         "voiceProfileId": spec.get("voiceProfileId"),
         "pronunciations": spec.get("pronunciations"),

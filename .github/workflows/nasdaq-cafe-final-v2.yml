@@ -180,7 +180,7 @@ jobs:
       EPISODE_DATE: ${{ inputs.episode_date }}
       EXPECTED_SPEC_SHA256: ${{ inputs.render_spec_sha256 }}
       PLOT_ARTIFACT_TOKEN: ${{ secrets.NASDAQ_CAFE_PLOT_ARTIFACT_TOKEN }}
-      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_MODEL: gemini-3.8-flash-tts
       GEMINI_TTS_VOICE: Charon
     steps:
       - name: Require configured Plot Artifact token

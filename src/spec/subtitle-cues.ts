@@ -15,7 +15,12 @@ const normalizeSpeech = (value?: string) => (value ?? "")
 
 // Keep Latin words and financial expressions atomic when they fit. Everything
 // else remains a single code point so Japanese can wrap at any safe boundary.
-const TOKEN_PATTERN = /[$+-]?(?:\d[\d,]*(?:\.\d+)?|\.\d+)(?:%|[A-Za-z]+)?|[A-Za-z][A-Za-z0-9]*(?:[._'/-][A-Za-z0-9]+)*|\s|./gu;
+const LATIN_TOKEN = String.raw`[\p{Script=Latin}][\p{Script=Latin}\p{M}\d]*(?:[._'’/&‐‑-][\p{Script=Latin}\p{M}\d]+)*`;
+const CURRENCY = String.raw`(?:[\p{Script=Latin}]{1,3})?\p{Sc}`;
+const NUMBER_TOKEN = String.raw`(?:[-+−]?(?:${CURRENCY})?|${CURRENCY}[-+−])(?:\d[\d,]*(?:\.\d+)?|\.\d+)(?:%|${LATIN_TOKEN})?`;
+const TOKEN_PATTERN = new RegExp(`${NUMBER_TOKEN}|${LATIN_TOKEN}|\\s|.`, "gu");
+const CLOSING_PUNCTUATION = /^[、。，．！？!?.,;:；：…"'\p{Pe}\p{Pf}]+$/u;
+const isClosingPunctuation = (value: string) => CLOSING_PUNCTUATION.test(value.replace(/\s/gu, ""));
 
 const subtitleTokens = (value: string) => value.match(TOKEN_PATTERN) ?? [];
 
@@ -34,22 +39,46 @@ const buildPages = (speechText?: string) => {
   if (!normalized) return [];
 
   const lines: string[] = [];
-  let line = "";
+  let lineTokens: string[] = [];
   for (const token of boundedTokens(normalized)) {
+    const line = lineTokens.join("");
     if (line && Array.from(line + token).length > MAX_LINE_CHARS) {
-      lines.push(line);
-      line = token;
+      // Move the last complete text token with closing punctuation when it fits.
+      // This preserves atomic words while keeping a sentence ending readable.
+      let suffixStart = lineTokens.length;
+      if (isClosingPunctuation(token)) {
+        while (suffixStart > 0 && !/[\p{L}\p{N}]/u.test(lineTokens[suffixStart - 1])) suffixStart -= 1;
+        if (suffixStart > 0) suffixStart -= 1;
+      }
+      const suffix = lineTokens.slice(suffixStart);
+      if (suffixStart > 0 && Array.from(suffix.join("") + token).length <= MAX_LINE_CHARS) {
+        lines.push(lineTokens.slice(0, suffixStart).join(""));
+        lineTokens = [...suffix, token];
+      } else {
+        lines.push(line);
+        lineTokens = [token];
+      }
     } else {
-      line += token;
+      lineTokens.push(token);
     }
   }
-  if (line) lines.push(line);
+  if (lineTokens.length) lines.push(lineTokens.join(""));
 
-  const pages: string[] = [];
-  for (let index = 0; index < lines.length; index += 2) {
-    pages.push(lines.slice(index, index + 2).join("\n"));
+  const pages: string[][] = [];
+  for (const line of lines) {
+    const previousPage = pages.at(-1);
+    if (!previousPage || previousPage.length === 2) {
+      // A full-width word and its punctuation cannot share a line. Keep them
+      // in the same cue by moving the preceding line into the new page.
+      const carriedLine = previousPage && isClosingPunctuation(line)
+        ? previousPage.pop()
+        : undefined;
+      pages.push(carriedLine === undefined ? [line] : [carriedLine, line]);
+    } else {
+      previousPage.push(line);
+    }
   }
-  return pages;
+  return pages.map((page) => page.join("\n"));
 };
 
 const speechWeight = (value: string) => Array.from(value).reduce((total, character) => {

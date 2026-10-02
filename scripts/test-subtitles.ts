@@ -94,6 +94,56 @@ assert.ok(
   "oversized token fragments must remain bounded",
 );
 
+for (const [prefixLength, token] of [
+  [41, "24H2"],
+  [43, "-$9.12B"],
+  [43, "$-9.12B"],
+  [43, "−5.12%"],
+  [39, "Nestlé"],
+  [42, "O’Reilly"],
+  [38, "3D-NAND"],
+  [37, "5G-Advanced"],
+  [38, "3GPP-R17"],
+  [39, "S&P500"],
+  [37, "US$9.12B"],
+  [37, "HK$9.12B"],
+  [40, "GPT‑4"],
+  [37, "5G‑Advanced"],
+] as const) {
+  const caption = "あ".repeat(prefixLength) + token;
+  const boundaryCues = createSubtitleCues(caption, 100, 2_100);
+  const boundaryLines = boundaryCues.flatMap((cue) => cue.text.split("\n"));
+  assert.ok(
+    boundaryLines.some((line) => line.includes(token)),
+    `${token} must stay whole across a subtitle page boundary`,
+  );
+  assert.equal(boundaryCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""), caption);
+  assert.equal(boundaryCues[0].startMs, 100);
+  assert.equal(boundaryCues.at(-1)?.endMs, 2_100);
+  assert.ok(boundaryLines.every((line) => Array.from(line).length <= 22));
+  assert.ok(boundaryCues.every((cue) => cue.text.split("\n").length <= 2));
+}
+
+const punctuationCaption = "きょうの注目銘柄はApplied Materialsの利益の成長を慎重に見ます。";
+const punctuationCues = createSubtitleCues(punctuationCaption, 0, 8_000);
+assert.ok(
+  punctuationCues.every((cue) => /[\p{L}\p{N}]/u.test(cue.text)),
+  "closing punctuation must not occupy its own subtitle page",
+);
+assert.equal(punctuationCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""), punctuationCaption);
+assert.ok(punctuationCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)));
+assert.ok(punctuationCues.every((cue) => cue.text.split("\n").length <= 2));
+
+for (const punctuation of ["。", ".", ",", "\"", "。 」"] as const) {
+  const fullWidthWordCaption = "あ".repeat(22) + "ABCDEFGHIJKLMNOPQRSTUV" + punctuation;
+  const fullWidthWordCues = createSubtitleCues(fullWidthWordCaption, 100, 2_100);
+  assert.ok(fullWidthWordCues.every((cue) => /[\p{L}\p{N}]/u.test(cue.text)));
+  assert.ok(fullWidthWordCues.some((cue) => cue.text.includes("ABCDEFGHIJKLMNOPQRSTUV")));
+  assert.equal(fullWidthWordCues.map((cue) => cue.text.replace(/\n/gu, "")).join(""), fullWidthWordCaption);
+  assert.ok(fullWidthWordCues.every((cue) => cue.text.split("\n").length <= 2));
+  assert.ok(fullWidthWordCues.every((cue) => cue.text.split("\n").every((line) => Array.from(line).length <= 22)));
+}
+
 const layoutCues = assertNarrationChunkSubtitleLayoutFits({
   speechText: speech,
   startMs: 0,

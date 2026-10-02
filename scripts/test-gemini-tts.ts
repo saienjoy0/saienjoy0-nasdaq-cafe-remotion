@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
-  createGeminiNarrationPrompt,
+  createGeminiNarrationStyle,
+  createGeminiSpeechInput,
   GeminiTtsProvider,
   pcm16ToWav,
 } from "../src/tts/providers/gemini-tts-provider";
@@ -13,11 +14,26 @@ assert.equal(wav.readUInt16LE(22), 1);
 assert.equal(wav.readUInt16LE(34), 16);
 assert.equal(wav.length, pcm.length + 44);
 
-const prompt = createGeminiNarrationPrompt("NASDAQは1%上昇しました。", 1.05);
-assert.match(prompt, /Read only the transcript below/);
-assert.match(prompt, /NASDAQは1%上昇しました。/);
-assert.match(prompt, /ナスダック/);
-assert.doesNotMatch(prompt, /GEMINI_API_KEY/);
+const style = createGeminiNarrationStyle(1.05);
+assert.match(style, /ナスダック/);
+assert.doesNotMatch(style, /TRANSCRIPT|GEMINI_API_KEY/);
+const narration = "NASDAQは1%上昇しました。";
+const speechInput = createGeminiSpeechInput({
+  displayText: narration,
+  speechText: narration,
+  voiceProfile: "fox-calm-ja-v1",
+  speakingRate: 1.05,
+  pitchScale: 1,
+  intonationScale: 1,
+  volumeScale: 1,
+  outputFormat: "wav",
+  requestAlignment: false,
+  outputPath: "/tmp/gemini-tts-structure-test.wav",
+  styleInstruction: "落ち着いた調子で",
+});
+assert.equal(speechInput[0].content[0].text, narration);
+assert.match(speechInput[0].content[0].annotations[0].style, /落ち着いた調子で/);
+assert.doesNotMatch(speechInput[0].content[0].text, /Director|Language|Style/);
 
 const previousCacheOnly = process.env.SPEC_TTS_CACHE_ONLY;
 const previousSingleKey = process.env.GEMINI_API_KEY;
@@ -34,7 +50,7 @@ for (const key of numberedKeys) delete process.env[key];
 
 const provider = new GeminiTtsProvider();
 const voice = await provider.selectVoice();
-assert.equal(voice.speakerUuid, "gemini-3.1-flash-tts-preview:Charon");
+assert.equal(voice.speakerUuid, "gemini-3.8-flash-tts:Charon");
 await assert.rejects(
   provider.synthesize(
     {
@@ -65,4 +81,4 @@ for (const [key, value] of previousNumberedKeys) {
   else process.env[key] = value;
 }
 
-console.log("PASS: Gemini TTS PCM/WAV, narration prompt, and cache-only contract");
+console.log("PASS: Gemini TTS PCM/WAV, structured style, and cache-only contract");

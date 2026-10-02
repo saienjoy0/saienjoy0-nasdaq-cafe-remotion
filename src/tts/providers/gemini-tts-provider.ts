@@ -13,7 +13,7 @@ import {
   GeminiApiKeyPool,
 } from "./gemini-api-key-pool";
 
-export const GEMINI_TTS_DEFAULT_MODEL = "gemini-3.1-flash-tts-preview";
+export const GEMINI_TTS_DEFAULT_MODEL = "gemini-3.8-flash-tts";
 export const GEMINI_TTS_DEFAULT_VOICE = "Charon";
 let apiKeyPool: GeminiApiKeyPool | null = null;
 const getApiKeyPool = () => {
@@ -57,25 +57,32 @@ export const pcm16ToWav = (
   return Buffer.concat([header, pcm]);
 };
 
-export const createGeminiNarrationPrompt = (
-  transcript: string,
+export const createGeminiNarrationStyle = (
   speakingRate = 1.05,
   styleInstruction?: string,
 ) => `
-### DIRECTOR'S NOTES
-
 Language: Japanese
 Speaker: A young overseas university student presenting a morning technology-market program.
 Style: Calm, intelligent, approachable, and slightly sleepy. Speak like a friendly guide, not a formal television announcer. Keep emotion restrained. Make contradictions sound mildly interesting without exaggeration. Do not sound promotional or sensational.
 Pacing: Moderately fast for a Japanese morning news video. Relative speed target: ${speakingRate.toFixed(2)}. Pause briefly after conclusions and before important contrasts. Read company names, index names, percentages, dates, and numbers clearly.
 Pronunciation: NASDAQは「ナスダック」。SOXは「ソックス指数」。AIは「エーアイ」。企業名や英語略語を勝手に省略しない。
 ${styleInstruction ? `Additional direction: ${styleInstruction}` : ""}
-Important: Read only the transcript below. Do not summarize, rewrite, translate, add introductions, or add closing remarks. Preserve all uncertainty expressions and qualifications.
-
-### TRANSCRIPT
-
-${transcript}
 `.trim();
+
+export const createGeminiSpeechInput = (request: TtsRequest) => [{
+  type: "user_input" as const,
+  content: [{
+    type: "text" as const,
+    text: request.speechText,
+    annotations: [{
+      type: "speech_metadata" as const,
+      style: createGeminiNarrationStyle(
+        request.speakingRate,
+        request.styleInstruction,
+      ),
+    }],
+  }],
+}];
 
 export class GeminiTtsProvider implements TtsProvider {
   public readonly name = "gemini";
@@ -122,14 +129,10 @@ export class GeminiTtsProvider implements TtsProvider {
       const client = new GoogleGenAI({apiKey});
       return client.interactions.create({
         model: this.model,
-        input: createGeminiNarrationPrompt(
-          request.speechText,
-          request.speakingRate,
-          request.styleInstruction,
-        ),
+        input: createGeminiSpeechInput(request),
         response_format: {type: "audio"},
         generation_config: {
-          speech_config: [{voice: this.voiceName, language: "ja"}],
+          speech_config: [{voice: this.voiceName}],
         },
         store: false,
       });

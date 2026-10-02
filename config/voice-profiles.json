@@ -27,9 +27,9 @@
     },
     "fox-main": {
       "provider": "gemini",
-      "model": "gemini-3.1-flash-tts-preview",
+      "model": "gemini-3.8-flash-tts",
       "voice": "Charon",
-      "speakerUuid": "gemini-3.1-flash-tts-preview:Charon",
+      "speakerUuid": "gemini-3.8-flash-tts:Charon",
       "styleId": 936454926,
       "speakingRate": 1.05,
       "pitchScale": 0,
@@ -41,9 +41,9 @@
     },
     "gemini-charon": {
       "provider": "gemini",
-      "model": "gemini-3.1-flash-tts-preview",
+      "model": "gemini-3.8-flash-tts",
       "voice": "Charon",
-      "speakerUuid": "gemini-3.1-flash-tts-preview:Charon",
+      "speakerUuid": "gemini-3.8-flash-tts:Charon",
       "styleId": 936454926,
       "speakingRate": 1.05,
       "pitchScale": 0,

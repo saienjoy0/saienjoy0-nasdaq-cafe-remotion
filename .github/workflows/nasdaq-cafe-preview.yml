@@ -50,7 +50,7 @@ jobs:
           GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
           GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
-          GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+          GEMINI_TTS_MODEL: gemini-3.8-flash-tts
           GEMINI_TTS_VOICE: Charon
         run: |
           set -euo pipefail
@@ -206,7 +206,7 @@ jobs:
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
       TTS_PROVIDER: gemini
-      GEMINI_TTS_MODEL: gemini-3.1-flash-tts-preview
+      GEMINI_TTS_MODEL: gemini-3.8-flash-tts
       GEMINI_TTS_VOICE: Charon
       GEMINI_KEY_POOL_MAX_ATTEMPTS: "12"
       GEMINI_KEY_POOL_MAX_ELAPSED_MS: "720000"
