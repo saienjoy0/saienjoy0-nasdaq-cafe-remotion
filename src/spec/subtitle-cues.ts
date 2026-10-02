@@ -4,11 +4,8 @@ export type SubtitleCue = {
   endMs: number;
 };
 
-const MAX_PAGE_CHARS = 44;
 const MAX_LINE_CHARS = 22;
 const cache = new Map<string, SubtitleCue[]>();
-
-const visibleLength = (value: string) => Array.from(value.replace(/\s+/gu, "")).length;
 
 const normalizeSpeech = (value?: string) => (value ?? "")
   .replace(/\r\n?/gu, "\n")
@@ -16,68 +13,72 @@ const normalizeSpeech = (value?: string) => (value ?? "")
   .replace(/\n+/gu, " ")
   .trim();
 
-const hardSplit = (value: string, maxChars: number) => {
-  const characters = Array.from(value);
+// Keep Latin words and financial expressions atomic when they fit. Everything
+// else remains a single code point so Japanese can wrap at any safe boundary.
+const LATIN_TOKEN = String.raw`[\p{Script=Latin}][\p{Script=Latin}\p{M}\d]*(?:[._'’/&‐‑-][\p{Script=Latin}\p{M}\d]+)*`;
+const CURRENCY = String.raw`(?:[\p{Script=Latin}]{1,3})?\p{Sc}`;
+const NUMBER_TOKEN = String.raw`(?:[-+−]?(?:${CURRENCY})?|${CURRENCY}[-+−])(?:\d[\d,]*(?:\.\d+)?|\.\d+)(?:%|${LATIN_TOKEN})?`;
+const TOKEN_PATTERN = new RegExp(`${NUMBER_TOKEN}|${LATIN_TOKEN}|\\s|.`, "gu");
+const CLOSING_PUNCTUATION = /^[、。，．！？!?.,;:；：…"'\p{Pe}\p{Pf}]+$/u;
+const isClosingPunctuation = (value: string) => CLOSING_PUNCTUATION.test(value.replace(/\s/gu, ""));
+
+const subtitleTokens = (value: string) => value.match(TOKEN_PATTERN) ?? [];
+
+const boundedTokens = (value: string) => subtitleTokens(value).flatMap((token) => {
+  const characters = Array.from(token);
+  if (characters.length <= MAX_LINE_CHARS) return [token];
   const parts: string[] = [];
-  for (let offset = 0; offset < characters.length; offset += maxChars) {
-    parts.push(characters.slice(offset, offset + maxChars).join(""));
+  for (let offset = 0; offset < characters.length; offset += MAX_LINE_CHARS) {
+    parts.push(characters.slice(offset, offset + MAX_LINE_CHARS).join(""));
   }
   return parts;
-};
-
-const sentenceParts = (speechText?: string) => {
-  const normalized = normalizeSpeech(speechText);
-  if (!normalized) return [];
-  return normalized.match(/[^。！？!?]+[。！？!?]?/gu) ?? [normalized];
-};
-
-const clauseParts = (sentence: string) => {
-  if (visibleLength(sentence) <= MAX_PAGE_CHARS) return [sentence];
-  const clauses = sentence.match(/[^、，,]+[、，,]?/gu) ?? [sentence];
-  return clauses.flatMap((clause) => visibleLength(clause) > MAX_PAGE_CHARS
-    ? hardSplit(clause, MAX_PAGE_CHARS)
-    : [clause]);
-};
+});
 
 const buildPages = (speechText?: string) => {
-  const units = sentenceParts(speechText).flatMap(clauseParts);
-  const pages: string[] = [];
-  let current = "";
-  for (const unit of units) {
-    if (!current) {
-      current = unit;
-      continue;
-    }
-    if (visibleLength(current + unit) <= MAX_PAGE_CHARS) {
-      current += unit;
-      continue;
-    }
-    pages.push(current);
-    current = unit;
-  }
-  if (current) pages.push(current);
-  return pages.flatMap((page) => visibleLength(page) > MAX_PAGE_CHARS
-    ? hardSplit(page, MAX_PAGE_CHARS)
-    : [page]);
-};
+  const normalized = normalizeSpeech(speechText);
+  if (!normalized) return [];
 
-const findLineBreak = (characters: string[]) => {
-  // A subtitle page can contain up to two 22-character lines. Prefer a
-  // punctuation boundary only when BOTH resulting lines fit the public safe
-  // area; otherwise a punctuation-first split can leave a 23+ character tail.
-  const minimum = Math.max(1, characters.length - MAX_LINE_CHARS);
-  const maximum = Math.min(MAX_LINE_CHARS, characters.length - 1);
-  for (let index = maximum; index >= minimum; index--) {
-    if (/[、，,。！？!?]/u.test(characters[index - 1] ?? "")) return index;
+  const lines: string[] = [];
+  let lineTokens: string[] = [];
+  for (const token of boundedTokens(normalized)) {
+    const line = lineTokens.join("");
+    if (line && Array.from(line + token).length > MAX_LINE_CHARS) {
+      // Move the last complete text token with closing punctuation when it fits.
+      // This preserves atomic words while keeping a sentence ending readable.
+      let suffixStart = lineTokens.length;
+      if (isClosingPunctuation(token)) {
+        while (suffixStart > 0 && !/[\p{L}\p{N}]/u.test(lineTokens[suffixStart - 1])) suffixStart -= 1;
+        if (suffixStart > 0) suffixStart -= 1;
+      }
+      const suffix = lineTokens.slice(suffixStart);
+      if (suffixStart > 0 && Array.from(suffix.join("") + token).length <= MAX_LINE_CHARS) {
+        lines.push(lineTokens.slice(0, suffixStart).join(""));
+        lineTokens = [...suffix, token];
+      } else {
+        lines.push(line);
+        lineTokens = [token];
+      }
+    } else {
+      lineTokens.push(token);
+    }
   }
-  return Math.min(maximum, Math.max(minimum, Math.ceil(characters.length / 2)));
-};
+  if (lineTokens.length) lines.push(lineTokens.join(""));
 
-const formatPage = (value: string) => {
-  const characters = Array.from(value);
-  if (characters.length <= MAX_LINE_CHARS) return value;
-  const splitAt = findLineBreak(characters);
-  return `${characters.slice(0, splitAt).join("")}\n${characters.slice(splitAt).join("")}`;
+  const pages: string[][] = [];
+  for (const line of lines) {
+    const previousPage = pages.at(-1);
+    if (!previousPage || previousPage.length === 2) {
+      // A full-width word and its punctuation cannot share a line. Keep them
+      // in the same cue by moving the preceding line into the new page.
+      const carriedLine = previousPage && isClosingPunctuation(line)
+        ? previousPage.pop()
+        : undefined;
+      pages.push(carriedLine === undefined ? [line] : [carriedLine, line]);
+    } else {
+      previousPage.push(line);
+    }
+  }
+  return pages.map((page) => page.join("\n"));
 };
 
 const speechWeight = (value: string) => Array.from(value).reduce((total, character) => {
@@ -115,7 +116,7 @@ export const createSubtitleCues = (
     const cueEnd = index === pages.length - 1 ? endMs : Math.min(endMs, cursor + duration);
     cursor = cueEnd;
     return {
-      text: formatPage(page),
+      text: page,
       startMs: cueStart,
       endMs: cueEnd,
     };
