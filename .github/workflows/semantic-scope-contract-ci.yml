@@ -1,0 +1,31 @@
+name: Semantic Scope Contract CI
+
+on:
+  pull_request:
+    paths:
+      - "src/spec/render-spec.ts"
+      - "src/spec/visual-candidate-input.ts"
+      - "src/spec/visual-candidate-builder.ts"
+      - "src/spec/visual-director-contract.ts"
+      - "src/spec/visual-direction-compiler.ts"
+      - "src/spec/validate-visual-grammar.ts"
+      - "scripts/test-semantic-scope-contract.ts"
+      - ".github/workflows/semantic-scope-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-scope:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Run semantic scope contract regression
+        run: node --import tsx scripts/test-semantic-scope-contract.ts
