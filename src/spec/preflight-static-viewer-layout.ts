@@ -152,7 +152,7 @@ export const preflightStaticViewerLayout = (spec: RenderSpec) => {
         "source label",
       );
     }
-    if (spec.schemaVersion === "2.4.0") {
+    if (spec.schemaVersion === "2.4.0" || spec.schemaVersion === "2.5.0") {
       scene.visualBeats.forEach((beat, beatIndex) =>
         assertStaticTemplateSoundness(scene, beat, `${base}.visualBeats[${beatIndex}]`),
       );

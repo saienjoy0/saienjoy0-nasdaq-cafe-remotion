@@ -176,7 +176,10 @@ const buildCatalogAnalysis = ({
   includeAuthoredCompatibility: boolean;
   collectCoverage: boolean;
 }): CatalogAnalysis => {
-  if (spec.schemaVersion !== "2.4.0") throw new Error("Visual Director requires render_spec 2.4.0");
+  if (spec.schemaVersion !== "2.4.0" && spec.schemaVersion !== "2.5.0") {
+    throw new Error(`Visual Director requires render_spec 2.4.0 or 2.5.0; got=${spec.schemaVersion}`);
+  }
+  const rendererContractVersion = spec.schemaVersion;
   if (hints && hints.episodeDate !== spec.episode.targetDate) throw new Error("capability hint episodeDate mismatch");
 
   const candidateInput = buildVisualCandidateInputFromRenderSpec({
@@ -255,6 +258,7 @@ const buildCatalogAnalysis = ({
           const appearance = getVisualGrammarAppearance(template, variant);
           const draft: Omit<VisualCandidate, "candidateId"> = {
             visualBeatId: beat.beatId,
+            semanticScope: beat.semanticScope,
             capability,
             visualTemplate: template,
             templateVariant: variant,
@@ -282,6 +286,7 @@ const buildCatalogAnalysis = ({
         const inventory = objectInventory(scene, beat);
         coverageBeats.push({
           visualBeatId: beat.beatId,
+          semanticScope: beat.semanticScope,
           visualGrammarId: beat.visualGrammarId ?? "missing",
           authoredVisualTemplate: beat.visualTemplate,
           requestedCapabilities: [...(hint?.capabilities ?? [])],
@@ -311,7 +316,7 @@ const buildCatalogAnalysis = ({
     ? visualCandidateCoverageSchema.parse({
         contractVersion: "1.0.0",
         episodeDate: spec.episode.targetDate,
-        rendererContractVersion: "2.4.0",
+        rendererContractVersion,
         sourceRenderSpecSha256,
         status: unavailableBeats.length === 0 ? "PASS" : "UNAVAILABLE",
         beatCount: coverageBeats.length,
@@ -328,7 +333,7 @@ const buildCatalogAnalysis = ({
   const catalog = visualCandidateCatalogSchema.parse({
     contractVersion: "1.0.0",
     episodeDate: spec.episode.targetDate,
-    rendererContractVersion: "2.4.0",
+    rendererContractVersion,
     sourceRenderSpecSha256,
     candidates,
   });

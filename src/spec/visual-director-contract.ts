@@ -2,6 +2,7 @@ import {createHash} from "node:crypto";
 import {z} from "zod";
 import {
   screenStateSchema,
+  semanticScopeSchema,
   specVisualModeSchema,
   visualTemplateConfigSchema,
   visualTemplateSchema,
@@ -15,6 +16,7 @@ import {
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 const safeId = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]*$/);
 const episodeDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const rendererContractVersionSchema = z.union([z.literal("2.4.0"), z.literal("2.5.0")]);
 
 export const evidenceCapabilitySchema = z.enum([
   "source-document",
@@ -32,6 +34,7 @@ export const evidenceCapabilitySchema = z.enum([
 export const visualCandidateSchema = z.object({
   candidateId: z.string().regex(/^vc-[A-Za-z0-9._-]+$/),
   visualBeatId: safeId,
+  semanticScope: semanticScopeSchema.optional(),
   capability: evidenceCapabilitySchema,
   visualTemplate: visualTemplateSchema,
   templateVariant: visualTemplateVariantSchema,
@@ -52,7 +55,7 @@ export const visualCandidateSchema = z.object({
 export const visualCandidateCatalogSchema = z.object({
   contractVersion: z.literal("1.0.0"),
   episodeDate: episodeDateSchema,
-  rendererContractVersion: z.literal("2.4.0"),
+  rendererContractVersion: rendererContractVersionSchema,
   sourceRenderSpecSha256: sha256Schema,
   candidates: z.array(visualCandidateSchema).min(1),
 }).strict();
@@ -66,6 +69,7 @@ const visualCandidateCoverageInventorySchema = z.object({
 
 export const visualCandidateCoverageBeatSchema = z.object({
   visualBeatId: safeId,
+  semanticScope: semanticScopeSchema.optional(),
   visualGrammarId: z.string().min(1),
   authoredVisualTemplate: visualTemplateSchema,
   requestedCapabilities: z.array(evidenceCapabilitySchema),
@@ -78,7 +82,7 @@ export const visualCandidateCoverageBeatSchema = z.object({
 export const visualCandidateCoverageSchema = z.object({
   contractVersion: z.literal("1.0.0"),
   episodeDate: episodeDateSchema,
-  rendererContractVersion: z.literal("2.4.0"),
+  rendererContractVersion: rendererContractVersionSchema,
   sourceRenderSpecSha256: sha256Schema,
   status: z.enum(["PASS", "UNAVAILABLE"]),
   beatCount: z.number().int().positive(),

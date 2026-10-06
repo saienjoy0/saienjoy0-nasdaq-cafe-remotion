@@ -1,5 +1,5 @@
 import {z} from "zod";
-import type {RenderSpec} from "./render-spec";
+import {semanticScopeSchema, type RenderSpec} from "./render-spec";
 import {
   evidenceCapabilitySchema,
   sha256Json,
@@ -28,6 +28,7 @@ export const visualCandidateInputBeatSchema = z.object({
   visualBeatId: safeId,
   sceneId: safeId,
   semanticGrammarId: visualGrammarIdSchema,
+  semanticScope: semanticScopeSchema.optional(),
   narrationChunkIds: z.array(safeId).min(1),
   evidenceSourceIds: z.array(safeId),
   cards: z.array(cardDescriptorSchema),
@@ -107,6 +108,7 @@ export const buildVisualCandidateInputFromRenderSpec = ({
       visualBeatId: beat.beatId,
       sceneId: `scene-${String(sceneIndex + 1).padStart(2, "0")}`,
       semanticGrammarId: beat.visualGrammarId,
+      semanticScope: beat.semanticScope,
       narrationChunkIds: narrationChunkIds(scene, beat),
       evidenceSourceIds: [...beat.evidenceSourceIds],
       cards: structuredClone(objects.cards),
