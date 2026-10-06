@@ -1,0 +1,48 @@
+name: Agent Skills Contract CI
+
+on:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - "config/agent-skills.lock.json"
+      - "docs/17_visual_skill_routing.md"
+      - "docs/superpowers/specs/2026-09-02-visual-improvement-skill-architecture-design.md"
+      - "docs/superpowers/plans/2026-09-02-visual-improvement-skill-integration.md"
+      - "scripts/sync-agent-skills.mjs"
+      - "scripts/test-agent-skills-contract.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/agent-skills-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate sync script syntax
+        run: node --check scripts/sync-agent-skills.mjs
+
+      - name: Validate skill routing contract
+        run: npm run test:agent-skills
+
+      - name: Materialize pinned upstream skills
+        run: npm run agent-skills:sync
+
+      - name: Verify synchronized skill receipts without network
+        run: npm run agent-skills:check

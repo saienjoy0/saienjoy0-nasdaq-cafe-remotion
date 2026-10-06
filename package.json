@@ -33,6 +33,9 @@
     "typescript": "5.9.3"
   },
   "scripts": {
+    "agent-skills:sync": "node scripts/sync-agent-skills.mjs",
+    "agent-skills:check": "node scripts/sync-agent-skills.mjs --check",
+    "test:agent-skills": "node --import tsx scripts/test-agent-skills-contract.ts",
     "dev": "remotion studio src/index.ts",
     "build": "remotion bundle src/index.ts dist/remotion",
     "upgrade": "remotion upgrade",
