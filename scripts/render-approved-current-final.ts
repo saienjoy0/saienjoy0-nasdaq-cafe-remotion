@@ -4,6 +4,7 @@ import path from "node:path";
 import {pathToFileURL} from "node:url";
 import {bundle} from "@remotion/bundler";
 import {getCompositions, renderMedia} from "@remotion/renderer";
+import type {RenderProductionData, RenderSpec} from "../src/spec/render-spec";
 
 const requiredEnv = (name: string) => {
   const value = process.env[name];
@@ -11,11 +12,11 @@ const requiredEnv = (name: string) => {
   return value;
 };
 const sha256 = (bytes: Buffer | string) => createHash("sha256").update(bytes).digest("hex");
-const object = (value: unknown, label: string): Record<string, any> => {
+const object = <T extends object>(value: unknown, label: string): T => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`${label} must be an object`);
   }
-  return value as Record<string, any>;
+  return value as T;
 };
 
 const episodeDate = requiredEnv("EPISODE_DATE");
@@ -28,13 +29,13 @@ const output = path.join(repoRoot, "renders", "final", `${episodeDate}_nasdaq-ca
 
 const specBytes = await readFile(specPath);
 if (sha256(specBytes) !== expectedSpecSha256) throw new Error("approved RenderSpec SHA mismatch before render-only adapter");
-const spec = object(JSON.parse(specBytes.toString("utf8")), "render_spec");
+const spec = object<RenderSpec>(JSON.parse(specBytes.toString("utf8")), "render_spec");
 if (spec.episode?.id !== episodeDate) throw new Error("render_spec episodeDate mismatch");
 
-const data = object(JSON.parse(await readFile(productionPath, "utf8")), "render_data.production.json");
-const technical = object(JSON.parse(await readFile(technicalPath, "utf8")), "technical_report.json");
+const data = object<RenderProductionData>(JSON.parse(await readFile(productionPath, "utf8")), "render_data.production.json");
+const technical = object<{inputSpecSha256: unknown; cache: unknown; chunkCount: number; errors: unknown}>(JSON.parse(await readFile(technicalPath, "utf8")), "technical_report.json");
 if (technical.inputSpecSha256 !== expectedSpecSha256) throw new Error("compiled production data is not bound to approved RenderSpec SHA");
-const cache = object(technical.cache, "technical cache");
+const cache = object<Record<string, unknown>>(technical.cache, "technical cache");
 if (!Number.isInteger(technical.chunkCount) || technical.chunkCount < 1) throw new Error("technical chunkCount is invalid");
 if (cache.misses !== 0 || cache.hits !== technical.chunkCount) {
   throw new Error(`approved cache-only compile mismatch: hits=${cache.hits} misses=${cache.misses} chunkCount=${technical.chunkCount}`);
@@ -44,14 +45,7 @@ if (Array.isArray(technical.errors) && technical.errors.length !== 0) throw new 
 // The historical Renderer commit owns the duration policy. Apply its exact final policy
 // to the already-compiled production duration without invoking its obsolete approval gate.
 const durationModuleUrl = pathToFileURL(path.join(repoRoot, "scripts", "duration-policy.ts")).href;
-const durationModule = (await import(durationModuleUrl)) as {
-  evaluateDurationContract: (input: {
-    command: "final";
-    durationMode: unknown;
-    measuredDurationMs: number;
-    isFixture: boolean;
-  }) => string[];
-};
+const durationModule = (await import(durationModuleUrl)) as Pick<typeof import("./duration-policy"), "evaluateDurationContract">;
 const fps = data.episode?.fps;
 const frames = data.timeline?.totalDurationInFrames;
 if (typeof fps !== "number" || fps <= 0 || typeof frames !== "number" || frames <= 0) {

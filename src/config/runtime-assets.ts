@@ -27,7 +27,7 @@ export type RuntimeAssetContext = {
 const safeAssetId = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const sha256 = /^[0-9a-f]{64}$/;
 const episodeDatePattern = /^\d{4}-\d{2}-\d{2}$/;
-const safePublicPath = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._/\-]+$/;
+const safePublicPath = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._/-]+$/;
 
 const staticManifest: AssetManifestForSpec = productionAssetManifest;
 

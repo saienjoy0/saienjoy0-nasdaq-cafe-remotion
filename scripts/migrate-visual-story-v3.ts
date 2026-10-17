@@ -1,6 +1,6 @@
 import {readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
-import type {Expression} from "../src/spec/render-spec";
+import type {Expression, RenderSpec, RenderSpecScene} from "../src/spec/render-spec";
 import type {CameraPreset, ShotRecipe, ShotTransition, SoundCue, StageLayout, TypographyTreatment} from "../src/spec/shot-contract";
 
 const input = process.argv[2];
@@ -57,12 +57,13 @@ const semanticBoundaries = (text: string, count: number) => {
   boundaries.push(speech.length);
   return {speech, boundaries};
 };
-const roleCard = (scene: any, beat: any, role: string) => scene.cards.find((card: any) => card.role === role && beat.objectIds.includes(card.cardId))?.cardId ?? null;
-const selectedNumbers = (scene: any, beat: any) => scene.numbers.filter((number: any) => beat.objectIds.includes(number.numberId)).map((number: any) => number.numberId);
-const selectedNodes = (scene: any, beat: any) => scene.nodes.filter((node: any) => beat.objectIds.includes(node.nodeId)).map((node: any) => node.nodeId);
-const selectedArrows = (scene: any, beat: any) => scene.arrows.filter((arrow: any) => beat.objectIds.includes(arrow.arrowId)).map((arrow: any) => arrow.arrowId);
+type VisualBeat = RenderSpecScene["visualBeats"][number];
+const roleCard = (scene: RenderSpecScene, beat: VisualBeat, role: string) => scene.cards.find((card) => card.role === role && beat.objectIds.includes(card.cardId))?.cardId ?? null;
+const selectedNumbers = (scene: RenderSpecScene, beat: VisualBeat) => scene.numbers.filter((number) => beat.objectIds.includes(number.numberId)).map((number) => number.numberId);
+const selectedNodes = (scene: RenderSpecScene, beat: VisualBeat) => scene.nodes.filter((node) => beat.objectIds.includes(node.nodeId)).map((node) => node.nodeId);
+const selectedArrows = (scene: RenderSpecScene, beat: VisualBeat) => scene.arrows.filter((arrow) => beat.objectIds.includes(arrow.arrowId)).map((arrow) => arrow.arrowId);
 
-const semanticTargets = (scene: any, beat: any, recipe: ShotRecipe, index: number) => {
+const semanticTargets = (scene: RenderSpecScene, beat: VisualBeat, recipe: ShotRecipe, index: number) => {
   const numbers = selectedNumbers(scene, beat);
   const nodes = selectedNodes(scene, beat);
   const arrows = selectedArrows(scene, beat);
@@ -81,17 +82,17 @@ const semanticTargets = (scene: any, beat: any, recipe: ShotRecipe, index: numbe
   return {primary: beat.objectIds[Math.min(index, Math.max(0, beat.objectIds.length - 1))] ?? null, reference: null, outcome: null, secondary: beat.objectIds.slice(1), camera: beat.objectIds[index] ?? beat.objectIds[0] ?? null};
 };
 
-const data = JSON.parse(await readFile(path.resolve(input), "utf8"));
+const data = JSON.parse(await readFile(path.resolve(input), "utf8")) as RenderSpec;
 for (const scene of data.scenes) {
   for (const beat of scene.visualBeats) {
     const shots = beat.shots ?? [];
     if (shots.length === 0) continue;
     if (beat.startChunkId !== beat.endChunkId) throw new Error(`${beat.beatId}: v3.1 semantic migration currently requires one narration chunk per Visual Beat`);
-    const chunk = scene.narrationChunks.find((item: any) => item.chunkId === beat.startChunkId);
+    const chunk = scene.narrationChunks.find((item) => item.chunkId === beat.startChunkId);
     if (!chunk) throw new Error(`${beat.beatId}: narration chunk missing`);
     const {speech, boundaries} = semanticBoundaries(chunk.speechText, shots.length);
     const continuityKey = shots.length > 1 ? `${beat.beatId}-flow` : null;
-    shots.forEach((shot: any, index: number) => {
+    shots.forEach((shot, index: number) => {
       const startChar = boundaries[index];
       const endChar = boundaries[index + 1];
       const segmentText = speech.slice(startChar, endChar);

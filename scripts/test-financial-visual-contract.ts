@@ -10,7 +10,7 @@ import {
   FINANCIAL_VISUAL_TEMPLATE_IDS,
   isFinancialVisualTemplate,
 } from "../src/spec/financial-visual-contract";
-import {renderSpecSchema} from "../src/spec/render-spec";
+import {renderSpecSchema, type RenderSpec} from "../src/spec/render-spec";
 import {
   VISUAL_TEMPLATE_CONTRACTS,
   VISUAL_TEMPLATE_IDS,
@@ -24,7 +24,7 @@ const legacy = JSON.parse(await readFile(fixturePath, "utf8"));
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const sha = "a".repeat(64);
 
-const firstBeat = (spec: any) => spec.scenes[0].visualBeats[0];
+const firstBeat = (spec: Pick<RenderSpec, "scenes">) => spec.scenes[0].visualBeats[0];
 const sourceId = legacy.sources[0].sourceId as string;
 
 const financialSpec = ({
@@ -49,7 +49,8 @@ const financialSpec = ({
     recipePlanSha256: sha,
     selectionCount: 1,
   };
-  const beat = firstBeat(spec);
+  // The raw builder also creates deliberately invalid inputs for schema rejection.
+  const beat = spec.scenes[0].visualBeats[0];
   beat.visualTemplate = visualTemplate;
   beat.templateVariant = variant;
   beat.screenState = visualTemplate === "source-receipt" ? "News" : "Chart";

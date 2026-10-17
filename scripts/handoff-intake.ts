@@ -6,7 +6,7 @@ import {productionAssetManifest} from "../src/config/production-assets";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_DIR = path.resolve(HERE, "..");
-const safeRelative = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._/\-]+$/;
+const safeRelative = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._/-]+$/;
 const safeAssetId = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const sha256Pattern = /^[0-9a-f]{64}$/;
 
@@ -99,6 +99,7 @@ const loadManifest = async (manifestPath: string): Promise<HandoffManifest> => {
 
 const recomputeBundleId = (manifest: HandoffManifest) => {
   const {bundle_id: _bundleId, ...core} = manifest;
+  void _bundleId;
   return sha256Bytes(canonical(core));
 };
 

@@ -114,7 +114,10 @@ export const preflightProductionExpressions = (spec: RenderSpec): ExpressionPref
     }
   });
   return {
-    checked: uses.map(({sceneIndex: _sceneIndex, ...use}) => use),
+    checked: uses.map(({sceneIndex, ...use}) => {
+      void sceneIndex;
+      return use;
+    }),
     assets,
   };
 };

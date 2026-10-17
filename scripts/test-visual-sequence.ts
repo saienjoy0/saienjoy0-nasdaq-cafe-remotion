@@ -27,8 +27,9 @@ const timedScene = {
   assetPlacements: [],
   durationMs: 2_000,
   durationInFrames: 60,
-  transition: {type: "none", durationMs: 0},
 } as unknown as ProductionScene;
+// Scene timing data, rather than a CSS animation transition.
+timedScene.transition = {type: "none", durationMs: 0};
 
 assert.equal(getSceneRenderState(timedScene, 400).visible.has("object-b"), false);
 const shown = getSceneRenderState(timedScene, 700);
@@ -95,8 +96,8 @@ const orderedScene = {
   ],
   durationMs: 10_000,
   durationInFrames: 300,
-  transition: {type: "none", durationMs: 0},
 } as unknown as ProductionScene;
+orderedScene.transition = {type: "none", durationMs: 0};
 
 const orderState = getSceneRenderState(orderedScene, 2_000);
 const view = toPublicSceneViewModel(orderedScene, orderState, {

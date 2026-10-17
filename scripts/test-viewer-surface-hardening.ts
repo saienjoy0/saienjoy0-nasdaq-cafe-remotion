@@ -52,7 +52,7 @@ test("static viewer layout rejects a long visible card value before Chrome start
     () => preflightStaticViewerLayout(value),
     /36 characters exceed card value limit 28/,
   );
-  visibleCard.lines[0].value = "NASDAQ -0.60%\nBrent +1.4% \/ $88.91";
+  visibleCard.lines[0].value = "NASDAQ -0.60%\nBrent +1.4% / $88.91";
   assert.doesNotThrow(() => preflightStaticViewerLayout(value));
 });
 
