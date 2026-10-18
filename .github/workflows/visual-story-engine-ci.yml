@@ -46,6 +46,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Lint with no warnings
+        run: npx eslint src scripts --max-warnings=0
+
       - name: Parse production workflow YAML
         run: |
           npx prettier --check \

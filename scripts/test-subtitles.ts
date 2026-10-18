@@ -186,8 +186,9 @@ const captionSurfaceScene = {
   assetPlacements: [],
   durationMs: 2_000,
   durationInFrames: 60,
-  transition: {type: "none", durationMs: 0},
 } as unknown as ProductionScene;
+// Scene timing data, rather than a CSS animation transition.
+captionSurfaceScene.transition = {type: "none", durationMs: 0};
 const captionSurfaceState = getSceneRenderState(captionSurfaceScene, 500);
 assert.equal(captionSurfaceState.captionText, "SOXXは2.02%高でした。");
 assert.ok(captionSurfaceState.subtitleText?.includes("2.02%"), "subtitle must use caption text");

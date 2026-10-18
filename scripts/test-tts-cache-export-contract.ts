@@ -16,9 +16,9 @@ const restoreScript = await readFile(
   "utf8",
 );
 
-assert(/^  push:/m.test(exportWorkflow));
-assert(!/^  schedule:/m.test(exportWorkflow));
-assert(!/^  workflow_dispatch:/m.test(exportWorkflow));
+assert(/^ {2}push:/m.test(exportWorkflow));
+assert(!/^ {2}schedule:/m.test(exportWorkflow));
+assert(!/^ {2}workflow_dispatch:/m.test(exportWorkflow));
 assert(exportWorkflow.includes('paths:\n      - "tts-cache-export-requests/*.json"'));
 assert(exportWorkflow.includes("runs-on: ubuntu-24.04"));
 assert(exportWorkflow.includes("actions/cache/restore@v5"));
