@@ -8,6 +8,7 @@ import {mkdir, readFile, rename, stat, writeFile} from "node:fs/promises";
 import path from "node:path";
 import {GoogleGenAI} from "@google/genai";
 import {
+  classifyGeminiQuotaError,
   collectGeminiApiKeys,
   GeminiApiKeyPool,
 } from "../../src/tts/providers/gemini-api-key-pool";
@@ -85,6 +86,8 @@ async function createAudio(apiKey: string, text: string, style: string) {
       );
 }
 
+type KeyDiagnostics = {successes: number; daily: number; rate: number; auth: number; other: number};
+
 const main = async () => {
   const value = validate(JSON.parse(await readFile(INPUT, "utf8")));
   const keys = collectGeminiApiKeys();
@@ -97,6 +100,10 @@ const main = async () => {
     .update(await readFile(INPUT)).digest("hex");
   await mkdir(OUT, {recursive: true});
   const pool = new GeminiApiKeyPool(keys, STATE);
+  // Deliberately keep only key slots and error categories, never credentials or raw provider responses.
+  const keyDiagnostics: KeyDiagnostics[] = keys.map(() => ({
+    successes: 0, daily: 0, rate: 0, auth: 0, other: 0,
+  }));
   const generated: string[] = [];
   let halted: string | null = null;
   for (const line of value.lines) {
@@ -110,8 +117,19 @@ const main = async () => {
     try {
       // Pass JSON text verbatim. <short pause> and <long pause> are inline cues,
       // not spoken words; do not alter text or subtitle.
-      const audio = await pool.run(async (key) =>
-        createAudio(key, line.text, value.voice.style));
+      const audio = await pool.run(async (key) => {
+        const slot = keys.indexOf(key);
+        if (slot < 0) throw new Error("Unknown Gemini key slot");
+        try {
+          const output = await createAudio(key, line.text, value.voice.style);
+          keyDiagnostics[slot].successes++;
+          return output;
+        } catch (error) {
+          const category = classifyGeminiQuotaError(error);
+          keyDiagnostics[slot][category]++;
+          throw error;
+        }
+      });
       const tmp = file + ".tmp";
       await writeFile(tmp, audio);
       await rename(tmp, file);
@@ -143,6 +161,10 @@ const main = async () => {
     complete: completed.length,
     missing: value.lines.filter((l) => !completed.includes(l.id)).map((l) => l.id),
     generatedThisRun: generated,
+    uniqueKeyCount: keys.length,
+    keyDiagnosticsThisRun: keyDiagnostics.map((counts, index) => ({
+      slot: index + 1, ...counts,
+    })),
     halted,
     destination: "public/voice/<id>.wav",
     manifestNote: "Run npm run voice:manifest inside ep001-remotion after extracting WAVs.",
@@ -150,6 +172,10 @@ const main = async () => {
   await writeFile(STATUS, JSON.stringify(status, null, 2) + "\n");
   console.log("Result: " + completed.length + "/" + value.lines.length +
     " WAV files, status=" + (halted ?? "COMPLETE"));
+  keyDiagnostics.forEach((counts, index) => {
+    console.log("Key slot " + (index + 1) + " (this run): " +
+      JSON.stringify(counts));
+  });
   if (completed.length !== value.lines.length) process.exitCode = 1;
 };
 
