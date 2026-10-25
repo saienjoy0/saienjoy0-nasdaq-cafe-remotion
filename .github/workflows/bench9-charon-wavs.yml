@@ -1,0 +1,121 @@
+name: Bench 9 Kicks - Charon WAV Batch
+
+on:
+  push:
+    branches:
+      - task/bench9-voice-105
+    paths:
+      - tools/bench9-tts/voice_request.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bench9-tts-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Generate isolated voice assets
+    if: github.repository == 'saienjoy0/saienjoy0-nasdaq-cafe-remotion'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+      BENCH9_MAX_NEW: "105"
+    steps:
+      - name: Checkout requested revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Verify keys exist without exposing values
+        shell: bash
+        run: |
+          if [[ -z "${GEMINI_API_KEY_1:-}" && -z "${GEMINI_API_KEY_2:-}" && -z "${GEMINI_API_KEY_3:-}" ]]; then
+            echo "::error::No Gemini API keys found in repository secrets"
+            exit 1
+          fi
+
+      - name: Restore WAV files from prior run
+        uses: actions/cache/restore@v4
+        with:
+          path: build/bench9-tts
+          key: bench9-tts-v1-${{ hashFiles('tools/bench9-tts/voice_request.json') }}-${{ github.run_id }}
+          restore-keys: |
+            bench9-tts-v1-${{ hashFiles('tools/bench9-tts/voice_request.json') }}-
+
+      - name: Generate all missing WAV files
+        id: synthesize
+        continue-on-error: true
+        run: node --import tsx tools/bench9-tts/generate.ts
+
+      - name: Save partial audio for later resume
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: build/bench9-tts
+          key: bench9-tts-v1-${{ hashFiles('tools/bench9-tts/voice_request.json') }}-${{ github.run_id }}
+
+      - name: Package generated WAV and status
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+
+          output = Path("build/bench9-tts")
+          output.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(output / "bench9-voice.zip", "w",
+                               compression=zipfile.ZIP_DEFLATED) as archive:
+              for wav in sorted((output / "voice").glob("*.wav")):
+                  archive.write(wav, "public/voice/" + wav.name)
+              p = output / "status.json"
+              if p.is_file():
+                  archive.write(p, p.name)
+          print("WAVs:", len(list((output / "voice").glob("*.wav"))))
+          PY
+
+      - name: Publish download artifact, even if quota exhausted
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench9-charon-wavs-${{ github.run_id }}
+          path: build/bench9-tts/bench9-voice.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Report full or partial completion
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          status = Path("build/bench9-tts/status.json")
+          if not status.is_file():
+              raise SystemExit("No status produced; inspect previous steps.")
+          d = json.loads(status.read_text(encoding="utf-8"))
+          done, total = d["complete"], d["total"]
+          print(f"Completed {done}/{total} WAV files.")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(f"## Bench 9 Kicks Charon WAV\n\n- Completed: {done}/{total}\n")
+              f.write(f"- Status: {d['halted'] or 'COMPLETE'}\n")
+              f.write("- Download artifact, extract into ep001-remotion, then run npm run voice:manifest.\n")
+          if done != total:
+              raise SystemExit("Partial synthesis; audio artifact saved. Rerun later to resume.")
+          PY
